@@ -1,1 +1,63 @@
-TODO: Tech spec generation workflow
+# Tech Spec Generation Workflow
+#
+# Triggered when a PR is merged to develop with changes to product specs.
+# Uses the Architect agent to convert product specs into technical specifications.
+
+name: 02 — Tech Spec
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'rnd/product_specs/**'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  detect-changes:
+    name: Detect Product Spec Changes
+    runs-on: ubuntu-latest
+    outputs:
+      product_specs_changed: ${{ steps.filter.outputs.product_specs }}
+      changed_files: ${{ steps.filter.outputs.product_specs_files }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Filter changed files
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          list-files: json
+          filters: |
+            product_specs:
+              - added|modified: 'rnd/product_specs/**'
+
+  generate-tech-spec:
+    name: Generate Tech Spec
+    needs: detect-changes
+    if: needs.detect-changes.outputs.product_specs_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Invoke Copilot Architect Agent
+        uses: github/copilot-agent@v1
+        with:
+          agent: architect
+          prompt: |
+            A product specification has been added or updated in this repository.
+            Changed files: ${{ needs.detect-changes.outputs.changed_files }}
+            
+            Please review the product specification(s) and generate the corresponding technical specification(s).
+            Follow the instructions in your agent profile (.github/agents/architect.agent.md).
+            Use the template at .github/templates/tech_spec.md as the base for each tech spec.
+            Output the tech spec(s) to rnd/tech_specs/ following the naming convention.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
