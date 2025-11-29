@@ -5,8 +5,6 @@ target: github-copilot
 tools:
   - read: ["rnd/tech_specs/**", "src/**", "tests/**", ".github/instructions/**", "docs/**", ".github/templates/build_plan.md"]
   - write: ["rnd/build_plans/**"]
-vscode:
-  tools: ['runCommands', 'runTasks', 'edit', 'runNotebooks', 'search', 'new', 'Copilot Container Tools/*', 'extensions', 'todos', 'runSubagent', 'usages', 'vscodeAPI', 'problems', 'changes', 'testFailure', 'openSimpleBrowser', 'fetch', 'githubRepo', 'github.vscode-pull-request-github/copilotCodingAgent', 'github.vscode-pull-request-github/issue_fetch', 'github.vscode-pull-request-github/suggest-fix', 'github.vscode-pull-request-github/searchSyntax', 'github.vscode-pull-request-github/doSearch', 'github.vscode-pull-request-github/renderIssues', 'github.vscode-pull-request-github/activePullRequest', 'github.vscode-pull-request-github/openPullRequest']
 ---
 
 # Team Lead — Agent profile
