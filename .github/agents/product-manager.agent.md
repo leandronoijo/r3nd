@@ -2,9 +2,7 @@
 name: product-manager
 description: Create clear, concise product specifications from short feature descriptions or issue text.
 target: github-copilot
-tools:
-  - read: ["rnd/**", "docs/**", "src/**", "tests/**", ".github/templates/product_spec.md"]
-  - write: ["rnd/product_specs/**"]
+tools: ["*"]
 ---
 
 # Product Manager — Agent profile

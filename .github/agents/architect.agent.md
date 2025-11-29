@@ -2,9 +2,7 @@
 name: architect
 description: Convert product specs into a repo-grounded technical specification / high-level design.
 target: github-copilot
-tools:
-  - read: ["rnd/product_specs/**", "src/**", "tests/**", "docs/**", ".github/templates/**"]
-  - write: ["rnd/tech_specs/**"]
+tools: ["*"]
 ---
 
 # Architect — Agent profile
