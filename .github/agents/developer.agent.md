@@ -2,9 +2,7 @@
 name: developer
 description: Implement features and tests based on a build plan; follow repository standards and keep diffs small and test-driven.
 target: github-copilot
-tools:
-  - read: ["rnd/build_plans/**", "src/**", "tests/**", "docs/**", ".github/instructions/**"]
-  - write: ["src/**", "tests/**", "rnd/build_plans/**"]
+tools: ["*"]
 ---
 
 # Developer — Agent profile

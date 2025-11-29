@@ -2,9 +2,7 @@
 name: team-lead
 description: Turn a technical spec into a concrete implementation and test plan formed of small, traceable tasks.
 target: github-copilot
-tools:
-  - read: ["rnd/tech_specs/**", "src/**", "tests/**", ".github/instructions/**", "docs/**", ".github/templates/build_plan.md"]
-  - write: ["rnd/build_plans/**"]
+tools: ["*"]
 ---
 
 # Team Lead — Agent profile
