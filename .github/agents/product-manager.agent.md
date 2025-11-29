@@ -3,8 +3,10 @@ name: product-manager
 description: Create clear, concise product specifications from short feature descriptions or issue text.
 target: github-copilot
 tools:
-	- read: ["rnd/**", "docs/**", "src/**", "tests/**", ".github/templates/product_spec.md"]
-	- write: ["rnd/product_specs/**"]
+  - read: ["rnd/**", "docs/**", "src/**", "tests/**", ".github/templates/product_spec.md"]
+  - write: ["rnd/product_specs/**"]
+vscode:
+  tools: ['runCommands', 'runTasks', 'edit', 'runNotebooks', 'search', 'new', 'Copilot Container Tools/*', 'extensions', 'todos', 'runSubagent', 'usages', 'vscodeAPI', 'problems', 'changes', 'testFailure', 'openSimpleBrowser', 'fetch', 'githubRepo', 'github.vscode-pull-request-github/copilotCodingAgent', 'github.vscode-pull-request-github/issue_fetch', 'github.vscode-pull-request-github/suggest-fix', 'github.vscode-pull-request-github/searchSyntax', 'github.vscode-pull-request-github/doSearch', 'github.vscode-pull-request-github/renderIssues', 'github.vscode-pull-request-github/activePullRequest', 'github.vscode-pull-request-github/openPullRequest']
 ---
 
 # Product Manager — Agent profile
