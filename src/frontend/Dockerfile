@@ -17,8 +17,8 @@ WORKDIR /app
 # Copy package files first for better caching
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production=false
+# Install dependencies (including devDependencies for build)
+RUN npm ci
 
 # Copy source code
 COPY . .
@@ -43,9 +43,12 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Expose port 80
 EXPOSE 80
 
+# Install curl for healthcheck (not pre-installed in Alpine)
+RUN apk add --no-cache curl
+
 # Add healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
+    CMD curl --fail --silent http://localhost/health || exit 1
 
 # Run nginx in foreground
 CMD ["nginx", "-g", "daemon off;"]
