@@ -18,6 +18,16 @@ export default [
     }
   },
   {
+    files: ['**/*.cjs'],
+    languageOptions: {
+      globals: {
+        module: 'readonly',
+        require: 'readonly',
+        __dirname: 'readonly'
+      }
+    }
+  },
+  {
     rules: {
       'vue/multi-word-component-names': 'off'
     }

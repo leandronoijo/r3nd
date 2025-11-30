@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import { vuetify } from '../../../setup';
+import { vuetify } from '../../setup';
 import FeaturesSection from '@/components/home/FeaturesSection.vue';
 
 describe('FeaturesSection', () => {

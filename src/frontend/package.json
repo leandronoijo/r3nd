@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "test": "jest --config jest.config.cjs",
     "test:e2e": "playwright test",
-    "lint": "eslint --fix src tests",
+    "lint": "eslint --fix . tests",
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {

@@ -10,7 +10,7 @@ module.exports = {
   },
   moduleFileExtensions: ['vue', 'js', 'jsx', 'ts', 'tsx', 'json'],
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/frontend/$1',
+    '^@/(.*)$': '<rootDir>/$1',
     '\\.(css|sass|scss)$': 'identity-obj-proxy'
   },
   testMatch: ['**/tests/**/*.spec.ts'],
