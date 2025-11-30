@@ -3,6 +3,13 @@
 # Triggered when a PR is merged to develop with changes to product specs.
 # Creates a GitHub issue and assigns it to Copilot with the Architect agent
 # to convert product specs into technical specifications.
+#
+# Required Secrets:
+#   COPILOT_PAT - Personal Access Token with the following permissions:
+#     - repo (full control of private repositories)
+#     - issues:write (to create and update issues)
+#   This token is required because the default GITHUB_TOKEN cannot assign
+#   issues to the Copilot agent due to GitHub's licensing restrictions.
 
 name: 02 — Tech Spec
 
