@@ -1,1 +1,120 @@
-TODO: Developer agent workflow
+# Development Workflow
+#
+# Triggered when a PR is merged to develop with changes to build plans.
+# Creates a GitHub issue and assigns it to Copilot with the Developer agent
+# to implement the build plan.
+#
+# Required Secrets:
+#   COPILOT_PAT - Personal Access Token with the following permissions:
+#     - repo (full control of private repositories)
+#     - issues:write (to create and update issues)
+#   This token is required because the default GITHUB_TOKEN cannot assign
+#   issues to the Copilot agent due to GitHub's licensing restrictions.
+
+name: 04 — Development
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'rnd/build_plans/**'
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  detect-changes:
+    name: Detect Build Plan Changes
+    runs-on: ubuntu-latest
+    outputs:
+      build_plans_changed: ${{ steps.filter.outputs.build_plans }}
+      changed_files: ${{ steps.filter.outputs.build_plans_files }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Filter changed files
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          list-files: json
+          filters: |
+            build_plans:
+              - added|modified: 'rnd/build_plans/**'
+
+  create-development-task:
+    name: Create Development Task
+    needs: detect-changes
+    if: needs.detect-changes.outputs.build_plans_changed == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      issue_number: ${{ steps.create-issue.outputs.issue_number }}
+    steps:
+      - name: Create issue for development
+        id: create-issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const changedFiles = JSON.parse('${{ needs.detect-changes.outputs.changed_files }}');
+            
+            // Build the issue body with file locations
+            const fileList = changedFiles.map(file => '- `' + file + '`').join('\n');
+            const firstFile = changedFiles[0] || 'rnd/build_plans/';
+            const planName = firstFile.split('/').pop().replace('.md', '');
+            
+            const issueTitle = 'Development: ' + planName;
+            const issueBody = [
+              '## Task for: Developer Agent',
+              '',
+              '> **Agent Profile:** `.github/agents/developer.agent.md`',
+              '',
+              'A build plan has been added or updated. Please implement the tasks described in the build plan.',
+              '',
+              '### Build Plan File(s)',
+              fileList,
+              '',
+              '### Instructions',
+              '1. Read and follow the developer agent profile at `.github/agents/developer.agent.md`',
+              '2. Read the build plan(s) listed above',
+              '3. Follow the backend instructions at `.github/instructions/backend.instructions.md`',
+              '4. Follow the frontend instructions at `.github/instructions/frontend.instructions.md`',
+              '5. Implement each task in the build plan, marking them complete as you go',
+              '6. Ensure all tests pass before completing',
+              '',
+              '### Context',
+              'This task was automatically created by the Development workflow when changes were detected in the build plans directory.',
+              '',
+              '**Note:** This issue should be assigned to the `developer` custom agent. If using the GitHub web interface, please select the `developer` agent from the agent dropdown when assigning to Copilot.'
+            ].join('\n');
+
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: issueTitle,
+              body: issueBody,
+              labels: ['development', 'copilot']
+            });
+            
+            console.log('Created issue #' + issue.data.number + ': ' + issue.data.title);
+            core.setOutput('issue_number', issue.data.number);
+            return issue.data.number;
+
+  assign-to-copilot:
+    name: Assign to Copilot
+    needs: create-development-task
+    runs-on: ubuntu-latest
+    steps:
+      # Note: Currently, the GitHub API does not support assigning a specific
+      # custom agent (like 'developer') programmatically. The issue is assigned
+      # to the default Copilot agent, but includes explicit instructions to
+      # follow the developer agent profile. When GitHub adds API support for
+      # custom agent assignment, this step should be updated.
+      - name: Assign issue to Copilot
+        uses: otto-de/assign_issue_toCopilot_action@v1.0.1
+        with:
+          issue_number: ${{ needs.create-development-task.outputs.issue_number }}
+          github_token: ${{ secrets.COPILOT_PAT }}
