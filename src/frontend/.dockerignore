@@ -1,0 +1,47 @@
+# =============================================================================
+# Docker Ignore File
+# =============================================================================
+# Excludes files and directories from the Docker build context
+# =============================================================================
+
+# Dependencies
+node_modules
+
+# Build output (we build inside container)
+dist
+
+# Development files
+*.local
+*.log
+npm-debug.log*
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Tests (not needed in production image)
+tests
+playwright
+*.spec.ts
+*.test.ts
+coverage
+playwright-report
+
+# Documentation (not needed in production image)
+*.md
+!README.md
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
