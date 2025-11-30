@@ -4,14 +4,13 @@ import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
   plugins: [vue()],
-  root: 'src/frontend',
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src/frontend', import.meta.url))
+      '@': fileURLToPath(new URL('.', import.meta.url))
     }
   },
   build: {
-    outDir: '../../dist',
+    outDir: 'dist',
     emptyOutDir: true
   }
 });

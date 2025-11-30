@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import { vuetify } from '../../setup';
+import { vuetify } from '../setup';
 import HomePage from '@/views/HomePage.vue';
 import HeroSection from '@/components/home/HeroSection.vue';
 import FeaturesSection from '@/components/home/FeaturesSection.vue';

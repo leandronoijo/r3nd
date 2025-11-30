@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import { vuetify } from '../../../setup';
+import { vuetify } from '../../setup';
 import QuickStartSection from '@/components/home/QuickStartSection.vue';
 
 describe('QuickStartSection', () => {

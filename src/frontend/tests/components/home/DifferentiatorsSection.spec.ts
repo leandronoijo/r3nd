@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import { vuetify } from '../../../setup';
+import { vuetify } from '../../setup';
 import DifferentiatorsSection from '@/components/home/DifferentiatorsSection.vue';
 
 describe('DifferentiatorsSection', () => {
