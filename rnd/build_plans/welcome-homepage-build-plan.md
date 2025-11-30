@@ -349,7 +349,7 @@ Complete these items **before** starting any implementation tasks.
   - 4 steps with code blocks and copy buttons:
     1. **Clone repository:**
        ```bash
-       git clone <repo-url>
+       git clone https://github.com/your-org/your-repo.git
        ```
     2. **Customize your stack rules:**
        ```bash
