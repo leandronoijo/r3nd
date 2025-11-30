@@ -37,10 +37,6 @@ playwright
 coverage
 playwright-report
 
-# Documentation (not needed in production image)
-*.md
-!README.md
-
 # Docker
 Dockerfile*
 docker-compose*
