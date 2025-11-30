@@ -42,22 +42,21 @@ const steps: PipelineStep[] = [
 <template>
   <v-container data-test-id="pipeline-section" class="py-12">
     <h2 class="text-h4 text-center mb-8">How the Pipeline Works</h2>
-    <v-stepper alt-labels non-linear class="bg-transparent elevation-0">
-      <v-stepper-header>
-        <template v-for="(step, index) in steps" :key="step.title">
-          <v-stepper-item
-            :data-test-id="`pipeline-step-${index}`"
-            :value="index + 1"
-            :title="step.title"
-            :subtitle="step.description"
-            :icon="step.icon"
-            :complete="false"
-            editable
-          />
-          <v-divider v-if="index < steps.length - 1" />
-        </template>
-      </v-stepper-header>
-    </v-stepper>
+    <v-timeline side="end" density="comfortable">
+      <v-timeline-item
+        v-for="(step, index) in steps"
+        :key="step.title"
+        :data-test-id="`pipeline-step-${index}`"
+        :icon="step.icon"
+        :dot-color="index === steps.length - 1 ? 'success' : 'primary'"
+        size="small"
+      >
+        <v-card elevation="2">
+          <v-card-title class="text-subtitle-1">{{ step.title }}</v-card-title>
+          <v-card-text>{{ step.description }}</v-card-text>
+        </v-card>
+      </v-timeline-item>
+    </v-timeline>
   </v-container>
 </template>
 
