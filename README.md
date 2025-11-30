@@ -161,6 +161,35 @@ docs/
 
 ---
 
+## 🏠 Welcome Homepage
+
+This repository includes a **Vue 3 + Vuetify** welcome homepage that showcases the project's features and pipeline. The homepage serves as a visual introduction to the AI-Driven R&D Pipeline.
+
+### Running the Frontend
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+```
+
+The homepage is available at `http://localhost:5173/` when running the development server.
+
+### Frontend Stack
+
+- **Vue 3** with Composition API (`<script setup>`)
+- **Vuetify 3** for UI components
+- **Vue Router** for navigation
+- **Vite** for build tooling
+- **TypeScript** for type safety
+
+---
+
 ## 📘 Documentation
 
 See the `docs/` directory for optional project documentation that explains the pipeline, personas, and automation architecture — this folder is intentionally extensible and may be empty in the seed repository.
