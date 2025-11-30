@@ -42,13 +42,30 @@ For local development with the full stack, use the docker-compose file in the re
 
 The frontend is a static SPA and does not require runtime environment variables. API endpoints should be configured at build time through Vite's environment variables:
 
-- Create `.env.staging` for staging builds
-- Create `.env.production` for production builds
+1. Create environment-specific files in the `src/frontend` directory:
+   - `.env.staging` for staging builds
+   - `.env.production` for production builds
 
-Example:
+2. Use the `VITE_MODE` build argument to select which env file to use:
+   ```bash
+   # Uses .env.production (default)
+   docker build -t r3nd-frontend:prod .
+   
+   # Uses .env.staging
+   docker build --build-arg VITE_MODE=staging -t r3nd-frontend:staging .
+   ```
+
+Example `.env.production`:
 ```
 VITE_API_URL=https://api.example.com
 ```
+
+Example `.env.staging`:
+```
+VITE_API_URL=https://api-staging.example.com
+```
+
+> **Note:** Vite automatically loads the appropriate `.env.[mode]` file based on the `--mode` flag during build.
 
 ### Nginx Configuration
 
