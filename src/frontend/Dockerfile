@@ -11,6 +11,9 @@
 # -----------------------------------------------------------------------------
 FROM node:22-alpine AS builder
 
+# Build argument for environment-specific builds
+ARG VITE_MODE=production
+
 # Set working directory
 WORKDIR /app
 
@@ -23,8 +26,8 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build the application
-RUN npm run build
+# Build the application with the specified mode
+RUN npm run build -- --mode ${VITE_MODE}
 
 # -----------------------------------------------------------------------------
 # Stage 2: Production
