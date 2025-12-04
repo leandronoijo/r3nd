@@ -23,7 +23,7 @@ This feature matters because it establishes the foundation for monetization, acc
 ## 3. Goals
 - Implement three distinct user tiers (Admin, Pro, Free) with clear capability boundaries.
 - Provide authentication and authorization mechanisms for user identity and permission verification.
-- Enable user registration, login, and profile management.
+- Enable user registration, login, and profile management via email/password and Google OAuth.
 - Support tier-based feature access control throughout the application.
 - Create a foundation for future subscription management and billing integration.
 
@@ -32,7 +32,7 @@ This feature matters because it establishes the foundation for monetization, acc
 ## 4. Non-Goals
 - No payment processing or billing integration in this iteration.
 - No subscription upgrade/downgrade workflows (manual tier assignment is acceptable).
-- No social authentication (OAuth, SAML, etc.) providers.
+- No additional social authentication providers beyond Google OAuth (no Facebook, GitHub, etc. in this iteration).
 - No multi-factor authentication (MFA) in this iteration.
 - No user analytics or tracking dashboard.
 - No email verification workflow (can be added later).
@@ -43,8 +43,9 @@ This feature matters because it establishes the foundation for monetization, acc
 ## 5. User Stories / Use Cases
 
 ### Primary Use Cases
-- *As a new user,* I want to register for a free account so I can access basic application features.
-- *As a registered user,* I want to log in with my credentials so I can access my personalized experience.
+- *As a new user,* I want to register for a free account using email/password or Google so I can access basic application features.
+- *As a registered user,* I want to log in with my credentials (email/password or Google) so I can access my personalized experience.
+- *As a new user,* I want to sign in with Google so I can quickly register without creating a new password.
 - *As a free-tier user,* I want to use core features so I can evaluate the application's value.
 - *As a Pro user,* I want access to premium features so I get value from my subscription.
 - *As an Admin,* I want full system access so I can manage users, content, and system configuration.
@@ -61,6 +62,8 @@ This feature matters because it establishes the foundation for monetization, acc
 - An Admin downgrades a Pro user to Free (existing Pro-only data should be handled gracefully).
 - Multiple concurrent login attempts from the same account (should maintain session security).
 - A user's session expires (should redirect to login with clear messaging).
+- A user registers with email/password, then later tries to log in with Google using the same email (should link accounts or show clear error).
+- A user's Google account is revoked or deleted (session should be invalidated gracefully).
 
 ---
 
@@ -89,6 +92,8 @@ This feature matters because it establishes the foundation for monetization, acc
 #### Authentication & Authorization
 
 **Registration**
+
+*Email/Password Registration*
 - The system must allow new users to register with:
   - Email address (unique, validated format)
   - Password (minimum 8 characters, must include letters and numbers)
@@ -101,18 +106,45 @@ This feature matters because it establishes the foundation for monetization, acc
   - User tier
   - Account creation timestamp
   - Account status (active/inactive)
+  - Authentication provider (local/google)
+
+*Google OAuth Registration*
+- The system must support "Sign in with Google" OAuth 2.0 flow.
+- Users authenticating via Google for the first time are automatically registered.
+- Google OAuth registration creates a user record with:
+  - Unique user ID
+  - Email (from Google profile)
+  - Display name (from Google profile)
+  - Google user ID (for linking)
+  - User tier (Free by default)
+  - Account creation timestamp
+  - Account status (active)
+  - Authentication provider (google)
+- No password is stored for Google-authenticated users.
 
 **Login**
+
+*Email/Password Login*
 - The system must authenticate users via email and password.
 - Successful login creates a session token (JWT recommended).
 - The system must return user profile data including tier and permissions.
 - Failed login attempts must not reveal whether email exists.
+
+*Google OAuth Login*
+- The system must support "Sign in with Google" for existing users.
+- The system validates the Google OAuth token and retrieves user profile.
+- If a user with the Google email already exists (registered via email/password):
+  - The system should link the Google account to the existing user account.
+  - User can subsequently log in via either method.
+- Successful login creates a session token (JWT).
+- The system must return user profile data including tier and permissions.
 
 **Session Management**
 - The system must maintain user sessions via tokens.
 - Sessions must expire after 24 hours of inactivity.
 - The system must validate session tokens on protected routes.
 - Users must be able to log out, invalidating their session.
+- Google OAuth tokens should be refreshed as needed to maintain session validity.
 
 **Authorization**
 - The system must enforce tier-based access control on all protected routes.
@@ -188,30 +220,62 @@ This feature matters because it establishes the foundation for monetization, acc
 ---
 
 ## 7. Success Metrics
-- Successful user registration and login flows with <5% error rate.
+- Successful user registration and login flows (email/password and Google OAuth) with <5% error rate.
+- >30% of users choosing Google OAuth over email/password registration (indicating user preference for convenience).
 - Clear tier-based feature differentiation visible in the UI.
 - Zero unauthorized access to protected features (security incidents).
 - Admin user management operations complete successfully >95% of the time.
 - User satisfaction with authentication experience (qualitative feedback).
 - Clear upgrade path messaging for Free users attempting to access Pro features.
+- Successful account linking when users authenticate via both methods.
 
 ---
 
 ## 8. User Flows (Optional)
 
-### Registration Flow
+### Email/Password Registration Flow
 1. User navigates to registration page.
 2. User enters email, password, and optional display name.
 3. System validates input (email format, password strength).
 4. System creates user account with Free tier.
 5. System automatically logs in user and redirects to dashboard.
 
-### Login Flow
+### Google OAuth Registration Flow
+1. User navigates to registration page.
+2. User clicks "Sign in with Google" button.
+3. System redirects to Google OAuth consent screen.
+4. User approves access to their Google profile.
+5. Google redirects back to application with authorization code.
+6. System exchanges code for Google user profile (email, name, ID).
+7. System creates new user account with Free tier using Google profile data.
+8. System creates session token and redirects to dashboard.
+
+### Email/Password Login Flow
 1. User navigates to login page.
 2. User enters email and password.
 3. System validates credentials.
 4. System creates session token and returns user profile.
 5. Frontend stores token and redirects to dashboard.
+
+### Google OAuth Login Flow
+1. User navigates to login page.
+2. User clicks "Sign in with Google" button.
+3. System redirects to Google OAuth consent screen.
+4. User approves access to their Google profile.
+5. Google redirects back to application with authorization code.
+6. System exchanges code for Google user profile.
+7. System looks up user by Google ID or email.
+8. If user exists, system creates session token and returns user profile.
+9. If user does not exist, system creates new account (registration flow).
+10. Frontend stores token and redirects to dashboard.
+
+### Account Linking Flow (Email User Logs in with Google)
+1. User with existing email/password account clicks "Sign in with Google".
+2. System receives Google profile with email matching existing user.
+3. System detects email collision and links Google ID to existing user account.
+4. System updates user record to include Google authentication provider.
+5. System creates session token and logs user in.
+6. User can now log in via either email/password or Google OAuth.
 
 ### Tier-Restricted Access Flow
 1. Free user attempts to access Pro-only feature.
@@ -233,11 +297,13 @@ This feature matters because it establishes the foundation for monetization, acc
 ## 9. Dependencies & Constraints
 - **Backend Framework:** NestJS with MongoDB (Mongoose) as specified in backend.instructions.md.
 - **Frontend Framework:** Vue 3 with Vuetify as specified in frontend.instructions.md.
-- **Authentication:** JWT-based token authentication.
+- **Authentication:** JWT-based token authentication for session management.
+- **Google OAuth:** Requires Google Cloud Platform project with OAuth 2.0 credentials configured.
+- **OAuth Redirect URI:** Must be configured in Google Cloud Console and match application URL.
 - **Existing Schema:** User schema must be created following Mongoose schema conventions.
 - **Existing Guards:** NestJS guards must be implemented for route protection.
 - **Database:** MongoDB must be available and configured.
-- **Environment Variables:** JWT secret must be configured securely.
+- **Environment Variables:** JWT secret, Google OAuth Client ID, and Google OAuth Client Secret must be configured securely.
 
 ---
 
@@ -246,6 +312,12 @@ This feature matters because it establishes the foundation for monetization, acc
 ### Risks
 - **Risk:** JWT secret leakage could compromise all user sessions.  
   **Mitigation:** Store JWT secret in environment variables, never commit to source control. Use strong, randomly generated secrets.
+
+- **Risk:** Google OAuth Client ID/Secret leakage could allow unauthorized access.  
+  **Mitigation:** Store Google OAuth credentials in environment variables, never commit to source control. Restrict OAuth redirect URIs in Google Cloud Console.
+
+- **Risk:** Google OAuth service outage could prevent users from logging in.  
+  **Mitigation:** Users with linked accounts can fall back to email/password login. Provide clear error messaging during Google service outages.
 
 - **Risk:** User tier changes could leave orphaned data or broken references.  
   **Mitigation:** Document tier change behavior; implement data migration scripts if needed in future iterations.
@@ -263,6 +335,8 @@ This feature matters because it establishes the foundation for monetization, acc
 - **Concurrent Modifications:** Two Admins editing the same user simultaneously should not corrupt data (last-write-wins is acceptable).
 - **Missing Display Name:** Default to email or "User" if display name is not provided.
 - **SQL Injection / NoSQL Injection:** Use Mongoose parameterized queries; validate all inputs with class-validator.
+- **Google Account Email Change:** If a user changes their email in Google, the system should handle gracefully (may require re-linking).
+- **Revoked Google Access:** If user revokes app access in Google account settings, handle gracefully on next login attempt.
 
 ---
 
@@ -277,7 +351,8 @@ This feature matters because it establishes the foundation for monetization, acc
 | What happens to Pro-tier data when a user is downgraded to Free? | **OPEN** | Requires clarification: Should data be hidden, deleted, or remain accessible in read-only mode? |
 | Should we log all user tier changes and by whom? | **RESOLVED** | Yes — tier changes should be logged with timestamp and Admin user ID for audit purposes. |
 | Should we implement rate limiting on authentication endpoints? | **RESOLVED** | Yes — implement rate limiting to prevent brute force attacks (max 5 login attempts per IP per 15 minutes recommended). |
-| What is the password reset workflow? | **RESOLVED** | Out of scope for this iteration. |
+| How should account linking work when email exists in both systems? | **RESOLVED** | Link Google account to existing email/password account when emails match. User can then log in via either method. |
+| What Google OAuth scopes are required? | **RESOLVED** | Minimum scopes: email, profile. Additional scopes may be added in future iterations. |
 
 ---
 
@@ -287,7 +362,8 @@ This feature matters because it establishes the foundation for monetization, acc
 
 | Capability | Free | Pro | Admin |
 |------------|------|-----|-------|
-| Register & Login | ✓ | ✓ | ✓ |
+| Register & Login (Email/Password) | ✓ | ✓ | ✓ |
+| Register & Login (Google OAuth) | ✓ | ✓ | ✓ |
 | View Profile | ✓ | ✓ | ✓ |
 | Edit Profile | ✓ | ✓ | ✓ |
 | Access Core Features | ✓ | ✓ | ✓ |
@@ -301,8 +377,10 @@ This feature matters because it establishes the foundation for monetization, acc
 These endpoints will be defined in the Technical Spec, but are noted here for clarity:
 
 **Authentication**
-- `POST /auth/register` — Register new user
-- `POST /auth/login` — Authenticate user
+- `POST /auth/register` — Register new user (email/password)
+- `POST /auth/login` — Authenticate user (email/password)
+- `GET /auth/google` — Initiate Google OAuth flow
+- `GET /auth/google/callback` — Handle Google OAuth callback
 - `POST /auth/logout` — Invalidate session
 - `GET /auth/me` — Get current user profile
 
@@ -320,15 +398,24 @@ These endpoints will be defined in the Technical Spec, but are noted here for cl
 ### Frontend Components (Expected)
 These components will be defined in the Build Plan, but are noted here for clarity:
 
-- `LoginView.vue` — Login page
-- `RegisterView.vue` — Registration page
+- `LoginView.vue` — Login page with email/password form and "Sign in with Google" button
+- `RegisterView.vue` — Registration page with email/password form and "Sign in with Google" button
+- `GoogleAuthCallback.vue` — Handles Google OAuth callback and token exchange
 - `ProfileView.vue` — User profile page
 - `UserManagementView.vue` — Admin user list and management (Admin only)
 - `UserEditDialog.vue` — Admin user editing dialog
 - `TierBadge.vue` — Reusable component showing user tier
 - Navigation menu items with tier-based visibility
 
+### Google OAuth Configuration Requirements
+- **Google Cloud Platform Project:** Required to obtain OAuth 2.0 credentials
+- **OAuth 2.0 Client ID:** Public identifier for the application
+- **OAuth 2.0 Client Secret:** Secret key for backend token exchange (never exposed to frontend)
+- **Authorized Redirect URIs:** Must include application callback URL (e.g., `https://app.example.com/auth/google/callback`)
+- **OAuth Scopes:** Minimum required scopes are `email` and `profile`
+
 ### Reference
 - Backend stack: `.github/instructions/backend.instructions.md`
 - Frontend stack: `.github/instructions/frontend.instructions.md`
 - Product spec template: `.github/templates/product_spec.md`
+- Google OAuth 2.0 Documentation: https://developers.google.com/identity/protocols/oauth2
