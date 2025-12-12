@@ -2,7 +2,7 @@
 
 > **Source:** Internal scaffold requirements  
 > **Created:** 2025-12-12  
-> **Status:** Draft | In Progress | Complete
+> **Status:** In Progress | Complete
 
 ---
 
@@ -22,8 +22,20 @@ Complete these items **before** starting any implementation tasks.
 
 | Package | Purpose | Justification |
 |---------|---------|---------------|
+| @nestjs/core | NestJS core framework | Required for NestJS app |
+| @nestjs/common | Common NestJS utilities | Required for decorators and services |
+| @nestjs/platform-express | Express platform | Required for HTTP server |
+| @nestjs/mongoose | Mongoose integration | Required for MongoDB |
+| @nestjs/config | Environment config | Standard NestJS config management |
 | @nestjs/schedule | For hourly cron job | Required for scheduled facts ingestion |
-| @nestjs/config | For environment config | Standard NestJS config management |
+| mongoose | MongoDB ODM | Required for database |
+| reflect-metadata | Metadata reflection | Required for NestJS |
+| rxjs | Reactive programming | Required for NestJS |
+| typescript | TypeScript compiler | Required for TS support |
+| @types/node | Node.js types | Required for TS |
+| jest | Test runner | Per testing instructions |
+| @nestjs/testing | NestJS testing utilities | Per testing instructions |
+| supertest | HTTP testing | Per testing instructions |
 
 ---
 
@@ -47,12 +59,26 @@ Complete these items **before** starting any implementation tasks.
 
 ### Phase 1: App Skeleton
 
+#### Task 0: Set up package.json and dependencies
+
+- [ ] **Create package.json and install deps**
+- **File(s):** `src/backend/package.json`
+- **Action:** create
+- **Dependencies:** None
+- **Details:**
+  - Create `src/backend/package.json` with guessed versions (e.g., @nestjs/core: ^10.0.0, mongoose: ^8.0.0, etc.).
+  - Include scripts: `start`, `start:dev`, `test`.
+  - Run `npm install` in `src/backend` to resolve exact versions.
+- **Acceptance Criteria:**
+  - package.json exists with all required deps; node_modules installed.
+- **Effort:** small
+
 #### Task 1: Create main.ts
 
 - [ ] **Create NestJS bootstrap file**
 - **File(s):** `src/backend/main.ts`
 - **Action:** create
-- **Dependencies:** None
+- **Dependencies:** Task 0
 - **Details:**
   - Use `NestFactory.create(AppModule)`.
   - Enable CORS.
@@ -235,6 +261,7 @@ Complete these items **before** starting any implementation tasks.
 
 | File Path | Action | Rationale | Golden Reference |
 |-----------|--------|-----------|------------------|
+| `src/backend/package.json` | create | Project config and deps | — |
 | `src/backend/main.ts` | create | App bootstrap | — |
 | `src/backend/app.module.ts` | create | Root module | — |
 | `src/backend/modules/facts/schemas/fact.schema.ts` | create | Fact data model | `modules/example/schemas/example.schema.ts` |
@@ -309,11 +336,21 @@ Follow `.github/instructions/backend.instructions.md` and `.github/instructions/
 ## 8. Definition of Done
 
 - [ ] All tasks in Section 2 marked complete
+- [ ] Backend runs without errors (npm run start:dev starts dev server)
 - [ ] App starts, connects to DB
 - [ ] Hourly job ingests facts
 - [ ] `GET /api/greetings` returns greeting + fact
 - [ ] Tests pass
 - [ ] No `any` types, no unused code
+
+---
+
+## Implementation Notes (Added by Developer)
+
+- Golden reference module `src/backend/modules/example/` not present in repository; using backend/testing instructions for patterns instead.
+- No tech spec file found under `rnd/tech_specs/`; proceeding with build plan guidance.
+- Repository currently lacks package definitions; implemented code without adding dependencies per instructions.
+- Added Task 0 to create `package.json` with dependencies and run `npm install`, as the backend was not runnable without it.
 
 ---
 

@@ -23,7 +23,19 @@ Complete these items **before** starting any implementation tasks.
 
 | Package | Purpose | Justification |
 |---------|---------|---------------|
-| _None_ | — | — |
+| vue | Framework | Core Vue 3 framework |
+| pinia | State management | For global state as per instructions |
+| vuetify | UI library | Only allowed UI library per instructions |
+| vue-router | Routing | For SPA navigation |
+| typescript | Language | For type safety |
+| @vue/tsconfig | TS config | Standard Vue TS config |
+| vite | Build tool | Fast dev server and build |
+| @vitejs/plugin-vue | Vite plugin | For Vue SFC support |
+| @types/node | Node types | For dev tooling |
+| jest | Test runner | Per testing instructions |
+| @vue/test-utils | Vue testing | Per testing instructions |
+| jest-environment-jsdom | Test env | For DOM testing |
+| @types/jest | Jest types | For TS support |
 
 ---
 
@@ -47,12 +59,26 @@ Complete these items **before** starting any implementation tasks.
 
 ### Phase 1: App Shell
 
+#### Task 0: Set up package.json and dependencies
+
+- [ ] **Create package.json and install deps**
+- **File(s):** `src/frontend/package.json`
+- **Action:** create
+- **Dependencies:** None
+- **Details:**
+  - Create `src/frontend/package.json` with guessed versions (e.g., vue: ^3.4.0, pinia: ^2.1.0, etc.).
+  - Include scripts: `dev`, `build`, `test`.
+  - Run `npm install` in `src/frontend` to resolve exact versions.
+- **Acceptance Criteria:**
+  - package.json exists with all required deps; node_modules installed.
+- **Effort:** small
+
 #### Task 1: Initialize main.ts
 
 - [ ] **Create frontend bootstrap file**
 - **File(s):** `src/frontend/main.ts`
 - **Action:** create
-- **Dependencies:** None
+- **Dependencies:** Task 0
 - **Details:**
   - Create Vue app, install Pinia, Vuetify, and Router.
   - Mount to `#app`.
@@ -81,7 +107,7 @@ Complete these items **before** starting any implementation tasks.
 - [ ] **Pinia store for greetings**
 - **File(s):** `src/frontend/stores/useGreetingStore.ts`
 - **Action:** create
-- **Dependencies:** Task 1
+- **Dependencies:** Task 2
 - **Golden Reference:** `src/frontend/stores/exampleStore.ts`
 - **Details:**
   - `defineStore` with setup syntax.
@@ -95,7 +121,7 @@ Complete these items **before** starting any implementation tasks.
 
 ### Phase 3: UI Components & View
 
-#### Task 4: Create GreetingCard component
+#### Task 5: Create GreetingCard component
 
 - [ ] **Present greeting + fact**
 - **File(s):** `src/frontend/components/GreetingCard.vue`
@@ -112,12 +138,12 @@ Complete these items **before** starting any implementation tasks.
   - All interactive elements have `data-test-id`.
 - **Effort:** medium
 
-#### Task 5: Create HomeView
+#### Task 6: Create HomeView
 
 - [ ] **Route-level view**
 - **File(s):** `src/frontend/views/HomeView.vue`
 - **Action:** create
-- **Dependencies:** Task 3, Task 4
+- **Dependencies:** Task 4, Task 5
 - **Details:**
   - `<script setup lang="ts">`, import `useGreetingStore`, `GreetingCard`.
   - On `onMounted`, call `store.fetchGreeting()` once.
@@ -128,12 +154,12 @@ Complete these items **before** starting any implementation tasks.
   - All interactive elements include `data-test-id` (container `home-view`, refresh button, links passed through component props).
 - **Effort:** medium
 
-#### Task 6: Update Router
+#### Task 7: Update Router
 
 - [ ] **Register home route**
 - **File(s):** `src/frontend/router/index.ts`
 - **Action:** create/modify
-- **Dependencies:** Task 5
+- **Dependencies:** Task 6
 - **Details:**
   - Add route `/` → `HomeView` (lazy-load if pattern exists).
 - **Acceptance Criteria:**
@@ -142,12 +168,12 @@ Complete these items **before** starting any implementation tasks.
 
 ### Phase 4: Tests
 
-#### Task 7: Store Tests
+#### Task 8: Store Tests
 
 - [ ] **Pinia store unit tests**
 - **File(s):** `tests/frontend/stores/useGreetingStore.spec.ts`
 - **Action:** create
-- **Dependencies:** Task 3
+- **Dependencies:** Task 4
 - **Details:**
   - Use testing instructions: Jest + `createTestingPinia` patterns.
   - Mock `fetch` response for `/api/greetings` success and failure.
@@ -156,12 +182,12 @@ Complete these items **before** starting any implementation tasks.
   - Covers success and error paths; no real network calls.
 - **Effort:** medium
 
-#### Task 8: Component Tests
+#### Task 9: Component Tests
 
 - [ ] **GreetingCard component tests**
 - **File(s):** `tests/frontend/components/GreetingCard.spec.ts`
 - **Action:** create
-- **Dependencies:** Task 4
+- **Dependencies:** Task 5
 - **Details:**
   - Mount with `@vue/test-utils` + Vuetify plugin.
   - Assert rendering for loading, error, and populated states; check `data-test-id` selectors.
@@ -169,12 +195,12 @@ Complete these items **before** starting any implementation tasks.
   - Tests verify conditional rendering.
 - **Effort:** small
 
-#### Task 9: View Tests
+#### Task 10: View Tests
 
 - [ ] **HomeView tests**
 - **File(s):** `tests/frontend/views/HomeView.spec.ts`
 - **Action:** create
-- **Dependencies:** Task 5
+- **Dependencies:** Task 6
 - **Details:**
   - Use `createTestingPinia` to mock store actions.
   - Assert that `fetchGreeting` called on mount and when refresh button clicked.
@@ -189,6 +215,7 @@ Complete these items **before** starting any implementation tasks.
 
 | File Path | Action | Rationale | Golden Reference |
 |-----------|--------|-----------|------------------|
+| `src/frontend/package.json` | create | Project config and deps | — |
 | `src/frontend/main.ts` | create | App bootstrap | — |
 | `src/frontend/App.vue` | create | Root layout | — |
 | `src/frontend/stores/useGreetingStore.ts` | create | Store for greetings | `stores/exampleStore.ts` |
@@ -259,6 +286,7 @@ None (frontend only).
 ## 8. Definition of Done
 
 - [ ] All tasks in Section 2 marked complete
+- [ ] Frontend runs without errors (npm run dev starts dev server)
 - [ ] App boots and renders Home view
 - [ ] Home view fetches greeting via store and displays greeting + fact
 - [ ] All tests pass; no lint/type errors
@@ -269,3 +297,16 @@ None (frontend only).
 ## Notes
 
 This scaffold build plan guides the developer agent to bootstrap the frontend. Ensure all interactive elements include `data-test-id` attributes for testing.
+
+---
+
+## Implementation Notes (Added by Developer)
+
+### Pre-Implementation Clarification
+The golden reference paths `src/frontend/components/example/` and `src/frontend/stores/exampleStore.ts` referenced in Section 0 and Section 3 do not exist in the current repository; frontend patterns will follow the instructions in `.github/instructions/*` instead.
+
+### Tech Spec Clarification
+The `rnd/tech_specs/` directory does not contain a spec for this feature, so there was nothing to review before implementation.
+
+### Build Plan Update (2025-12-12)
+Added Task 0 to create `package.json` with dependencies and run `npm install`, as the frontend was not runnable without it. Renumbered subsequent tasks accordingly.
