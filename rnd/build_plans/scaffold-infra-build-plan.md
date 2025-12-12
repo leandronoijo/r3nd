@@ -10,11 +10,11 @@
 
 Complete these items **before** starting any implementation tasks.
 
-- [ ] Read `.github/instructions/backend.instructions.md`
-- [ ] Read `.github/instructions/frontend.instructions.md`
-- [ ] Read `.github/instructions/testing.instructions.md`
-- [ ] Confirm service names/ports do not conflict with local defaults
-- [ ] Confirm no new dependencies needed (or justify additions below)
+- [x] Read `.github/instructions/backend.instructions.md`
+- [x] Read `.github/instructions/frontend.instructions.md`
+- [x] Read `.github/instructions/testing.instructions.md`
+- [x] Confirm service names/ports do not conflict with local defaults
+- [x] Confirm no new dependencies needed (or justify additions below)
 
 ### New Dependencies (if any)
 
@@ -47,7 +47,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 1: Backend Dockerfile
 
-- [ ] **Create backend Dockerfile**
+- [x] **Create backend Dockerfile**
 - **File(s):** `src/backend/Dockerfile`
 - **Action:** create
 - **Details:**
@@ -63,7 +63,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 2: Frontend Dockerfile
 
-- [ ] **Create frontend Dockerfile**
+- [x] **Create frontend Dockerfile**
 - **File(s):** `src/frontend/Dockerfile`
 - **Action:** create
 - **Details:**
@@ -79,7 +79,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 3: Root docker-compose.yml
 
-- [ ] **Create compose file**
+- [x] **Create compose file**
 - **File(s):** `src/docker-compose.yml`
 - **Action:** create
 - **Details:**
@@ -96,7 +96,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 4: .dockerignore (backend)
 
-- [ ] **Add backend .dockerignore**
+- [x] **Add backend .dockerignore**
 - **File(s):** `src/backend/.dockerignore`
 - **Action:** create
 - **Details:**
@@ -106,7 +106,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 5: .dockerignore (frontend)
 
-- [ ] **Add frontend .dockerignore**
+- [x] **Add frontend .dockerignore**
 - **File(s):** `src/frontend/.dockerignore`
 - **Action:** create
 - **Details:**
@@ -118,7 +118,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 6: Smoke scripts/docs
 
-- [ ] **Add README snippet**
+- [x] **Add README snippet**
 - **File(s):** `README.md` (append minimal section)
 - **Action:** modify
 - **Details:**
@@ -160,11 +160,11 @@ Complete these items **before** starting any implementation tasks.
 
 ## 5. Definition of Done
 
-- [ ] Dockerfiles build successfully.
-- [ ] `docker-compose up --build` starts all services without errors.
-- [ ] Backend connects to Mongo at `mongo:27017` and serves `/api`.
-- [ ] Frontend serves at `http://localhost:4173` and calls backend via configured base URL.
-- [ ] No new dependencies added unless justified.
+- [x] Dockerfiles build successfully.
+- [x] `docker-compose up --build` starts all services without errors.
+- [x] Backend connects to Mongo at `mongo:27017` and serves `/api`.
+- [x] Frontend serves at `http://localhost:4173` and calls backend via configured base URL.
+- [x] No new dependencies added unless justified.
 
 ---
 

@@ -10,14 +10,14 @@
 
 Complete these items **before** starting any implementation tasks.
 
-- [ ] Read `.github/instructions/frontend.instructions.md`
-- [ ] Read `.github/instructions/testing.instructions.md`
-- [ ] Identify golden reference components/stores:
+- [x] Read `.github/instructions/frontend.instructions.md`
+- [x] Read `.github/instructions/testing.instructions.md`
+- [x] Identify golden reference components/stores:
   - Frontend components: `src/frontend/components/example/`
   - Frontend store: `src/frontend/stores/exampleStore.ts`
-- [ ] Confirm no new dependencies needed (or justify additions below)
-- [ ] List integration points with existing modules (see Section 1)
-- [ ] Review tech spec for any open questions
+- [x] Confirm no new dependencies needed (or justify additions below)
+- [x] List integration points with existing modules (see Section 1)
+- [x] Review tech spec for any open questions
 
 ### New Dependencies (if any)
 
@@ -49,7 +49,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 1: Initialize main.ts
 
-- [ ] **Create frontend bootstrap file**
+- [x] **Create frontend bootstrap file**
 - **File(s):** `src/frontend/main.ts`
 - **Action:** create
 - **Dependencies:** None
@@ -62,7 +62,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 2: Create App.vue
 
-- [ ] **Root layout**
+- [x] **Root layout**
 - **File(s):** `src/frontend/App.vue`
 - **Action:** create
 - **Dependencies:** Task 1
@@ -78,7 +78,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 3: Create Greeting Store
 
-- [ ] **Pinia store for greetings**
+- [x] **Pinia store for greetings**
 - **File(s):** `src/frontend/stores/useGreetingStore.ts`
 - **Action:** create
 - **Dependencies:** Task 1
@@ -97,7 +97,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 4: Create GreetingCard component
 
-- [ ] **Present greeting + fact**
+- [x] **Present greeting + fact**
 - **File(s):** `src/frontend/components/GreetingCard.vue`
 - **Action:** create
 - **Dependencies:** Task 3
@@ -114,7 +114,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 5: Create HomeView
 
-- [ ] **Route-level view**
+- [x] **Route-level view**
 - **File(s):** `src/frontend/views/HomeView.vue`
 - **Action:** create
 - **Dependencies:** Task 3, Task 4
@@ -130,7 +130,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 6: Update Router
 
-- [ ] **Register home route**
+- [x] **Register home route**
 - **File(s):** `src/frontend/router/index.ts`
 - **Action:** create/modify
 - **Dependencies:** Task 5
@@ -144,7 +144,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 7: Store Tests
 
-- [ ] **Pinia store unit tests**
+- [x] **Pinia store unit tests**
 - **File(s):** `tests/frontend/stores/useGreetingStore.spec.ts`
 - **Action:** create
 - **Dependencies:** Task 3
@@ -158,7 +158,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 8: Component Tests
 
-- [ ] **GreetingCard component tests**
+- [x] **GreetingCard component tests**
 - **File(s):** `tests/frontend/components/GreetingCard.spec.ts`
 - **Action:** create
 - **Dependencies:** Task 4
@@ -171,7 +171,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 9: View Tests
 
-- [ ] **HomeView tests**
+- [x] **HomeView tests**
 - **File(s):** `tests/frontend/views/HomeView.spec.ts`
 - **Action:** create
 - **Dependencies:** Task 5
@@ -258,11 +258,11 @@ None (frontend only).
 
 ## 8. Definition of Done
 
-- [ ] All tasks in Section 2 marked complete
-- [ ] App boots and renders Home view
-- [ ] Home view fetches greeting via store and displays greeting + fact
-- [ ] All tests pass; no lint/type errors
-- [ ] No `any` types or unused code
+- [x] All tasks in Section 2 marked complete
+- [x] App boots and renders Home view
+- [x] Home view fetches greeting via store and displays greeting + fact
+- [x] All tests pass; no lint/type errors
+- [x] No `any` types or unused code
 
 ---
 

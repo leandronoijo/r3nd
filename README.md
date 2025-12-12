@@ -179,6 +179,69 @@ To extend or adapt the system:
 
 ---
 
+## 🐳 Docker Setup
+
+This repository includes Docker configuration for running the full stack locally.
+
+### Quick Start
+
+```bash
+# Start all services (backend, frontend, MongoDB)
+docker-compose -f src/docker-compose.yml up --build
+```
+
+The services will be available at:
+- **Frontend**: http://localhost:4173
+- **Backend API**: http://localhost:3000/api
+- **MongoDB**: mongodb://localhost:27017/r3nd
+
+### Manual Setup (Development)
+
+If you prefer to run services individually:
+
+```bash
+# Install dependencies for all workspaces
+npm run install:all
+
+# Start backend (in one terminal)
+npm run backend:dev
+
+# Start frontend (in another terminal)
+npm run frontend:dev
+```
+
+**Note**: You'll need MongoDB running locally at `mongodb://localhost:27017/r3nd` or set the `MONGODB_URI` environment variable.
+
+### Running Tests
+
+```bash
+# Run backend tests
+npm run backend:test
+
+# Run frontend tests
+npm run frontend:test
+
+# Run all unit tests
+npm run test:all
+
+# Run E2E tests (requires services to be running)
+npm run test:e2e
+```
+
+### Environment Variables
+
+#### Backend
+- `PORT` - Server port (default: 3000)
+- `MONGODB_URI` - MongoDB connection string (default: mongodb://localhost:27017/r3nd)
+
+#### Frontend
+- `VITE_API_BASE_URL` - Backend API base URL (default: http://localhost:3000/api)
+
+#### E2E Tests
+- `E2E_BASE_URL` - Frontend base URL for Playwright (default: http://localhost:4173)
+
+---
+
 ## 🧭 Roadmap
 
 Potential future enhancements:

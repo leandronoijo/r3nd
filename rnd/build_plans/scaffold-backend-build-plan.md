@@ -10,13 +10,13 @@
 
 Complete these items **before** starting any implementation tasks.
 
-- [ ] Read `.github/instructions/backend.instructions.md`
-- [ ] Read `.github/instructions/testing.instructions.md`
-- [ ] Identify golden reference modules:
+- [x] Read `.github/instructions/backend.instructions.md`
+- [x] Read `.github/instructions/testing.instructions.md`
+- [x] Identify golden reference modules:
   - Backend: `src/backend/modules/example/`
-- [ ] Confirm no new dependencies needed (or justify additions below)
-- [ ] List integration points with existing modules (see Section 1)
-- [ ] Review tech spec for any open questions
+- [x] Confirm no new dependencies needed (or justify additions below)
+- [x] List integration points with existing modules (see Section 1)
+- [x] Review tech spec for any open questions
 
 ### New Dependencies (if any)
 
@@ -49,7 +49,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 1: Create main.ts
 
-- [ ] **Create NestJS bootstrap file**
+- [x] **Create NestJS bootstrap file**
 - **File(s):** `src/backend/main.ts`
 - **Action:** create
 - **Dependencies:** None
@@ -67,7 +67,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 2: Create app.module.ts
 
-- [ ] **Create root module**
+- [x] **Create root module**
 - **File(s):** `src/backend/app.module.ts`
 - **Action:** create
 - **Dependencies:** Task 1
@@ -85,7 +85,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 3: Create Fact Schema
 
-- [ ] **Define Mongoose schema for facts**
+- [x] **Define Mongoose schema for facts**
 - **File(s):** `src/backend/modules/facts/schemas/fact.schema.ts`
 - **Action:** create
 - **Dependencies:** None
@@ -108,7 +108,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 4: Create Facts Service
 
-- [ ] **Implement facts business logic**
+- [x] **Implement facts business logic**
 - **File(s):** `src/backend/modules/facts/facts.service.ts`
 - **Action:** create
 - **Dependencies:** Task 3
@@ -128,7 +128,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 5: Create Facts Ingestor (Cron)
 
-- [ ] **Add hourly ingestion job**
+- [x] **Add hourly ingestion job**
 - **File(s):** `src/backend/modules/facts/facts.ingestor.ts`
 - **Action:** create
 - **Dependencies:** Task 4
@@ -142,7 +142,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 6: Create Facts Module
 
-- [ ] **Wire facts module**
+- [x] **Wire facts module**
 - **File(s):** `src/backend/modules/facts/facts.module.ts`
 - **Action:** create
 - **Dependencies:** Task 3, Task 4, Task 5
@@ -157,7 +157,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 7: Create Facts Service Tests
 
-- [ ] **Unit tests for facts service**
+- [x] **Unit tests for facts service**
 - **File(s):** `src/backend/modules/facts/facts.service.spec.ts`
 - **Action:** create
 - **Dependencies:** Task 4
@@ -175,7 +175,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 8: Create Greetings Service
 
-- [ ] **Implement greetings logic**
+- [x] **Implement greetings logic**
 - **File(s):** `src/backend/modules/greetings/greetings.service.ts`
 - **Action:** create
 - **Dependencies:** Task 6
@@ -190,7 +190,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 9: Create Greetings Controller
 
-- [ ] **Expose hello endpoint**
+- [x] **Expose hello endpoint**
 - **File(s):** `src/backend/modules/greetings/greetings.controller.ts`
 - **Action:** create
 - **Dependencies:** Task 8
@@ -203,7 +203,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 10: Create Greetings Module
 
-- [ ] **Wire greetings module**
+- [x] **Wire greetings module**
 - **File(s):** `src/backend/modules/greetings/greetings.module.ts`
 - **Action:** create
 - **Dependencies:** Task 8, Task 9
@@ -217,7 +217,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 11: Create Greetings Controller Tests
 
-- [ ] **Unit tests for greetings controller**
+- [x] **Unit tests for greetings controller**
 - **File(s):** `src/backend/modules/greetings/greetings.controller.spec.ts`
 - **Action:** create
 - **Dependencies:** Task 9
@@ -308,12 +308,12 @@ Follow `.github/instructions/backend.instructions.md` and `.github/instructions/
 
 ## 8. Definition of Done
 
-- [ ] All tasks in Section 2 marked complete
-- [ ] App starts, connects to DB
-- [ ] Hourly job ingests facts
-- [ ] `GET /api/greetings` returns greeting + fact
-- [ ] Tests pass
-- [ ] No `any` types, no unused code
+- [x] All tasks in Section 2 marked complete
+- [x] App starts, connects to DB
+- [x] Hourly job ingests facts
+- [x] `GET /api/greetings` returns greeting + fact
+- [x] Tests pass
+- [x] No `any` types, no unused code
 
 ---
 

@@ -10,12 +10,12 @@
 
 Complete these items **before** starting any implementation tasks.
 
-- [ ] Read `.github/instructions/testing.instructions.md`
-- [ ] Read `.github/instructions/frontend.instructions.md`
-- [ ] Read `.github/instructions/backend.instructions.md`
-- [ ] Ensure backend (`/api/greetings`) and frontend (Home view) are available/running
-- [ ] Confirm `data-test-id` selectors implemented per frontend plan
-- [ ] No new dependencies (Playwright already configured; otherwise justify below)
+- [x] Read `.github/instructions/testing.instructions.md`
+- [x] Read `.github/instructions/frontend.instructions.md`
+- [x] Read `.github/instructions/backend.instructions.md`
+- [x] Ensure backend (`/api/greetings`) and frontend (Home view) are available/running
+- [x] Confirm `data-test-id` selectors implemented per frontend plan
+- [x] No new dependencies (Playwright already configured; otherwise justify below)
 
 ### New Dependencies (if any)
 
@@ -49,7 +49,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 1: Ensure Playwright config
 
-- [ ] **Verify/adjust Playwright config**
+- [x] **Verify/adjust Playwright config**
 - **File(s):** `playwright.config.ts` (or repo equivalent)
 - **Action:** create/modify
 - **Details:**
@@ -64,7 +64,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 2: Home flow E2E
 
-- [ ] **Create main E2E spec**
+- [x] **Create main E2E spec**
 - **File(s):** `tests/e2e/greeting.e2e.spec.ts`
 - **Action:** create
 - **Dependencies:** Frontend/Backend running
@@ -81,7 +81,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 3: Error surfacing (optional if API can fail)
 
-- [ ] **Add error-path E2E (if backend can simulate failure)**
+- [x] **Add error-path E2E (if backend can simulate failure)**
 - **File(s):** `tests/e2e/greeting-error.e2e.spec.ts`
 - **Action:** create (optional based on backend feature flag)
 - **Details:**
@@ -94,7 +94,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 4: Seed/warm-up step
 
-- [ ] **Ensure data available**
+- [x] **Ensure data available**
 - **File(s):** `tests/e2e/fixtures/README.md` (doc) or `scripts/seed` (if needed)
 - **Action:** doc/create (optional)
 - **Details:**
@@ -107,7 +107,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 5: Add package script (if missing)
 
-- [ ] **Wire NPM script for E2E**
+- [x] **Wire NPM script for E2E**
 - **File(s):** `package.json`
 - **Action:** modify (only if absent)
 - **Details:**
@@ -118,7 +118,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 6: README blurb
 
-- [ ] **Document how to run E2E**
+- [x] **Document how to run E2E**
 - **File(s):** `README.md`
 - **Action:** modify (append)
 - **Details:**
@@ -175,11 +175,11 @@ Complete these items **before** starting any implementation tasks.
 
 ## 6. Definition of Done
 
-- [ ] Playwright config set with correct base URL.
-- [ ] E2E specs created using only `data-test-id` selectors.
-- [ ] Tests cover load and refresh paths (and error if feasible).
-- [ ] README/docs updated with run instructions.
-- [ ] No new dependencies unless justified.
+- [x] Playwright config set with correct base URL.
+- [x] E2E specs created using only `data-test-id` selectors.
+- [x] Tests cover load and refresh paths (and error if feasible).
+- [x] README/docs updated with run instructions.
+- [x] No new dependencies unless justified.
 
 ---
 

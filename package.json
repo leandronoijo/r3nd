@@ -1,0 +1,22 @@
+{
+  "name": "r3nd",
+  "version": "0.1.0",
+  "description": "R3ND Seed Repository",
+  "private": true,
+  "scripts": {
+    "backend:dev": "cd src/backend && npm run start:dev",
+    "backend:build": "cd src/backend && npm run build",
+    "backend:test": "cd src/backend && npm test",
+    "frontend:dev": "cd src/frontend && npm run dev",
+    "frontend:build": "cd src/frontend && npm run build",
+    "frontend:test": "cd src/frontend && npm test",
+    "docker:up": "cd src && docker-compose up --build",
+    "docker:down": "cd src && docker-compose down",
+    "test:e2e": "playwright test",
+    "test:all": "npm run backend:test && npm run frontend:test",
+    "install:all": "npm install && cd src/backend && npm install && cd ../frontend && npm install"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.38.0"
+  }
+}
