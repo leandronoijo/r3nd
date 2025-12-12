@@ -49,20 +49,20 @@ Complete these items **before** starting any implementation tasks.
 
 ### Phase 1: Backend Foundation
 
-#### Task 1: Create Entity Schema
+-#### Task 1: Create Entity Schema
 
-- [ ] **Create Mongoose schema**
+- [ ] **Create data model/schema (per backend instructions)**
 - **File(s):** `src/backend/modules/<module-name>/schemas/<entity>.schema.ts`
 - **Action:** create
 - **Dependencies:** None
 - **Golden Reference:** `src/backend/modules/example/schemas/example.schema.ts`
 - **Details:**
-  - Define schema class with `@Schema()` decorator
-  - Fields:
-    - `fieldName: string` — `@Prop({ required: true })`
-    - `optionalField?: string` — `@Prop()`
-    - `createdAt: Date` — `@Prop({ default: Date.now })`
-  - Export schema and type: `export const EntitySchema = SchemaFactory.createForClass(Entity)`
+  - Define schema/model using the backend data modeling approach specified in `.github/instructions/backend.instructions.md`.
+  - Fields (example):
+    - `fieldName: string` — required
+    - `optionalField?: string` — optional
+    - `createdAt: Date` — default to creation timestamp
+  - Export and register model/provider according to backend instructions
   - Add indexes for frequently queried fields
 - **Acceptance Criteria:**
   - Schema compiles without errors
@@ -80,21 +80,12 @@ Complete these items **before** starting any implementation tasks.
 - **Dependencies:** Task 1
 - **Golden Reference:** `src/backend/modules/example/dto/create-example.dto.ts`
 - **Details:**
-  - Class with class-validator decorators:
-    ```typescript
-    @IsString()
-    @IsNotEmpty()
-    fieldName: string;
-
-    @IsOptional()
-    @IsString()
-    optionalField?: string;
-    ```
+  - Class with validation decorators/annotations (follow `.github/instructions/backend.instructions.md` for examples)
   - Field names must match schema exactly
 - **Acceptance Criteria:**
-  - All fields have appropriate class-validator decorators
+  - All fields have appropriate validation decorators/annotations as defined in backend instructions
   - Field names match schema 1:1
-  - TypeScript types explicit
+  - Explicit types (follow repository language/type system and backend instructions)
 - **Effort:** small
 
 ---
@@ -104,10 +95,10 @@ Complete these items **before** starting any implementation tasks.
 - **Action:** create
 - **Dependencies:** Task 2 (CreateEntityDto)
 - **Details:**
-  - Extend `PartialType(CreateEntityDto)` from `@nestjs/mapped-types`
+  - Extend the Create DTO with a language-appropriate partial/patch DTO pattern per backend instructions
   - Add any update-specific fields
 - **Acceptance Criteria:**
-  - Properly extends CreateEntityDto with PartialType
+  - Properly extends CreateEntityDto using the repository’s partial/update DTO pattern as described in backend instructions
 - **Effort:** small
 
 ---
@@ -120,8 +111,8 @@ Complete these items **before** starting any implementation tasks.
 - **Dependencies:** Task 1, Task 2
 - **Golden Reference:** `src/backend/modules/example/example.service.ts`
 - **Details:**
-  - Class decorated with `@Injectable()`
-  - Inject model: `@InjectModel(Entity.name) private entityModel: Model<Entity>`
+  - Class registered as a service per backend DI conventions (see `.github/instructions/backend.instructions.md`)
+  - Inject repository/model via repository DI provider pattern per backend instructions
   - Methods:
     - `async create(dto: CreateEntityDto): Promise<Entity>`
     - `async findAll(): Promise<Entity[]>`
@@ -132,7 +123,7 @@ Complete these items **before** starting any implementation tasks.
   - Log significant operations
 - **Acceptance Criteria:**
   - `@Injectable()` decorator present
-  - All methods return typed Mongoose documents
+  - All methods return typed data models per backend conventions
   - `NotFoundException` thrown with descriptive message
   - No business logic validation (DTOs handle input validation)
 - **Effort:** medium
@@ -173,7 +164,7 @@ Complete these items **before** starting any implementation tasks.
 - **Dependencies:** Task 1, Task 3, Task 4
 - **Golden Reference:** `src/backend/modules/example/example.module.ts`
 - **Details:**
-  - Import `MongooseModule.forFeature([{ name: Entity.name, schema: EntitySchema }])`
+  - Register the model/provider according to backend module conventions (see `.github/instructions/backend.instructions.md`)
   - Declare controller in `controllers`
   - Declare service in `providers`
   - Export service if other modules need it
@@ -206,7 +197,7 @@ Complete these items **before** starting any implementation tasks.
 - **Dependencies:** Task 3
 - **Golden Reference:** `src/backend/modules/example/example.service.spec.ts`
 - **Details:**
-  - Use `Test.createTestingModule` from `@nestjs/testing`
+  - Use the repository's backend testing harness and patterns (see `.github/instructions/testing.instructions.md`)
   - Mock `Model<Entity>` for all methods
   - Test cases:
     - `create()` — returns saved entity
@@ -240,7 +231,7 @@ Complete these items **before** starting any implementation tasks.
 
 ### Phase 3: Frontend Implementation
 
-#### Task 7: Create Pinia Store
+#### Task 7: Create store
 
 - [ ] **Create useEntityStore**
 - **File(s):** `src/frontend/stores/useEntityStore.ts`
@@ -273,22 +264,22 @@ Complete these items **before** starting any implementation tasks.
 #### Task 8: Create Components
 
 - [ ] **Create EntityList component**
-- **File(s):** `src/frontend/components/<feature>/EntityList.vue`
+-- **File(s):** `src/frontend/components/<feature>/EntityList` (component file)
 - **Action:** create
 - **Dependencies:** Task 7
-- **Golden Reference:** `src/frontend/components/example/ExampleList.vue`
+-- **Golden Reference:** `src/frontend/components/example/ExampleList` (component file)
 - **Details:**
-  - Use `<script setup lang="ts">`
-  - Import and use Pinia store
-  - Vuetify components: `v-data-table` or `v-list`
+  - Use the frontend component pattern/syntax as defined in `.github/instructions/frontend.instructions.md`
+  - Import and use the repository's store pattern per `.github/instructions/frontend.instructions.md`
+  - UI components: use repository's selected UI library components (see `.github/instructions/frontend.instructions.md`)
   - Required `data-test-id` attributes:
     - `entity-list-container`
     - `entity-list-item-{id}`
     - `entity-list-loading`
     - `entity-list-empty`
 - **Acceptance Criteria:**
-  - Composition API with `<script setup>`
-  - Vuetify components only
+  - Frontend component pattern: use composition-style components as defined in `.github/instructions/frontend.instructions.md`
+  - Use the repository's designated UI library and follow its component patterns (see `.github/instructions/frontend.instructions.md`)
   - All interactive elements have `data-test-id`
   - Fetches data via store on mount
 - **Effort:** medium
@@ -296,14 +287,14 @@ Complete these items **before** starting any implementation tasks.
 ---
 
 - [ ] **Create EntityForm component**
-- **File(s):** `src/frontend/components/<feature>/EntityForm.vue`
+-- **File(s):** `src/frontend/components/<feature>/EntityForm` (component file)
 - **Action:** create
 - **Dependencies:** Task 7
 - **Details:**
-  - Use `<script setup lang="ts">`
+  - Use the frontend component pattern/syntax as defined in `.github/instructions/frontend.instructions.md`
   - Props: `entity?: Entity` (for edit mode), `mode: 'create' | 'edit'`
   - Emits: `submit`, `cancel`
-  - Vuetify form components: `v-form`, `v-text-field`, `v-btn`
+  - UI form components per `.github/instructions/frontend.instructions.md` (use the repo's designated UI library)
   - Client-side validation matching backend DTOs
   - Required `data-test-id` attributes:
     - `entity-form`
@@ -320,7 +311,7 @@ Complete these items **before** starting any implementation tasks.
 ---
 
 - [ ] **Create EntityDetail component**
-- **File(s):** `src/frontend/components/<feature>/EntityDetail.vue`
+-- **File(s):** `src/frontend/components/<feature>/EntityDetail` (component file)
 - **Action:** create
 - **Dependencies:** Task 7
 - **Details:**
@@ -341,7 +332,7 @@ Complete these items **before** starting any implementation tasks.
 #### Task 9: Create View and Route
 
 - [ ] **Create EntityView**
-- **File(s):** `src/frontend/views/<Feature>View.vue`
+-- **File(s):** `src/frontend/views/<Feature>View` (view component/file)
 - **Action:** create
 - **Dependencies:** Task 8
 - **Details:**
@@ -380,7 +371,7 @@ Complete these items **before** starting any implementation tasks.
 - **Action:** create
 - **Dependencies:** Task 7
 - **Details:**
-  - Use `createTestingPinia`
+  - Use the repository's frontend store test harness (see `.github/instructions/testing.instructions.md`)
   - Mock API calls
   - Test all actions and state mutations
 - **Acceptance Criteria:**
@@ -395,8 +386,8 @@ Complete these items **before** starting any implementation tasks.
 - **Action:** create
 - **Dependencies:** Task 8
 - **Details:**
-  - Use `@vue/test-utils` with `mount`
-  - Mock Pinia store
+  - Use the repository's frontend testing utilities and patterns (see `.github/instructions/testing.instructions.md`)
+  - Mock store using the repository's frontend testing harness (see `.github/instructions/testing.instructions.md`)
   - Test rendering, interactions
 - **Acceptance Criteria:**
   - Components render correctly
@@ -407,7 +398,7 @@ Complete these items **before** starting any implementation tasks.
 
 ### Phase 5: E2E Tests
 
-#### Task 11: Playwright E2E Tests
+#### Task 11: E2E Tests (tooling per testing instructions)
 
 - [ ] **Create E2E test suite**
 - **File(s):** `tests/e2e/<feature>.spec.ts`
@@ -435,10 +426,10 @@ Complete these items **before** starting any implementation tasks.
 | `src/backend/modules/<module>/<module>.module.ts` | create | Module wiring | `modules/example/example.module.ts` |
 | `src/backend/app.module.ts` | modify | Register module | — |
 | `src/frontend/stores/useEntityStore.ts` | create | State management | `stores/exampleStore.ts` |
-| `src/frontend/components/<feature>/EntityList.vue` | create | List UI | `components/example/ExampleList.vue` |
-| `src/frontend/components/<feature>/EntityForm.vue` | create | Form UI | — |
-| `src/frontend/components/<feature>/EntityDetail.vue` | create | Detail UI | — |
-| `src/frontend/views/<Feature>View.vue` | create | Page view | — |
+| `src/frontend/components/<feature>/EntityList` (component) | create | List UI | `components/example/ExampleList` (component) |
+| `src/frontend/components/<feature>/EntityForm` (component) | create | Form UI | — |
+| `src/frontend/components/<feature>/EntityDetail` (component) | create | Detail UI | — |
+| `src/frontend/views/<Feature>View` (view) | create | Page view | — |
 | `src/frontend/router/index.ts` | modify | Add routes | — |
 
 ---
@@ -458,8 +449,8 @@ Complete these items **before** starting any implementation tasks.
 
 | Field | CreateDto Decorators | UpdateDto | Notes |
 |-------|---------------------|-----------|-------|
-| `fieldName` | `@IsString()`, `@IsNotEmpty()` | Optional via PartialType | — |
-| `optionalField` | `@IsOptional()`, `@IsString()` | Optional | — |
+| `fieldName` | Validation decorators/annotations as defined in backend instructions | Optional via update DTO pattern | — |
+| `optionalField` | Validation annotations as defined in backend instructions | Optional | — |
 
 ### Migration Plan
 
@@ -471,7 +462,7 @@ Complete these items **before** starting any implementation tasks.
 
 ## 5. Test Strategy
 
-### Unit Tests (Jest)
+### Unit Tests
 
 | Test File | What to Test | Mocks Needed | Coverage Target |
 |-----------|--------------|--------------|-----------------|
@@ -498,7 +489,7 @@ Complete these items **before** starting any implementation tasks.
 | `PATCH /entities/:id` | Partial update | 200 + updated entity |
 | `DELETE /entities/:id` | Valid ID | 204 No Content |
 
-### E2E Tests (Playwright)
+### E2E Tests
 
 #### Flow 1: Create Entity
 
@@ -597,31 +588,31 @@ Complete these items **before** starting any implementation tasks.
 
 | Area | Warning | Correct Pattern |
 |------|---------|-----------------|
-| **Frontend** | Use Vue 3 `<script setup>` only. No React, MUI, Tailwind. | Vuetify + Composition API |
-| **Backend** | NestJS module/service/controller pattern. No logic in controllers. | Thin controllers, fat services |
-| **DTOs** | Always add class-validator decorators. Sync with schema. | `@IsString()`, `@IsNotEmpty()`, etc. |
-| **Tests** | Every new file needs a test. Use `data-test-id` for E2E. | `*.spec.ts` alongside source |
-| **Imports** | Only import from allowed packages (vue, vuetify, pinia, nestjs, mongoose). | Check package.json first |
-| **State** | Frontend state in Pinia only. No component-local shared state. | `defineStore` with setup syntax |
-| **Queries** | No raw Mongo queries. Use Mongoose model methods. | `Model.find()`, not `db.collection()` |
-| **Errors** | Use NestJS exceptions. Never swallow errors. | `NotFoundException`, `BadRequestException` |
+| **Frontend** | Follow `.github/instructions/frontend.instructions.md` for frontend patterns and allowed libraries. | See frontend instructions |
+| **Backend** | Follow `.github/instructions/backend.instructions.md` for backend patterns and allowed libraries. | See backend instructions |
+| **DTOs** | Follow backend instructions for DTOs, validation, and schema sync. | See backend instructions |
+| **Tests** | Follow `.github/instructions/testing.instructions.md` for test requirements, selectors/doc conventions, and quality gates. | See testing instructions |
+| **Imports** | Check `package.json` and instruction files for allowed packages. | Verify before adding dependencies |
+| **State** | Follow frontend instructions for state management patterns and store usage. | See frontend instructions |
+| **Queries** | Follow backend instructions for data access patterns and repository/ORM usage. | See backend instructions |
+| **Errors** | Follow backend instructions for error handling and exception patterns. | See backend instructions |
 | **Types** | No `any` types. Explicit interfaces required. | Define interfaces/types |
 | **Files** | Max 300-400 lines per file. Split if larger. | Single responsibility |
-| **Schema ↔ DTO** | Field names must match exactly. Add to both simultaneously. | Keep in sync always |
-| **Validation** | Input validation via DTOs only, not in service business logic. | class-validator decorators |
+| **Schema ↔ DTO** | Follow backend instructions to ensure schema and DTO field parity and migration plans. | See backend instructions |
+| **Validation** | Follow backend instructions for input validation patterns and decorators. | See backend instructions |
 
 ### Common Mistakes to Avoid
 
 | Anti-Pattern | Correct Approach |
 |--------------|------------------|
-| Logic in controllers | Move to service |
-| `any` types | Define explicit interfaces |
-| Missing `data-test-id` | Add to ALL interactive elements |
-| Raw fetch in components | Use Pinia actions |
-| Options API | Always `<script setup>` |
-| Missing tests | Create test file for every new file |
-| Hardcoded values | Use ConfigService / environment variables |
-| Large files (>300 LOC) | Split into smaller modules |
+| Logic in controllers | Move to service — follow backend instructions |
+| `any` types | Define explicit interfaces — follow instruction file's type-checker rules |
+| Missing stable selectors | Use `data-test-id` or equivalent as per testing instructions |
+| Raw fetch in components | Use store/composable patterns for data fetching per frontend instructions |
+| Non-recommended component APIs | Follow frontend instructions for component patterns (composition/props/emits) |
+| Missing tests | Create test files and update build plan's test sections as required |
+| Hardcoded values | Use configuration service and environment variables (see backend instructions) |
+| Large files (>300 LOC) | Split into smaller modules — single responsibility patterns apply |
 
 ---
 

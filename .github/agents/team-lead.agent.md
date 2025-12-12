@@ -103,12 +103,12 @@ Table of every file touched:
 If any Mongo schema or DTO changes:
 - [ ] List fields added/modified with types
 - [ ] Confirm schema ↔ DTO field name match
-- [ ] Add class-validator decorators specified
+- [ ] Add validation decorators/annotations as specified in backend instructions
 - [ ] Migration/backfill plan if data exists
 - [ ] Indexes needed for new fields
 
 ## 5. Test Strategy
-### Unit tests (Jest)
+### Unit tests
 | Test File | What to Test | Mocks Needed | Coverage Target |
 |-----------|--------------|--------------|-----------------|
 | `*.service.spec.ts` | Business logic | Model, external services | Success + error paths |
@@ -117,7 +117,7 @@ If any Mongo schema or DTO changes:
 - Module combinations to test
 - API endpoint request/response contracts
 
-### E2E tests (Playwright)
+### E2E tests
 - User flows with step-by-step actions
 - `data-test-id` values to add (list them explicitly)
 - Explicit waits: `waitForSelector`, `waitForResponse`
@@ -184,7 +184,7 @@ Explicit warnings for Developer agent (see below).
 
 - If a Mongo field is added, the plan must include:
   1. Schema update task.
-  2. DTO update task (with class-validator decorators specified).
+  2. DTO update task (with validation decorators/annotations as specified in backend instructions).
   3. Service method update task.
   4. Test update task.
   5. Migration task (if data exists).
@@ -194,7 +194,7 @@ Explicit warnings for Developer agent (see below).
 - Every new service → unit test task.
 - Every new controller → integration test task.
 - Every new component/store → frontend unit test task.
-- Every user-facing flow → Playwright E2E task with `data-test-id` list.
+- Every user-facing flow → E2E task (tooling defined in `.github/instructions/testing.instructions.md`) with `data-test-id` list.
 - Specify exact test assertions expected.
 
 ### AI-Agent Guardrails section
@@ -203,14 +203,14 @@ Include a section in every build plan warning the Developer agent about:
 
 | Area | Warning | Correct Pattern |
 |------|---------|-----------------|
-| Frontend | Use Vue 3 `<script setup>` only. No React, MUI, Tailwind. | Vuetify + Composition API |
-| Backend | NestJS module/service/controller pattern. No logic in controllers. | Thin controllers, fat services |
-| DTOs | Always add class-validator decorators. Sync with schema. | `@IsString()`, `@IsNotEmpty()`, etc. |
+| Frontend | Follow `.github/instructions/frontend.instructions.md` for frontend stack and guardrails. | See frontend instructions |
+| Backend | Follow `.github/instructions/backend.instructions.md` for backend stack and guardrails. | See backend instructions |
+| DTOs | Always add validation decorators/annotations and keep DTO ↔ schema in sync. | See backend instructions |
 | Tests | Every new file needs a test. Use `data-test-id` for E2E. | `*.spec.ts` alongside source |
-| Imports | Only import from allowed packages (vue, vuetify, pinia, nestjs, mongoose). | Check package.json first |
-| State | Frontend state in Pinia only. No component-local shared state. | `defineStore` with setup syntax |
-| Queries | No raw Mongo queries. Use Mongoose model methods. | `Model.find()`, not `db.collection()` |
-| Errors | Use NestJS exceptions. Never swallow errors. | `NotFoundException`, `BadRequestException` |
+| Imports | Check `package.json` and `.github/instructions/*` for allowed packages. | Verify before adding new deps |
+| State | Follow `.github/instructions/frontend.instructions.md` for state management patterns. | See frontend instructions |
+| Queries | Follow `.github/instructions/backend.instructions.md` for data access patterns. | See backend instructions |
+| Errors | Follow `.github/instructions/backend.instructions.md` for error handling conventions. | See backend instructions |
 | Types | No `any` types. Explicit interfaces required. | Define interfaces/types |
 | Files | Max 300-400 lines per file. Split if larger. | Single responsibility |
 
@@ -273,7 +273,7 @@ Include a section in every build plan warning the Developer agent about:
   - **Golden Reference:** `src/backend/modules/example/example.service.ts`
   - **Details:**
     - Class decorated with `@Injectable()`
-    - Inject `OrderModel` via `@InjectModel(Order.name)`
+    - Inject the data model via the repository's DI pattern per `.github/instructions/backend.instructions.md`
     - Methods:
       - `async create(dto: CreateOrderDto): Promise<Order>` — creates and saves order
       - `async findById(id: string): Promise<Order>` — returns order or throws
@@ -281,8 +281,8 @@ Include a section in every build plan warning the Developer agent about:
     - Throw `NotFoundException` if order not found in `findById`
     - Log order creation with orderId
   - **Acceptance criteria:**
-    - Service is `@Injectable()` decorated
-    - All methods return typed Mongoose documents
+    - Service is registered per backend DI conventions
+    - All methods return typed repository-specific data models per backend conventions
     - `NotFoundException` thrown with message "Order not found"
     - Unit test covers: create success, findById success, findById not found
   - **Effort:** medium
@@ -296,7 +296,9 @@ Include a section in every build plan warning the Developer agent about:
 ```markdown
 ## 5. Test Strategy
 
-### Unit tests (Jest)
+Follow `.github/instructions/testing.instructions.md` for test frameworks, naming conventions, and E2E selector contracts.
+
+### Unit tests
 
 | Test File | What to Test | Mocks Needed |
 |-----------|--------------|--------------|
@@ -310,13 +312,13 @@ Include a section in every build plan warning the Developer agent about:
 - Test full request cycle: POST /orders with valid DTO → 201 + order object
 - Test validation: POST /orders with missing fields → 400 + error messages
 
-### E2E tests (Playwright)
+### E2E tests
 
 **Flow: Create Order**
 1. Navigate to `/orders/new`
 2. Fill form fields (use `data-test-id="order-form-*"`)
 3. Click submit (`data-test-id="order-submit-btn"`)
-4. Wait for `waitForResponse('**/api/orders')`
+4. Wait for the API response for the request (explicit wait) to `**/api/orders`
 5. Assert success toast (`data-test-id="toast-success"`)
 6. Assert redirect to order detail page
 

@@ -16,7 +16,8 @@ These rules apply to all code under `src/frontend/`. AI agents and humans must f
 | Framework | Vue 3 | Composition API only, `<script setup>` required |
 | State | Pinia | All global/shared state lives in stores |
 | UI Library | Vuetify | The **only** allowed component library |
-| Testing | Jest + Playwright | Unit tests in `tests/frontend/`, E2E in `playwright/` |
+
+**Testing & quality gates:** Follow `.github/instructions/testing.instructions.md`.
 
 ### Forbidden
 
@@ -80,24 +81,6 @@ src/frontend/
 - Prefer Vuetify utility classes and props over custom CSS.
 - No Tailwind, no global utility classes.
 - If custom CSS is needed, keep selectors shallow (max 2 levels).
-
----
-
-## Testing Requirements
-
-### Unit tests (Jest)
-
-- Every new component or store must have a corresponding `.spec.ts` file.
-- Use `@vue/test-utils` for mounting components.
-- Mock Pinia stores with `createTestingPinia`.
-- Avoid snapshot tests for dynamic components.
-
-### E2E tests (Playwright)
-
-- Use `data-test-id` selectors exclusively.
-- Never use CSS class selectors or XPath.
-- Waits must be explicit (`waitForSelector`, `waitForResponse`).
-- Each test should be isolated and idempotent.
 
 ---
 

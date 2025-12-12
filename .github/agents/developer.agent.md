@@ -44,8 +44,8 @@ Ask yourself before writing each line: *"Does this follow the patterns establish
 | Input | Location | Purpose |
 |-------|----------|---------|
 | Build Plan | `rnd/build_plans/<feature-id>-build-plan.md` | Source of truth — follow exactly |
-| Backend Rules | `.github/instructions/backend.instructions.md` | NestJS patterns and conventions |
-| Frontend Rules | `.github/instructions/frontend.instructions.md` | Vue/Vuetify patterns and conventions |
+| Backend Rules | `.github/instructions/backend.instructions.md` | Backend stack and conventions (see instructions file) |
+| Frontend Rules | `.github/instructions/frontend.instructions.md` | Frontend stack and conventions (see instructions file) |
 | Existing Code | `src/backend/`, `src/frontend/` | Context and integration points |
 | Existing Tests | `tests/backend/`, `tests/frontend/` | Test patterns to follow |
 | Golden References | As specified in build plan | Canonical examples to copy |
@@ -65,44 +65,20 @@ Ask yourself before writing each line: *"Does this follow the patterns establish
 
 ## Hard Rules — Violations Will Be Rejected
 
-### Frontend (Vue)
+### Frontend
 
-| Rule | Enforcement | Why |
-|------|-------------|-----|
-| Vue 3 Composition API only | Always use `<script setup lang="ts">`. | Consistency across codebase |
-| Vuetify only | No React, MUI, Bootstrap, Tailwind, or other UI libs. | Single design system |
-| Pinia for state | All shared state in stores. No component-local shared state. | Predictable state management |
-| `data-test-id` required | Every interactive element (button, input, link) must have one. | E2E test reliability |
-| No Options API | Never use `data()`, `methods`, `computed` outside `<script setup>`. | Modern Vue patterns only |
-| Scoped styles only | Use `<style scoped>`. No global CSS leaks. | Component isolation |
-| Explicit types | Define props with `defineProps<T>()`. No implicit any. | Type safety |
-| Centralized API calls | Use Pinia actions or composables. Never inline `fetch`. | Maintainability |
+Follow the frontend-specific instructions in `.github/instructions/frontend.instructions.md` for framework, UI library, state management, and test conventions.
+Keep changes small, component-focused, and rely on the repository's golden references (see `src/frontend/components/example/` and `src/frontend/stores/exampleStore.ts`).
 
-### Backend (NestJS)
+### Backend
 
-| Rule | Enforcement | Why |
-|------|-------------|-----|
-| Module/Service/Controller pattern | Follow `src/backend/modules/example/` structure exactly. | Predictable architecture |
-| `@Injectable()` on all services | Every service class must have this decorator. | NestJS DI requirement |
-| DTOs with class-validator | Every request body must use a validated DTO. | Input validation |
-| Schema ↔ DTO sync | If you add a Mongo field, update both schema and DTO. | Data consistency |
-| No logic in controllers | Controllers call services; all logic lives in services. | Separation of concerns |
-| No raw Mongo queries | Use Mongoose model methods only. | Query safety |
-| No cross-module injection | Unless documented in the build plan with justification. | Module isolation |
-| Explicit error handling | Use NestJS exceptions. Never swallow errors. | Debuggability |
-| Config via ConfigService | No hardcoded values. Use environment variables. | Environment flexibility |
+Follow backend-specific rules in `.github/instructions/backend.instructions.md` (module patterns, DTOs, schema rules, and service/controller hygiene).
+Do not guess; rely on golden references (`src/backend/modules/example/`) and instruction file guidance for framework-specific code patterns.
 
 ### Testing
 
-| Rule | Enforcement | Why |
-|------|-------------|-----|
-| Every new service → unit test | Use `Test.createTestingModule`. | Code coverage |
-| Every new controller → integration test | Test request/response cycle. | API contract verification |
-| Every new component/store → frontend test | Use `@vue/test-utils` + `createTestingPinia`. | UI reliability |
-| Playwright E2E → `data-test-id` only | No CSS class or XPath selectors. | Test stability |
-| Explicit waits | Use `waitForSelector`, `waitForResponse`. | No flaky tests |
-| Test both paths | Success and error cases required. | Full coverage |
-| Deterministic tests | No random data, no timing dependencies. | Reproducibility |
+Follow `.github/instructions/testing.instructions.md` for all testing frameworks, naming conventions, selectors, and required quality gates.
+Use golden references and tests already in the repo as patterns; do not introduce new testing frameworks without updating the testing instructions.
 
 ### General
 
@@ -112,7 +88,7 @@ Ask yourself before writing each line: *"Does this follow the patterns establish
 | No files >400 lines | Split into smaller modules at 300 lines. | Maintainability |
 | No unused imports | Remove before committing. | Clean code |
 | No commented-out code | Delete, don't comment. | Code hygiene |
-| Prettier + ESLint must pass | Run before marking task complete. | Consistency |
+| Lint and format must pass | Follow repository linting and formatting scripts (see `.github/instructions/`) before marking task complete. | Consistency |
 | No `any` types | Explicit types or interfaces required. | Type safety |
 | Async/await over .then | Consistent async patterns. | Readability |
 | Single responsibility | One function = one purpose. | Testability |
@@ -149,143 +125,15 @@ Ask yourself before writing each line: *"Does this follow the patterns establish
 
 ## Code Patterns to Follow
 
-### Backend Service Pattern
+### Golden References
 
-```typescript
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Entity, EntityDocument } from './schemas/entity.schema';
-import { CreateEntityDto } from './dto/create-entity.dto';
+Refer to the repository's golden references for backend and frontend implementation examples. These live under `src/backend/modules/example/` and `src/frontend/components/example/` and are the canonical source for code patterns.
 
-@Injectable()
-export class EntityService {
-  constructor(
-    @InjectModel(Entity.name) private entityModel: Model<EntityDocument>,
-  ) {}
+Refer to DTOs in `src/backend/modules/example/dto/` for canonical examples and validation rules. Use the backend instructions file for precise decorators and validation patterns.
 
-  async create(dto: CreateEntityDto): Promise<Entity> {
-    const entity = new this.entityModel(dto);
-    return entity.save();
-  }
+Frontend component and store patterns live in the frontend golden references; consult `src/frontend/components/example/` and `src/frontend/stores/exampleStore.ts` for examples and patterns.
 
-  async findById(id: string): Promise<Entity> {
-    const entity = await this.entityModel.findById(id).exec();
-    if (!entity) {
-      throw new NotFoundException(`Entity with id ${id} not found`);
-    }
-    return entity;
-  }
-}
-```
-
-### Backend DTO Pattern
-
-```typescript
-import { IsString, IsNotEmpty, IsOptional, IsNumber, Min } from 'class-validator';
-
-export class CreateEntityDto {
-  @IsString()
-  @IsNotEmpty()
-  name: string;
-
-  @IsString()
-  @IsOptional()
-  description?: string;
-
-  @IsNumber()
-  @Min(0)
-  quantity: number;
-}
-```
-
-### Frontend Component Pattern
-
-```vue
-<script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useEntityStore } from '@/stores/entityStore';
-
-interface Props {
-  entityId: string;
-}
-
-const props = defineProps<Props>();
-const emit = defineEmits<{
-  (e: 'updated', id: string): void;
-}>();
-
-const store = useEntityStore();
-const loading = ref(false);
-
-const entity = computed(() => store.getById(props.entityId));
-
-async function handleSubmit() {
-  loading.value = true;
-  try {
-    await store.update(props.entityId);
-    emit('updated', props.entityId);
-  } finally {
-    loading.value = false;
-  }
-}
-</script>
-
-<template>
-  <v-card data-test-id="entity-card">
-    <v-card-title>{{ entity?.name }}</v-card-title>
-    <v-card-actions>
-      <v-btn
-        data-test-id="entity-submit-btn"
-        :loading="loading"
-        @click="handleSubmit"
-      >
-        Save
-      </v-btn>
-    </v-card-actions>
-  </v-card>
-</template>
-
-<style scoped>
-/* Component-specific styles only */
-</style>
-```
-
-### Frontend Store Pattern
-
-```typescript
-import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
-import type { Entity } from '@/types/entity';
-
-export const useEntityStore = defineStore('entity', () => {
-  // State
-  const entities = ref<Entity[]>([]);
-  const loading = ref(false);
-  const error = ref<string | null>(null);
-
-  // Getters
-  const getById = computed(() => (id: string) => 
-    entities.value.find(e => e.id === id)
-  );
-
-  // Actions
-  async function fetchAll() {
-    loading.value = true;
-    error.value = null;
-    try {
-      const response = await fetch('/api/entities');
-      entities.value = await response.json();
-    } catch (e) {
-      error.value = e instanceof Error ? e.message : 'Unknown error';
-    } finally {
-      loading.value = false;
-    }
-  }
-
-  return { entities, loading, error, getById, fetchAll };
-});
-```
+Refer to frontend golden references for example stores and composables.
 
 ---
 
@@ -311,10 +159,10 @@ export const useEntityStore = defineStore('entity', () => {
 
 | Mistake | Correct Approach | Detection |
 |---------|------------------|-----------|
-| Using React patterns (`useState`, JSX) | Use Vue `ref`, `reactive`, `<template>`. | Import from 'react' |
-| Importing MUI or Tailwind | Only import from `vuetify`. | Import statements |
+| Using unauthorized frontend patterns (`useState`, JSX) | Follow `.github/instructions/frontend.instructions.md` for allowed frontend patterns and frameworks. | See frontend instructions |
+| Importing unauthorized UI libraries | Follow `.github/instructions/frontend.instructions.md` for allowed UI libraries. | See frontend instructions |
 | Forgetting `data-test-id` | Add to every interactive element. | Missing in template |
-| Inline fetch in component | Use Pinia action or composable. | `fetch` in `<script setup>` |
+| Inline fetch in component | Follow `.github/instructions/frontend.instructions.md` for data fetching patterns (store or composable). | See frontend instructions |
 | Large monolithic component | Split at 200 lines. | Line count |
 | Options API usage | Always `<script setup>`. | `data()`, `methods` keywords |
 | Direct store mutation | Use store actions only. | `store.state = x` |
@@ -327,15 +175,15 @@ export const useEntityStore = defineStore('entity', () => {
 | Mistake | Correct Approach | Detection |
 |---------|------------------|-----------|
 | Logic in controllers | Move to service. | More than 3 lines in handler |
-| Skipping DTO validation | Add class-validator decorators. | Missing decorators |
-| Raw MongoDB queries | Use Mongoose model methods. | `db.collection()` calls |
-| Missing `@Injectable()` | Every service needs it. | DI errors at runtime |
+| Skipping DTO validation | Follow `.github/instructions/backend.instructions.md` for DTO and validation patterns. | See backend instructions |
+| Raw DB queries | Follow `.github/instructions/backend.instructions.md` for data access patterns and repositories. | See backend instructions |
+| Missing DI registration (service/provider) | Follow `.github/instructions/backend.instructions.md` for DI patterns and service registration. | See backend instructions |
 | Circular module imports | Use `forwardRef` sparingly, prefer refactor. | Build errors |
 | Adding schema fields without DTO | Update both simultaneously. | Field mismatch |
 | Large services (>300 lines) | Split into focused services. | Line count |
 | Hardcoded config | Use `ConfigService`. | String literals |
-| Swallowing errors | Throw NestJS exceptions. | Empty catch blocks |
-| Using `any` type | Define explicit interfaces. | TypeScript warnings |
+| Swallowing errors | Follow `.github/instructions/backend.instructions.md` for error handling and exception patterns. | See backend instructions |
+| Using `any` type | Define explicit interfaces. | Type system / type-checker warnings |
 
 ### Testing Mistakes
 
@@ -365,21 +213,21 @@ Before marking a task complete, verify:
 
 ### For backend code:
 
-- [ ] Service has `@Injectable()`
+- [ ] Service registered per backend DI conventions
 - [ ] Controller only calls service methods
-- [ ] DTOs have all class-validator decorators
+- [ ] DTOs validated per `.github/instructions/backend.instructions.md`
 - [ ] Schema and DTO fields match
-- [ ] Errors throw NestJS exceptions
+- [ ] Errors handled per `.github/instructions/backend.instructions.md`
 - [ ] No hardcoded config values
 
 ### For frontend code:
 
-- [ ] Uses `<script setup lang="ts">`
-- [ ] Uses only Vuetify components
+- [ ] Frontend components follow `.github/instructions/frontend.instructions.md` conventions
+- [ ] Frontend uses allowed UI libraries per `.github/instructions/frontend.instructions.md`
 - [ ] All interactive elements have `data-test-id`
-- [ ] State changes go through Pinia
-- [ ] No inline fetch calls
-- [ ] Uses `<style scoped>`
+- [ ] State changes follow patterns in `.github/instructions/frontend.instructions.md`
+- [ ] No inline fetch calls — use store/composable patterns per frontend instructions
+- [ ] Uses component-scoped styles as per frontend instructions
 
 ### For tests:
 
@@ -401,12 +249,12 @@ Always refer to these as canonical examples:
 | Backend Service | `src/backend/modules/example/example.service.ts` | Service methods, error handling |
 | Backend Controller | `src/backend/modules/example/example.controller.ts` | Route handlers, DTO usage |
 | Backend DTO | `src/backend/modules/example/dto/` | Validation decorators |
-| Backend Schema | `src/backend/modules/example/schemas/` | Mongoose schema definition |
-| Frontend Component | `src/frontend/components/example/` | Vue component structure |
-| Frontend Store | `src/frontend/stores/exampleStore.ts` | Pinia store patterns |
-| Backend Tests | `tests/backend/` | Jest test patterns |
-| Frontend Tests | `tests/frontend/` | Vue test-utils patterns |
-| E2E Tests | `playwright/` (if exists) | Playwright selectors and waits |
+| Backend Schema | `src/backend/modules/example/schemas/` | Data model definition examples (follow backend instructions) |
+| Frontend Component | `src/frontend/components/example/` | Frontend component structure (follow frontend instructions) |
+| Frontend Store | `src/frontend/stores/exampleStore.ts` | Store patterns (follow frontend instructions) |
+| Backend Tests | `tests/backend/` | Backend test patterns (see `.github/instructions/testing.instructions.md`) |
+| Frontend Tests | `tests/frontend/` | Frontend test patterns (see `.github/instructions/testing.instructions.md`) |
+| E2E Tests | `tests/e2e/` (or configured path) | E2E test patterns and selector contracts (see `.github/instructions/testing.instructions.md`) |
 
 **Copy their structure for new features. Do not invent new patterns.**
 

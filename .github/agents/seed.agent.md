@@ -30,37 +30,15 @@ Your primary mission is to:
 
 ---
 
-## 2. Tech Stack Assumptions
+## 2. Stack Assumptions and Reference
 
-When generating or modifying code, assume the following by default unless the repository explicitly says otherwise:
+This seed repo provides golden references and templates for common SaaS patterns. Technology choices (frontend, backend, database, testing tools, and CI) are declared in the instruction files:
 
-### Backend
-- **Framework:** NestJS (TypeScript)
-- **Style:** Modular monolith / services split by domain.
-- **Patterns:** DI, services, controllers, DTOs, repositories.
-- **Testing:** Jest (unit + integration).
-- **Persistence:** MongoDB (via official driver or Mongoose, depending on existing code).
-- **Other:**
-  - Config via `.env` + config module.
-  - Clean separation between transport (HTTP) and domain logic.
+- Backend specifics: `.github/instructions/backend.instructions.md`
+- Frontend specifics: `.github/instructions/frontend.instructions.md`
+- Testing and quality gates: `.github/instructions/testing.instructions.md`
 
-### Frontend
-- **Framework:** Vue 3 (Composition API, TypeScript).
-- **State:** Pinia.
-- **UI Library:** Vuetify.
-- **Routing:** Vue Router.
-- **Testing:** Unit tests (Vitest/Jest) and E2E (Playwright/Puppeteer, as configured).
-
-### Infra & Tooling
-- **Containers:** Docker.
-  - **Separate containers** for frontend and backend.
-  - **MongoDB** in its own container.
-  - `docker-compose` for local orchestration.
-- **CI/CD:** GitHub Actions.
-  - Lint, type-check, test, build, and basic security checks.
-  - Designed to be extended by AI-driven workflows.
-
-If the repo already defines different choices, **follow the repo**, not these defaults.
+Follow the instruction files for exact tooling and frameworks. If the repo already defines different choices in those instructions, follow the repo instead of the seed.
 
 ---
 
@@ -91,7 +69,7 @@ When you write or modify code:
 5. **Opinionated but pragmatic**
    - Enforce consistent patterns, but don’t over-engineer:
      - On backend: service + controller + DTO (+ repository if needed).
-     - On frontend: feature-based directories, composables for reusable logic, Pinia stores for shared state.
+    - On frontend: feature-based directories, composables for reusable logic, a store pattern for shared state.
    - Limit dependencies to **well-known, maintained** libraries.
 
 ---
@@ -101,12 +79,12 @@ When you write or modify code:
 Follow these rules when generating or editing code:
 
 ### General
-- Use **TypeScript everywhere**, with strict typing.
+- Prefer a strongly-typed approach by default — follow `.github/instructions/backend.instructions.md` and `.github/instructions/frontend.instructions.md` for language and typing expectations.
 - Prefer **async/await** over .then chains.
 - Keep functions small and **single-responsibility**.
 - Use **consistent naming**:
   - Backend: `PascalCase` for classes, `camelCase` for functions/variables, `UPPER_SNAKE_CASE` for constants.
-  - Frontend: components `PascalCase.vue`, composables `useSomething.ts`, stores `useSomethingStore.ts`.
+  - Frontend: components named in `PascalCase`, composables named `useSomething`, and stores named `useSomethingStore`.
 - Avoid premature abstraction: **duplicate once, abstract on the third time**.
 
 ### Backend Specific
@@ -123,9 +101,9 @@ Follow these rules when generating or editing code:
 ### Frontend Specific
 - Components:
   - Keep presentational and container logic separated.
-  - Use Vuetify components idiomatically, respecting existing design tokens/theme.
+  - Follow `.github/instructions/frontend.instructions.md` for UI component library conventions and design tokens.
 - State management:
-  - Keep global/stateful logic in Pinia; avoid prop drilling when shared.
+  - Follow `.github/instructions/frontend.instructions.md` for state management conventions and store patterns.
 - API calls:
   - Centralize in a client layer (e.g. `/src/api` or composables), not scattered across components.
 
@@ -136,7 +114,7 @@ Follow these rules when generating or editing code:
 Whenever you add or change behavior:
 
 - **Add or update tests**:
-  - Backend: Jest unit tests for services and controllers where logic exists.
+  - Backend: unit/integration tests are required as specified by `.github/instructions/testing.instructions.md`.
   - Frontend: unit tests for composables/stores; component tests for critical flows.
   - E2E: update or add tests for critical user journeys when endpoints or UX change.
 - Ensure:
@@ -144,8 +122,8 @@ Whenever you add or change behavior:
   - New test cases clearly express the scenario and expected outcome.
 
 Linting & Format:
-- Respect existing ESLint/TSLint and Prettier rules.
-- Do not introduce new linting/config tools unless clearly required and consistent with the rest of the repo.
+- Respect existing linting and formatting rules defined in the repository and follow the instruction files for tooling and scripts.
+- Do not introduce new linting/config tools unless clearly required and consistent with the rest of the repo; update instruction files accordingly.
 
 ---
 
@@ -177,7 +155,7 @@ When acting in this repo, you should:
 
 - **Scaffolding a new feature:**
   - Backend: create module + service + controller + DTOs + tests, wired to existing patterns.
-  - Frontend: create feature directory, Vue components, Pinia store/composables, routes, and basic tests.
+  - Frontend: create feature directory, frontend components, stores/composables, routes, and basic tests per `.github/instructions/frontend.instructions.md`.
   - Add basic documentation (e.g. in a feature README or docstring).
 
 - **Adding a new API endpoint:**

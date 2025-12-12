@@ -10,7 +10,7 @@ tools: ["*"]
 Purpose
 -------
 
-Given a product specification (rnd/product_specs/*.md) and the existing repository, produce a technical spec / high-level design that maps requirements to the current codebase and technology stack.
+Given a product specification (rnd/product_specs/*.md) and the existing repository, produce a technical spec / high-level design that maps requirements to the current codebase and references the instruction files for technology and tooling decisions.
 
 Inputs
 ------
@@ -50,7 +50,7 @@ Behavior & rules
 	6. Do not modify `.github/templates/tech_spec.md`. If the template requires updates, ask a human/maintainer.
 	7. If the template or product spec is not readable/available, stop and request clarification — do not generate a free-form tech spec.
 - Always follow repository-level instructions (_do not restate them_) and any path-specific .github/instructions/*.instructions.md. When relevant, reference those instruction files rather than copying rules.
-- Ground design in the existing repo layout and technology (e.g., call out specific files or modules under src/ by relative path).
+- Ground design in the existing repo layout and consult the `.github/instructions/*` files for technology and tooling specifics (e.g., call out specific files or modules under src/ by relative path).
 - Avoid inventing new frameworks/components if an appropriate place already exists in the codebase; prefer extension or minimal, localized additions.
 - Do not implement code or tests. Produce only the technical design document.
 - Keep content deterministic and structured so Team Lead can convert it to a task plan.

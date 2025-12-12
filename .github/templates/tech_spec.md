@@ -76,7 +76,7 @@ List modules to create or modify, with their responsibilities.
 
 Define new or modified data structures.
 
-```typescript
+```
 // Example schema/interface
 interface ExampleEntity {
   id: string;
@@ -92,14 +92,14 @@ interface ExampleEntity {
 
 | Component | Path | Purpose |
 |-----------|------|---------|
-| `FeaturePage.vue` | `src/frontend/features/<feature>/` | Main feature view |
-| `FeatureList.vue` | `src/frontend/features/<feature>/components/` | List display |
+| `FeaturePage` (component) | `src/frontend/features/<feature>/` | Main feature view |
+| `FeatureList` (component) | `src/frontend/features/<feature>/components/` | List display |
 
 #### 3.3.2 State Management
 
-Describe Pinia store changes or new stores.
+Describe store changes or new stores (follow `.github/instructions/frontend.instructions.md`).
 
-- **Store:** `use<Feature>Store.ts`
+- **Store:** `use<Feature>Store` (file path: `src/frontend/stores/use<Feature>Store`)
   - State: `items`, `loading`, `error`
   - Actions: `fetchItems()`, `createItem()`
 

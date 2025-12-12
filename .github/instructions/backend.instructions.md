@@ -16,7 +16,8 @@ These rules apply to all code under `src/backend/`. AI agents and humans must fo
 | Framework | NestJS | Module/Service/Controller pattern |
 | Validation | class-validator + class-transformer | All DTOs validated |
 | Database | MongoDB via Mongoose | Strict schemas, no ad-hoc fields |
-| Testing | Jest | `Test.createTestingModule` required |
+
+**Testing & quality gates:** Follow `.github/instructions/testing.instructions.md`.
 
 ### Forbidden
 
@@ -111,24 +112,6 @@ src/backend/
 4. Index frequently queried fields: `@Prop({ index: true })`.
 5. No `Mixed` or `any` types — always explicit.
 6. Keep schema and DTO in sync; they must evolve together.
-
----
-
-## Testing Requirements
-
-### Unit / Integration tests (Jest)
-
-- Every module, service, and controller must have a `.spec.ts` file.
-- Use `Test.createTestingModule` from `@nestjs/testing`.
-- Mock external dependencies (other services, Mongoose models).
-- Test both success and error paths.
-- Use factories or fixtures for test data.
-
-### Test file naming
-
-- `<module-name>.module.spec.ts`
-- `<module-name>.service.spec.ts`
-- `<module-name>.controller.spec.ts`
 
 ---
 
