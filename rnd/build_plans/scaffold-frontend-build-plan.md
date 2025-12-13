@@ -1,7 +1,7 @@
 # Build Plan: scaffold-frontend
 
 > **Source:** Internal scaffold requirements  
-> **Created:** 2025-12-12  
+> **Created:** 2025-12-13  
 > **Status:** Draft | In Progress | Complete
 
 ---
@@ -10,52 +10,53 @@
 
 Complete these items **before** starting any implementation tasks.
 
-- [ ] Read `.github/instructions/frontend.instructions.md`
-- [ ] Read `.github/instructions/testing.instructions.md`
-- [ ] Identify golden reference components/stores:
-  - Frontend components: `src/frontend/components/example/`
-  - Frontend store: `src/frontend/stores/exampleStore.ts`
-- [ ] Confirm no new dependencies needed (or justify additions below)
-- [ ] List integration points with existing modules (see Section 1)
-- [ ] Review tech spec for any open questions
+- [x] Read `.github/instructions/frontend.instructions.md`
+- [x] Read `.github/instructions/testing.instructions.md`
+- [x] Identify golden reference components/services:
+  - Frontend components: `src/frontend/app/components/example/`
+  - Frontend service: `src/frontend/app/services/example-state.service.ts`
+- [x] Confirm no new dependencies needed (or justify additions below)
+- [x] List integration points with existing modules (see Section 1)
+- [x] Review tech spec for any open questions
 
 ### New Dependencies (if any)
 
 | Package | Purpose | Justification |
 |---------|---------|---------------|
-| vue | Framework | Core Vue 3 framework |
-| pinia | State management | For global state as per instructions |
-| vuetify | UI library | Only allowed UI library per instructions |
-| @mdi/font | Icons | Required by Vuetify for Material Design Icons |
-| vue-router | Routing | For SPA navigation |
+| @angular/core | Framework | Core Angular framework |
+| @angular/common | Common directives | For CommonModule (*ngIf, *ngFor, etc.) |
+| @angular/platform-browser | Browser platform | For browser rendering |
+| @angular/platform-browser-dynamic | Dynamic bootstrap | For JIT compilation |
+| @angular/router | Routing | For SPA navigation |
+| @angular/cli | CLI tooling | For scaffolding and builds |
+| primeng | UI library | Only allowed UI library per instructions |
+| primeicons | Icons | Required by PrimeNG for icons |
+| rxjs | Reactive programming | For state management and async operations |
 | typescript | Language | For type safety |
-| @vue/tsconfig | TS config | Standard Vue TS config |
-| vite | Build tool | Fast dev server and build |
-| @vitejs/plugin-vue | Vite plugin | For Vue SFC support |
-| @types/node | Node types | For dev tooling |
-| jest | Test runner | Per testing instructions |
-| @vue/test-utils | Vue testing | Per testing instructions |
-| jest-environment-jsdom | Test env | For DOM testing |
-| @types/jest | Jest types | For TS support |
-| ts-node | Dev tooling | Allows Jest to load the TypeScript `jest.config.ts` |
-| @vue/compiler-dom | Compiler | Required by the Vue test-utils bundle used in Jest |
-| @vue/server-renderer | SSR runtime | Required by the Vue test-utils bundle used in Jest |
+| @angular-devkit/build-angular | Build tools | Angular build system |
+| jasmine-core | Test framework | Per testing instructions (default Angular testing) |
+| karma | Test runner | Per testing instructions (default Angular testing) |
+| karma-jasmine | Test adapter | Jasmine adapter for Karma |
+| karma-chrome-launcher | Test browser | Chrome launcher for Karma |
+| karma-coverage | Test coverage | Coverage reporting |
+| @types/jasmine | Jasmine types | For TS support in tests |
 
 ---
 
 ## 1. Implementation Overview
 
-**Approach:** Bootstrap a Vue 3 + Pinia + Vuetify frontend with a Home view that fetches a greeting from the backend and displays it via a store-driven component.
+**Approach:** Bootstrap an Angular 20 standalone application with RxJS state management and PrimeNG UI that fetches a greeting from the backend and displays it via a service-driven component.
 
 **Key Decisions:**
-- Use Pinia store actions for all API calls; no inline fetches in components.
-- Use Vuetify components for layout and UI (no raw HTML for interactive elements).
+- Use standalone components (no NgModules).
+- Use RxJS BehaviorSubjects for state management; no third-party state libraries.
+- Use PrimeNG components for layout and UI (no raw HTML for interactive elements).
 - Provide `data-test-id` on all interactive elements for E2E/component testing.
 
 **Integration Points:**
 | Existing Module | Integration Type | Notes |
 |-----------------|------------------|-------|
-| Backend `/api/greetings` | HTTP fetch via store | Returns greeting + fact |
+| Backend `/api/greetings` | HTTP fetch via service | Returns greeting + fact |
 
 ---
 
@@ -63,198 +64,243 @@ Complete these items **before** starting any implementation tasks.
 
 ### Phase 1: App Shell
 
-#### Task 0: Set up package.json and dependencies
+#### Task 0: Set up Angular project and dependencies
 
-- [ ] **Create package.json and install deps**
-- **File(s):** `src/frontend/package.json`
+- [x] **Create Angular project and install deps**
+- **File(s):** `src/frontend/`
 - **Action:** create
 - **Dependencies:** None
 - **Details:**
-  - **Prefer CLI**: Use `npm init -y` or `npm create vite@latest` to scaffold initial project, then use `npm install <package>` for each dependency instead of manually editing the file.
+  - **Prefer CLI**: Use `ng new frontend --routing --style=scss --standalone` to scaffold initial project, then use `npm install <package>` for each additional dependency.
   - Required packages (install via CLI):
-    - `npm install vue pinia vuetify @mdi/font vue-router`
-    - `npm install -D typescript @vue/tsconfig vite @vitejs/plugin-vue @types/node jest @vue/test-utils jest-environment-jsdom @types/jest`
-  - Update scripts in `package.json`:
-    - `dev`: `vite`
-    - `build`: `vite build`
-    - `test`: `jest`
-  - **Why CLI**: Ensures lockfile sync, correct version resolution, and follows framework best practices.
+    - `npm install primeng primeicons`
+  - Update `angular.json`:
+    - Add PrimeNG styles to `styles` array: `"node_modules/primeng/resources/themes/lara-light-blue/theme.css"`, `"node_modules/primeng/resources/primeng.min.css"`, `"node_modules/primeicons/primeicons.css"`
+  - **Why CLI**: Ensures correct Angular workspace structure, lockfile sync, and follows framework best practices.
 - **Acceptance Criteria:**
-  - package.json exists with all required deps; node_modules installed.
-  - Scripts are correctly defined.
+  - Angular project structure exists with all required deps; node_modules installed.
+  - `angular.json` configured with PrimeNG styles.
   - `package-lock.json` is generated and in sync.
 - **Effort:** small
 
 #### Task 0.5: Create .gitignore
 
-- [ ] **Add .gitignore for frontend**
+- [x] **Verify .gitignore for frontend**
 - **File(s):** `src/frontend/.gitignore`
-- **Action:** create
-- **Dependencies:** None
+- **Action:** verify/create
+- **Dependencies:** Task 0
 - **Details:**
-  - Ignore `node_modules/`, `dist/`, `*.log`, `.env*`, `coverage/`, `npm-debug.log*`, `.DS_Store`, etc.
+  - Angular CLI should create this automatically. Verify it ignores `node_modules/`, `dist/`, `*.log`, `.angular/`, `coverage/`, etc.
 - **Acceptance Criteria:**
-  - .gitignore exists and ignores common Node.js and build artifacts.
+  - .gitignore exists and ignores common Node.js and Angular build artifacts.
 - **Effort:** small
 
 #### Task 1: Initialize main.ts
 
-- [ ] **Create frontend bootstrap file**
-- **File(s):** `src/frontend/main.ts`
-- **Action:** create
+- [x] **Verify frontend bootstrap file**
+- **File(s):** `src/frontend/src/main.ts`
+- **Action:** verify/modify
 - **Dependencies:** Task 0
 - **Details:**
-  - Create Vue app, install Pinia, Vuetify, and Router.
-  - Mount to `#app`.
+  - Angular CLI creates this automatically with `bootstrapApplication(AppComponent, appConfig)`.
+  - Verify it uses standalone bootstrap pattern.
 - **Acceptance Criteria:**
   - App boots without console errors.
 - **Effort:** small
 
-#### Task 2: Create App.vue
+#### Task 2: Create AppComponent
 
-- [ ] **Root layout**
-- **File(s):** `src/frontend/App.vue`
-- **Action:** create
+- [x] **Root layout**
+- **File(s):** `src/frontend/src/app/app.component.ts`
+- **Action:** verify/modify
 - **Dependencies:** Task 1
 - **Details:**
-  - Use `<script setup lang="ts">`.
-  - Wrap content with Vuetify `v-app` / `v-main`.
-  - Include `<RouterView />`.
+  - Angular CLI creates this automatically as standalone component.
+  - Modify template to use PrimeNG layout components (if needed).
+  - Include `<router-outlet></router-outlet>`.
 - **Acceptance Criteria:**
-  - Uses Vuetify structure; no inline fetch.
+  - Uses PrimeNG structure; no inline HTTP.
+  - Component is standalone with proper imports.
 - **Effort:** small
 
 #### Task 2.5: Validate build and scripts
 
-- [ ] **Ensure npm scripts work**
+- [x] **Ensure npm scripts work**
 - **File(s):** N/A
 - **Action:** run commands
 - **Dependencies:** Task 0, Task 1, Task 2
 - **Details:**
-  - Run `npm run build` to ensure Vite build succeeds.
+  - Run `npm run build` to ensure Angular build succeeds.
   - Run `npm run test` to ensure all tests pass.
-  - Run `npm run dev` briefly (e.g., timeout after 5 seconds) to ensure the dev server starts without errors.
+  - Run `npm start` briefly (e.g., timeout after 5 seconds) to ensure the dev server starts without errors.
 - **Acceptance Criteria:**
   - `npm run build` completes without errors.
   - `npm run test` passes all tests.
-  - `npm run dev` starts the dev server without errors.
+  - `npm start` starts the dev server without errors.
 - **Effort:** small
 
 ### Phase 2: State & API
 
-#### Task 3: Create Greeting Store
+#### Task 3: Create Greeting Service
 
-- [ ] **Pinia store for greetings**
-- **File(s):** `src/frontend/stores/useGreetingStore.ts`
+- [x] **Injectable service for greetings**
+- **File(s):** `src/frontend/src/app/services/greeting.service.ts`
 - **Action:** create
 - **Dependencies:** Task 2
-- **Golden Reference:** `src/frontend/stores/exampleStore.ts`
+- **Golden Reference:** `src/frontend/app/services/example-state.service.ts`
 - **Details:**
-  - `defineStore` with setup syntax.
-  - State: `greeting` (string | null), `fact` (object | null), `loading` (boolean), `error` (string | null).
-  - Action: `async fetchGreeting()` → GET `/api/greetings`, set `greeting` and `fact`, manage loading/error.
+  - Generate with CLI: `ng generate service app/services/greeting`
+  - `@Injectable({ providedIn: 'root' })`.
+  - State (private BehaviorSubjects):
+    - `greetingSubject: BehaviorSubject<string | null>`
+    - `factSubject: BehaviorSubject<Fact | null>`
+    - `loadingSubject: BehaviorSubject<boolean>`
+    - `errorSubject: BehaviorSubject<string | null>`
+  - Public observables (read-only):
+    - `greeting$: Observable<string | null>`
+    - `fact$: Observable<Fact | null>`
+    - `loading$: Observable<boolean>`
+    - `error$: Observable<string | null>`
+  - Method: `fetchGreeting(): void` → GET `/api/greetings`, update subjects, manage loading/error.
   - **API base URL resolution** (runtime-configurable pattern):
-    - Read runtime-injected global: `(globalThis as any).__VITE_API_BASE_URL__`
-    - Fallback to build-time env: `import.meta.env.VITE_API_BASE_URL` (if using Vite)
+    - Read runtime-injected global: `(globalThis as any).__API_BASE_URL__`
     - Default fallback: `'/api'` (relative path for proxy/same-origin)
     - Treat empty strings as undefined: use `|| undefined` to ensure fallback chain works
-    - Example: `const apiBase = ((globalThis as any).__VITE_API_BASE_URL__) || import.meta.env.VITE_API_BASE_URL || '/api';`
-  - Use global `fetch`; no new deps; handle non-200 with thrown error.
+    - Example: `const apiBase = ((globalThis as any).__API_BASE_URL__) || '/api';`
+  - Use Angular `HttpClient`; inject in constructor.
+  - Use RxJS operators: `map`, `catchError`, `tap`, `finalize`.
   - Validate response content-type is JSON before parsing to avoid silent HTML responses.
 - **Acceptance Criteria:**
-  - Store compiles; no `any` types.
-  - All async logic in actions; components use store getters/state only.
+  - Service compiles; no `any` types.
+  - All HTTP logic in service; components use observables only.
   - API base URL supports runtime configuration without rebuild.
+  - BehaviorSubjects are private; only observables exposed publicly.
 - **Effort:** medium
+
+#### Task 4: Configure HTTP Client
+
+- [x] **Provide HttpClient**
+- **File(s):** `src/frontend/src/app/app.config.ts`
+- **Action:** create/modify
+- **Dependencies:** Task 3
+- **Details:**
+  - Angular CLI should create `app.config.ts` with providers.
+  - Add `provideHttpClient()` to providers array.
+  - Import from `@angular/common/http`.
+- **Acceptance Criteria:**
+  - HttpClient is available for injection in services.
+- **Effort:** small
 
 ### Phase 3: UI Components & View
 
 #### Task 5: Create GreetingCard component
 
-- [ ] **Present greeting + fact**
-- **File(s):** `src/frontend/components/GreetingCard.vue`
+- [x] **Present greeting + fact**
+- **File(s):** `src/frontend/src/app/components/greeting-card/greeting-card.component.ts`
 - **Action:** create
 - **Dependencies:** Task 3
-- **Golden Reference:** `src/frontend/components/example/`
+- **Golden Reference:** `src/frontend/app/components/example/`
 - **Details:**
-  - `<script setup lang="ts">` with props: `greeting: string`, `fact: { text: string; language: string; source: string; permalink: string } | null`, `loading: boolean`, `error: string | null`.
-  - Use Vuetify (`v-card`, `v-card-title`, `v-card-text`, `v-alert`, `v-progress-linear`).
+  - Generate with CLI: `ng generate component app/components/greeting-card --standalone`
+  - Inputs:
+    - `@Input() greeting: string | null = null;`
+    - `@Input() fact: Fact | null = null;`
+    - `@Input() loading: boolean = false;`
+    - `@Input() error: string | null = null;`
+  - Use PrimeNG (`p-card`, `p-message`, `p-progressBar`).
   - Show loading state, error state, greeting text, fact text/permalink when present.
   - Add `data-test-id` on card (`greeting-card`), loading (`greeting-loading`), error (`greeting-error`), greeting text (`greeting-text`), fact text (`greeting-fact-text`), fact link (`greeting-fact-link`).
+  - Import required PrimeNG modules in `imports: []` array.
 - **Acceptance Criteria:**
   - Component is presentational; no data fetching.
   - All interactive elements have `data-test-id`.
+  - Component is standalone with all dependencies imported.
 - **Effort:** medium
 
-#### Task 6: Create HomeView
+#### Task 6: Create HomePage component
 
-- [ ] **Route-level view**
-- **File(s):** `src/frontend/views/HomeView.vue`
+- [x] **Route-level page component**
+- **File(s):** `src/frontend/src/app/pages/home/home.component.ts`
 - **Action:** create
 - **Dependencies:** Task 4, Task 5
 - **Details:**
-  - `<script setup lang="ts">`, import `useGreetingStore`, `GreetingCard`.
-  - On `onMounted`, call `store.fetchGreeting()` once.
-  - Add a refresh button (`v-btn`) to re-fetch; `data-test-id="refresh-greeting-btn"`.
-  - Layout with Vuetify container (`v-container`, `v-row`, `v-col`).
+  - Generate with CLI: `ng generate component app/pages/home --standalone`
+  - Inject `GreetingService` in constructor.
+  - In `ngOnInit`, call `greetingService.fetchGreeting()` once.
+  - Use `async` pipe to subscribe to service observables in template.
+  - Add a refresh button (`p-button`) to re-fetch; `data-test-id="refresh-greeting-btn"`.
+  - Pass observable values to `<app-greeting-card>` component.
+  - Use PrimeNG layout components for container structure.
+  - Import GreetingCardComponent and PrimeNG modules in `imports: []`.
 - **Acceptance Criteria:**
-  - Uses store for data; no inline fetch.
-  - All interactive elements include `data-test-id` (container `home-view`, refresh button, links passed through component props).
+  - Uses service for data; no inline HTTP.
+  - All interactive elements include `data-test-id` (container `data-test-id="home-page"`, refresh button).
+  - Uses `async` pipe for subscriptions (no manual subscribe/unsubscribe).
 - **Effort:** medium
 
 #### Task 7: Update Router
 
-- [ ] **Register home route**
-- **File(s):** `src/frontend/router/index.ts`
+- [x] **Register home route**
+- **File(s):** `src/frontend/src/app/app.routes.ts`
 - **Action:** create/modify
 - **Dependencies:** Task 6
 - **Details:**
-  - Add route `/` → `HomeView` (lazy-load if pattern exists).
+  - Angular CLI creates `app.routes.ts` for standalone routing.
+  - Add route `{ path: '', component: HomeComponent }` (lazy-load if pattern exists).
+  - Import HomeComponent.
 - **Acceptance Criteria:**
-  - Route resolves to HomeView; router compiles.
+  - Route resolves to HomeComponent; router compiles.
 - **Effort:** small
 
 ### Phase 4: Tests
 
-#### Task 8: Store Tests
+#### Task 8: Service Tests
 
-- [ ] **Pinia store unit tests**
-- **File(s):** `tests/frontend/stores/useGreetingStore.spec.ts`
-- **Action:** create
+- [x] **Greeting service unit tests**
+- **File(s):** `src/frontend/src/app/services/greeting.service.spec.ts`
+- **Action:** modify
 - **Dependencies:** Task 4
 - **Details:**
-  - Use testing instructions: Jest + `createTestingPinia` patterns.
-  - Mock `fetch` response for `/api/greetings` success and failure.
-  - Assert loading/error/greeting/fact state transitions.
+  - Angular CLI creates `.spec.ts` file automatically with component/service generation.
+  - Use testing instructions: Jasmine + Angular TestBed patterns.
+  - Mock `HttpClient` with `HttpClientTestingModule`.
+  - Assert loading/error/greeting/fact state transitions via observables.
+  - Test success and error HTTP responses.
 - **Acceptance Criteria:**
   - Covers success and error paths; no real network calls.
+  - Uses RxJS testing patterns (subscribe to observables, assert emissions).
 - **Effort:** medium
 
 #### Task 9: Component Tests
 
-- [ ] **GreetingCard component tests**
-- **File(s):** `tests/frontend/components/GreetingCard.spec.ts`
-- **Action:** create
+- [x] **GreetingCard component tests**
+- **File(s):** `src/frontend/src/app/components/greeting-card/greeting-card.component.spec.ts`
+- **Action:** modify
 - **Dependencies:** Task 5
 - **Details:**
-  - Mount with `@vue/test-utils` + Vuetify plugin.
+  - Angular CLI creates this automatically.
+  - Use TestBed to configure testing module with PrimeNG imports.
+  - Create component fixture with different input combinations.
   - Assert rendering for loading, error, and populated states; check `data-test-id` selectors.
 - **Acceptance Criteria:**
   - Tests verify conditional rendering.
+  - Uses Angular testing utilities (ComponentFixture, DebugElement).
 - **Effort:** small
 
-#### Task 10: View Tests
+#### Task 10: Page Tests
 
-- [ ] **HomeView tests**
-- **File(s):** `tests/frontend/views/HomeView.spec.ts`
-- **Action:** create
+- [x] **HomePage tests**
+- **File(s):** `src/frontend/src/app/pages/home/home.component.spec.ts`
+- **Action:** modify
 - **Dependencies:** Task 6
 - **Details:**
-  - Use `createTestingPinia` to mock store actions.
-  - Assert that `fetchGreeting` called on mount and when refresh button clicked.
-  - Verify `GreetingCard` receives store-provided props.
+  - Angular CLI creates this automatically.
+  - Use TestBed to provide mock GreetingService.
+  - Assert that `fetchGreeting` called on init and when refresh button clicked.
+  - Verify `GreetingCardComponent` receives service-provided values via async pipe.
 - **Acceptance Criteria:**
   - Interaction paths covered; no real network calls.
+  - Uses Jasmine spies to verify service method calls.
 - **Effort:** medium
 
 ---
@@ -264,16 +310,17 @@ Complete these items **before** starting any implementation tasks.
 | File Path | Action | Rationale | Golden Reference |
 |-----------|--------|-----------|------------------|
 | `src/frontend/package.json` | create | Project config and deps | — |
-| `src/frontend/.gitignore` | create | Ignore build artifacts | — |
-| `src/frontend/main.ts` | create | App bootstrap | — |
-| `src/frontend/App.vue` | create | Root layout | — |
-| `src/frontend/stores/useGreetingStore.ts` | create | Store for greetings | `stores/exampleStore.ts` |
-| `src/frontend/components/GreetingCard.vue` | create | Present greeting + fact | `components/example/` |
-| `src/frontend/views/HomeView.vue` | create | Home route view | `components/example/` patterns |
-| `src/frontend/router/index.ts` | create/modify | Register home route | — |
-| `tests/frontend/stores/useGreetingStore.spec.ts` | create | Store tests | Existing frontend tests |
-| `tests/frontend/components/GreetingCard.spec.ts` | create | Component tests | Existing frontend tests |
-| `tests/frontend/views/HomeView.spec.ts` | create | View tests | Existing frontend tests |
+| `src/frontend/.gitignore` | verify | Ignore build artifacts | — |
+| `src/frontend/src/main.ts` | verify | App bootstrap | — |
+| `src/frontend/src/app/app.component.ts` | verify/modify | Root layout | — |
+| `src/frontend/src/app/app.config.ts` | create/modify | Provide HttpClient | — |
+| `src/frontend/src/app/services/greeting.service.ts` | create | Service for greetings | `services/example-state.service.ts` |
+| `src/frontend/src/app/components/greeting-card/` | create | Present greeting + fact | `components/example/` |
+| `src/frontend/src/app/pages/home/` | create | Home route page | `components/example/` patterns |
+| `src/frontend/src/app/app.routes.ts` | create/modify | Register home route | — |
+| `src/frontend/src/app/services/greeting.service.spec.ts` | modify | Service tests | Existing tests |
+| `src/frontend/src/app/components/greeting-card/*.spec.ts` | modify | Component tests | Existing tests |
+| `src/frontend/src/app/pages/home/*.spec.ts` | modify | Page tests | Existing tests |
 
 ---
 
@@ -299,9 +346,9 @@ Complete these items **before** starting any implementation tasks.
 
 | Test File | What to Test | Mocks Needed | Coverage Target |
 |-----------|--------------|--------------|-----------------|
-| `useGreetingStore.spec.ts` | fetch success/error state transitions | `fetch` mock | Success + error |
-| `GreetingCard.spec.ts` | Render states (loading/error/data) | None (props-driven) | Render branches |
-| `HomeView.spec.ts` | Calls `fetchGreeting` on mount and refresh | Pinia action mock | Interaction |
+| `greeting.service.spec.ts` | fetch success/error state transitions | HttpClientTestingModule | Success + error |
+| `greeting-card.component.spec.ts` | Render states (loading/error/data) | None (inputs-driven) | Render branches |
+| `home.component.spec.ts` | Calls `fetchGreeting` on init and refresh | Mock GreetingService | Interaction |
 
 ---
 
@@ -315,7 +362,7 @@ None.
 
 | Variable | Required | Default | Purpose |
 |----------|----------|---------|---------|
-| `VITE_API_BASE_URL` | No | `/api` | Base URL for API calls (prefix fetches) |
+| `API_BASE_URL` | No | `/api` | Base URL for API calls (prefix fetches) |
 
 ### Migration Plan
 
@@ -325,8 +372,8 @@ None (frontend only).
 
 ## 7. AI-Agent Guardrails
 
-- Follow `.github/instructions/frontend.instructions.md` (Vue 3, Composition API, Pinia, Vuetify, data-test-id on interactive elements).
-- Follow `.github/instructions/testing.instructions.md` (Jest, `@vue/test-utils`, `createTestingPinia`).
+- Follow `.github/instructions/frontend.instructions.md` (Angular 20, standalone components, RxJS, PrimeNG, data-test-id on interactive elements).
+- Follow `.github/instructions/testing.instructions.md` (Jasmine, Karma, TestBed, HttpClientTestingModule).
 - No new dependencies unless justified above.
 - No `any` types, no commented-out code, files < 400 LOC.
 
@@ -334,13 +381,13 @@ None (frontend only).
 
 ## 8. Definition of Done
 
-- [ ] All tasks in Section 2 marked complete
-- [ ] `npm run build` completes without errors
-- [ ] `npm run dev` starts dev server without errors
-- [ ] `npm run test` passes all tests
-- [ ] App boots and renders Home view
-- [ ] Home view fetches greeting via store and displays greeting + fact
-- [ ] No `any` types or unused code
+- [x] All tasks in Section 2 marked complete
+- [x] `npm run build` completes without errors
+- [x] `npm start` starts dev server without errors
+- [x] `npm run test` passes all tests
+- [x] App boots and renders Home page
+- [x] Home page fetches greeting via service and displays greeting + fact
+- [x] No `any` types or unused code
 
 ---
 
@@ -353,19 +400,21 @@ This scaffold build plan guides the developer agent to bootstrap the frontend. E
 ## Implementation Notes (Added by Developer)
 
 ### Pre-Implementation Clarification
-The golden reference paths `src/frontend/components/example/` and `src/frontend/stores/exampleStore.ts` referenced in Section 0 and Section 3 do not exist in the current repository; frontend patterns will follow the instructions in `.github/instructions/*` instead.
+The golden reference paths `src/frontend/app/components/example/` and `src/frontend/app/services/example-state.service.ts` referenced in Section 0 and Section 3 do not exist in the current repository; frontend patterns will follow the instructions in `.github/instructions/*` instead.
 
 ### Tech Spec Clarification
 The `rnd/tech_specs/` directory does not contain a spec for this feature, so there was nothing to review before implementation.
 
-
 ### Testing Dependency Clarification
-`ts-jest`, `@vue/vue3-jest`, `identity-obj-proxy`, `@pinia/testing`, and `@vue/compiler-sfc` were added to the frontend package to enable Jest-powered TS + Vue SFC testing, mock-based Vuetify usage, and the Vite compiler support that the build plan’s base stack requires.
+All testing dependencies (Jasmine, Karma, etc.) are included by default with Angular CLI project generation.
 
-### Jest/Test Setup Notes
-Jest now loads the `tests/` folder via `<rootDir>/../../tests`, points `moduleDirectories` at `./node_modules`, and overrides `tsconfig.jest.json` to search both `node_modules` and `../src/frontend/node_modules` so tests can resolve runtime deps without a root-level install. Vuetify imports are mapped to lightweight mocks in `tests/__mocks__`, and `shims-vue.d.ts` declares the stubbed `vuetify` modules so TypeScript stays happy while the real frontend still uses the actual components.
+### Angular CLI Notes
+Angular CLI handles most of the initial setup automatically. The build plan assumes you'll use `ng new` to create the project structure and `ng generate` for components/services, which automatically creates `.spec.ts` files and configures the standalone pattern.
 
 ### Dependency & Runtime Notes
-- Added `ts-node` so Jest can load the TypeScript `jest.config.ts`.
-- Added `@vue/compiler-dom` and `@vue/server-renderer` because the mocked `@vue/test-utils` build exposes `Vue` via those globals inside `tests/setupTests.ts`.
-- `tests/setupTests.ts` now wires the `Vue`, compiler, and the `__VITE_API_BASE_URL__` / `__VITE_BASE_URL__` tokens that `vite.config.ts` exposes through `define`, which lets the store/router avoid direct `import.meta` usage while still honoring the Vite env variables.
+- PrimeNG styles must be added to `angular.json` in the `styles` array for global theme/component styles.
+- HttpClient is provided via `app.config.ts` using `provideHttpClient()` for standalone applications.
+- The `__API_BASE_URL__` runtime global can be injected by a custom server similar to the Vue pattern, allowing environment configuration without rebuilds.
+
+### PrimeNG Asset Clarification
+PrimeNG 21 no longer exposes the legacy `resources` directory via its `exports` map, so the theme, PrimeIcons CSS, and associated fonts/images were downloaded from the CDN (v17.1 assets) into `src/styles/` and referenced locally to keep the build deterministic. This avoids relying on unreachable paths when `angular.json` injects the styles.

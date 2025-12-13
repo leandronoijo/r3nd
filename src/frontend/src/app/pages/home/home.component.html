@@ -1,0 +1,21 @@
+<section class="home-page" data-test-id="home-page">
+  <div class="home-card">
+    <header class="home-header">
+      <h1 data-test-id="home-heading">Daily Greeting</h1>
+      <button
+        pButton
+        type="button"
+        label="Refresh"
+        (click)="refreshGreeting()"
+        data-test-id="refresh-greeting-btn"
+      ></button>
+    </header>
+
+    <app-greeting-card
+      [greeting]="greeting$ | async"
+      [fact]="fact$ | async"
+      [loading]="(loading$ | async) ?? false"
+      [error]="error$ | async"
+    ></app-greeting-card>
+  </div>
+</section>

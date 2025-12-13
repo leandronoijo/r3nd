@@ -1,0 +1,34 @@
+<p-card header="Daily Greeting" data-test-id="greeting-card">
+  <div *ngIf="loading" class="loading" data-test-id="greeting-loading">
+    <p-progressBar mode="indeterminate"></p-progressBar>
+  </div>
+
+  <div *ngIf="!loading && error" data-test-id="greeting-error">
+    <p-message severity="error" [text]="error"></p-message>
+  </div>
+
+  <div *ngIf="!loading && !error" class="content">
+    <p class="greeting-text" data-test-id="greeting-text">
+      {{ greeting || fallbackMessage }}
+    </p>
+    <div *ngIf="fact" class="fact-section">
+      <p class="fact-text" data-test-id="greeting-fact-text">
+        {{ fact.text }}
+      </p>
+      <span class="fact-meta">
+        {{ fact.language }} · {{ fact.source }}
+      </span>
+      <a
+        pButton
+        type="button"
+        class="fact-link"
+        [href]="fact.permalink"
+        target="_blank"
+        rel="noopener"
+        data-test-id="greeting-fact-link"
+      >
+        Learn more
+      </a>
+    </div>
+  </div>
+</p-card>
