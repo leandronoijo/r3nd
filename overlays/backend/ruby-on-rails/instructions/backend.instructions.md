@@ -122,6 +122,16 @@ src/backend/
 
 1. Controllers handle HTTP layer only — no business logic.
 2. API controllers should inherit from `ApplicationController` and be namespaced under `Api::V1`.
+   - Routing preference: prefer exposing the latest API without the version in the path by using a default module scope. Example:
+     ```ruby
+     namespace :api do
+       scope module: :v1 do
+         resources :greetings, only: %i[index]
+       end
+     end
+     # -> URL: /api/greetings
+     # -> Controller: Api::V1::GreetingsController
+     ```
 3. Use strong parameters to whitelist input:
    ```ruby
    def create
@@ -328,7 +338,7 @@ src/backend/
 6. **Caching**: Use Rails caching (`Rails.cache`) for expensive operations.
 7. **Transactions**: Wrap multi-step DB operations in `ActiveRecord::Base.transaction`.
 8. **Eager loading**: Prevent N+1 with `includes` or `preload`.
-9. **API versioning**: Namespace controllers under `Api::V1`, `Api::V2`, etc.
+9. **API versioning**: Namespace controllers under `Api::V1`, `Api::V2`, etc. Prefer routing the application so `v1` is the default module used for requests under `/api` (using `scope module: :v1` inside `namespace :api`) when you want to keep the public URL stable (e.g., `/api/greetings` -> `Api::V1::GreetingsController`). Use `namespace :v1` when you need the version present in the URL (e.g., `/api/v1/greetings`).
 10. **CORS**: Configure in `config/initializers/cors.rb` using `rack-cors` gem.
 
 ---

@@ -10,12 +10,12 @@
 
 Complete these items **before** starting any implementation tasks.
 
-- [x] Read `.github/instructions/backend.instructions.md`
-- [x] Read `.github/instructions/frontend.instructions.md`
+- [ ] Read `.github/instructions/backend.instructions.md`
+- [ ] Read `.github/instructions/frontend.instructions.md`
 - [ ] Read `.github/instructions/infrastructure.instructions.md`
-- [x] Read `.github/instructions/testing.instructions.md`
-- [x] Confirm service names/ports do not conflict with local defaults
-- [x] Confirm no new dependencies needed (or justify additions below)
+- [ ] Read `.github/instructions/testing.instructions.md`
+- [ ] Confirm service names/ports do not conflict with local defaults
+- [ ] Confirm no new dependencies needed (or justify additions below)
 
 ### New Dependencies (if any)
 
@@ -55,7 +55,7 @@ Complete these items **before** starting any implementation tasks.
 
 -#### Task 1: Backend Dockerfile
 
-- [x] **Create backend Dockerfile**
+- [ ] **Create backend Dockerfile**
 - **File(s):** `src/backend/Dockerfile`
 - **Action:** create
 - **Details:**
@@ -74,7 +74,7 @@ Complete these items **before** starting any implementation tasks.
 
 -#### Task 2: Frontend Dockerfile
 
-- [x] **Create frontend Dockerfile**
+- [ ] **Create frontend Dockerfile**
 - **File(s):** `src/frontend/Dockerfile`
 - **Action:** create
 - **Details:**
@@ -93,7 +93,7 @@ Complete these items **before** starting any implementation tasks.
 
 -#### Task 3: Root docker-compose.yml
 
-- [x] **Create compose file**
+- [ ] **Create compose file**
 - **File(s):** `src/docker-compose.yml`
 - **Action:** create
 - **Details:**
@@ -117,7 +117,7 @@ Complete these items **before** starting any implementation tasks.
 
 -#### Task 4: .dockerignore (backend)
 
-- [x] **Add backend .dockerignore**
+- [ ] **Add backend .dockerignore**
 - **File(s):** `src/backend/.dockerignore`
 - **Action:** create
 - **Details:**
@@ -127,7 +127,7 @@ Complete these items **before** starting any implementation tasks.
 
 -#### Task 5: .dockerignore (frontend)
 
-- [x] **Add frontend .dockerignore**
+- [ ] **Add frontend .dockerignore**
 - **File(s):** `src/frontend/.dockerignore`
 - **Action:** create
 - **Details:**
@@ -137,7 +137,7 @@ Complete these items **before** starting any implementation tasks.
 
 -#### Task 6: .gitignore (backend)
 
-- [x] **Add backend .gitignore**
+- [ ] **Add backend .gitignore**
 - **File(s):** `src/backend/.gitignore`
 - **Action:** create
 - **Details:**
@@ -147,7 +147,7 @@ Complete these items **before** starting any implementation tasks.
 
 -#### Task 7: .gitignore (frontend)
 
-- [x] **Add frontend .gitignore**
+- [ ] **Add frontend .gitignore**
 - **File(s):** `src/frontend/.gitignore`
 - **Action:** create
 - **Details:**
@@ -159,7 +159,7 @@ Complete these items **before** starting any implementation tasks.
 
 -#### Task 6: Smoke scripts/docs
 
-- [x] **Add README snippet**
+- [ ] **Add README snippet**
 - **File(s):** `README.md` (append minimal section)
 - **Action:** modify
 - **Details:**
@@ -207,6 +207,11 @@ docker compose -f src/docker-compose.yml logs -f frontend backend
   - Runtime env vars not injected into served HTML — verify custom server reads `process.env` and injects `<script>window.__VAR__=...</script>` into HTML before serving.
 
 ---
+
+## Implementation Notes (Added by Developer)
+
+- Bundler is configured to install gems into `/usr/local/bundle` (`bundle config set --local path /usr/local/bundle`) and the runtime entrypoint now uses `bundle exec bin/rails` to load the preinstalled gems before starting the server.
+- `docker compose -f src/docker-compose.yml build --no-cache` plus `docker compose -f src/docker-compose.yml up -d` were used to validate the new images, followed by `curl http://localhost:3000/api/v1/greetings` and `curl http://localhost:4173` to confirm backend and frontend responses, then `docker compose -f src/docker-compose.yml down` to clean up.
 
 ## 3. File/Module-level Changes
 

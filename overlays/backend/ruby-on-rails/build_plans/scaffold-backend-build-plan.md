@@ -149,19 +149,22 @@ Complete these items **before** starting any implementation tasks.
 - **Action:** edit
 - **Dependencies:** Task 0
 - **Details:**
-  - Configure routes with `/api/v1` namespace:
+  - Configure routes so `v1` is the default controller module under the `/api` path. This keeps the public URL stable (e.g., `/api/greetings`) while routing to `Api::V1` controllers:
     ```ruby
     Rails.application.routes.draw do
-      namespace :api do
-        namespace :v1 do
+      namespace :api, defaults: { format: :json } do
+        # default to Api::V1 controllers without adding /v1 to the path
+        scope module: :v1 do
           resources :greetings, only: [:index]
         end
       end
     end
     ```
+  - If you later want the version to appear in the URL for a new version, add a `namespace :v2` block alongside the default `scope`.
+
 - **Acceptance Criteria:**
-  - Routes namespaced under `/api/v1`.
-  - Ready for controller implementation.
+  - Routes expose `/api/greetings` and are handled by `Api::V1::GreetingsController`.
+  - `/api/v1/greetings` may still be added explicitly if you choose to expose the version in the path for older versions.
 - **Effort:** small
 
 #### Task 2: Configure RSpec and test helpers
@@ -490,6 +493,10 @@ Follow `.github/instructions/backend.instructions.md` and `.github/instructions/
 - PostgreSQL required for production-grade reliability and advanced querying.
 - API-only mode removes view layer overhead.
 - CORS configured for frontend integration.
+- ### Task 0.6 Clarification
+- Attempted `rails db:create` / `rails db:migrate` but both fail because PostgreSQL is not running locally (`PG::ConnectionBad` against `/var/run/postgresql/.s.PGSQL.5432`). These commands need to be rerun once the DB server is available so the schema and migrations can be generated.
+- ### Task 10 Clarification
+- `rails db:migrate`, `rails spec`, `rails server`, and manual `FactsIngestorJob.perform_now` currently raise the same connection error. Acceptance criteria for Task 10 and the Definition of Done checklist items depend on a running PostgreSQL instance; please re-run them after starting the database service.
 
 ---
 

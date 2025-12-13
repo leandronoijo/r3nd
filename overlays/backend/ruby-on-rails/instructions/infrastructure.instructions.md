@@ -55,6 +55,8 @@ COPY Gemfile Gemfile.lock ./
 # Install gems
 RUN bundle config set --local deployment 'true' && \
     bundle config set --local without 'development test' && \
+    # Ensure runtime stage reuses the same bundle path without reconfiguring.
+    bundle config set --local path /usr/local/bundle && \
     bundle install --jobs 4 --retry 3
 
 # Copy application code
@@ -106,6 +108,7 @@ CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
 - Use `bundle exec` to ensure correct gem versions.
 - Run migrations separately (in entrypoint script or docker-compose command).
 - Alpine requires `build-base` and `postgresql-dev` for native gem compilation.
+- Because the entrypoint creates/migrates the database before launching Rails, allow 10-15 seconds for the service to be ready before hitting the API from the host.
 
 ---
 
@@ -162,6 +165,7 @@ volumes:
     command: >
       sh -c "bundle exec rails db:create db:migrate &&
              bundle exec rails server -b 0.0.0.0"
+    # Keep the healthcheck host/creds aligned with the Compose postgres env so the backend waits until pg_isready can actually connect.
 ```
 
 **Environment Variables:**
@@ -170,7 +174,7 @@ volumes:
 |----------|----------|-------------|
 | `DATABASE_URL` | Yes | PostgreSQL connection string (use service name `postgres` for container networking) |
 | `RAILS_ENV` | Yes | Rails environment (`development`, `test`, `production`) |
-| `RAILS_MASTER_KEY` | Yes (production) | Encryption key for credentials (from `config/master.key`) |
+| `RAILS_MASTER_KEY` | Yes (production) | Encryption key for credentials kept in `config/master.key`; provide a dev fallback (or `.env` default) to avoid startup failures. |
 | `SECRET_KEY_BASE` | Yes (production) | Secret for session encryption (generate with `rails secret`) |
 | `PORT` | No | HTTP server port (default: `3000`) |
 
@@ -579,6 +583,7 @@ curl -f http://localhost:3000/api/v1/greetings || exit 1
 
 # Cleanup
 docker-compose down -v
+docker compose down --remove-orphans
 ```
 
 ---
