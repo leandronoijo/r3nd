@@ -12,6 +12,7 @@ Complete these items **before** starting any implementation tasks.
 
 - [x] Read `.github/instructions/backend.instructions.md`
 - [x] Read `.github/instructions/frontend.instructions.md`
+- [ ] Read `.github/instructions/infrastructure.instructions.md`
 - [x] Read `.github/instructions/testing.instructions.md`
 - [x] Confirm service names/ports do not conflict with local defaults
 - [x] Confirm no new dependencies needed (or justify additions below)
@@ -26,18 +27,19 @@ Complete these items **before** starting any implementation tasks.
 
 ## 1. Implementation Overview
 
-**Approach:** Provide Dockerfiles for backend (NestJS) and frontend (Vue/Vite) and a root-level `docker-compose.yml` to run backend, frontend, and MongoDB together with sensible defaults and shared network.
+**Approach:** Provide Dockerfiles for backend and frontend and a root-level `docker-compose.yml` to run backend, frontend, and database together with sensible defaults and shared network.
 
 **Key Decisions:**
 - Use multi-stage builds for both services (build → runtime) to keep images small.
-- Use environment variables for ports and Mongo URI; defaults for local dev.
+- Use environment variables for ports and database connection; defaults for local dev.
 - Map backend to `/api` and frontend to `/` with CORS enabled server-side.
+- Framework-specific build commands, database configuration, and runtime commands are defined in `.github/instructions/infrastructure.instructions.md`).
 
 **Integration Points:**
 | Service | Integration Type | Notes |
 |---------|------------------|-------|
-| backend → mongo | `MONGODB_URI` env | `mongodb://mongo:27017/r3nd` |
-| frontend → backend | `VITE_API_BASE_URL` env | `http://localhost:3000/api` (browser access from host) |
+| backend → database | Framework-specific env var | See backend instructions for connection string format |
+| frontend → backend | `VITE_API_BASE_URL` or `NEXT_PUBLIC_API_URL` | `http://localhost:3000/api` (browser access from host) |
 
 **Critical Runtime Environment Pattern:**
 - Frontend build-time env vars (e.g., `VITE_API_BASE_URL`) are embedded in the build output and cannot change at runtime.
@@ -57,15 +59,18 @@ Complete these items **before** starting any implementation tasks.
 - **File(s):** `src/backend/Dockerfile`
 - **Action:** create
 - **Details:**
-  - Multi-stage: base (node:18-alpine), deps install with `package-lock.json`, build stage (if needed), final runtime.
+  - **Follow framework-specific Dockerfile instructions** in`instructions/infrastructure.instructions.md`.
+  - Multi-stage build pattern (build stage → runtime stage) to minimize image size.
   - Set `WORKDIR /app`.
-  - Copy `package*.json` (backend scope) and `tsconfig` needed; install prod deps.
-  - Copy backend source; run `npm run build` (or repo script) targeting backend.
-  - Expose `3000`; `CMD ["node", "dist/main.js"]` (align with Nest build output).
-  - Env: `PORT=3000`, `MONGODB_URI` injected by compose.
+  - Install dependencies using framework's package manager.
+  - Build application using framework's build command.
+  - always Expose backend port `3000`.
+  - Set runtime command to start the built application.
+  - Environment variables for port and database connection injected by compose.
 - **Acceptance Criteria:**
   - Image builds without dev tooling in runtime layer.
-  - Runs `node dist/main.js` successfully with provided envs.
+  - Application starts successfully with provided environment variables.
+  - Framework-specific requirements met
 
 -#### Task 2: Frontend Dockerfile
 
@@ -73,18 +78,18 @@ Complete these items **before** starting any implementation tasks.
 - **File(s):** `src/frontend/Dockerfile`
 - **Action:** create
 - **Details:**
-  - Multi-stage: build (node:18-alpine) runs `npm ci && npm run build` for frontend.
-  - Serve via lightweight custom server (e.g., `server.js`) that injects runtime env vars into HTML, or use `npm run preview`. Prefer custom `server.js` for runtime env injection.
-  - If using custom server: create `server.js` that reads env vars (e.g., `process.env.VITE_API_BASE_URL`) and injects `<script>window.__VITE_API_BASE_URL__=value;</script>` into served HTML before `</head>`.
-  - Runtime stage: copy built assets, server script, and expose build arg as runtime ENV so server can read it.
-  - Expose `4173` (or configured preview port).
-  - Env: `VITE_API_BASE_URL` passed as both ARG (build-time) and ENV (runtime) to support both patterns.
+  - **Follow framework-specific Dockerfile instructions** in the frontend `instructions/frontend.instructions.md`.
+  - Multi-stage build pattern: build stage runs dependency install and build command.
+  - Serve via lightweight custom server that injects runtime env vars into HTML, or use framework's preview/serve command.
+  - If using custom server: create server script that reads env vars and injects them into served HTML for client-side access.
+  - Runtime stage: copy built assets, server script, and minimal runtime dependencies.
+  - Expose frontend port (typically `4173` for Vite, `3000` for Next.js, `4200` for Angular).
+  - API base URL passed as both ARG (build-time) and ENV (runtime) to support both static and runtime configuration.
 - **Acceptance Criteria:**
   - Image builds and serves built assets on container start.
-  - Runtime env vars are injected into served HTML for client-side access.
+  - Runtime env vars are injected appropriately for client-side access.
   - No dev deps in runtime layer.
-
-### Phase 2: Docker Compose
+  - Framework-specific requirements met 
 
 -#### Task 3: Root docker-compose.yml
 
@@ -92,14 +97,19 @@ Complete these items **before** starting any implementation tasks.
 - **File(s):** `src/docker-compose.yml`
 - **Action:** create
 - **Details:**
+  - **Follow framework-specific database and service configuration** from `instructions/infrastructure.instructions.md`.
   - Services:
-    - `mongo`: image `mongo:6`, ports `27017:27017`, volume `mongo-data:/data/db`.
-    - `backend`: build `./backend` context `src/backend`, depends_on `mongo`, env `MONGODB_URI=mongodb://mongo:27017/r3nd`, `PORT=3000`, ports `3000:3000`.
-    - `frontend`: build `./frontend` context `src/frontend`, **args** `VITE_API_BASE_URL=http://localhost:3000/api` (build-time), **environment** `VITE_API_BASE_URL=http://localhost:3000/api` (runtime for server injection), ports `4173:4173`, depends_on `backend`.
-  - **Critical**: Frontend env must use `http://localhost:<backend-port>/api` for browser access from host, NOT `http://backend:3000/api` (which only works container-to-container). Add comment explaining browser vs container networking.
+    - `database`: Framework-specific database image (MongoDB, PostgreSQL, MySQL, etc.), appropriate ports, volume for persistence.
+    - `backend`: build `./backend` context `src/backend`, depends_on `database`, framework-specific environment variables for database connection and port, ports `3000:3000`.
+    - `frontend`: build `./frontend` context `src/frontend`, framework-specific build args and environment for API URL, ports mapped appropriately, depends_on `backend`.
+  - **Critical**: Frontend API URL must use `http://localhost:<backend-port>/api` for browser access from host, NOT `http://backend:3000/api` (which only works container-to-container). Add comment explaining browser vs container networking.
   - Networks: default bridge (implicit) or named `app-net` shared by all services.
-  - Volumes: `mongo-data` for persistence.
+  - Volumes: named volume for database persistence.
 - **Acceptance Criteria:**
+  - `docker-compose up --build` brings up all services.
+  - Frontend reachable at appropriate port, backend at `http://localhost:3000/api`, database internal connection works.
+  - Browser accessing frontend can successfully call backend API.
+  - Framework-specific database configuration works correctly.
   - `docker-compose up --build` brings up all services; frontend reachable at `http://localhost:4173`, backend at `http://localhost:3000/api`, mongo internal at `mongo:27017`.
   - Browser accessing frontend at `http://localhost:4173` can successfully call backend API.
 
@@ -212,38 +222,39 @@ docker compose -f src/docker-compose.yml logs -f frontend backend
 | `README.md` | modify | Document Docker usage |
 
 ---
-
-## 4. Configuration
-
 ### Environment Variables
 
-| Service | Variable | Default | Purpose |
-|---------|----------|---------|---------|
+**Note:** Specific variable names and connection strings are framework-dependent. See `instructions/infrastructure.instructions.md` for exact configuration.
+
+| Service | Variable Pattern | Typical Default | Purpose |
+|---------|------------------|-----------------|---------|
 | backend | `PORT` | `3000` | HTTP port |
+| backend | Database connection variable | Framework-specific | DB connection string |
+| frontend | API URL variable | `http://localhost:3000/api` | Backend base URL (framework-specific var name) |
+| database | Database init variables | Framework-specific | Initial database configuration |
 | backend | `MONGODB_URI` | `mongodb://mongo:27017/r3nd` | DB connection |
 | frontend | `VITE_API_BASE_URL` | `http://localhost:3000/api` | Backend base URL |
 | mongo | `MONGO_INITDB_DATABASE` | `r3nd` (optional) | Initial DB |
 
 ---
 
-## 5. Definition of Done
-
 - [ ] Dockerfiles build successfully.
 - [ ] `docker-compose up --build` starts all services without errors.
-- [ ] Backend connects to Mongo at `mongo:27017` and serves `/api`.
+- [ ] Backend connects to database using framework-specific connection and serves `/api`.
+- [ ] Frontend serves at appropriate port and calls backend via configured base URL.
+- [ ] No new dependencies added unless justified.
+- [ ] Framework-specific smoke tests pass.and serves `/api`.
 - [ ] Frontend serves at `http://localhost:4173` and calls backend via configured base URL.
 - [ ] No new dependencies added unless justified.
 
----
-
-## Implementation Notes (Added by Developer)
-
-- Added `src/frontend/server.js` as a zero-dependency static server so the runtime Docker stage can run `node server.js` without installing Vite or other dev-only packages.
-- The frontend Docker build now exposes `VITE_API_BASE_URL` as a build arg/default `http://localhost:3000/api`, matching the README documentation and Docker Compose wiring; backend env defaults follow the compose file as well.
-- Both Dockerfiles now use `node:20-alpine` because Nest 11 and Vite 7 explicitly require Node 20+, so the previous Node 18 base failed during the frontend build.
 
 ## Notes
 
+- **Framework-specific configuration is defined in instruction files not in this plan.**
+- Align Dockerfile commands with framework conventions.
+- Adjust ports and environment variable names based on framework requirements.
+- For specific examples, refer to: `.github/instructions/infrastructure.instructions.md`
+  - frontend: `.github/instructions/frontend.instructions.md`
 - Align Dockerfile commands with existing `package.json` scripts (adjust build/start commands to actual script names in repo).
 - If backend build output differs (e.g., `dist/src/main.js`), update CMD accordingly.
 - If frontend uses a different preview port, update compose and Dockerfile to match.
