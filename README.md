@@ -179,6 +179,41 @@ To extend or adapt the system:
 
 ---
 
+## 🐳 Docker Quick Start
+
+Run the entire stack (backend + frontend + MongoDB) with Docker Compose:
+
+```bash
+docker-compose -f src/docker-compose.yml up --build
+```
+
+Services will be available at:
+- **Frontend**: http://localhost:4173
+- **Backend API**: http://localhost:3000/api
+- **MongoDB**: localhost:27017
+
+To stop the services:
+
+```bash
+docker-compose -f src/docker-compose.yml down
+```
+
+To stop and remove volumes:
+
+```bash
+docker-compose -f src/docker-compose.yml down -v
+```
+
+### Environment Variables
+
+| Service | Variable | Default | Purpose |
+|---------|----------|---------|---------|
+| backend | `PORT` | `3000` | HTTP port |
+| backend | `MONGODB_URI` | `mongodb://mongo:27017/r3nd` | Database connection |
+| frontend | `VITE_API_BASE_URL` | `http://localhost:3000/api` | Backend API URL (for browser) |
+
+---
+
 ## 🧭 Roadmap
 
 Potential future enhancements:
