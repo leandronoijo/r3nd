@@ -45,8 +45,7 @@ services:
     environment:
       # CRITICAL: Use localhost for browser access from host, NOT the service name 'backend'
       # Browser makes requests from host machine, so it needs host-accessible URL
-      # Note: Python server.py injects this into served HTML
-      VITE_API_BASE_URL: http://localhost:3000/api/v1
+      # Note: Frontend HTML uses hardcoded API URL (http://localhost:3000)
       PORT: 4173
     networks:
       - app-net

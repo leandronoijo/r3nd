@@ -32,7 +32,7 @@ loop do
     response_body = JSON.generate({status: 'ok'})
   when '/api/v1/greetings'
     response_body = JSON.generate({
-      greeting: 'Hello from Rails API!',
+      greeting: 'Hello from Ruby API!',
       fact: {
         id: 1,
         text: 'Ruby on Rails was created by David Heinemeier Hansson in 2004',
