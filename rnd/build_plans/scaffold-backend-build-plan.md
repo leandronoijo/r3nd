@@ -10,13 +10,13 @@
 
 Complete these items **before** starting any implementation tasks.
 
-- [ ] Read `.github/instructions/backend.instructions.md`
-- [ ] Read `.github/instructions/testing.instructions.md`
-- [ ] Identify golden reference modules:
+- [x] Read `.github/instructions/backend.instructions.md`
+- [x] Read `.github/instructions/testing.instructions.md`
+- [x] Identify golden reference modules:
   - Backend: `src/backend/modules/example/`
-- [ ] Confirm no new dependencies needed (or justify additions below)
-- [ ] List integration points with existing modules (see Section 1)
-- [ ] Review tech spec for any open questions
+- [x] Confirm no new dependencies needed (or justify additions below)
+- [x] List integration points with existing modules (see Section 1)
+- [x] Review tech spec for any open questions
 
 ### New Dependencies (if any)
 
@@ -40,6 +40,8 @@ Complete these items **before** starting any implementation tasks.
 | ts-jest | TypeScript transformer for Jest | Compiles spec files |
 | @types/jest | Jest type helpers | Enables typing of global jest APIs |
 | @types/supertest | Supertest type helpers | Ensures typed HTTP assertions |
+| class-validator | Validation decorators | Required by `ValidationPipe` for incoming DTO validation |
+| class-transformer | Class transformation helpers | Required by `ValidationPipe` to transform payloads |
 
 ---
 
@@ -65,7 +67,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 0: Set up package.json and dependencies
 
-- [ ] **Create package.json and install deps**
+- [x] **Create package.json and install deps**
 - **File(s):** `src/backend/package.json`
 - **Action:** create
 - **Dependencies:** None
@@ -88,7 +90,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 0.5: Set up TypeScript and Jest configuration
 
-- [ ] **Create TypeScript and Jest config files**
+- [x] **Create TypeScript and Jest config files**
 - **File(s):** `src/backend/tsconfig.json`, `src/backend/tsconfig.build.json`, `src/backend/tsconfig.spec.json`, `src/backend/jest.config.ts`
 - **Action:** create
 - **Dependencies:** Task 0
@@ -101,9 +103,21 @@ Complete these items **before** starting any implementation tasks.
   - Config files created and valid.
 - **Effort:** small
 
+#### Task 0.6: Create .gitignore
+
+- [x] **Add .gitignore for backend**
+- **File(s):** `src/backend/.gitignore`
+- **Action:** create
+- **Dependencies:** None
+- **Details:**
+  - Ignore `node_modules/`, `dist/`, `*.log`, `.env*`, `coverage/`, `npm-debug.log*`, `.DS_Store`, etc.
+- **Acceptance Criteria:**
+  - .gitignore exists and ignores common Node.js and build artifacts.
+- **Effort:** small
+
 #### Task 1: Create main.ts
 
-- [ ] **Create NestJS bootstrap file**
+- [x] **Create NestJS bootstrap file**
 - **File(s):** `src/backend/main.ts`
 - **Action:** create
 - **Dependencies:** Task 0
@@ -121,7 +135,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 2: Create app.module.ts
 
-- [ ] **Create root module**
+- [x] **Create root module**
 - **File(s):** `src/backend/app.module.ts`
 - **Action:** create
 - **Dependencies:** Task 1
@@ -137,7 +151,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 2.5: Validate build and scripts
 
-- [ ] **Ensure npm scripts work**
+- [x] **Ensure npm scripts work**
 - **File(s):** N/A
 - **Action:** run commands
 - **Dependencies:** Task 0, Task 0.5, Task 1, Task 2
@@ -155,7 +169,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 3: Create Fact Schema
 
-- [ ] **Define Mongoose schema for facts**
+- [x] **Define Mongoose schema for facts**
 - **File(s):** `src/backend/modules/facts/schemas/fact.schema.ts`
 - **Action:** create
 - **Dependencies:** None
@@ -180,7 +194,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 4: Create Facts Service
 
-- [ ] **Implement facts business logic**
+- [x] **Implement facts business logic**
 - **File(s):** `src/backend/modules/facts/facts.service.ts`
 - **Action:** create
 - **Dependencies:** Task 3
@@ -200,7 +214,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 5: Create Facts Ingestor (Cron)
 
-- [ ] **Add hourly ingestion job**
+- [x] **Add hourly ingestion job**
 - **File(s):** `src/backend/modules/facts/facts.ingestor.ts`
 - **Action:** create
 - **Dependencies:** Task 4
@@ -214,7 +228,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 6: Create Facts Module
 
-- [ ] **Wire facts module**
+- [x] **Wire facts module**
 - **File(s):** `src/backend/modules/facts/facts.module.ts`
 - **Action:** create
 - **Dependencies:** Task 3, Task 4, Task 5
@@ -229,7 +243,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 7: Create Facts Service Tests
 
-- [ ] **Unit tests for facts service**
+- [x] **Unit tests for facts service**
 - **File(s):** `src/backend/modules/facts/facts.service.spec.ts`
 - **Action:** create
 - **Dependencies:** Task 4
@@ -247,7 +261,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 8: Create Greetings Service
 
-- [ ] **Implement greetings logic**
+- [x] **Implement greetings logic**
 - **File(s):** `src/backend/modules/greetings/greetings.service.ts`
 - **Action:** create
 - **Dependencies:** Task 6
@@ -262,7 +276,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 9: Create Greetings Controller
 
-- [ ] **Expose hello endpoint**
+- [x] **Expose hello endpoint**
 - **File(s):** `src/backend/modules/greetings/greetings.controller.ts`
 - **Action:** create
 - **Dependencies:** Task 8
@@ -275,7 +289,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 10: Create Greetings Module
 
-- [ ] **Wire greetings module**
+- [x] **Wire greetings module**
 - **File(s):** `src/backend/modules/greetings/greetings.module.ts`
 - **Action:** create
 - **Dependencies:** Task 8, Task 9
@@ -289,7 +303,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 11: Create Greetings Controller Tests
 
-- [ ] **Unit tests for greetings controller**
+- [x] **Unit tests for greetings controller**
 - **File(s):** `src/backend/modules/greetings/greetings.controller.spec.ts`
 - **Action:** create
 - **Dependencies:** Task 9
@@ -312,6 +326,7 @@ Complete these items **before** starting any implementation tasks.
 | `src/backend/tsconfig.build.json` | create | TypeScript config for build | — |
 | `src/backend/tsconfig.spec.json` | create | TypeScript config for tests | — |
 | `src/backend/jest.config.ts` | create | Jest configuration | — |
+| `src/backend/.gitignore` | create | Ignore build artifacts | — |
 | `src/backend/main.ts` | create | App bootstrap | — |
 | `src/backend/app.module.ts` | create | Root module | — |
 | `src/backend/modules/facts/schemas/fact.schema.ts` | create | Fact data model | `modules/example/schemas/example.schema.ts` |
@@ -385,15 +400,15 @@ Follow `.github/instructions/backend.instructions.md` and `.github/instructions/
 
 ## 8. Definition of Done
 
-- [ ] All tasks in Section 2 marked complete
-- [ ] `npm run build` completes without errors
-- [ ] `npm run start` runs the built app without errors
-- [ ] `npm run start:dev` starts dev server without TypeScript errors
-- [ ] `npm run test` passes all tests
-- [ ] App starts, connects to DB
-- [ ] Hourly job ingests facts
-- [ ] `GET /api/greetings` returns greeting + fact
-- [ ] No `any` types, no unused code
+- [x] All tasks in Section 2 marked complete
+- [x] `npm run build` completes without errors
+- [x] `npm run start` runs the built app without errors
+- [x] `npm run start:dev` starts dev server without TypeScript errors
+- [x] `npm run test` passes all tests
+- [x] App starts, connects to DB
+- [x] Hourly job ingests facts
+- [x] `GET /api/greetings` returns greeting + fact
+- [x] No `any` types, no unused code
 
 ---
 
@@ -410,6 +425,7 @@ Follow `.github/instructions/backend.instructions.md` and `.github/instructions/
 - Added definite assignment assertions in Task 3 for schema properties.
 - Added Task 2.5 to validate npm run build, npm run test, and npm run start:dev work.
 - Updated Definition of Done to include npm run build.
+- Added `class-validator` and `class-transformer` to package dependencies after observing the `ValidationPipe` runtime complaint during `npm run start:dev`.
 
 ---
 

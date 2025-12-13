@@ -125,6 +125,26 @@ Complete these items **before** starting any implementation tasks.
 - **Acceptance Criteria:**
   - Keeps image small; no local artifacts copied.
 
+-#### Task 6: .gitignore (backend)
+
+- [x] **Add backend .gitignore**
+- **File(s):** `src/backend/.gitignore`
+- **Action:** create
+- **Details:**
+  - Ignore `node_modules/`, `dist/`, `*.log`, `.env*`, `coverage/`, `npm-debug.log*`, `.DS_Store`, etc.
+- **Acceptance Criteria:**
+  - .gitignore exists and ignores common Node.js and build artifacts.
+
+-#### Task 7: .gitignore (frontend)
+
+- [x] **Add frontend .gitignore**
+- **File(s):** `src/frontend/.gitignore`
+- **Action:** create
+- **Details:**
+  - Ignore `node_modules/`, `dist/`, `*.log`, `.env*`, `coverage/`, `npm-debug.log*`, `.DS_Store`, etc.
+- **Acceptance Criteria:**
+  - .gitignore exists and ignores common Node.js and build artifacts.
+
 ### Phase 4: Verification
 
 -#### Task 6: Smoke scripts/docs
@@ -184,8 +204,10 @@ docker compose -f src/docker-compose.yml logs -f frontend backend
 |-----------|--------|-----------|
 | `src/backend/Dockerfile` | create | Containerize backend |
 | `src/backend/.dockerignore` | create | Reduce image size |
+| `src/backend/.gitignore` | create | Ignore build artifacts |
 | `src/frontend/Dockerfile` | create | Containerize frontend |
 | `src/frontend/.dockerignore` | create | Reduce image size |
+| `src/frontend/.gitignore` | create | Ignore build artifacts |
 | `src/docker-compose.yml` | create | Orchestrate services |
 | `README.md` | modify | Document Docker usage |
 
@@ -218,6 +240,7 @@ docker compose -f src/docker-compose.yml logs -f frontend backend
 
 - Added `src/frontend/server.js` as a zero-dependency static server so the runtime Docker stage can run `node server.js` without installing Vite or other dev-only packages.
 - The frontend Docker build now exposes `VITE_API_BASE_URL` as a build arg/default `http://localhost:3000/api`, matching the README documentation and Docker Compose wiring; backend env defaults follow the compose file as well.
+- Both Dockerfiles now use `node:20-alpine` because Nest 11 and Vite 7 explicitly require Node 20+, so the previous Node 18 base failed during the frontend build.
 
 ## Notes
 

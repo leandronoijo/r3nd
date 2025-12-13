@@ -37,6 +37,9 @@ Complete these items **before** starting any implementation tasks.
 | @vue/test-utils | Vue testing | Per testing instructions |
 | jest-environment-jsdom | Test env | For DOM testing |
 | @types/jest | Jest types | For TS support |
+| ts-node | Dev tooling | Allows Jest to load the TypeScript `jest.config.ts` |
+| @vue/compiler-dom | Compiler | Required by the Vue test-utils bundle used in Jest |
+| @vue/server-renderer | SSR runtime | Required by the Vue test-utils bundle used in Jest |
 
 ---
 
@@ -80,6 +83,18 @@ Complete these items **before** starting any implementation tasks.
   - package.json exists with all required deps; node_modules installed.
   - Scripts are correctly defined.
   - `package-lock.json` is generated and in sync.
+- **Effort:** small
+
+#### Task 0.5: Create .gitignore
+
+- [ ] **Add .gitignore for frontend**
+- **File(s):** `src/frontend/.gitignore`
+- **Action:** create
+- **Dependencies:** None
+- **Details:**
+  - Ignore `node_modules/`, `dist/`, `*.log`, `.env*`, `coverage/`, `npm-debug.log*`, `.DS_Store`, etc.
+- **Acceptance Criteria:**
+  - .gitignore exists and ignores common Node.js and build artifacts.
 - **Effort:** small
 
 #### Task 1: Initialize main.ts
@@ -249,6 +264,7 @@ Complete these items **before** starting any implementation tasks.
 | File Path | Action | Rationale | Golden Reference |
 |-----------|--------|-----------|------------------|
 | `src/frontend/package.json` | create | Project config and deps | — |
+| `src/frontend/.gitignore` | create | Ignore build artifacts | — |
 | `src/frontend/main.ts` | create | App bootstrap | — |
 | `src/frontend/App.vue` | create | Root layout | — |
 | `src/frontend/stores/useGreetingStore.ts` | create | Store for greetings | `stores/exampleStore.ts` |
@@ -348,3 +364,8 @@ The `rnd/tech_specs/` directory does not contain a spec for this feature, so the
 
 ### Jest/Test Setup Notes
 Jest now loads the `tests/` folder via `<rootDir>/../../tests`, points `moduleDirectories` at `./node_modules`, and overrides `tsconfig.jest.json` to search both `node_modules` and `../src/frontend/node_modules` so tests can resolve runtime deps without a root-level install. Vuetify imports are mapped to lightweight mocks in `tests/__mocks__`, and `shims-vue.d.ts` declares the stubbed `vuetify` modules so TypeScript stays happy while the real frontend still uses the actual components.
+
+### Dependency & Runtime Notes
+- Added `ts-node` so Jest can load the TypeScript `jest.config.ts`.
+- Added `@vue/compiler-dom` and `@vue/server-renderer` because the mocked `@vue/test-utils` build exposes `Vue` via those globals inside `tests/setupTests.ts`.
+- `tests/setupTests.ts` now wires the `Vue`, compiler, and the `__VITE_API_BASE_URL__` / `__VITE_BASE_URL__` tokens that `vite.config.ts` exposes through `define`, which lets the store/router avoid direct `import.meta` usage while still honoring the Vite env variables.
