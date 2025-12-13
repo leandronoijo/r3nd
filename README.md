@@ -253,7 +253,7 @@ curl http://localhost:3000/api/v1/greetings
 
 # Expected response: HTTP 200 with JSON
 {
-  "greeting": "Hello from Rails API!",
+  "greeting": "Hello from Ruby API!",
   "fact": { ... }
 }
 

@@ -15,6 +15,7 @@ loop do
   # Read headers
   headers = {}
   while (line = client.gets) && (line.chomp != '')
+    break unless line
     key, value = line.split(': ', 2)
     headers[key] = value.chomp if value
   end

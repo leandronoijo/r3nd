@@ -43,9 +43,8 @@ services:
     ports:
       - "4173:4173"
     environment:
-      # CRITICAL: Use localhost for browser access from host, NOT the service name 'backend'
-      # Browser makes requests from host machine, so it needs host-accessible URL
-      # Note: Frontend HTML uses hardcoded API URL (http://localhost:3000)
+      # Note: Frontend HTML uses window.__API_BASE_URL__ || 'http://localhost:3000'
+      # Browser requests from host, so must use localhost not service name
       PORT: 4173
     networks:
       - app-net
