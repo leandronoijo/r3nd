@@ -1,0 +1,18 @@
+{
+  "name": "r3nd",
+  "version": "1.0.0",
+  "description": "This repository is a `starter template` for teams who want to automate their product → architecture → planning → development lifecycle using **GitHub Copilot Agents** and **GitHub Actions**.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test:e2e": "playwright test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.57.0"
+  }
+}

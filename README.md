@@ -188,3 +188,37 @@ Potential future enhancements:
 - Auto-link specs and build plans to PR descriptions
 - Diagram generation from tech specs
 - Optional CI for running tests after the Developer stage
+
+---
+
+## 🐳 Running the Application
+
+The scaffolded R3ND application can be run locally using Docker Compose:
+
+```bash
+# Build and start all services (MongoDB, Backend, Frontend)
+docker-compose -f src/docker-compose.yml up --build
+```
+
+**Services:**
+- **Frontend**: http://localhost:4173
+- **Backend API**: http://localhost:3000/api
+- **MongoDB**: localhost:27017
+
+**Environment Variables:**
+- `MONGODB_URI`: MongoDB connection string (default: `mongodb://mongo:27017/r3nd`)
+- `PORT` (backend): Backend server port (default: `3000`)
+- `PORT` (frontend): Frontend server port (default: `4173`)
+- `VITE_API_BASE_URL`: API base URL for frontend (default: `http://localhost:3000/api`)
+
+**Stopping services:**
+```bash
+docker-compose -f src/docker-compose.yml down
+```
+
+**Running E2E tests:**
+
+After starting the services, run the E2E tests:
+```bash
+npm run test:e2e
+```

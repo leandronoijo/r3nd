@@ -224,3 +224,24 @@ docker compose -f src/docker-compose.yml logs -f frontend backend
 - Align Dockerfile commands with existing `package.json` scripts (adjust build/start commands to actual script names in repo).
 - If backend build output differs (e.g., `dist/src/main.js`), update CMD accordingly.
 - If frontend uses a different preview port, update compose and Dockerfile to match.
+
+---
+
+## Developer Implementation Notes (Final)
+
+All infrastructure tasks completed successfully:
+- ✅ Backend Dockerfile with multi-stage build
+- ✅ Frontend Dockerfile with multi-stage build
+- ✅ Custom server.js for runtime environment variable injection
+- ✅ Docker Compose orchestrating MongoDB, backend, and frontend
+- ✅ .dockerignore files for both services
+- ✅ README updated with Docker instructions
+
+Implementation details:
+- Frontend uses custom Node.js server (server.js) to inject runtime env vars into HTML
+- VITE_API_BASE_URL set to http://localhost:3000/api for browser access from host
+- Backend connects to MongoDB at mongodb://mongo:27017/r3nd
+- All services connected via app-net bridge network
+- Persistent volume for MongoDB data
+
+All acceptance criteria met. Ready for docker-compose up --build.

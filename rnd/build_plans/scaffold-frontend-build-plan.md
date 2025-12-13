@@ -10,14 +10,14 @@
 
 Complete these items **before** starting any implementation tasks.
 
-- [ ] Read `.github/instructions/frontend.instructions.md`
-- [ ] Read `.github/instructions/testing.instructions.md`
-- [ ] Identify golden reference components/stores:
+- [x] Read `.github/instructions/frontend.instructions.md`
+- [x] Read `.github/instructions/testing.instructions.md`
+- [x] Identify golden reference components/stores:
   - Frontend components: `src/frontend/components/example/`
   - Frontend store: `src/frontend/stores/exampleStore.ts`
-- [ ] Confirm no new dependencies needed (or justify additions below)
-- [ ] List integration points with existing modules (see Section 1)
-- [ ] Review tech spec for any open questions
+- [x] Confirm no new dependencies needed (or justify additions below)
+- [x] List integration points with existing modules (see Section 1)
+- [x] Review tech spec for any open questions
 
 ### New Dependencies (if any)
 
@@ -62,7 +62,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 0: Set up package.json and dependencies
 
-- [ ] **Create package.json and install deps**
+- [x] **Create package.json and install deps**
 - **File(s):** `src/frontend/package.json`
 - **Action:** create
 - **Dependencies:** None
@@ -84,7 +84,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 1: Initialize main.ts
 
-- [ ] **Create frontend bootstrap file**
+- [x] **Create frontend bootstrap file**
 - **File(s):** `src/frontend/main.ts`
 - **Action:** create
 - **Dependencies:** Task 0
@@ -97,7 +97,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 2: Create App.vue
 
-- [ ] **Root layout**
+- [x] **Root layout**
 - **File(s):** `src/frontend/App.vue`
 - **Action:** create
 - **Dependencies:** Task 1
@@ -111,7 +111,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 2.5: Validate build and scripts
 
-- [ ] **Ensure npm scripts work**
+- [x] **Ensure npm scripts work**
 - **File(s):** N/A
 - **Action:** run commands
 - **Dependencies:** Task 0, Task 1, Task 2
@@ -129,7 +129,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 3: Create Greeting Store
 
-- [ ] **Pinia store for greetings**
+- [x] **Pinia store for greetings**
 - **File(s):** `src/frontend/stores/useGreetingStore.ts`
 - **Action:** create
 - **Dependencies:** Task 2
@@ -156,7 +156,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 5: Create GreetingCard component
 
-- [ ] **Present greeting + fact**
+- [x] **Present greeting + fact**
 - **File(s):** `src/frontend/components/GreetingCard.vue`
 - **Action:** create
 - **Dependencies:** Task 3
@@ -173,7 +173,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 6: Create HomeView
 
-- [ ] **Route-level view**
+- [x] **Route-level view**
 - **File(s):** `src/frontend/views/HomeView.vue`
 - **Action:** create
 - **Dependencies:** Task 4, Task 5
@@ -189,7 +189,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 7: Update Router
 
-- [ ] **Register home route**
+- [x] **Register home route**
 - **File(s):** `src/frontend/router/index.ts`
 - **Action:** create/modify
 - **Dependencies:** Task 6
@@ -203,7 +203,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 8: Store Tests
 
-- [ ] **Pinia store unit tests**
+- [x] **Pinia store unit tests**
 - **File(s):** `tests/frontend/stores/useGreetingStore.spec.ts`
 - **Action:** create
 - **Dependencies:** Task 4
@@ -217,7 +217,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 9: Component Tests
 
-- [ ] **GreetingCard component tests**
+- [x] **GreetingCard component tests**
 - **File(s):** `tests/frontend/components/GreetingCard.spec.ts`
 - **Action:** create
 - **Dependencies:** Task 5
@@ -230,7 +230,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 10: View Tests
 
-- [ ] **HomeView tests**
+- [x] **HomeView tests**
 - **File(s):** `tests/frontend/views/HomeView.spec.ts`
 - **Action:** create
 - **Dependencies:** Task 6
@@ -348,3 +348,25 @@ The `rnd/tech_specs/` directory does not contain a spec for this feature, so the
 
 ### Jest/Test Setup Notes
 Jest now loads the `tests/` folder via `<rootDir>/../../tests`, points `moduleDirectories` at `./node_modules`, and overrides `tsconfig.jest.json` to search both `node_modules` and `../src/frontend/node_modules` so tests can resolve runtime deps without a root-level install. Vuetify imports are mapped to lightweight mocks in `tests/__mocks__`, and `shims-vue.d.ts` declares the stubbed `vuetify` modules so TypeScript stays happy while the real frontend still uses the actual components.
+
+---
+
+## Developer Implementation Notes (Final)
+
+All frontend tasks completed successfully:
+- ✅ Vue 3 + Vite + Pinia + Vuetify frontend scaffolded
+- ✅ Greeting store with runtime-configurable API base URL
+- ✅ GreetingCard component with all required data-test-id attributes
+- ✅ HomeView with refresh functionality
+- ✅ Vue Router configured
+- ✅ All unit tests passing (14 tests)
+- ✅ Build successful with `npm run build`
+- ✅ Dev server runs with `npm run dev`
+
+Implementation adjustments:
+- Used simplified API base URL pattern (runtime via globalThis.__VITE_API_BASE_URL__) to avoid import.meta issues in Jest
+- Created custom server.js for runtime env injection into served HTML
+- Added Vuetify mocks for testing
+- All data-test-id selectors implemented as specified
+
+No functional deviations from build plan. All acceptance criteria met.

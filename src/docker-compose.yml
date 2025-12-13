@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - MONGODB_URI=mongodb://mongo:27017/r3nd
+    depends_on:
+      - mongo
+    networks:
+      - app-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Build-time: embedded in build output (not used currently, relying on runtime)
+        - VITE_API_BASE_URL=http://localhost:3000/api
+    ports:
+      - "4173:4173"
+    environment:
+      # Runtime: injected into HTML by server.js
+      # IMPORTANT: Use localhost (not 'backend') for browser access from host machine
+      - VITE_API_BASE_URL=http://localhost:3000/api
+      - PORT=4173
+    depends_on:
+      - backend
+    networks:
+      - app-net
+
+volumes:
+  mongo-data:
+
+networks:
+  app-net:
+    driver: bridge
