@@ -33,6 +33,17 @@ These rules define **how testing is done** in this repository (unit/integration/
 
 If the stack changes, update this section and adjust the supporting scripts/config accordingly.
 
+### E2E Tool Isolation
+
+All E2E testing tools, configurations, and dependencies **must** be contained within the `tests/e2e/` directory:
+
+- `package.json` for E2E dependencies (Playwright, etc.)
+- Config files (e.g., `playwright.config.ts`)
+- Fixtures, helpers, and utilities
+- **Nothing E2E-related should leak into the repository root**
+
+This keeps the main workspace clean and E2E tooling self-contained.
+
 ---
 
 ## Test Types

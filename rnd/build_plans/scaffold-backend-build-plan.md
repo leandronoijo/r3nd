@@ -36,6 +36,10 @@ Complete these items **before** starting any implementation tasks.
 | jest | Test runner | Per testing instructions |
 | @nestjs/testing | NestJS testing utilities | Per testing instructions |
 | supertest | HTTP testing | Per testing instructions |
+| ts-node | Runtime for TypeScript scripts | Powers the dev entrypoint |
+| ts-jest | TypeScript transformer for Jest | Compiles spec files |
+| @types/jest | Jest type helpers | Enables typing of global jest APIs |
+| @types/supertest | Supertest type helpers | Ensures typed HTTP assertions |
 
 ---
 
@@ -66,11 +70,35 @@ Complete these items **before** starting any implementation tasks.
 - **Action:** create
 - **Dependencies:** None
 - **Details:**
-  - Create `src/backend/package.json` with guessed versions (e.g., @nestjs/core: ^10.0.0, mongoose: ^8.0.0, etc.).
-  - Include scripts: `start`, `start:dev`, `test`.
-  - Run `npm install` in `src/backend` to resolve exact versions.
+  - **Prefer CLI**: Use `npm init -y` to create initial `package.json`, then use `npm install <package>` for each dependency instead of manually editing the file.
+  - Required packages (install via CLI):
+    - `npm install @nestjs/core @nestjs/common @nestjs/platform-express @nestjs/mongoose @nestjs/config @nestjs/schedule mongoose reflect-metadata rxjs`
+    - `npm install -D typescript @types/node jest @nestjs/testing supertest ts-node ts-jest @types/jest @types/supertest`
+  - Update scripts in `package.json`:
+    - `build`: `tsc -p tsconfig.build.json`
+    - `start`: `npm run build && node dist/main.js`
+    - `start:dev`: `ts-node --project tsconfig.json main.ts`
+    - `test`: `jest`
+  - **Why CLI**: Ensures lockfile sync, correct version resolution, and follows best practices.
 - **Acceptance Criteria:**
   - package.json exists with all required deps; node_modules installed.
+  - Scripts are correctly defined.
+  - `package-lock.json` is generated and in sync.
+- **Effort:** small
+
+#### Task 0.5: Set up TypeScript and Jest configuration
+
+- [ ] **Create TypeScript and Jest config files**
+- **File(s):** `src/backend/tsconfig.json`, `src/backend/tsconfig.build.json`, `src/backend/tsconfig.spec.json`, `src/backend/jest.config.ts`
+- **Action:** create
+- **Dependencies:** Task 0
+- **Details:**
+  - `tsconfig.json`: Compiler options with `strict: true`, `include: ["**/*"]`, `rootDir: "."`.
+  - `tsconfig.build.json`: Extends `tsconfig.json`, sets `declaration: true`, `sourceMap: true`, `outDir: "dist"`, excludes spec files.
+  - `tsconfig.spec.json`: Extends `tsconfig.json`, adds `types: ["jest", "node"]`, `isolatedModules: true`, `include: ["**/*.spec.ts", "**/*", "tests/**/*"]`.
+  - `jest.config.ts`: Preset `ts-jest`, testMatch `**/*.spec.ts`, transform for `.ts` files using `tsconfig.spec.json`.
+- **Acceptance Criteria:**
+  - Config files created and valid.
 - **Effort:** small
 
 #### Task 1: Create main.ts
@@ -107,6 +135,22 @@ Complete these items **before** starting any implementation tasks.
   - Config and DB connection configured.
 - **Effort:** small
 
+#### Task 2.5: Validate build and scripts
+
+- [ ] **Ensure npm scripts work**
+- **File(s):** N/A
+- **Action:** run commands
+- **Dependencies:** Task 0, Task 0.5, Task 1, Task 2
+- **Details:**
+  - Run `npm run build` to ensure TypeScript compilation succeeds.
+  - Run `npm run test` to ensure all tests pass.
+  - Run `npm run start:dev` briefly (e.g., timeout after 5 seconds) to ensure the app starts without TypeScript errors.
+- **Acceptance Criteria:**
+  - `npm run build` completes without errors.
+  - `npm run test` passes all tests.
+  - `npm run start:dev` starts the server without TypeScript compilation errors.
+- **Effort:** small
+
 ### Phase 2: Facts Module
 
 #### Task 3: Create Fact Schema
@@ -126,10 +170,12 @@ Complete these items **before** starting any implementation tasks.
     - `language: string` — required, index.
     - `permalink: string` — required.
     - `createdAt: Date` — default `Date.now`.
+  - Use definite assignment assertions (`!`) for all properties to satisfy strict TypeScript.
 - **Acceptance Criteria:**
   - Schema compiles.
   - All fields explicit types, no `any`.
   - Indexes on `externalId` and `language`.
+  - No TypeScript strict mode errors.
 - **Effort:** small
 
 #### Task 4: Create Facts Service
@@ -262,6 +308,10 @@ Complete these items **before** starting any implementation tasks.
 | File Path | Action | Rationale | Golden Reference |
 |-----------|--------|-----------|------------------|
 | `src/backend/package.json` | create | Project config and deps | — |
+| `src/backend/tsconfig.json` | create | TypeScript config for dev | — |
+| `src/backend/tsconfig.build.json` | create | TypeScript config for build | — |
+| `src/backend/tsconfig.spec.json` | create | TypeScript config for tests | — |
+| `src/backend/jest.config.ts` | create | Jest configuration | — |
 | `src/backend/main.ts` | create | App bootstrap | — |
 | `src/backend/app.module.ts` | create | Root module | — |
 | `src/backend/modules/facts/schemas/fact.schema.ts` | create | Fact data model | `modules/example/schemas/example.schema.ts` |
@@ -336,11 +386,13 @@ Follow `.github/instructions/backend.instructions.md` and `.github/instructions/
 ## 8. Definition of Done
 
 - [ ] All tasks in Section 2 marked complete
-- [ ] Backend runs without errors (npm run start:dev starts dev server)
+- [ ] `npm run build` completes without errors
+- [ ] `npm run start` runs the built app without errors
+- [ ] `npm run start:dev` starts dev server without TypeScript errors
+- [ ] `npm run test` passes all tests
 - [ ] App starts, connects to DB
 - [ ] Hourly job ingests facts
 - [ ] `GET /api/greetings` returns greeting + fact
-- [ ] Tests pass
 - [ ] No `any` types, no unused code
 
 ---
@@ -351,6 +403,13 @@ Follow `.github/instructions/backend.instructions.md` and `.github/instructions/
 - No tech spec file found under `rnd/tech_specs/`; proceeding with build plan guidance.
 - Repository currently lacks package definitions; implemented code without adding dependencies per instructions.
 - Added Task 0 to create `package.json` with dependencies and run `npm install`, as the backend was not runnable without it.
+- Added TypeScript/Jest infrastructure (`tsconfig.json`, `tsconfig.build.json`, `tsconfig.spec.json`, `jest.config.ts`) plus dev dependencies (`ts-node`, `ts-jest`, `@types/jest`, `@types/supertest`) because the scaffold had no test tooling.
+- Added `src/backend/modules/greetings/greetings.service.spec.ts` to exercise the service logic so every business class has coverage, even though the plan only called for controller tests.
+- Updated Task 0 to specify exact npm scripts.
+- Added Task 0.5 for TypeScript/Jest configs.
+- Added definite assignment assertions in Task 3 for schema properties.
+- Added Task 2.5 to validate npm run build, npm run test, and npm run start:dev work.
+- Updated Definition of Done to include npm run build.
 
 ---
 

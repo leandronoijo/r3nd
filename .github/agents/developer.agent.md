@@ -84,7 +84,8 @@ Use golden references and tests already in the repo as patterns; do not introduc
 
 | Rule | Enforcement | Why |
 |------|-------------|-----|
-| No new frameworks or libraries | Only use what's already in package.json. | Dependency control |
+| No new frameworks or libraries that were not explicitly approved | Only use what's already in the project's dependency manifest (e.g., package.json, pyproject.toml, go.mod). | Dependency control |
+| Prefer CLI tools over manual file editing | Use framework CLI generators (e.g., `nest g`, `npm install`) and package manager commands instead of manually editing config files. | Consistency, correctness, lockfile sync |
 | No files >400 lines | Split into smaller modules at 300 lines. | Maintainability |
 | No unused imports | Remove before committing. | Clean code |
 | No commented-out code | Delete, don't comment. | Code hygiene |
@@ -92,6 +93,9 @@ Use golden references and tests already in the repo as patterns; do not introduc
 | No `any` types | Explicit types or interfaces required. | Type safety |
 | Async/await over .then | Consistent async patterns. | Readability |
 | Single responsibility | One function = one purpose. | Testability |
+| Validate external I/O and user input types | Check content-type and payload shapes for network/file/DB/user input, validate and sanitize before use, and add tests for malformed or unexpected types. | Prevent runtime parse/type errors and security issues |
+| Build & runtime packaging validation | Ensure build artifacts and runtime packaging include the expected start script or entry point, runtime metadata (lockfiles/manifest) are in sync with declared dependencies, and artifact paths used in packaging are correct for the project's build system (e.g., outDir). | Build or packaging errors, or runtime failures due to incorrect artifact paths or missing runtime metadata |
+| Runtime environment configuration | For containerized apps: distinguish build-time env (embedded in build) vs runtime env (injected at serve time). Use server-side injection for runtime config (inject globals into HTML). Set browser-accessible URLs (e.g., `http://localhost:<port>`) for host access, not internal container names. | Flexible deployment, avoid rebuilds for config changes, prevent browser network errors |
 
 ---
 
@@ -108,11 +112,12 @@ Use golden references and tests already in the repo as patterns; do not introduc
 
 1. **Read the task carefully** — understand file path, action, details, and acceptance criteria.
 2. **Find the golden reference** — copy structure from the example module.
-3. **Implement the code** — follow the details exactly as specified.
-4. **Write the test** — create test file alongside the code, not after.
-5. **Run lint and tests** — ensure no errors or warnings.
-6. **Mark task complete** — update checkbox `- [ ]` → `- [x]` in build plan.
-7. **Move to next task** — only after current task is fully complete.
+3. **Prefer CLI tools** — use framework scaffolding commands and package manager CLIs instead of manually creating/editing files when available.
+4. **Implement the code** — follow the details exactly as specified.
+5. **Write the test** — create test file alongside the code, not after.
+6. **Run lint and tests** — ensure no errors or warnings.
+7. **Mark task complete** — update checkbox `- [ ]` → `- [x]` in build plan.
+8. **Move to next task** — only after current task is fully complete.
 
 ### After All Tasks
 
@@ -120,6 +125,7 @@ Use golden references and tests already in the repo as patterns; do not introduc
 2. **Check for unused imports** — remove any that lint didn't catch.
 3. **Verify acceptance criteria** — re-read each task's criteria.
 4. **Update build plan** — mark any deviations or clarifications (append-only).
+5. **Validate build & runtime artifacts** — run project build and packaging commands and run smoke tests to verify that built artifacts can be started and that the endpoints respond as expected. Document the build/packaging and runtime commands and results in the append-only build plan notes. Avoid referencing specific container or packaging technologies; use the project's packaging, deployment, or runtime tooling.
 
 ---
 
@@ -169,6 +175,7 @@ Refer to frontend golden references for example stores and composables.
 | Missing `:key` in `v-for` | Always provide stable, unique key. | Lint warning |
 | Hardcoded strings | Use constants or i18n. | String literals in template |
 | Global CSS | Use `<style scoped>`. | Missing `scoped` |
+| Not validating I/O response types | Check `Content-Type` and payload shape before parsing/using (e.g., guard against HTML/index.html from dev server); surface clear, actionable errors and add tests for non-conforming responses. | Parse errors like "Unexpected token '<'" or runtime type errors |
 
 ### Backend Mistakes
 
@@ -184,6 +191,7 @@ Refer to frontend golden references for example stores and composables.
 | Hardcoded config | Use `ConfigService`. | String literals |
 | Swallowing errors | Follow `.github/instructions/backend.instructions.md` for error handling and exception patterns. | See backend instructions |
 | Using `any` type | Define explicit interfaces. | Type system / type-checker warnings |
+| Not validating data from external sources (DB, files, APIs, user input) | Validate and sanitize incoming data, assert shapes and types, and throw controlled exceptions; include tests for malformed inputs. | Runtime type errors or unhandled exceptions |
 
 ### Testing Mistakes
 
@@ -195,6 +203,7 @@ Refer to frontend golden references for example stores and composables.
 | Testing implementation | Test behavior, not internals. | Mocking private methods |
 | Non-deterministic data | Use fixtures, not `Math.random()`. | Random failures |
 | Missing error path tests | Test both success and failure. | Only happy path |
+| Missing tests for unexpected I/O data types | Add tests that simulate malformed/non-JSON responses, invalid DB records, and bad file contents so the code's error paths are exercised and user-facing errors are helpful. | No tests cover malformed I/O scenarios |
 
 ---
 
@@ -210,6 +219,7 @@ Before marking a task complete, verify:
 - [ ] No commented-out code
 - [ ] Follows naming conventions (PascalCase/camelCase)
 - [ ] Has corresponding test file
+ - [ ] I/O validation added where applicable (check content-type, validate shapes, sanitize inputs) and tests cover malformed/non-JSON cases
 
 ### For backend code:
 
@@ -218,7 +228,9 @@ Before marking a task complete, verify:
 - [ ] DTOs validated per `.github/instructions/backend.instructions.md`
 - [ ] Schema and DTO fields match
 - [ ] Errors handled per `.github/instructions/backend.instructions.md`
+ - [ ] External I/O validated and tested (DB queries, external APIs, file reads, user input)
 - [ ] No hardcoded config values
+ - [ ] Build artifact paths, runtime packaging copies, and lockfile (if present) sync verified; build and runtime smoke tests pass
 
 ### For frontend code:
 
@@ -228,6 +240,7 @@ Before marking a task complete, verify:
 - [ ] State changes follow patterns in `.github/instructions/frontend.instructions.md`
 - [ ] No inline fetch calls — use store/composable patterns per frontend instructions
 - [ ] Uses component-scoped styles as per frontend instructions
+ - [ ] Runtime package includes an explicit entrypoint and required runtime metadata (e.g., lockfile, manifest). Ensure the build artifact output paths align with packaging expectations and that runtime config/env var defaults are set to enable service-to-service resolution in the deployment environment.
 
 ### For tests:
 
@@ -268,7 +281,7 @@ If you encounter a situation where:
 2. **The interface/type doesn't match** → Append clarification to plan, proceed with correct types.
 3. **A dependency task isn't complete** → Stop, do not proceed out of order.
 4. **The golden reference doesn't exist** → Use instruction files as guide, document in plan.
-5. **A library isn't in package.json** → Stop, do not add dependencies. Flag to Team Lead.
+5. **A library isn't in the project's manifest** (e.g., `package.json`, `pyproject.toml`, `go.mod`) → Stop and document the need in the build plan. If the library is a required runtime dependency for the framework or pattern to work, add it with a short justification in the plan and ensure the project's lockfile (if present) is updated via the project's package manager; otherwise flag to Team Lead and stop.
 
 **Always append clarifications, never modify or delete existing plan content.**
 

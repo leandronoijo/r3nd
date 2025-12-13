@@ -10,18 +10,18 @@
 
 Complete these items **before** starting any implementation tasks.
 
-- [ ] Read `.github/instructions/testing.instructions.md`
-- [ ] Read `.github/instructions/frontend.instructions.md`
-- [ ] Read `.github/instructions/backend.instructions.md`
+- [x] Read `.github/instructions/testing.instructions.md`
+- [x] Read `.github/instructions/frontend.instructions.md`
+- [x] Read `.github/instructions/backend.instructions.md`
 - [ ] Ensure backend (`/api/greetings`) and frontend (Home view) are available/running
-- [ ] Confirm `data-test-id` selectors implemented per frontend plan
-- [ ] No new dependencies (Playwright already configured; otherwise justify below)
+- [x] Confirm `data-test-id` selectors implemented per frontend plan
+- [x] No new dependencies (Playwright already configured; otherwise justify below)
 
 ### New Dependencies (if any)
 
 | Package | Purpose | Justification |
 |---------|---------|---------------|
-| _None_ | — | — |
+| `@playwright/test` | E2E runner | Provides the Playwright test harness used by `tests/e2e/*` and the `test:e2e` script; required because the plan assumes Playwright is available. |
 
 ---
 
@@ -49,7 +49,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 1: Ensure Playwright config
 
-- [ ] **Verify/adjust Playwright config**
+- [x] **Verify/adjust Playwright config**
 - **File(s):** `playwright.config.ts` (or repo equivalent)
 - **Action:** create/modify
 - **Details:**
@@ -64,7 +64,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 2: Home flow E2E
 
-- [ ] **Create main E2E spec**
+- [x] **Create main E2E spec**
 - **File(s):** `tests/e2e/greeting.e2e.spec.ts`
 - **Action:** create
 - **Dependencies:** Frontend/Backend running
@@ -94,7 +94,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 4: Seed/warm-up step
 
-- [ ] **Ensure data available**
+- [x] **Ensure data available**
 - **File(s):** `tests/e2e/fixtures/README.md` (doc) or `scripts/seed` (if needed)
 - **Action:** doc/create (optional)
 - **Details:**
@@ -107,7 +107,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 5: Add package script (if missing)
 
-- [ ] **Wire NPM script for E2E**
+- [x] **Wire NPM script for E2E**
 - **File(s):** `package.json`
 - **Action:** modify (only if absent)
 - **Details:**
@@ -118,7 +118,7 @@ Complete these items **before** starting any implementation tasks.
 
 #### Task 6: README blurb
 
-- [ ] **Document how to run E2E**
+- [x] **Document how to run E2E**
 - **File(s):** `README.md`
 - **Action:** modify (append)
 - **Details:**
@@ -175,11 +175,11 @@ Complete these items **before** starting any implementation tasks.
 
 ## 6. Definition of Done
 
-- [ ] Playwright config set with correct base URL.
-- [ ] E2E specs created using only `data-test-id` selectors.
-- [ ] Tests cover load and refresh paths (and error if feasible).
-- [ ] README/docs updated with run instructions.
-- [ ] No new dependencies unless justified.
+- [x] Playwright config set with correct base URL.
+- [x] E2E specs created using only `data-test-id` selectors.
+- [x] Tests cover load and refresh paths (and error if feasible).
+- [x] README/docs updated with run instructions.
+- [x] No new dependencies unless justified.
 
 ---
 
@@ -187,3 +187,13 @@ Complete these items **before** starting any implementation tasks.
 
 - Keep tests deterministic: avoid relying on random fact text changing; instead assert presence and structure, or wait for network idle after refresh.
 - Do not mock network in E2E; rely on running backend + Mongo as per compose.
+
+---
+
+## Implementation Notes (Added by Developer)
+
+### Playwright Dependency
+`@playwright/test` (plus the browsers it downloads) was installed via the new root `package.json`; the plan required Playwright to be runnable locally, so the dependency is justified as documented in Section 0. Running `npx playwright install` emits a host validation warning when `libicu74`, `libjpeg-turbo8`, and `gstreamer1.0-libav` are missing—install those system packages if CI fails.
+
+### Services & Error Path
+The E2E suite was authored against `http://localhost:4173`, but this environment does not have the backend/frontend stack running, so the Playwright tests were not executed after authoring; please start `docker-compose -f src/docker-compose.yml up --build` before running `npm run test:e2e`. Task 3 remains unimplemented because the backend does not expose a configurable error path without further code changes.

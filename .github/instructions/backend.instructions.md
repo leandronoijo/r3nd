@@ -19,6 +19,18 @@ These rules apply to all code under `src/backend/`. AI agents and humans must fo
 
 **Testing & quality gates:** Follow `.github/instructions/testing.instructions.md`.
 
+### CLI Tooling & Package Management
+
+**Always prefer CLI tools over manual file editing:**
+- **Installing packages**: Use `npm install <package>` instead of manually editing `package.json`.
+- **Scaffolding**: Use NestJS CLI for generating modules, controllers, services:
+  - `nest generate module <name>` or `nest g mo <name>`
+  - `nest generate controller <name>` or `nest g co <name>`
+  - `nest generate service <name>` or `nest g s <name>`
+- **Project setup**: Use `nest new <project-name>` for initial project structure.
+
+**Why**: CLI tools ensure correct imports, module registration, and follow NestJS conventions automatically.
+
 ### Forbidden
 
 - Express patterns outside NestJS abstractions.

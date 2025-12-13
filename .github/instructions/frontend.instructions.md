@@ -16,8 +16,18 @@ These rules apply to all code under `src/frontend/`. AI agents and humans must f
 | Framework | Vue 3 | Composition API only, `<script setup>` required |
 | State | Pinia | All global/shared state lives in stores |
 | UI Library | Vuetify | The **only** allowed component library |
+| Build Tool | Vite | Fast dev server and optimized builds |
 
 **Testing & quality gates:** Follow `.github/instructions/testing.instructions.md`.
+
+### CLI Tooling & Package Management
+
+**Always prefer CLI tools over manual file editing:**
+- **Installing packages**: Use `npm install <package>` instead of manually editing `package.json`.
+- **Scaffolding**: If the framework provides scaffolding commands (e.g., Vue CLI, Vite create), use them instead of manually creating project structure.
+- **Component generation**: Use framework CLI generators when available (e.g., `vite create`, custom generators).
+
+**Why**: CLI tools ensure correct configuration, update lockfiles automatically, and follow framework best practices.
 
 ### Forbidden
 
@@ -72,6 +82,42 @@ src/frontend/
 3. Keep state minimal; derive values via `computed`.
 4. All async logic (API calls) belongs in **actions**, not components.
 5. Never mutate store state directly from components — use actions.
+
+---
+
+## Runtime Environment Configuration
+
+**Build-time vs Runtime Environment Variables:**
+
+- **Build-time** (Vite `import.meta.env.*`): Embedded in the build output at compile time. Cannot change without rebuilding.
+- **Runtime** (injected globals): Set after build, allows configuration changes without rebuilds.
+
+**Pattern for Runtime Configuration:**
+
+1. **Server injection**: Custom server (e.g., `server.js`) reads `process.env` and injects into HTML:
+   ```javascript
+   const html = originalHtml.replace('</head>', 
+     `<script>window.__API_BASE_URL__="${process.env.VITE_API_BASE_URL}";</script></head>`);
+   ```
+
+2. **Client consumption**: Store/composable reads runtime global with fallbacks:
+   ```typescript
+   const apiBase = (globalThis as any).__API_BASE_URL__ || 
+                   import.meta.env.VITE_API_BASE_URL || 
+                   '/api';
+   ```
+
+3. **Treat empty strings as undefined**: Use `|| undefined` to ensure fallback chain works:
+   ```typescript
+   const runtimeVar = ((globalThis as any).__VAR__) || undefined;
+   const buildVar = (import.meta.env.VITE_VAR) || undefined;
+   const final = runtimeVar ?? buildVar ?? defaultValue;
+   ```
+
+**Docker/Container Pattern:**
+- Set env vars as both build `args` and runtime `environment` in docker-compose.
+- For browser access from host: use `http://localhost:<port>` not internal service names.
+- Custom server must be included in runtime image and expose env as runtime ENV.
 
 ---
 

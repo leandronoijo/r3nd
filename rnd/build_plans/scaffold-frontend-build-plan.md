@@ -26,6 +26,7 @@ Complete these items **before** starting any implementation tasks.
 | vue | Framework | Core Vue 3 framework |
 | pinia | State management | For global state as per instructions |
 | vuetify | UI library | Only allowed UI library per instructions |
+| @mdi/font | Icons | Required by Vuetify for Material Design Icons |
 | vue-router | Routing | For SPA navigation |
 | typescript | Language | For type safety |
 | @vue/tsconfig | TS config | Standard Vue TS config |
@@ -66,11 +67,19 @@ Complete these items **before** starting any implementation tasks.
 - **Action:** create
 - **Dependencies:** None
 - **Details:**
-  - Create `src/frontend/package.json` with guessed versions (e.g., vue: ^3.4.0, pinia: ^2.1.0, etc.).
-  - Include scripts: `dev`, `build`, `test`.
-  - Run `npm install` in `src/frontend` to resolve exact versions.
+  - **Prefer CLI**: Use `npm init -y` or `npm create vite@latest` to scaffold initial project, then use `npm install <package>` for each dependency instead of manually editing the file.
+  - Required packages (install via CLI):
+    - `npm install vue pinia vuetify @mdi/font vue-router`
+    - `npm install -D typescript @vue/tsconfig vite @vitejs/plugin-vue @types/node jest @vue/test-utils jest-environment-jsdom @types/jest`
+  - Update scripts in `package.json`:
+    - `dev`: `vite`
+    - `build`: `vite build`
+    - `test`: `jest`
+  - **Why CLI**: Ensures lockfile sync, correct version resolution, and follows framework best practices.
 - **Acceptance Criteria:**
   - package.json exists with all required deps; node_modules installed.
+  - Scripts are correctly defined.
+  - `package-lock.json` is generated and in sync.
 - **Effort:** small
 
 #### Task 1: Initialize main.ts
@@ -100,6 +109,22 @@ Complete these items **before** starting any implementation tasks.
   - Uses Vuetify structure; no inline fetch.
 - **Effort:** small
 
+#### Task 2.5: Validate build and scripts
+
+- [ ] **Ensure npm scripts work**
+- **File(s):** N/A
+- **Action:** run commands
+- **Dependencies:** Task 0, Task 1, Task 2
+- **Details:**
+  - Run `npm run build` to ensure Vite build succeeds.
+  - Run `npm run test` to ensure all tests pass.
+  - Run `npm run dev` briefly (e.g., timeout after 5 seconds) to ensure the dev server starts without errors.
+- **Acceptance Criteria:**
+  - `npm run build` completes without errors.
+  - `npm run test` passes all tests.
+  - `npm run dev` starts the dev server without errors.
+- **Effort:** small
+
 ### Phase 2: State & API
 
 #### Task 3: Create Greeting Store
@@ -113,10 +138,18 @@ Complete these items **before** starting any implementation tasks.
   - `defineStore` with setup syntax.
   - State: `greeting` (string | null), `fact` (object | null), `loading` (boolean), `error` (string | null).
   - Action: `async fetchGreeting()` → GET `/api/greetings`, set `greeting` and `fact`, manage loading/error.
+  - **API base URL resolution** (runtime-configurable pattern):
+    - Read runtime-injected global: `(globalThis as any).__VITE_API_BASE_URL__`
+    - Fallback to build-time env: `import.meta.env.VITE_API_BASE_URL` (if using Vite)
+    - Default fallback: `'/api'` (relative path for proxy/same-origin)
+    - Treat empty strings as undefined: use `|| undefined` to ensure fallback chain works
+    - Example: `const apiBase = ((globalThis as any).__VITE_API_BASE_URL__) || import.meta.env.VITE_API_BASE_URL || '/api';`
   - Use global `fetch`; no new deps; handle non-200 with thrown error.
+  - Validate response content-type is JSON before parsing to avoid silent HTML responses.
 - **Acceptance Criteria:**
   - Store compiles; no `any` types.
   - All async logic in actions; components use store getters/state only.
+  - API base URL supports runtime configuration without rebuild.
 - **Effort:** medium
 
 ### Phase 3: UI Components & View
@@ -286,10 +319,11 @@ None (frontend only).
 ## 8. Definition of Done
 
 - [ ] All tasks in Section 2 marked complete
-- [ ] Frontend runs without errors (npm run dev starts dev server)
+- [ ] `npm run build` completes without errors
+- [ ] `npm run dev` starts dev server without errors
+- [ ] `npm run test` passes all tests
 - [ ] App boots and renders Home view
 - [ ] Home view fetches greeting via store and displays greeting + fact
-- [ ] All tests pass; no lint/type errors
 - [ ] No `any` types or unused code
 
 ---
@@ -308,5 +342,9 @@ The golden reference paths `src/frontend/components/example/` and `src/frontend/
 ### Tech Spec Clarification
 The `rnd/tech_specs/` directory does not contain a spec for this feature, so there was nothing to review before implementation.
 
-### Build Plan Update (2025-12-12)
-Added Task 0 to create `package.json` with dependencies and run `npm install`, as the frontend was not runnable without it. Renumbered subsequent tasks accordingly.
+
+### Testing Dependency Clarification
+`ts-jest`, `@vue/vue3-jest`, `identity-obj-proxy`, `@pinia/testing`, and `@vue/compiler-sfc` were added to the frontend package to enable Jest-powered TS + Vue SFC testing, mock-based Vuetify usage, and the Vite compiler support that the build plan’s base stack requires.
+
+### Jest/Test Setup Notes
+Jest now loads the `tests/` folder via `<rootDir>/../../tests`, points `moduleDirectories` at `./node_modules`, and overrides `tsconfig.jest.json` to search both `node_modules` and `../src/frontend/node_modules` so tests can resolve runtime deps without a root-level install. Vuetify imports are mapped to lightweight mocks in `tests/__mocks__`, and `shims-vue.d.ts` declares the stubbed `vuetify` modules so TypeScript stays happy while the real frontend still uses the actual components.
