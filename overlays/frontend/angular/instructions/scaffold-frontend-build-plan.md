@@ -74,6 +74,8 @@ Complete these items **before** starting any implementation tasks.
   - **Prefer CLI**: Use `ng new frontend --routing --style=scss --standalone` to scaffold initial project, then use `npm install <package>` for each additional dependency.
   - Required packages (install via CLI):
     - `npm install primeng primeicons`
+  - Dev server convenience:
+    - Add a `proxy.conf.json` that proxies `/api` to `http://localhost:3000` and update the `start` script to use `ng serve --proxy-config proxy.conf.json` so local dev calls to `/api` reach the backend without needing runtime injection.
   - Update `angular.json`:
     - Add PrimeNG styles to `styles` array: `"node_modules/primeng/resources/themes/lara-light-blue/theme.css"`, `"node_modules/primeng/resources/primeng.min.css"`, `"node_modules/primeicons/primeicons.css"`
   - **Why CLI**: Ensures correct Angular workspace structure, lockfile sync, and follows framework best practices.
@@ -163,10 +165,11 @@ Complete these items **before** starting any implementation tasks.
     - `error$: Observable<string | null>`
   - Method: `fetchGreeting(): void` → GET `/api/greetings`, update subjects, manage loading/error.
   - **API base URL resolution** (runtime-configurable pattern):
-    - Read runtime-injected global: `(globalThis as any).__API_BASE_URL__`
-    - Default fallback: `'/api'` (relative path for proxy/same-origin)
-    - Treat empty strings as undefined: use `|| undefined` to ensure fallback chain works
-    - Example: `const apiBase = ((globalThis as any).__API_BASE_URL__) || '/api';`
+    - Read runtime-injected globals (support both common names): `(globalThis as any).__API_BASE_URL__` and `(globalThis as any).__VITE_API_BASE_URL__`.
+    - Default fallback: `'/api'` (relative path for proxy/same-origin).
+    - Treat empty strings as undefined: use `|| undefined` to ensure fallback chain works.
+    - Example: `const apiBase = ((globalThis as any).__API_BASE_URL__ || (globalThis as any).__VITE_API_BASE_URL__) || '/api';`
+    - Note: the runner/server should inject at least one of the globals (preferably both) so browser clients pick the correct backend host/port.
   - Use Angular `HttpClient`; inject in constructor.
   - Use RxJS operators: `map`, `catchError`, `tap`, `finalize`.
   - Validate response content-type is JSON before parsing to avoid silent HTML responses.
@@ -174,6 +177,7 @@ Complete these items **before** starting any implementation tasks.
   - Service compiles; no `any` types.
   - All HTTP logic in service; components use observables only.
   - API base URL supports runtime configuration without rebuild.
+  - Runtime injection: the service respects injected runtime variables (supports both `__API_BASE_URL__` and `__VITE_API_BASE_URL__`) and falls back to `/api`.
   - BehaviorSubjects are private; only observables exposed publicly.
 - **Effort:** medium
 
@@ -362,7 +366,8 @@ None.
 
 | Variable | Required | Default | Purpose |
 |----------|----------|---------|---------|
-| `API_BASE_URL` | No | `/api` | Base URL for API calls (prefix fetches) |
+| `API_BASE_URL` | No | `/api` | Base URL for API calls (prefix fetches); recommended runtime env name to inject for browser access (e.g., `http://localhost:3000/api`). |
+| `VITE_API_BASE_URL` | No | (alias) | Historical/alternate env name used by some runners; server should inject either or both names to ensure clients pick it up. |
 
 ### Migration Plan
 
@@ -395,6 +400,12 @@ None (frontend only).
 
 This scaffold build plan guides the developer agent to bootstrap the frontend. Ensure all interactive elements include `data-test-id` attributes for testing.
 
+### Troubleshooting
+
+- Symptom: Browser network tab shows requests to `http://<frontend-host>:<frontend-port>/api/...` returning HTML instead of JSON.
+  - Cause: Runtime env not injected for browser use or env points to an internal container hostname (e.g., `http://backend:3000/api`).
+  - Fix: For local/browser access set `API_BASE_URL` or `VITE_API_BASE_URL` to `http://localhost:3000/api` and ensure the runner/server injects it into HTML (preferably inject both `__API_BASE_URL__` and `__VITE_API_BASE_URL__`). For local dev, prefer using the dev proxy (`proxy.conf.json`) so `/api` requests are forwarded to port 3000.
+
 ---
 
 ## Implementation Notes (Added by Developer)
@@ -415,6 +426,7 @@ Angular CLI handles most of the initial setup automatically. The build plan assu
 - PrimeNG styles must be added to `angular.json` in the `styles` array for global theme/component styles.
 - HttpClient is provided via `app.config.ts` using `provideHttpClient()` for standalone applications.
 - The `__API_BASE_URL__` runtime global can be injected by a custom server similar to the Vue pattern, allowing environment configuration without rebuilds.
+ - The runtime global can be injected by a custom server similar to the Vue pattern, allowing environment configuration without rebuilds. **Inject both** `__API_BASE_URL__` and `__VITE_API_BASE_URL__` (or at least one) to be robust to different client expectations; prefer `http://localhost:3000/api` for browser-level access in local/dev setups.
 
 ### PrimeNG Asset Clarification
 PrimeNG 21 no longer exposes the legacy `resources` directory via its `exports` map, so the theme, PrimeIcons CSS, and associated fonts/images were downloaded from the CDN (v17.1 assets) into `src/styles/` and referenced locally to keep the build deterministic. This avoids relying on unreachable paths when `angular.json` injects the styles.
