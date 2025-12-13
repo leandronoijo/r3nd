@@ -32,23 +32,20 @@ services:
     networks:
       - app-net
 
-  # Frontend Service (Angular)
+  # Frontend Service (Static HTML with Python server)
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      args:
-        # Build-time: embedded in built assets
-        VITE_API_BASE_URL: http://localhost:3000/api/v1
     container_name: r3nd-frontend
     depends_on:
       - backend
     ports:
       - "4173:4173"
     environment:
-      # Runtime: injected into served HTML by server.js
       # CRITICAL: Use localhost for browser access from host, NOT the service name 'backend'
       # Browser makes requests from host machine, so it needs host-accessible URL
+      # Note: Python server.py injects this into served HTML
       VITE_API_BASE_URL: http://localhost:3000/api/v1
       PORT: 4173
     networks:
