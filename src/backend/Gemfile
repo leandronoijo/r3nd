@@ -1,0 +1,24 @@
+source 'https://rubygems.org'
+
+ruby '~> 3.3.0'
+
+# Core Rails framework
+gem 'rails', '~> 8.1.0'
+
+# Database adapter
+gem 'pg', '~> 1.5'
+
+# Web server
+gem 'puma', '>= 6.0'
+
+# CORS support for API
+gem 'rack-cors'
+
+# Reduces boot times through caching
+gem 'bootsnap', require: false
+
+group :development, :test do
+  gem 'debug', platforms: %i[ mri windows ], require: 'debug/prelude'
+  gem 'brakeman', require: false
+  gem 'rubocop-rails-omakase', require: false
+end

@@ -188,3 +188,77 @@ Potential future enhancements:
 - Auto-link specs and build plans to PR descriptions
 - Diagram generation from tech specs
 - Optional CI for running tests after the Developer stage
+
+---
+
+## 🐳 Running with Docker
+
+### Quick Start
+
+Start all services (database, backend, frontend):
+
+```bash
+docker compose -f src/docker-compose.yml up --build
+```
+
+The application will be available at:
+- **Frontend**: http://localhost:4173
+- **Backend API**: http://localhost:3000/api/v1
+- **PostgreSQL**: localhost:5432
+
+### Service Ports
+
+| Service | Port | URL |
+|---------|------|-----|
+| Frontend | 4173 | http://localhost:4173 |
+| Backend | 3000 | http://localhost:3000/api/v1 |
+| PostgreSQL | 5432 | postgresql://r3nd:r3nd_password@localhost:5432/r3nd_production |
+
+### Environment Variables
+
+**Backend:**
+- `DATABASE_URL`: PostgreSQL connection string (default: `postgresql://r3nd:r3nd_password@postgres:5432/r3nd_production`)
+- `SECRET_KEY_BASE`: Rails secret key (auto-generated for development)
+- `RAILS_MASTER_KEY`: Rails credentials encryption key (optional for development)
+- `PORT`: HTTP port (default: 3000)
+
+**Frontend:**
+- `VITE_API_BASE_URL`: Backend API URL for browser access (default: `http://localhost:3000/api/v1`)
+- `PORT`: HTTP port (default: 4173)
+
+### Common Commands
+
+```bash
+# Build without cache (clean build)
+docker compose -f src/docker-compose.yml build --no-cache
+
+# Start services in detached mode
+docker compose -f src/docker-compose.yml up -d
+
+# View logs
+docker compose -f src/docker-compose.yml logs -f
+
+# Stop all services
+docker compose -f src/docker-compose.yml down
+
+# Stop and remove volumes (clean slate)
+docker compose -f src/docker-compose.yml down -v
+```
+
+### Smoke Tests
+
+```bash
+# Test backend API
+curl http://localhost:3000/api/v1/greetings
+
+# Expected response: HTTP 200 with JSON
+{
+  "greeting": "Hello from Rails API!",
+  "fact": { ... }
+}
+
+# Test frontend
+curl http://localhost:4173
+
+# Expected: HTML content from index.html
+```

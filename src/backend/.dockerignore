@@ -1,0 +1,16 @@
+.git
+.gitignore
+log/*
+tmp/*
+vendor/bundle
+public/assets
+public/packs
+coverage
+.byebug_history
+.env*
+*.log
+.DS_Store
+.vscode
+.idea
+spec/examples.txt
+README.md
