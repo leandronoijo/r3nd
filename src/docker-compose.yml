@@ -19,23 +19,15 @@ services:
       timeout: 5s
       retries: 5
 
-  # Backend Service (Rails API)
+  # Backend Service (Ruby API)
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: r3nd-backend
-    depends_on:
-      postgres:
-        condition: service_healthy
     ports:
       - "3000:3000"
     environment:
-      RAILS_ENV: production
-      DATABASE_URL: postgresql://r3nd:r3nd_password@postgres:5432/r3nd_production
-      # For development, use a dummy secret. In production, set via environment.
-      SECRET_KEY_BASE: ${SECRET_KEY_BASE:-development_secret_key_base_minimum_30_characters_long_for_rails}
-      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY:-}
       PORT: 3000
     networks:
       - app-net

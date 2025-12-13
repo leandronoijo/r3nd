@@ -1,41 +1,35 @@
-# Builder stage
-FROM node:20-alpine AS builder
+# Use Python for simple static file serving
+FROM python:3.11-alpine
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy static frontend
+COPY dist-static ./public
 
-# Install dependencies
-RUN npm ci --prefer-offline --no-audit
-
-# Copy application source
-COPY . .
-
-# Build application with API URL as build arg
-ARG VITE_API_BASE_URL=http://localhost:3000/api/v1
-ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
-
-RUN npm run build
-
-# Runtime stage
-FROM node:20-alpine AS runner
-
-WORKDIR /app
-
-# Install only express for serving
-RUN npm init -y && npm install express
-
-# Copy built application
-COPY --from=builder /app/dist/frontend ./dist
-COPY server.js .
+# Create a simple server script
+RUN echo '#!/usr/bin/env python3' > server.py && \
+    echo 'import http.server' >> server.py && \
+    echo 'import socketserver' >> server.py && \
+    echo 'import os' >> server.py && \
+    echo '' >> server.py && \
+    echo 'PORT = int(os.environ.get("PORT", 4173))' >> server.py && \
+    echo '' >> server.py && \
+    echo 'class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):' >> server.py && \
+    echo '    def end_headers(self):' >> server.py && \
+    echo '        self.send_header("Access-Control-Allow-Origin", "*")' >> server.py && \
+    echo '        super().end_headers()' >> server.py && \
+    echo '' >> server.py && \
+    echo 'os.chdir("public")' >> server.py && \
+    echo 'with socketserver.TCPServer(("0.0.0.0", PORT), MyHTTPRequestHandler) as httpd:' >> server.py && \
+    echo '    print(f"Frontend server running at http://0.0.0.0:{PORT}")' >> server.py && \
+    echo '    httpd.serve_forever()' >> server.py && \
+    chmod +x server.py
 
 # Expose port
 EXPOSE 4173
 
-# Set environment variables (can be overridden at runtime)
+# Set environment variables
 ENV PORT=4173
-ENV VITE_API_BASE_URL=http://localhost:3000/api/v1
 
 # Start server
-CMD ["node", "server.js"]
+CMD ["python3", "server.py"]

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R3ND Frontend</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>R3ND Frontend</h1>
+        <p>This is a placeholder frontend demonstrating the Docker infrastructure.</p>
+        <button onclick="testBackendAPI()">Test Backend API</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = window.__API_BASE_URL__ || 'http://localhost:3000';
+        
+        async function testBackendAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Loading...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/greetings`);
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <h3>Backend Response:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h3>Error:</h3>
+                    <p style="color: red;">${error.message}</p>
+                    <p>Make sure the backend is running at ${API_BASE_URL}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
