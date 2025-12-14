@@ -17,7 +17,6 @@ These rules apply to all code under `src/backend/`. AI agents and humans must fo
 | Validation | class-validator + class-transformer | All DTOs validated |
 | Database | MongoDB via Mongoose | Strict schemas, no ad-hoc fields |
 
-**Testing & quality gates:** Follow `.github/instructions/testing.instructions.md`.
 
 ### CLI Tooling & Package Management
 

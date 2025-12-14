@@ -60,86 +60,118 @@ function mapDestination(remotePath, backend, frontend) {
 async function main() {
   console.log('r3nd — project scaffolder');
 
-  const { backend } = await prompt([
-    {
-      type: 'list',
-      name: 'backend',
-      message: 'Choose a backend',
-      choices: [
-        { name: 'NestJS + Mongo', value: 'nestjs' },
-        { name: 'FastAPI + Mongo', value: 'fast-api' },
-        { name: 'Ruby on Rails + Postgres', value: 'ruby-on-rails' }
-      ]
-    }
-  ]);
-
-  const { frontend } = await prompt([
-    {
-      type: 'list',
-      name: 'frontend',
-      message: 'Choose a frontend',
-      choices: [
-        { name: 'Vue', value: 'vue' },
-        { name: 'Angular', value: 'angular' }
-      ]
-    }
-  ]);
-
   const cwd = process.cwd();
 
+  // Check for existing instructions to detect resume scenario
+  const backendInstructionsExist = await fs.access(path.join(cwd, '.github', 'instructions', 'backend.instructions.md')).then(() => true).catch(() => false);
+  const frontendInstructionsExist = await fs.access(path.join(cwd, '.github', 'instructions', 'frontend.instructions.md')).then(() => true).catch(() => false);
+
+  let backend, frontend;
+
+  if (backendInstructionsExist) {
+    console.log('✓ Backend instructions already exist, skipping backend selection');
+    // Try to detect backend type from existing files (default to nestjs if cannot detect)
+    backend = 'nestjs'; // Could be enhanced to actually detect from files
+  } else {
+    const response = await prompt([
+      {
+        type: 'list',
+        name: 'backend',
+        message: 'Choose a backend',
+        choices: [
+          { name: 'NestJS + Mongo', value: 'nestjs' },
+          { name: 'FastAPI + Mongo', value: 'fast-api' },
+          { name: 'Ruby on Rails + Postgres', value: 'ruby-on-rails' }
+        ]
+      }
+    ]);
+    backend = response.backend;
+  }
+
+  if (frontendInstructionsExist) {
+    console.log('✓ Frontend instructions already exist, skipping frontend selection');
+    // Try to detect frontend type from existing files (default to vue if cannot detect)
+    frontend = 'vue'; // Could be enhanced to actually detect from files
+  } else {
+    const response = await prompt([
+      {
+        type: 'list',
+        name: 'frontend',
+        message: 'Choose a frontend',
+        choices: [
+          { name: 'Vue', value: 'vue' },
+          { name: 'Angular', value: 'angular' }
+        ]
+      }
+    ]);
+    frontend = response.frontend;
+  }
+
   // Build list of path prefixes to copy
-  const prefixes = [
-    '.github/',
-    'rnd/',
-    '.gitignore',
-    'README.md',
-    `overlays/backend/${backend}/`,
-    `overlays/frontend/${frontend}/`
-  ];
-
-  console.log('Fetching file list from GitHub...');
-  let tree;
-  try {
-    const res = await axios.get(API_TREE_URL, { headers: { Accept: 'application/vnd.github.v3+json' } });
-    tree = res.data.tree;
-  } catch (err) {
-    console.error('Failed to fetch repository tree from GitHub API:', err.message);
-    process.exit(1);
+  const prefixes = [];
+  
+  // Always include base files if not resuming
+  if (!backendInstructionsExist && !frontendInstructionsExist) {
+    prefixes.push('.github/', 'rnd/', '.gitignore', 'README.md');
+  }
+  
+  // Only include backend overlay if backend instructions don't exist
+  if (!backendInstructionsExist) {
+    prefixes.push(`overlays/backend/${backend}/`);
+  }
+  
+  // Only include frontend overlay if frontend instructions don't exist
+  if (!frontendInstructionsExist) {
+    prefixes.push(`overlays/frontend/${frontend}/`);
   }
 
-  const toCopy = tree.filter(item => {
-    if (item.type !== 'blob') return false;
-    return prefixes.some(p => {
-      if (p.endsWith('/')) return item.path.startsWith(p);
-      return item.path === p;
-    });
-  }).map(item => item.path);
+  // If both exist, we're in full resume mode - skip file copying
+  if (backendInstructionsExist && frontendInstructionsExist) {
+    console.log('✓ Resuming from existing setup, skipping file download');
+  } else {
+    console.log('Fetching file list from GitHub...');
+    let tree;
+    try {
+      const res = await axios.get(API_TREE_URL, { headers: { Accept: 'application/vnd.github.v3+json' } });
+      tree = res.data.tree;
+    } catch (err) {
+      console.error('Failed to fetch repository tree from GitHub API:', err.message);
+      process.exit(1);
+    }
 
-  if (toCopy.length === 0) {
-    console.warn('No files matched the requested prefixes. Aborting.');
-    process.exit(1);
+    const toCopy = tree.filter(item => {
+      if (item.type !== 'blob') return false;
+      return prefixes.some(p => {
+        if (p.endsWith('/')) return item.path.startsWith(p);
+        return item.path === p;
+      });
+    }).map(item => item.path);
+
+    if (toCopy.length === 0) {
+      console.warn('No files matched the requested prefixes.');
+    } else {
+      console.log(`Found ${toCopy.length} files to copy. Starting download...`);
+
+      for (const remotePath of toCopy) {
+        const mapped = mapDestination(remotePath, backend, frontend);
+        await writeFileFromUrl(remotePath, cwd, mapped || undefined);
+      }
+    }
+
+    // Ensure rnd subdirectories exist
+    const rndDirs = ['rnd/build_plans', 'rnd/product_specs', 'rnd/tech_specs'];
+    for (const r of rndDirs) {
+      const full = path.join(cwd, r);
+      await ensureDir(full);
+      console.log(`Ensured directory: ${r}`);
+    }
+
+    // Ensure .github/instructions exists when overlays included instructions
+    await ensureDir(path.join(cwd, '.github', 'instructions'));
+    console.log('Ensured directory: .github/instructions');
+
+    console.log('Scaffolding complete.');
   }
-
-  console.log(`Found ${toCopy.length} files to copy. Starting download...`);
-
-  for (const remotePath of toCopy) {
-    const mapped = mapDestination(remotePath, backend, frontend);
-    await writeFileFromUrl(remotePath, cwd, mapped || undefined);
-  }
-
-  // Ensure rnd subdirectories exist
-  const rndDirs = ['rnd/build_plans', 'rnd/product_specs', 'rnd/tech_specs'];
-  for (const r of rndDirs) {
-    const full = path.join(cwd, r);
-    await ensureDir(full);
-    console.log(`Ensured directory: ${r}`);
-  }
-
-  // Ensure .github/instructions exists when overlays included instructions
-  await ensureDir(path.join(cwd, '.github', 'instructions'));
-  console.log('Ensured directory: .github/instructions');
-
-  console.log('Scaffolding complete.');
   console.log('Next steps: install dependencies and adapt overlays as needed.');
 
   // Ask the user if they'd like an LLM agent to create a minimal new app
@@ -159,7 +191,7 @@ async function main() {
 
   if (llmChoice === 'codex') {
     // Define the ordered plan files (separate prompts)
-    const plans = [
+    const allPlans = [
       'rnd/build_plans/scaffold-backend-bootstrap-build-plan.md',
       'rnd/build_plans/scaffold-frontend-bootstrap-build-plan.md',
       'rnd/build_plans/scaffold-backend-complete-build-plan.md',
@@ -167,67 +199,138 @@ async function main() {
       'rnd/build_plans/scaffold-infra-build-plan.md'
     ];
 
+    // Check what already exists to determine which plans to skip
+    const backendDirExists = await fs.access(path.join(cwd, 'src', 'backend')).then(() => true).catch(() => false);
+    const frontendDirExists = await fs.access(path.join(cwd, 'src', 'frontend')).then(() => true).catch(() => false);
+    const dockerComposeExists = await fs.access(path.join(cwd, 'docker-compose.yml')).then(() => true).catch(() => false);
+
+    // Filter plans based on what exists
+    const plans = [];
+    
+    if (!backendDirExists) {
+      plans.push(allPlans[0]); // scaffold-backend-bootstrap
+      plans.push(allPlans[2]); // scaffold-backend-complete
+    } else {
+      console.log('✓ Backend directory (src/backend) already exists, skipping backend scaffolding');
+    }
+
+    if (!frontendDirExists) {
+      plans.push(allPlans[1]); // scaffold-frontend-bootstrap
+      plans.push(allPlans[3]); // scaffold-frontend-complete
+    } else {
+      console.log('✓ Frontend directory (src/frontend) already exists, skipping frontend scaffolding');
+    }
+
+    if (!dockerComposeExists) {
+      plans.push(allPlans[4]); // scaffold-infra
+    } else {
+      console.log('✓ docker-compose.yml already exists, skipping infrastructure scaffolding');
+    }
+
+    if (plans.length === 0) {
+      console.log('\n✓ All scaffolding appears to be complete. Nothing to do!');
+      return;
+    }
+
+    function getPlanName(planPath) {
+      return path.basename(planPath, '.md');
+    }
+
     function makePrompt(planPath) {
-      return `using the .github/agents/developer.agent.md as instructions please implement the following building plan to its completion:\n\n1. ${planPath}\n`;
+      const planName = getPlanName(planPath);
+      const doneFile = `${planName}.done`;
+      return `using the .github/agents/developer.agent.md as instructions please implement the following building plan to its completion:\n\n1. ${planPath}\n\nIMPORTANT: When you have completely finished implementing this build plan, create a file named ${doneFile} in the current directory to signal completion.`;
     }
 
     function makeCodexCommand(promptText) {
-      return `codex -a on-failure -s workspace-write sandbox_permissions="require_escalated" exec --skip-git-repo-check "${promptText.replace(/\"/g, '\\\"')}"`;
+      return `codex --yolo '${promptText.replace(/\"/g, '\\\"')}'`;
     }
 
-    console.log('\nLocal codex CLI commands (will be run in orchestrated groups):');
+    console.log('\nLocal codex CLI commands (will be run sequentially):');
     plans.forEach((p, i) => console.log(`${i + 1}. ${p}`));
 
     const { runNow } = await prompt([
-      { type: 'confirm', name: 'runNow', message: 'Run these commands now with the local codex CLI (orchestrated)?', default: false }
+      { type: 'confirm', name: 'runNow', message: 'Run these commands now with the local codex CLI (one by one)?', default: false }
     ]);
 
     if (!runNow) {
       console.log('Okay — when ready you can run these commands locally in this order:');
       plans.forEach((p, i) => {
-        console.log(`\n--- Prompt ${i + 1} (${p}) ---\n`);
+        console.log(`\n--- Prompt ${i + 1} ---\n`);
         console.log(makePrompt(p));
       });
-      console.log('\nOrchestrated execution order: run 1 & 2 in parallel, then 3 & 4 in parallel, then 5.');
+      console.log('\nExecution order: plans will run sequentially (one after another).');
       return;
     }
 
-    console.log('Running codex CLI in orchestrated groups:');
+    console.log('Running codex CLI sequentially:');
 
-    // Groups: [1,2], [3,4], [5]
-    const groups = [[0, 1], [2, 3], [4]];
+    // Helper function to wait for completion file
+    async function waitForCompletion(planPath, maxWaitMs = 3600000) {
+      const planName = getPlanName(planPath);
+      const doneFile = path.join(cwd, `${planName}.done`);
+      const checkInterval = 2000; // Check every 2 seconds
+      const startTime = Date.now();
 
-    async function runGroup(group) {
-      // Start all commands in the group in parallel
-      const proms = group.map(idx => {
-        const p = plans[idx];
-        const promptText = makePrompt(p);
-        const cmd = makeCodexCommand(promptText);
-        console.log(`\nStarting codex for: ${p}`);
-        const child = child_process.spawn('sh', ['-lc', cmd], { stdio: 'inherit' });
-        return new Promise((resolve, reject) => {
-          child.on('close', code => {
-            if (code === 0) {
-              console.log(`codex finished: ${p}`);
-              resolve();
-            } else {
-              reject(new Error(`codex exited with code ${code} for ${p}`));
+      return new Promise((resolve, reject) => {
+        const checkFile = async () => {
+          try {
+            await fs.access(doneFile);
+            console.log(`✓ Completion file found for: ${planPath}`);
+            // Clean up the done file
+            try {
+              await fs.unlink(doneFile);
+            } catch (err) {
+              console.warn(`Warning: Could not delete ${doneFile}`);
             }
-          });
-          child.on('error', err => reject(err));
-        });
+            resolve();
+          } catch (err) {
+            // File doesn't exist yet
+            if (Date.now() - startTime > maxWaitMs) {
+              reject(new Error(`Timeout waiting for completion file: ${doneFile}`));
+            } else {
+              setTimeout(checkFile, checkInterval);
+            }
+          }
+        };
+        checkFile();
       });
-      // Wait for all to finish
-      await Promise.all(proms);
+    }
+
+    async function runPlan(planPath) {
+      const promptText = makePrompt(planPath);
+      const cmd = makeCodexCommand(promptText);
+      console.log(`\nStarting codex for: ${planPath}`);
+      
+      const child = child_process.spawn('sh', ['-lc', cmd], { 
+        stdio: 'inherit',
+        cwd: cwd
+      });
+      
+      // Wait for the completion file
+      await waitForCompletion(planPath);
+      
+      console.log(`Killing codex process for: ${planPath}`);
+      child.kill('SIGTERM');
+      
+      // Give it a moment to terminate gracefully
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      if (!child.killed) {
+        child.kill('SIGKILL');
+      }
+      
+      console.log(`✓ Completed: ${planPath}\n`);
     }
 
     try {
-      for (const g of groups) {
-        await runGroup(g);
+      for (let i = 0; i < plans.length; i++) {
+        console.log(`\n[${i + 1}/${plans.length}] Processing plan...`);
+        await runPlan(plans[i]);
       }
-      console.log('All codex groups completed successfully.');
+      console.log('All codex plans completed successfully.');
     } catch (err) {
-      console.error('An error occurred while running codex groups:', err.message);
+      console.error('An error occurred while running codex:', err.message);
     }
 
   } else if (llmChoice === 'github') {
@@ -235,7 +338,7 @@ async function main() {
 
   } else if (llmChoice === 'generate') {
     // Produce separate prompts for each plan and output them in order
-    const plans = [
+    const allPlans = [
       'rnd/build_plans/scaffold-backend-bootstrap-build-plan.md',
       'rnd/build_plans/scaffold-frontend-bootstrap-build-plan.md',
       'rnd/build_plans/scaffold-backend-complete-build-plan.md',
@@ -243,8 +346,47 @@ async function main() {
       'rnd/build_plans/scaffold-infra-build-plan.md'
     ];
 
+    // Check what already exists to determine which plans to skip
+    const backendDirExists = await fs.access(path.join(cwd, 'src', 'backend')).then(() => true).catch(() => false);
+    const frontendDirExists = await fs.access(path.join(cwd, 'src', 'frontend')).then(() => true).catch(() => false);
+    const dockerComposeExists = await fs.access(path.join(cwd, 'docker-compose.yml')).then(() => true).catch(() => false);
+
+    // Filter plans based on what exists
+    const plans = [];
+    
+    if (!backendDirExists) {
+      plans.push(allPlans[0]); // scaffold-backend-bootstrap
+      plans.push(allPlans[2]); // scaffold-backend-complete
+    } else {
+      console.log('✓ Backend directory (src/backend) already exists, skipping backend scaffolding');
+    }
+
+    if (!frontendDirExists) {
+      plans.push(allPlans[1]); // scaffold-frontend-bootstrap
+      plans.push(allPlans[3]); // scaffold-frontend-complete
+    } else {
+      console.log('✓ Frontend directory (src/frontend) already exists, skipping frontend scaffolding');
+    }
+
+    if (!dockerComposeExists) {
+      plans.push(allPlans[4]); // scaffold-infra
+    } else {
+      console.log('✓ docker-compose.yml already exists, skipping infrastructure scaffolding');
+    }
+
+    if (plans.length === 0) {
+      console.log('\n✓ All scaffolding appears to be complete. Nothing to generate!');
+      return;
+    }
+
+    function getPlanName(planPath) {
+      return path.basename(planPath, '.md');
+    }
+
     function makePrompt(planPath) {
-      return `using the .github/agents/developer.agent.md as instructions please implement the following building plan to its completion:\n\n1. ${planPath}\n`;
+      const planName = getPlanName(planPath);
+      const doneFile = `${planName}.done`;
+      return `using the .github/agents/developer.agent.md as instructions please implement the following building plan to its completion:\n\n1. ${planPath}\n\nIMPORTANT: When you have completely finished implementing this build plan, create a file named '${doneFile}' in the current directory to signal completion.`;
     }
 
     console.log('\n--- COPY & PASTE PROMPTS (in order) ---\n');

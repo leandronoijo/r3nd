@@ -75,10 +75,6 @@ Keep changes small, component-focused, and rely on the repository's golden refer
 Follow backend-specific rules in `.github/instructions/backend.instructions.md` (module patterns, DTOs, schema rules, and service/controller hygiene).
 Do not guess; rely on golden references (`src/backend/modules/example/`) and instruction file guidance for framework-specific code patterns.
 
-### Testing
-
-Follow `.github/instructions/testing.instructions.md` for all testing frameworks, naming conventions, selectors, and required quality gates.
-Use golden references and tests already in the repo as patterns; do not introduce new testing frameworks without updating the testing instructions.
 
 ### General
 
@@ -86,6 +82,8 @@ Use golden references and tests already in the repo as patterns; do not introduc
 |------|-------------|-----|
 | No new frameworks or libraries that were not explicitly approved | Only use what's already in the project's dependency manifest (e.g., package.json, pyproject.toml, go.mod). | Dependency control |
 | Prefer CLI tools over manual file editing | Use framework CLI generators (e.g., `nest g`, `npm install`) and package manager commands instead of manually editing config files. | Consistency, correctness, lockfile sync |
+| Validate package installations immediately | After adding any package, ALWAYS run: (1) package manager install (e.g., `npm install`), (2) build command (e.g., `npm run build`), (3) test command (e.g., `npm run test`). Check for peer dependency conflicts and resolve before proceeding. | Prevent broken builds, catch dependency conflicts early |
+| Validate Docker artifacts after creation | After creating or modifying Dockerfile or docker-compose.yml, ALWAYS: (1) build the image(s) with `docker build` or `docker compose build`, (2) run the container(s) with `docker run` or `docker compose up`, (3) verify services start correctly and endpoints respond. Document commands and results in build plan. | Ensure containerized deployment works before marking task complete |
 | No files >400 lines | Split into smaller modules at 300 lines. | Maintainability |
 | No unused imports | Remove before committing. | Clean code |
 | No commented-out code | Delete, don't comment. | Code hygiene |
@@ -115,9 +113,11 @@ Use golden references and tests already in the repo as patterns; do not introduc
 3. **Prefer CLI tools** — use framework scaffolding commands and package manager CLIs instead of manually creating/editing files when available.
 4. **Implement the code** — follow the details exactly as specified.
 5. **Write the test** — create test file alongside the code, not after.
-6. **Run lint and tests** — ensure no errors or warnings.
-7. **Mark task complete** — update checkbox `- [ ]` → `- [x]` in build plan.
-8. **Move to next task** — only after current task is fully complete.
+6. **Validate package additions** — if packages were added, run install + build + test (e.g., `npm install && npm run build && npm run test`). Resolve any peer dependency conflicts immediately.
+7. **Validate Docker artifacts** — if Dockerfile or docker-compose.yml was created/modified, build and run the container(s) to verify they work. Document commands and results.
+8. **Run lint and tests** — ensure no errors or warnings.
+9. **Mark task complete** — update checkbox `- [ ]` → `- [x]` in build plan.
+10. **Move to next task** — only after current task is fully complete.
 
 ### After All Tasks
 
@@ -177,6 +177,14 @@ Refer to frontend golden references for example stores and composables.
 | Global CSS | Use `<style scoped>`. | Missing `scoped` |
 | Not validating I/O response types | Check `Content-Type` and payload shape before parsing/using (e.g., guard against HTML/index.html from dev server); surface clear, actionable errors and add tests for non-conforming responses. | Parse errors like "Unexpected token '<'" or runtime type errors |
 
+### Dependency & Build Mistakes
+
+| Mistake | Correct Approach | Detection |
+|---------|------------------|-----------|
+| Adding packages without validating | After adding any package, run install + build + test immediately. Check for peer dependency version conflicts (e.g., jest@30 vs jest@29). | `npm install` fails with ERESOLVE errors |
+| Creating Dockerfile without testing | After creating/modifying Dockerfile or docker-compose.yml, build and run containers to verify startup and endpoint connectivity. | Container fails to build or start; services unreachable |
+| Ignoring peer dependency warnings | Resolve peer dependency conflicts by aligning versions (downgrade or upgrade as needed). Use `npm ls <package>` to inspect dependency tree. | Build works but runtime fails; version mismatch errors |
+
 ### Backend Mistakes
 
 | Mistake | Correct Approach | Detection |
@@ -220,6 +228,21 @@ Before marking a task complete, verify:
 - [ ] Follows naming conventions (PascalCase/camelCase)
 - [ ] Has corresponding test file
  - [ ] I/O validation added where applicable (check content-type, validate shapes, sanitize inputs) and tests cover malformed/non-JSON cases
+
+### When packages are added:
+
+- [ ] Ran package manager install command (e.g., `npm install`, `pip install`)
+- [ ] Checked for and resolved any peer dependency conflicts
+- [ ] Ran build command successfully (e.g., `npm run build`)
+- [ ] Ran test suite successfully (e.g., `npm run test`)
+- [ ] Documented any version alignments or dependency resolutions in build plan
+
+### When Docker files are created/modified:
+
+- [ ] Built Docker image(s) successfully (`docker build` or `docker compose build`)
+- [ ] Started container(s) successfully (`docker run` or `docker compose up`)
+- [ ] Verified service endpoints respond correctly
+- [ ] Documented build and run commands with results in build plan
 
 ### For backend code:
 
@@ -265,9 +288,9 @@ Always refer to these as canonical examples:
 | Backend Schema | `src/backend/modules/example/schemas/` | Data model definition examples (follow backend instructions) |
 | Frontend Component | `src/frontend/components/example/` | Frontend component structure (follow frontend instructions) |
 | Frontend Store | `src/frontend/stores/exampleStore.ts` | Store patterns (follow frontend instructions) |
-| Backend Tests | `tests/backend/` | Backend test patterns (see `.github/instructions/testing.instructions.md`) |
-| Frontend Tests | `tests/frontend/` | Frontend test patterns (see `.github/instructions/testing.instructions.md`) |
-| E2E Tests | `tests/e2e/` (or configured path) | E2E test patterns and selector contracts (see `.github/instructions/testing.instructions.md`) |
+| Backend Tests | `tests/backend/` | Backend test patterns |
+| Frontend Tests | `tests/frontend/` | Frontend test patterns |
+| E2E Tests | `tests/e2e/` (or configured path) | E2E test patterns and selector contracts |
 
 **Copy their structure for new features. Do not invent new patterns.**
 
@@ -315,6 +338,8 @@ A task is complete when:
 
 - [ ] Code matches the task details exactly
 - [ ] Test file exists and covers success + error paths
+- [ ] If packages were added: install + build + test all pass, peer dependencies resolved
+- [ ] If Docker files were created/modified: containers build, start, and respond correctly
 - [ ] Lint passes with no warnings
 - [ ] Type check passes with no errors
 - [ ] Acceptance criteria from plan are met

@@ -18,7 +18,6 @@ These rules apply to all code under `src/frontend/`. AI agents and humans must f
 | UI Library | Vuetify | The **only** allowed component library |
 | Build Tool | Vite | Fast dev server and optimized builds |
 
-**Testing & quality gates:** Follow `.github/instructions/testing.instructions.md`.
 
 ### CLI Tooling & Package Management
 

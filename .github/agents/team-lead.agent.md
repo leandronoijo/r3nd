@@ -194,7 +194,6 @@ Explicit warnings for Developer agent (see below).
 - Every new service → unit test task.
 - Every new controller → integration test task.
 - Every new component/store → frontend unit test task.
-- Every user-facing flow → E2E task (tooling defined in `.github/instructions/testing.instructions.md`) with `data-test-id` list.
 - Specify exact test assertions expected.
 
 ### AI-Agent Guardrails section
@@ -296,7 +295,6 @@ Include a section in every build plan warning the Developer agent about:
 ```markdown
 ## 5. Test Strategy
 
-Follow `.github/instructions/testing.instructions.md` for test frameworks, naming conventions, and E2E selector contracts.
 
 ### Unit tests
 
