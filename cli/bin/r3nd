@@ -1,2 +1,12 @@
 #!/usr/bin/env node
-require('../src/cli.js')
+const entry = require('../src/index.js');
+if (entry && typeof entry.main === 'function') {
+	entry.main(process.argv).catch(err => {
+		console.error('Unexpected error:', err && err.message ? err.message : err);
+		process.exit(1);
+	});
+} else {
+	// Fallback: require the module to run side-effects
+	require('../src/index.js');
+}
+
