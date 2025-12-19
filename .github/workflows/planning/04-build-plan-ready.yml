@@ -11,7 +11,7 @@
 #   This token is required because the default GITHUB_TOKEN cannot assign
 #   issues to the Copilot agent due to GitHub's licensing restrictions.
 
-name: 04 — Development
+name: 04 — Build Plan Ready
 
 on:
   push:
@@ -68,27 +68,16 @@ jobs:
             
             const issueTitle = 'Development: ' + planName;
             const issueBody = [
-              '## Task for: Developer Agent',
+              '## Task: Development',
               '',
-              '> **Agent Profile:** `.github/agents/developer.agent.md`',
+              `**Feature / Plan:** \`${planName}\``,
               '',
-              'A build plan has been added or updated. Please implement the tasks described in the build plan.',
-              '',
-              '### Build Plan File(s)',
+              '### Changed file(s)',
               fileList,
               '',
-              '### Instructions',
-              '1. Read and follow the developer agent profile at `.github/agents/developer.agent.md`',
-              '2. Read the build plan(s) listed above',
-              '3. Follow the backend instructions at `.github/instructions/backend.instructions.md`',
-              '4. Follow the frontend instructions at `.github/instructions/frontend.instructions.md`',
-              '5. Implement each task in the build plan, marking them complete as you go',
-              '6. Ensure all tests pass before completing',
+              '> **Agent profile:** `.github/agents/developer.agent.md`',
               '',
-              '### Context',
-              'This task was automatically created by the Development workflow when changes were detected in the build plans directory.',
-              '',
-              '**Note:** This issue should be assigned to the `developer` custom agent. If using the GitHub web interface, please select the `developer` agent from the agent dropdown when assigning to Copilot.'
+              '_No additional instructions are included here; follow the referenced agent profile._'
             ].join('\n');
 
             const issue = await github.rest.issues.create({
@@ -99,6 +88,51 @@ jobs:
               labels: ['development', 'copilot']
             });
             
+            console.log('Created issue #' + issue.data.number + ': ' + issue.data.title);
+            core.setOutput('issue_number', issue.data.number);
+            return issue.data.number;
+
+  create-testcases-task:
+    name: Create Test-Cases Generation Task
+    needs: detect-changes
+    if: needs.detect-changes.outputs.build_plans_changed == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      issue_number: ${{ steps.create-issue.outputs.issue_number }}
+    steps:
+      - name: Create issue for test-cases generation
+        id: create-issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const changedFiles = JSON.parse('${{ needs.detect-changes.outputs.changed_files }}');
+            const fileList = changedFiles.map(file => '- `' + file + '`').join('\n');
+            const firstFile = changedFiles[0] || 'rnd/build_plans/';
+            const planName = firstFile.split('/').pop().replace('.md', '');
+
+            const issueTitle = 'Generate Test Cases: ' + planName;
+            const issueBody = [
+              '## Task: Generate Test Cases',
+              '',
+              `**Feature / Plan:** \`${planName}\``,
+              '',
+              '### Changed file(s)',
+              fileList,
+              '',
+              '> **Agent profile:** `.github/agents/test-engineer.agent.md`',
+              '> **Canonical template:** `.github/templates/test_cases.md`',
+              '',
+              '_No additional instructions are included here; follow the referenced agent profile and template._'
+            ].join('\n');
+
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: issueTitle,
+              body: issueBody,
+              labels: ['test-cases', 'copilot']
+            });
+
             console.log('Created issue #' + issue.data.number + ': ' + issue.data.title);
             core.setOutput('issue_number', issue.data.number);
             return issue.data.number;
@@ -117,4 +151,15 @@ jobs:
         uses: otto-de/assign_issue_toCopilot_action@v1.0.1
         with:
           issue_number: ${{ needs.create-development-task.outputs.issue_number }}
+          github_token: ${{ secrets.COPILOT_PAT }}
+
+  assign-testcases-to-copilot:
+    name: Assign Test-Cases Issue to Copilot
+    needs: create-testcases-task
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assign test-cases issue to Copilot
+        uses: otto-de/assign_issue_toCopilot_action@v1.0.1
+        with:
+          issue_number: ${{ needs.create-testcases-task.outputs.issue_number }}
           github_token: ${{ secrets.COPILOT_PAT }}

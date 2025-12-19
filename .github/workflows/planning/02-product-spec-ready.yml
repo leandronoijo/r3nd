@@ -11,7 +11,7 @@
 #   This token is required because the default GITHUB_TOKEN cannot assign
 #   issues to the Copilot agent due to GitHub's licensing restrictions.
 
-name: 02 — Tech Spec
+name: 02 — Product Spec Ready
 
 on:
   push:
