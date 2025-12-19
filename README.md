@@ -168,6 +168,50 @@ See the `docs/` directory for optional project documentation that explains the p
 
 ---
 
+## 🧰 CLI
+
+This repository includes a small CLI (located in the `cli/` folder) that helps scaffold and initialize projects from the r3nd seed overlays.
+
+- `scaffold`: interactive scaffolder that copies overlays and rnd build plans into the current working directory (existing behaviour).
+
+- `init`: a lightweight initializer that will:
+	- run `git init` if the current directory is not already a git repository
+	- copy a minimal set of seed files from the r3nd seed repository into the current directory:
+		- `.github/agents/**`
+		- `.github/templates/**`
+		- `.github/workflows/**`
+		- `.gitignore`
+
+- `analyse`: Inspect the current git repository to generate `project.instructions.md` and per-app instruction files using the configured LLM agent. Useful to bootstrap instruction files from an existing codebase.
+	- Options:
+		- `-a, --agent <agent>`: Agent to use (`codex`, `gemini`, `github`, or `generate`). Default: `codex`.
+		- `-n, --non-interactive`: Run without interactive prompts (assume defaults).
+	- Example (non-interactive, use codex):
+
+		```bash
+		node cli/src/index.js analyse --non-interactive --agent codex
+		```
+
+Usage examples (from the repo root):
+
+```bash
+# Run scaffold (interactive)
+node cli/src/index.js scaffold
+
+# Initialize current directory with minimal r3nd seed files
+node cli/src/index.js init
+```
+
+Installation (global):
+
+You can install the CLI globally from the seed repository as requested:
+
+```bash
+sudo npm install -g git+https://github.com/leandronoijo/r3nd.git#0
+```
+
+After global install you can run the CLI as `r3nd` from your shell (e.g. `r3nd init`).
+
 ## 👤 For Maintainers
 
 To extend or adapt the system:

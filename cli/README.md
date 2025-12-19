@@ -1,11 +1,55 @@
 # r3nd CLI
 
-Usage:
 
-- From the project root run `npx r3nd new`.
-- The CLI will prompt for backend and frontend choices and copy matching files from the `leandronoijo/r3nd` GitHub `develop` branch into the current working directory.
+Commands:
 
-Notes:
+- `init`: Initialize the current directory as a git repository (runs `git init` if `.git` is missing) and copy a minimal set of seed files from the r3nd seed repository. Files copied include:
+  - `.github/agents/**`
+  - `.github/templates/**`
+  - `.github/workflows/**`
+  - `.gitignore`
 
-- Install dependencies locally to test faster: run `npm install` inside `cli/`.
-- The script uses GitHub's API to list files and then downloads the raw files. If you hit rate limits, set a `GITHUB_TOKEN` env var and update the script to use it.
+  Example:
+
+  - From the project root: `node src/index.js init`
+  - If installed globally: `r3nd init` (see installation section)
+
+- `scaffold`: Full project scaffolding (existing behaviour) — prompts for backend/frontend overlays and copies matching overlays and rnd build plans.
+
+- `analyse`: Analyse the repository and generate `project.instructions.md` and per-app instruction files using an LLM agent.
+  - Options:
+    - `-a, --agent <agent>`: Agent to use (`codex|gemini|github|generate`). Default: `codex`.
+    - `-n, --non-interactive`: Run without interactive prompts.
+  - Example:
+
+    ```bash
+    node src/index.js analyse --non-interactive --agent codex
+    ```
+
+- `bugfix`: Create and execute a bugfix plan using r3nd agents.
+  - Example:
+
+    ```bash
+    node src/index.js bugfix
+    ```
+
+Installation:
+
+- Install locally for development:
+
+  ```bash
+  cd cli
+  npm install
+  ```
+
+- Install globally from the seed repository (as requested):
+
+  ```bash
+  sudo npm install -g git+https://github.com/leandronoijo/r3nd.git#0
+  ```
+
+  After global install you can run the CLI as `r3nd` from your shell.
+
+---
+
+This CLI is intended to be used as a scaffolder and helper for generating project overlays and instructions using the r3nd overlays and optional LLM-driven plans.
