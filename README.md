@@ -1,4 +1,5 @@
 # AI-Driven R&D Pipeline – Seed Repository
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 
 This repository is a `starter template` for teams who want to automate their product → architecture → planning → development lifecycle using **GitHub Copilot Agents** and **GitHub Actions**.
 

@@ -1,0 +1,18 @@
+{
+  "name": "r3nd",
+  "version": "0.1.0",
+  "description": "r3nd project scaffolder CLI",
+  "bin": {
+    "r3nd": "cli/bin/r3nd"
+  },
+  "author": "leandronoijo",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.4.0",
+    "commander": "^11.0.0",
+    "inquirer": "^9.0.0"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
