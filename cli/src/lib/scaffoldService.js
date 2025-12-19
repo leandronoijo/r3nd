@@ -3,15 +3,29 @@ const path = require('path');
 const { GitHubClient } = require('./github/githubClient');
 const { mapDestination } = require('./overlays/overlayRegistry');
 const { writeBuffer, ensureDir } = require('./fs/fileWriter');
-const { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts } = require('./ui/prompts');
+const { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin } = require('./ui/prompts');
 const { runPlansSequential, waitForCompletionFile, runCodexCommand } = require('./llm/agentRunner');
 const logger = require('./utils/logger');
 const fs = require('fs').promises;
+const { execSync } = require('child_process');
 
 async function runScaffold(opts = {}, deps = {}) {
   const cwd = opts.cwd || process.cwd();
   const nonInteractive = !!opts.nonInteractive;
   const githubClient = deps.githubClient || new GitHubClient({});
+
+  // Check if current directory is a git repository, if not, initialize it
+  const isGitRepo = await fs.access(path.join(cwd, '.git')).then(() => true).catch(() => false);
+  if (!isGitRepo) {
+    logger.info('Initializing git repository...');
+    execSync('git init', { cwd });
+
+    const remoteOrigin = await askRemoteOrigin(nonInteractive);
+    if (remoteOrigin) {
+      logger.info('Adding remote origin...');
+      execSync(`git remote add origin ${remoteOrigin}`, { cwd });
+    }
+  }
 
   logger.info('r3nd — project scaffolder');
 
