@@ -1,0 +1,208 @@
+# E2E Testing Workflow
+#
+# Triggered when a PR is merged to develop with changes to src/.
+# Creates a GitHub issue and assigns it to Copilot with the E2E Engineer agent
+# to generate and run E2E tests for the implemented feature.
+# The issue includes the original PR description to provide context about which
+# feature was implemented.
+#
+# Required Secrets:
+#   COPILOT_PAT - Personal Access Token with the following permissions:
+#     - repo (full control of private repositories)
+#     - issues:write (to create and update issues)
+#   This token is required because the default GITHUB_TOKEN cannot assign
+#   issues to the Copilot agent due to GitHub's licensing restrictions.
+
+name: 05 — Development Ready
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'src/**'
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  detect-changes:
+    name: Detect Source Code Changes
+    runs-on: ubuntu-latest
+    outputs:
+      src_changed: ${{ steps.filter.outputs.src }}
+      changed_files: ${{ steps.filter.outputs.src_files }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Filter changed files
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          list-files: json
+          filters: |
+            src:
+              - added|modified: 'src/**'
+
+  get-pr-context:
+    name: Get PR Context
+    needs: detect-changes
+    if: needs.detect-changes.outputs.src_changed == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      pr_number: ${{ steps.get-pr.outputs.pr_number }}
+      pr_title: ${{ steps.get-pr.outputs.pr_title }}
+      pr_body: ${{ steps.get-pr.outputs.pr_body }}
+      pr_author: ${{ steps.get-pr.outputs.pr_author }}
+    steps:
+      - name: Get merged PR information
+        id: get-pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Find the PR that was just merged for this commit
+            const commit = context.sha;
+            
+            // Search for PRs that were merged with this commit
+            const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: commit
+            });
+            
+            // Find the most recently merged PR to develop
+            const mergedPR = prs.find(pr => 
+              pr.merged_at && 
+              pr.base.ref === 'develop'
+            );
+            
+            if (mergedPR) {
+              console.log('Found merged PR #' + mergedPR.number);
+              core.setOutput('pr_number', mergedPR.number);
+              core.setOutput('pr_title', mergedPR.title);
+              core.setOutput('pr_body', mergedPR.body || 'No description provided.');
+              core.setOutput('pr_author', mergedPR.user.login);
+            } else {
+              console.log('No merged PR found, using commit info');
+              core.setOutput('pr_number', 'N/A');
+              core.setOutput('pr_title', context.payload.head_commit.message.split('\n')[0]);
+              core.setOutput('pr_body', 'Direct push to develop (no PR description available)');
+              core.setOutput('pr_author', context.payload.head_commit.author.username);
+            }
+
+  create-e2e-task:
+    name: Create E2E Testing Task
+    needs: [detect-changes, get-pr-context]
+    if: needs.detect-changes.outputs.src_changed == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      issue_number: ${{ steps.create-issue.outputs.issue_number }}
+    steps:
+      - name: Create issue for E2E testing
+        id: create-issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const changedFiles = JSON.parse('${{ needs.detect-changes.outputs.changed_files }}');
+            const prNumber = '${{ needs.get-pr-context.outputs.pr_number }}';
+            const prTitle = '${{ needs.get-pr-context.outputs.pr_title }}';
+            const prBody = `${{ needs.get-pr-context.outputs.pr_body }}`;
+            const prAuthor = '${{ needs.get-pr-context.outputs.pr_author }}';
+            
+            // Build file list
+            const fileList = changedFiles.map(file => '- `' + file + '`').join('\n');
+            
+            // Extract feature name from PR title or first changed file
+            let featureName = 'unknown-feature';
+            if (prTitle.toLowerCase().includes('feat')) {
+              // Try to extract from conventional commit format
+              const match = prTitle.match(/feat\((.*?)\):/i);
+              if (match) {
+                featureName = match[1];
+              } else {
+                // Use part after "feat:"
+                featureName = prTitle.replace(/^feat[:\s]+/i, '').trim();
+              }
+            } else {
+              // Use PR title as-is
+              featureName = prTitle;
+            }
+            
+            // Sanitize feature name for title
+            featureName = featureName.substring(0, 50);
+            
+            const issueTitle = 'E2E Testing: ' + featureName;
+            const issueBody = [
+              '## Task: E2E Testing',
+              '',
+              `**Feature:** \`${featureName}\``,
+              '',
+              '### Original PR Context',
+              '',
+              `**PR #${prNumber}** by @${prAuthor}`,
+              `**Title:** ${prTitle}`,
+              '',
+              '**Description:**',
+              '```',
+              prBody,
+              '```',
+              '',
+              '### Changed file(s) in src/',
+              fileList,
+              '',
+              '---',
+              '',
+              '> **Agent profile:** `.github/agents/e2e-engineer.agent.md`',
+              '> **E2E Instructions:** `.github/instructions/e2e-testing.instructions.md`',
+              '> **Result Template:** `.github/templates/e2e-result.md`',
+              '',
+              '### Instructions',
+              '',
+              'As the E2E Engineer agent:',
+              '',
+              '1. **Identify the feature-id** from the PR description above and the changed files',
+              '2. **Read test cases** from `rnd/test_cases/<feature-id>-test-cases.md`',
+              '3. **Read build plan** from `rnd/build_plans/<feature-id>-build-plan.md` for contracts and acceptance criteria',
+              '4. **Start services** (backend, frontend, database) per environment setup protocol',
+              '5. **Generate E2E tests** following patterns in `.github/instructions/e2e-testing.instructions.md`',
+              '6. **Run tests sequentially** and capture results',
+              '7. **Diagnose failures** (environment/methodology/code) per decision tree',
+              '8. **Generate result report** in `rnd/e2e-results/<feature-id>-e2e-result.md`',
+              '',
+              '**Output:** Create PR with test files and result report.',
+              '',
+              '_Follow the agent profile exactly. No additional instructions._'
+            ].join('\n');
+
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: issueTitle,
+              body: issueBody,
+              labels: ['e2e-testing', 'copilot']
+            });
+            
+            console.log('Created issue #' + issue.data.number + ': ' + issue.data.title);
+            core.setOutput('issue_number', issue.data.number);
+            return issue.data.number;
+
+  assign-to-copilot:
+    name: Assign to Copilot
+    needs: create-e2e-task
+    runs-on: ubuntu-latest
+    steps:
+      # Note: Currently, the GitHub API does not support assigning a specific
+      # custom agent (like 'e2e-engineer') programmatically. The issue is assigned
+      # to the default Copilot agent, but includes explicit instructions to
+      # follow the e2e-engineer agent profile. When GitHub adds API support for
+      # custom agent assignment, this step should be updated.
+      - name: Assign issue to Copilot
+        uses: otto-de/assign_issue_toCopilot_action@v1.0.1
+        with:
+          issue_number: ${{ needs.create-e2e-task.outputs.issue_number }}
+          github_token: ${{ secrets.COPILOT_PAT }}
