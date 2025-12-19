@@ -55,4 +55,10 @@ async function confirmBuildPlan(nonInteractive = false) {
   return res.approve;
 }
 
-module.exports = { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askBugDescription, askBugfixLLMChoice, confirmBuildPlan };
+async function askAnalyseAgent(defaultAgent = 'codex', nonInteractive = false) {
+  if (nonInteractive) return defaultAgent;
+  const res = await prompt([{ type: 'list', name: 'agent', message: 'Which agent would you like to use for analysis?', choices: [ { name: 'Local codex CLI', value: 'codex' }, { name: 'Gemini CLI', value: 'gemini' }, { name: 'GitHub coding agent (future)', value: 'github' }, { name: 'Generate prompts only (no agent)', value: 'generate' } ], default: defaultAgent }]);
+  return res.agent;
+}
+
+module.exports = { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askBugDescription, askBugfixLLMChoice, confirmBuildPlan, askAnalyseAgent };
