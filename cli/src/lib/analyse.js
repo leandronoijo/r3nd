@@ -11,10 +11,15 @@ async function parseAppsFromInstructions(content) {
   const jsonMatch = content.match(/```json\s*([\s\S]*?)```/i);
   if (jsonMatch) {
     try {
-      const parsed = JSON.parse(jsonMatch[1]);
-      if (Array.isArray(parsed.apps)) return parsed.apps;
+      const raw = jsonMatch[1].trim();
+      const parsed = JSON.parse(raw);
+      // If the JSON block is directly an array of apps
+      if (Array.isArray(parsed)) return parsed.map(a => ({ name: a.name || a.app || 'unknown', path: a.path || '.', purpose: a.purpose || '', stack: a.stack || '' }));
+      // If it's an object with `apps` property
+      if (Array.isArray(parsed.apps)) return parsed.apps.map(a => ({ name: a.name || a.app || 'unknown', path: a.path || '.', purpose: a.purpose || '', stack: a.stack || '' }));
     } catch (e) {
-      // fall through
+      console.warn('Failed to parse JSON fenced block for apps:', e && e.message ? e.message : e);
+      // fall through to other parsers
     }
   }
 

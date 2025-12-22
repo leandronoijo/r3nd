@@ -85,8 +85,17 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const changedFiles = JSON.parse('${{ needs.detect-changes.outputs.changed_files }}');
-            
+            // Safely parse changed_files output (may be empty or malformed)
+            let changedFiles = [];
+            try {
+              const raw = '${{ needs.detect-changes.outputs.changed_files }}' || '[]';
+              changedFiles = JSON.parse(raw);
+              if (!Array.isArray(changedFiles)) changedFiles = [];
+            } catch (err) {
+              core.notice('Failed to parse changed_files; defaulting to empty array.');
+              changedFiles = [];
+            }
+
             // Build the issue body with file locations
             const fileList = changedFiles.map(file => '- `' + file + '`').join('\n');
             const firstFile = changedFiles[0] || 'rnd/build_plans/';
@@ -131,7 +140,16 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const changedFiles = JSON.parse('${{ needs.detect-changes.outputs.changed_files }}');
+            // Safely parse changed_files output (may be empty or malformed)
+            let changedFiles = [];
+            try {
+              const raw = '${{ needs.detect-changes.outputs.changed_files }}' || '[]';
+              changedFiles = JSON.parse(raw);
+              if (!Array.isArray(changedFiles)) changedFiles = [];
+            } catch (err) {
+              core.notice('Failed to parse changed_files; defaulting to empty array.');
+              changedFiles = [];
+            }
             const fileList = changedFiles.map(file => '- `' + file + '`').join('\n');
             const firstFile = changedFiles[0] || 'rnd/build_plans/';
             const planName = firstFile.split('/').pop().replace('.md', '');
