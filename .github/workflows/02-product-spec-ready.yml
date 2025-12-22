@@ -19,6 +19,15 @@ on:
       - develop
     paths:
       - 'rnd/product_specs/**'
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch or ref to run against'
+        required: true
+        default: 'develop'
+      file:
+        description: 'Product spec file to process (e.g. rnd/product_specs/feature.md)'
+        required: true
 
 permissions:
   contents: read
@@ -29,22 +38,39 @@ jobs:
     name: Detect Product Spec Changes
     runs-on: ubuntu-latest
     outputs:
-      product_specs_changed: ${{ steps.filter.outputs.product_specs }}
-      changed_files: ${{ steps.filter.outputs.product_specs_files }}
+      product_specs_changed: ${{ steps.select.outputs.product_specs_changed }}
+      changed_files: ${{ steps.select.outputs.changed_files }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch || github.ref }}
 
       - name: Filter changed files
         uses: dorny/paths-filter@v3
         id: filter
+        if: github.event_name == 'push'
         with:
           list-files: json
           filters: |
             product_specs:
               - added|modified: 'rnd/product_specs/**'
+      - name: Select changed files
+        id: select
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            file="${{ github.event.inputs.file }}"
+            if [[ ! -f "$file" ]]; then
+              echo "File not found: $file" >&2
+              exit 1
+            fi
+            printf 'product_specs_changed=true\n' >> "$GITHUB_OUTPUT"
+            printf 'changed_files=["%s"]\n' "${file//\"/\\\"}" >> "$GITHUB_OUTPUT"
+          else
+            echo "product_specs_changed=${{ steps.filter.outputs.product_specs }}" >> "$GITHUB_OUTPUT"
+            echo "changed_files=${{ steps.filter.outputs.product_specs_files }}" >> "$GITHUB_OUTPUT"
+          fi
 
   create-tech-spec-task:
     name: Create Tech Spec Task

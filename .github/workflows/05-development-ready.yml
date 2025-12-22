@@ -21,6 +21,19 @@ on:
       - develop
     paths:
       - 'src/**'
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch or ref to run against'
+        required: true
+        default: 'develop'
+      src_file:
+        description: 'Source file to include in the issue (e.g. src/app/feature.ts)'
+        required: true
+      feature_name:
+        description: 'Feature name for the issue title (optional)'
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -32,22 +45,43 @@ jobs:
     name: Detect Source Code Changes
     runs-on: ubuntu-latest
     outputs:
-      src_changed: ${{ steps.filter.outputs.src }}
-      changed_files: ${{ steps.filter.outputs.src_files }}
+      src_changed: ${{ steps.select.outputs.src_changed }}
+      changed_files: ${{ steps.select.outputs.changed_files }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch || github.ref }}
 
       - name: Filter changed files
         uses: dorny/paths-filter@v3
         id: filter
+        if: github.event_name == 'push'
         with:
           list-files: json
           filters: |
             src:
               - added|modified: 'src/**'
+      - name: Select changed files
+        id: select
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            file="${{ github.event.inputs.src_file }}"
+            if [[ "$file" != src/* ]]; then
+              echo "File must be under src/: $file" >&2
+              exit 1
+            fi
+            if [[ ! -f "$file" ]]; then
+              echo "File not found: $file" >&2
+              exit 1
+            fi
+            printf 'src_changed=true\n' >> "$GITHUB_OUTPUT"
+            printf 'changed_files=["%s"]\n' "${file//\"/\\\"}" >> "$GITHUB_OUTPUT"
+          else
+            echo "src_changed=${{ steps.filter.outputs.src }}" >> "$GITHUB_OUTPUT"
+            echo "changed_files=${{ steps.filter.outputs.src_files }}" >> "$GITHUB_OUTPUT"
+          fi
 
   get-pr-context:
     name: Get PR Context
@@ -55,13 +89,14 @@ jobs:
     if: needs.detect-changes.outputs.src_changed == 'true'
     runs-on: ubuntu-latest
     outputs:
-      pr_number: ${{ steps.get-pr.outputs.pr_number }}
-      pr_title: ${{ steps.get-pr.outputs.pr_title }}
-      pr_body: ${{ steps.get-pr.outputs.pr_body }}
-      pr_author: ${{ steps.get-pr.outputs.pr_author }}
+      pr_number: ${{ steps.select.outputs.pr_number }}
+      pr_title: ${{ steps.select.outputs.pr_title }}
+      pr_body: ${{ steps.select.outputs.pr_body }}
+      pr_author: ${{ steps.select.outputs.pr_author }}
     steps:
       - name: Get merged PR information
         id: get-pr
+        if: github.event_name == 'push'
         uses: actions/github-script@v7
         with:
           script: |
@@ -94,6 +129,34 @@ jobs:
               core.setOutput('pr_body', 'Direct push to develop (no PR description available)');
               core.setOutput('pr_author', context.payload.head_commit.author.username);
             }
+      - name: Set manual context
+        id: manual
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          feature_name="${{ github.event.inputs.feature_name }}"
+          src_file="${{ github.event.inputs.src_file }}"
+          if [[ -z "$feature_name" ]]; then
+            feature_name="$(basename "$src_file")"
+            feature_name="${feature_name%.*}"
+          fi
+          echo "pr_number=manual" >> "$GITHUB_OUTPUT"
+          echo "pr_title=$feature_name" >> "$GITHUB_OUTPUT"
+          echo "pr_body=Manual run for $src_file on ${{ github.event.inputs.branch }}" >> "$GITHUB_OUTPUT"
+          echo "pr_author=${{ github.actor }}" >> "$GITHUB_OUTPUT"
+      - name: Select PR context
+        id: select
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "pr_number=${{ steps.manual.outputs.pr_number }}" >> "$GITHUB_OUTPUT"
+            echo "pr_title=${{ steps.manual.outputs.pr_title }}" >> "$GITHUB_OUTPUT"
+            echo "pr_body=${{ steps.manual.outputs.pr_body }}" >> "$GITHUB_OUTPUT"
+            echo "pr_author=${{ steps.manual.outputs.pr_author }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "pr_number=${{ steps.get-pr.outputs.pr_number }}" >> "$GITHUB_OUTPUT"
+            echo "pr_title=${{ steps.get-pr.outputs.pr_title }}" >> "$GITHUB_OUTPUT"
+            echo "pr_body=${{ steps.get-pr.outputs.pr_body }}" >> "$GITHUB_OUTPUT"
+            echo "pr_author=${{ steps.get-pr.outputs.pr_author }}" >> "$GITHUB_OUTPUT"
+          fi
 
   create-e2e-task:
     name: Create E2E Testing Task

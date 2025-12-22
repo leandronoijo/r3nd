@@ -7,14 +7,16 @@ Commands:
   - `.github/agents/**`
   - `.github/templates/**`
   - `.github/workflows/**`
+  - `.github/instructions/e2e-testing.instructions.md`
   - `.gitignore`
+  - (Includes the retro agent/template/workflow via the `.github` folders)
 
   Example:
 
   - From the project root: `node src/index.js init`
   - If installed globally: `r3nd init` (see installation section)
 
-- `scaffold`: Full project scaffolding (existing behaviour) — prompts for backend/frontend overlays and copies matching overlays and rnd build plans.
+- `scaffold`: Full project scaffolding (existing behaviour) — prompts for backend/frontend overlays and copies matching overlays and rnd build plans. Ensures the retro agent/template/workflow are present even when resuming from an existing setup.
 
 - `analyse`: Analyse the repository and generate `project.instructions.md` and per-app instruction files using an LLM agent.
   - Options:

@@ -21,7 +21,13 @@ async function runInit(opts = {}, deps = {}) {
 
   // Determine which files to copy from seed (only these prefixes)
   const prefixes = ['.github/agents/', '.github/templates/', '.github/workflows/'];
-  const singleFiles = ['.gitignore'];
+  const singleFiles = [
+    '.gitignore',
+    '.github/instructions/e2e-testing.instructions.md',
+    '.github/agents/retro.agent.md',
+    '.github/templates/retro.md',
+    '.github/workflows/06-retro-ready.yml'
+  ];
 
   logger.info('Fetching file list from GitHub (seed repo)...');
   const tree = await githubClient.getTree();

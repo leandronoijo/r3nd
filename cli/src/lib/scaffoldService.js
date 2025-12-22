@@ -54,6 +54,11 @@ async function runScaffold(opts = {}, deps = {}) {
   }
 
   const prefixes = [];
+  const mandatorySeedFiles = [
+    '.github/agents/retro.agent.md',
+    '.github/templates/retro.md',
+    '.github/workflows/06-retro-ready.yml'
+  ];
   if (!backendInstructionsExist && !frontendInstructionsExist) {
     prefixes.push('.github/', 'rnd/', '.gitignore', 'README.md');
   }
@@ -93,6 +98,30 @@ async function runScaffold(opts = {}, deps = {}) {
     logger.info('Ensured directory: .github/instructions');
     logger.info('Scaffolding complete.');
   }
+
+  async function ensureSeedFiles(files) {
+    const missing = [];
+    for (const remotePath of files) {
+      const rel = mapDestination(remotePath, backend, frontend) || remotePath;
+      const exists = await fs.access(path.join(cwd, rel)).then(() => true).catch(() => false);
+      if (!exists) missing.push({ remotePath, rel });
+    }
+
+    if (missing.length === 0) return;
+
+    logger.info(`Fetching ${missing.length} mandatory file(s) from GitHub...`);
+    for (const item of missing) {
+      try {
+        const buffer = await githubClient.fetchRaw(item.remotePath);
+        await writeBuffer(cwd, item.rel, buffer, { overwrite: false });
+        logger.info(`Copied: ${item.remotePath} -> ${item.rel}`);
+      } catch (err) {
+        logger.error(`Failed to copy ${item.remotePath}:`, err && err.message ? err.message : err);
+      }
+    }
+  }
+
+  await ensureSeedFiles(mandatorySeedFiles);
 
   logger.info('Next steps: install dependencies and adapt overlays as needed.');
 

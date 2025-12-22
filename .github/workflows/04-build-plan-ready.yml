@@ -19,6 +19,15 @@ on:
       - develop
     paths:
       - 'rnd/build_plans/**'
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch or ref to run against'
+        required: true
+        default: 'develop'
+      file:
+        description: 'Build plan file to process (e.g. rnd/build_plans/feature.md)'
+        required: true
 
 permissions:
   contents: read
@@ -29,22 +38,39 @@ jobs:
     name: Detect Build Plan Changes
     runs-on: ubuntu-latest
     outputs:
-      build_plans_changed: ${{ steps.filter.outputs.build_plans }}
-      changed_files: ${{ steps.filter.outputs.build_plans_files }}
+      build_plans_changed: ${{ steps.select.outputs.build_plans_changed }}
+      changed_files: ${{ steps.select.outputs.changed_files }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch || github.ref }}
 
       - name: Filter changed files
         uses: dorny/paths-filter@v3
         id: filter
+        if: github.event_name == 'push'
         with:
           list-files: json
           filters: |
             build_plans:
               - added|modified: 'rnd/build_plans/**'
+      - name: Select changed files
+        id: select
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            file="${{ github.event.inputs.file }}"
+            if [[ ! -f "$file" ]]; then
+              echo "File not found: $file" >&2
+              exit 1
+            fi
+            printf 'build_plans_changed=true\n' >> "$GITHUB_OUTPUT"
+            printf 'changed_files=["%s"]\n' "${file//\"/\\\"}" >> "$GITHUB_OUTPUT"
+          else
+            echo "build_plans_changed=${{ steps.filter.outputs.build_plans }}" >> "$GITHUB_OUTPUT"
+            echo "changed_files=${{ steps.filter.outputs.build_plans_files }}" >> "$GITHUB_OUTPUT"
+          fi
 
   create-development-task:
     name: Create Development Task

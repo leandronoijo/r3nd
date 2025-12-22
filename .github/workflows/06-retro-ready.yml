@@ -1,0 +1,131 @@
+# Retro Workflow
+#
+# Triggered when a PR review is approved.
+# Creates a GitHub issue and assigns it to Copilot with the Retro agent
+# to review PR discussions and propose process improvements.
+#
+# Required Secrets:
+#   COPILOT_PAT - Personal Access Token with the following permissions:
+#     - repo (full control of private repositories)
+#     - issues:write (to create and update issues)
+#   This token is required because the default GITHUB_TOKEN cannot assign
+#   issues to the Copilot agent due to GitHub's licensing restrictions.
+
+name: 06 — Retro Ready
+
+on:
+  pull_request_review:
+    types:
+      - submitted
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to retro (e.g. 123)'
+        required: true
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  create-retro-task:
+    name: Create Retro Task
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event.review.state == 'approved'
+    outputs:
+      issue_number: ${{ steps.create-issue.outputs.issue_number }}
+    steps:
+      - name: Create issue for retro
+        id: create-issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = context.eventName === 'workflow_dispatch'
+              ? Number(core.getInput('pr_number'))
+              : context.payload.pull_request.number;
+
+            if (!prNumber || Number.isNaN(prNumber)) {
+              core.setFailed('Invalid PR number.');
+              return;
+            }
+
+            const { data: pr } = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: prNumber
+            });
+
+            const existing = await github.rest.search.issuesAndPullRequests({
+              q: `repo:${owner}/${repo} is:issue label:retro "PR #${prNumber}"`
+            });
+
+            if (existing.data.total_count > 0) {
+              core.notice(`Retro issue already exists for PR #${prNumber}.`);
+              return;
+            }
+
+            const files = await github.paginate(
+              github.rest.pulls.listFiles,
+              { owner, repo, pull_number: prNumber, per_page: 100 }
+            );
+            const maxFiles = 200;
+            const fileList = files
+              .slice(0, maxFiles)
+              .map(file => `- \`${file.filename}\``)
+              .join('\n');
+            const moreFiles = files.length > maxFiles
+              ? `\n- ...and ${files.length - maxFiles} more`
+              : '';
+
+            const issueTitle = `Retro: PR #${pr.number} - ${pr.title}`;
+            const issueBody = [
+              '## Task for: Retro Agent',
+              '',
+              '> **Agent Profile:** `.github/agents/retro.agent.md`',
+              '> **Template:** `.github/templates/retro.md`',
+              '',
+              'Review the full PR discussion and propose improvements to agents, templates, or instructions.',
+              '',
+              '### PR Context',
+              `- **PR:** #${pr.number}`,
+              `- **Title:** ${pr.title}`,
+              `- **Author:** @${pr.user.login}`,
+              `- **URL:** ${pr.html_url}`,
+              `- **Base:** ${pr.base.ref}`,
+              `- **Head:** ${pr.head.ref}`,
+              '',
+              '### Changed file(s)',
+              fileList + moreFiles,
+              '',
+              '### Instructions',
+              '1. Read the PR conversation, review comments, and review threads.',
+              '2. Map feedback to the correct agent/template/instruction using the directory mapping in the retro agent profile.',
+              '3. Use the retro template and write the report to `rnd/retros/pr-' + pr.number + '-retro.md`.',
+              '4. Include evidence links for each recommendation.'
+            ].join('\n');
+
+            const issue = await github.rest.issues.create({
+              owner,
+              repo,
+              title: issueTitle,
+              body: issueBody,
+              labels: ['retro', 'copilot']
+            });
+
+            core.setOutput('issue_number', issue.data.number);
+            return issue.data.number;
+
+  assign-to-copilot:
+    name: Assign to Copilot
+    needs: create-retro-task
+    if: needs.create-retro-task.outputs.issue_number != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assign issue to Copilot
+        uses: otto-de/assign_issue_toCopilot_action@v1.0.1
+        with:
+          issue_number: ${{ needs.create-retro-task.outputs.issue_number }}
+          github_token: ${{ secrets.COPILOT_PAT }}
