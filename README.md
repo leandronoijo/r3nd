@@ -6,7 +6,7 @@ This repository is a `starter template` for teams who want to automate their pro
 It provides:
 
 - A fully structured, opinionated directory layout  
-- Seven Copilot personas (Product Manager, Architect, Team Lead, Developer, Test Engineer, E2E Engineer, Retro)  
+- Seven Copilot personas (Product Manager, Architect, Team Lead, Developer, QA Team Lead, E2E Engineer, Retro)  
 - A chained workflow pipeline producing product specs → tech specs → build plans → test cases → code → E2E → retro  
 - Human-controlled PR gates at every stage  
 - Strict separation between R&D artifacts, documentation, and actual application code  
@@ -24,7 +24,7 @@ Located in `.github/agents/`:
 - `architect.agent.md`
 - `team-lead.agent.md`
 - `developer.agent.md`
-- `test-engineer.agent.md`
+- `qa-team-lead.agent.md`
 - `e2e-engineer.agent.md`
 - `retro.agent.md`
 

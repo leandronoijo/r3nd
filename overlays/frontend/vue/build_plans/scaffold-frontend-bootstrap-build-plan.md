@@ -67,7 +67,7 @@ npm create vite@latest src/frontend -- --template vue
 
 ### Task D: Validate build and run
 - Run `npm --prefix src/frontend run build` to ensure build succeeds.
-- Run `npm --prefix src/frontend run dev` and confirm dev server starts; open `http://localhost:5173/` (Vite default) and verify the Home view renders.
+- Run `npm --prefix src/frontend run dev` and confirm dev server starts; open `http://localhost:4173/` (Vite default) and verify the Home view renders.
 
 ---
 

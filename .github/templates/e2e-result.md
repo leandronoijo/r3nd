@@ -110,7 +110,7 @@ Service startup failures, connection errors, or infrastructure problems that pre
 | Service | Status | URL | Notes |
 |---------|--------|-----|-------|
 | Backend | ✅ Started / ❌ Failed | `http://localhost:3000` | <Startup logs summary> |
-| Frontend | ✅ Started / ❌ Failed | `http://localhost:5173` | <Startup logs summary> |
+| Frontend | ✅ Started / ❌ Failed | `http://localhost:4173` | <Startup logs summary> |
 | Database | ✅ Started / ❌ Failed | `mongodb://localhost:27017` | <Startup logs summary> |
 
 **Error Messages:**

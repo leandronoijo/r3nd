@@ -68,7 +68,7 @@ export default defineConfig({
   // Shared settings for all projects
   use: {
     // Base URL for navigation (override with env var)
-    baseURL: process.env.BASE_URL || 'http://localhost:5173',
+    baseURL: process.env.BASE_URL || 'http://localhost:4173',
     
     // Collect trace only on failure to save space
     trace: 'on-first-retry',
@@ -104,12 +104,17 @@ export default defineConfig({
     // },
   ],
   
-  // Web server configuration (auto-start dev server if not running)
+  // Web server configuration (auto-start services using Docker Compose)
+  // IMPORTANT: Use Docker Compose to run dependent services. Do NOT start services
+  // manually (e.g. `npm run dev`) when running E2E tests — the test harness
+  // should rely on the compose-managed environment instead.
+  // The command below will build and bring up required services and Playwright
+  // will wait for `baseURL` to be reachable.
   webServer: process.env.CI ? undefined : {
-    command: 'npm run dev', // Adjust based on your project
-    url: 'http://localhost:5173',
+    command: 'docker compose up --build', // Start services via Docker Compose
+    url: process.env.BASE_URL || 'http://localhost:4173',
     reuseExistingServer: !process.env.CI,
-    timeout: 10 * 60 * 1000, // 10 minutes (per agent requirements)
+    timeout: 10 * 60 * 1000, // 10 minutes
   },
 });
 ```
@@ -118,7 +123,7 @@ export default defineConfig({
 
 Tests should respect these environment variables:
 
-- `BASE_URL`: Frontend application URL (default: `http://localhost:5173`)
+- `BASE_URL`: Frontend application URL (default: `http://localhost:4173`)
 - `API_BASE_URL`: Backend API URL (default: `http://localhost:3000`)
 - `CI`: Set to `true` in CI environment for stricter behavior
 - `PWDEBUG`: Set to `1` for Playwright debug mode
@@ -126,7 +131,7 @@ Tests should respect these environment variables:
 Example `.env.test`:
 
 ```bash
-BASE_URL=http://localhost:5173
+BASE_URL=http://localhost:4173
 API_BASE_URL=http://localhost:3000
 ```
 
@@ -683,7 +688,7 @@ test.describe('orders-v1-TC-01: Create new order', () => {
 
 ```bash
 # Generate code by recording actions
-npx playwright codegen http://localhost:5173
+npx playwright codegen http://localhost:4173
 
 # Open last HTML report
 npx playwright show-report

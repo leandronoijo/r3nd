@@ -195,7 +195,7 @@ jobs:
               '### Changed file(s)',
               fileList,
               '',
-              '> **Agent profile:** `.github/agents/test-engineer.agent.md`',
+              '> **Agent profile:** `.github/agents/qa-team-lead.agent.md`',
               '> **Canonical template:** `.github/templates/test_cases.md`',
               '',
               '_No additional instructions are included here; follow the referenced agent profile and template._'

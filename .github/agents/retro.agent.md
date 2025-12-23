@@ -54,7 +54,7 @@ Use the file path referenced in the comment to determine which process artifact 
 | `rnd/product_specs/` | `product-manager` agent + `.github/templates/product_spec.md` |
 | `rnd/tech_specs/` | `architect` agent + `.github/templates/tech_spec.md` |
 | `rnd/build_plans/` | `team-lead` agent + `.github/templates/build_plan.md` |
-| `rnd/test_cases/` | `test-engineer` agent + `.github/templates/test_cases.md` |
+| `rnd/test_cases/` | `qa-team-lead` agent + `.github/templates/test_cases.md` |
 | `tests/e2e/` or `rnd/e2e-results/` | `e2e-engineer` agent + `.github/instructions/e2e-testing.instructions.md` + `.github/templates/e2e-result.md` |
 | `src/backend/` | `developer` agent + `.github/instructions/backend.instructions.md` |
 | `src/frontend/` | `developer` agent + `.github/instructions/frontend.instructions.md` |

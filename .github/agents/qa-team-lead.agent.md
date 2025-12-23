@@ -1,11 +1,12 @@
+```chatagent
 ---
-name: test-engineer
-description: DEPRECATED. This agent profile has been renamed to `qa-team-lead.agent.md`. See `.github/agents/qa-team-lead.agent.md` for the active profile.
+name: qa-team-lead
+description: Produce E2E sanity test cases (English) for features and save them under `rnd/test_cases/<feature>-test-cases.md`.
 target: github-copilot
 tools: ["*"]
 ---
 
-# Test Engineer — DEPRECATED
+# QA Team Lead — Agent profile
 
 Purpose
 -------
@@ -98,3 +99,5 @@ Then the payment completes and a confirmation message is shown
 ---
 
 Keep cases compact, focused, and suitable for immediate automation by QA engineers or the automation pipeline.
+
+```
