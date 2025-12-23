@@ -58,6 +58,31 @@ jobs:
               pull_number: prNumber
             });
 
+            const isHuman = user => user && user.type === 'User';
+            const hasBody = body => body && String(body).trim().length > 0;
+
+            const issueComments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number: prNumber, per_page: 100 }
+            );
+            const reviewComments = await github.paginate(
+              github.rest.pulls.listReviewComments,
+              { owner, repo, pull_number: prNumber, per_page: 100 }
+            );
+            const reviews = await github.paginate(
+              github.rest.pulls.listReviews,
+              { owner, repo, pull_number: prNumber, per_page: 100 }
+            );
+
+            const hasDiscussion = issueComments.some(comment => isHuman(comment.user) && hasBody(comment.body)) ||
+              reviewComments.some(comment => isHuman(comment.user) && hasBody(comment.body)) ||
+              reviews.some(review => isHuman(review.user) && hasBody(review.body));
+
+            if (!hasDiscussion) {
+              core.notice(`No human PR discussion found for #${prNumber}; skipping retro issue.`);
+              return;
+            }
+
             const existing = await github.rest.search.issuesAndPullRequests({
               q: `repo:${owner}/${repo} is:issue label:retro "PR #${prNumber}"`
             });
