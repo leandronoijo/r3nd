@@ -55,7 +55,7 @@ jobs:
           list-files: json
           filters: |
             tech_specs:
-              - added|modified: 'rnd/tech_specs/**'
+              - added: 'rnd/tech_specs/**'
       - name: Select changed files
         id: select
         run: |

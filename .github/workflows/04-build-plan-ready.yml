@@ -55,7 +55,7 @@ jobs:
           list-files: json
           filters: |
             build_plans:
-              - added|modified: 'rnd/build_plans/**'
+              - added: 'rnd/build_plans/**'
       - name: Select changed files
         id: select
         run: |
