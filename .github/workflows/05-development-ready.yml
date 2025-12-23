@@ -141,7 +141,9 @@ jobs:
           fi
           echo "pr_number=manual" >> "$GITHUB_OUTPUT"
           echo "pr_title=$feature_name" >> "$GITHUB_OUTPUT"
-          echo "pr_body=Manual run for $src_file on ${{ github.event.inputs.branch }}" >> "$GITHUB_OUTPUT"
+          echo "pr_body<<EOF" >> "$GITHUB_OUTPUT"
+          echo "Manual run for $src_file on ${{ github.event.inputs.branch }}" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
           echo "pr_author=${{ github.actor }}" >> "$GITHUB_OUTPUT"
       - name: Select PR context
         id: select
@@ -149,12 +151,16 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "pr_number=${{ steps.manual.outputs.pr_number }}" >> "$GITHUB_OUTPUT"
             echo "pr_title=${{ steps.manual.outputs.pr_title }}" >> "$GITHUB_OUTPUT"
-            echo "pr_body=${{ steps.manual.outputs.pr_body }}" >> "$GITHUB_OUTPUT"
+            echo "pr_body<<EOF" >> "$GITHUB_OUTPUT"
+            echo "${{ steps.manual.outputs.pr_body }}" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
             echo "pr_author=${{ steps.manual.outputs.pr_author }}" >> "$GITHUB_OUTPUT"
           else
             echo "pr_number=${{ steps.get-pr.outputs.pr_number }}" >> "$GITHUB_OUTPUT"
             echo "pr_title=${{ steps.get-pr.outputs.pr_title }}" >> "$GITHUB_OUTPUT"
-            echo "pr_body=${{ steps.get-pr.outputs.pr_body }}" >> "$GITHUB_OUTPUT"
+            echo "pr_body<<EOF" >> "$GITHUB_OUTPUT"
+            echo "${{ steps.get-pr.outputs.pr_body }}" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
             echo "pr_author=${{ steps.get-pr.outputs.pr_author }}" >> "$GITHUB_OUTPUT"
           fi
 
