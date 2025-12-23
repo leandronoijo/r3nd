@@ -1,6 +1,7 @@
 const child_process = require('child_process');
 const path = require('path');
 const fs = require('fs').promises;
+const { detectAvailableTools, getInstallInstructions } = require('../utils/toolDetector');
 
 // Simple agent runner that supports the file-based completion signaling used
 // by the existing codex workflow. Agents should expose a `makeCommand(prompt)`
@@ -32,7 +33,31 @@ async function runCodexCommand(cmd, cwd) {
   });
 }
 
-async function runPlansSequential(plans, { cwd = process.cwd(), makePrompt, makeCommand, timeoutMs = 3600000 } = {}) {
+/**
+ * Validate that the required agent tool is available before running
+ * @param {string} agentType - The agent type (codex, gemini, github)
+ * @throws {Error} If agent tool is not available
+ */
+function validateAgentAvailability(agentType) {
+  const availableTools = detectAvailableTools();
+  
+  if (agentType === 'codex' && !availableTools.codex) {
+    throw new Error(`Codex CLI not found. ${getInstallInstructions('codex')}`);
+  }
+  if (agentType === 'gemini' && !availableTools.gemini) {
+    throw new Error(`Gemini CLI not found. ${getInstallInstructions('gemini')}`);
+  }
+  if (agentType === 'github' && !availableTools.github) {
+    throw new Error(`GitHub CLI not found. ${getInstallInstructions('github')}`);
+  }
+}
+
+async function runPlansSequential(plans, { cwd = process.cwd(), makePrompt, makeCommand, timeoutMs = 3600000, agentType = 'codex' } = {}) {
+  // Validate agent availability before starting
+  if (agentType !== 'generate') {
+    validateAgentAvailability(agentType);
+  }
+  
   for (const planPath of plans) {
     const prompt = await makePrompt(planPath);
     const cmd = makeCommand(prompt);
@@ -109,4 +134,4 @@ async function runPlansSequential(plans, { cwd = process.cwd(), makePrompt, make
   }
 }
 
-module.exports = { runPlansSequential, runCodexCommand, waitForCompletionFile };
+module.exports = { runPlansSequential, runCodexCommand, waitForCompletionFile, validateAgentAvailability };

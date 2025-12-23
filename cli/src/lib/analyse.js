@@ -82,7 +82,7 @@ async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = 
     }
 
     const timeoutMs = parseInt(process.env.R3ND_AGENT_TIMEOUT || '3600000', 10);
-    await runPlansSequential([projectPlanPath], { cwd: destRoot, makePrompt: async (p) => makeOverviewPlanPrompt(p), makeCommand: (prompt) => makeCmdForPrompt(prompt), timeoutMs });
+    await runPlansSequential([projectPlanPath], { cwd: destRoot, makePrompt: async (p) => makeOverviewPlanPrompt(p), makeCommand: (prompt) => makeCmdForPrompt(prompt), timeoutMs, agentType: agent });
 
     // After agent signals completion, read project.instructions.md (or write placeholder)
     let fileContent = '';
@@ -115,7 +115,8 @@ async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = 
         return `${prompt}\n\nIMPORTANT: Save the instructions to ${path.relative(destRoot, path.join(instructionsDir, `${app.name}.instructions.md`))}. When you have completely finished creating this file, create a file named ${doneFile} in the current directory to signal completion.`;
       },
       makeCommand: (prompt) => makeCmdForPrompt(prompt),
-      timeoutMs
+      timeoutMs,
+      agentType: agent
     });
 
     // Ensure any missing per-app files get placeholder content

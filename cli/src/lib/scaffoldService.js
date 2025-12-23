@@ -162,7 +162,7 @@ async function runScaffold(opts = {}, deps = {}) {
 
     logger.info('Running codex CLI sequentially:');
     try {
-      await runPlansSequential(plans, { cwd, makePrompt: async (p) => makePrompt(p), makeCommand: (prompt) => makeCodexCommand(prompt), timeoutMs: opts.agentTimeout || 3600000 });
+      await runPlansSequential(plans, { cwd, makePrompt: async (p) => makePrompt(p), makeCommand: (prompt) => makeCodexCommand(prompt), timeoutMs: opts.agentTimeout || 3600000, agentType: 'codex' });
       logger.info('All codex plans completed successfully.');
     } catch (err) {
       logger.error('An error occurred while running codex:', err && err.message ? err.message : err);
@@ -199,7 +199,7 @@ async function runScaffold(opts = {}, deps = {}) {
 
     logger.info('\nRunning Gemini CLI commands (interactive, sequentially):');
     try {
-      await runPlansSequential(plansGem, { cwd, makePrompt: async (p) => makeGeminiPrompt(p), makeCommand: (prompt) => makeGeminiCommand(prompt), timeoutMs: opts.agentTimeout || 3600000 });
+      await runPlansSequential(plansGem, { cwd, makePrompt: async (p) => makeGeminiPrompt(p), makeCommand: (prompt) => makeGeminiCommand(prompt), timeoutMs: opts.agentTimeout || 3600000, agentType: 'gemini' });
       logger.info('Gemini plans completed.');
     } catch (err) {
       logger.error('An error occurred while running Gemini plans:', err && err.message ? err.message : err);
