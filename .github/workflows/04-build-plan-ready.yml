@@ -1,0 +1,241 @@
+# Development Workflow
+#
+# Triggered when a PR is merged to develop with changes to build plans.
+# Creates a GitHub issue and assigns it to Copilot with the Developer agent
+# to implement the build plan.
+#
+# Required Secrets:
+#   COPILOT_PAT - Personal Access Token with the following permissions:
+#     - repo (full control of private repositories)
+#     - issues:write (to create and update issues)
+#   This token is required because the default GITHUB_TOKEN cannot assign
+#   issues to the Copilot agent due to GitHub's licensing restrictions.
+
+name: 04 — Build Plan Ready
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'rnd/build_plans/**'
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch or ref to run against'
+        required: true
+        default: 'develop'
+      file:
+        description: 'Build plan file to process (e.g. rnd/build_plans/feature.md)'
+        required: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  detect-changes:
+    name: Detect Build Plan Changes
+    runs-on: ubuntu-latest
+    outputs:
+      build_plans_changed: ${{ steps.select.outputs.build_plans_changed }}
+      changed_files: ${{ steps.select.outputs.changed_files }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch || github.ref }}
+
+      - name: Filter changed files
+        uses: dorny/paths-filter@v3
+        id: filter
+        if: github.event_name == 'push'
+        with:
+          list-files: json
+          filters: |
+            build_plans:
+              - added: 'rnd/build_plans/**'
+      - name: Select changed files
+        id: select
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            file="${{ github.event.inputs.file }}"
+            if [[ ! -f "$file" ]]; then
+              echo "File not found: $file" >&2
+              exit 1
+            fi
+            printf 'build_plans_changed=true\n' >> "$GITHUB_OUTPUT"
+            printf 'changed_files=["%s"]\n' "${file//\"/\\\"}" >> "$GITHUB_OUTPUT"
+          else
+            echo "build_plans_changed=${{ steps.filter.outputs.build_plans }}" >> "$GITHUB_OUTPUT"
+            echo "changed_files=${{ steps.filter.outputs.build_plans_files }}" >> "$GITHUB_OUTPUT"
+          fi
+
+  create-development-task:
+    name: Create Development Task
+    needs: detect-changes
+    if: needs.detect-changes.outputs.build_plans_changed == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      issue_number: ${{ steps.create-issue.outputs.issue_number }}
+    steps:
+      - name: Create issue for development
+        id: create-issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Safely parse changed_files output (may be empty, malformed JSON,
+            // or a bracketed list like [rnd/build_plans/foo.md] without quotes)
+            function parseChangedFilesRaw(raw) {
+              if (!raw) return [];
+              raw = String(raw).trim();
+              try {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) return parsed;
+              } catch (e) {
+                // fall through
+              }
+              const inner = raw.replace(/^\[|\]$/g, '').trim();
+              if (!inner) return [];
+              const parts = inner.split(/,\s*|\s+/).map(s => s.trim()).filter(Boolean).map(s => s.replace(/^['"]|['"]$/g, ''));
+              return parts;
+            }
+
+            let changedFiles = [];
+            try {
+              const raw = '${{ needs.detect-changes.outputs.changed_files }}' || '';
+              changedFiles = parseChangedFilesRaw(raw);
+              if (!Array.isArray(changedFiles)) changedFiles = [];
+            } catch (err) {
+              core.notice('Failed to parse changed_files; defaulting to empty array.');
+              changedFiles = [];
+            }
+
+            // Build the issue body with file locations
+            const fileList = changedFiles.map(file => '- `' + file + '`').join('\n');
+            const firstFile = changedFiles[0] || 'rnd/build_plans/';
+            const planName = firstFile.split('/').pop().replace('.md', '');
+            
+            const issueTitle = 'Development: ' + planName;
+            const issueBody = [
+              '## Task: Development',
+              '',
+              `**Feature / Plan:** \`${planName}\``,
+              '',
+              '### Changed file(s)',
+              fileList,
+              '',
+              '> **Agent profile:** `.github/agents/developer.agent.md`',
+              '',
+              '_No additional instructions are included here; follow the referenced agent profile._'
+            ].join('\n');
+
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: issueTitle,
+              body: issueBody,
+              labels: ['development', 'copilot']
+            });
+            
+            console.log('Created issue #' + issue.data.number + ': ' + issue.data.title);
+            core.setOutput('issue_number', issue.data.number);
+            return issue.data.number;
+
+  create-testcases-task:
+    name: Create Test-Cases Generation Task
+    needs: detect-changes
+    if: needs.detect-changes.outputs.build_plans_changed == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      issue_number: ${{ steps.create-issue.outputs.issue_number }}
+    steps:
+      - name: Create issue for test-cases generation
+        id: create-issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Safely parse changed_files output (may be empty, malformed JSON,
+            // or a bracketed list)
+            function parseChangedFilesRaw(raw) {
+              if (!raw) return [];
+              raw = String(raw).trim();
+              try {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) return parsed;
+              } catch (e) {
+                // fall through
+              }
+              const inner = raw.replace(/^\[|\]$/g, '').trim();
+              if (!inner) return [];
+              const parts = inner.split(/,\s*|\s+/).map(s => s.trim()).filter(Boolean).map(s => s.replace(/^['"]|['"]$/g, ''));
+              return parts;
+            }
+
+            let changedFiles = [];
+            try {
+              const raw = '${{ needs.detect-changes.outputs.changed_files }}' || '';
+              changedFiles = parseChangedFilesRaw(raw);
+              if (!Array.isArray(changedFiles)) changedFiles = [];
+            } catch (err) {
+              core.notice('Failed to parse changed_files; defaulting to empty array.');
+              changedFiles = [];
+            }
+            const fileList = changedFiles.map(file => '- `' + file + '`').join('\n');
+            const firstFile = changedFiles[0] || 'rnd/build_plans/';
+            const planName = firstFile.split('/').pop().replace('.md', '');
+
+            const issueTitle = 'Generate Test Cases: ' + planName;
+            const issueBody = [
+              '## Task: Generate Test Cases',
+              '',
+              `**Feature / Plan:** \`${planName}\``,
+              '',
+              '### Changed file(s)',
+              fileList,
+              '',
+              '> **Agent profile:** `.github/agents/qa-team-lead.agent.md`',
+              '> **Canonical template:** `.github/templates/test_cases.md`',
+              '',
+              '_No additional instructions are included here; follow the referenced agent profile and template._'
+            ].join('\n');
+
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: issueTitle,
+              body: issueBody,
+              labels: ['test-cases', 'copilot']
+            });
+
+            console.log('Created issue #' + issue.data.number + ': ' + issue.data.title);
+            core.setOutput('issue_number', issue.data.number);
+            return issue.data.number;
+
+  assign-to-copilot:
+    name: Assign to Copilot
+    needs: create-development-task
+    runs-on: ubuntu-latest
+    steps:
+      # Note: Currently, the GitHub API does not support assigning a specific
+      # custom agent (like 'developer') programmatically. The issue is assigned
+      # to the default Copilot agent, but includes explicit instructions to
+      # follow the developer agent profile. When GitHub adds API support for
+      # custom agent assignment, this step should be updated.
+      - name: Assign issue to Copilot
+        uses: otto-de/assign_issue_toCopilot_action@v1.0.1
+        with:
+          issue_number: ${{ needs.create-development-task.outputs.issue_number }}
+          github_token: ${{ secrets.COPILOT_PAT }}
+
+  assign-testcases-to-copilot:
+    name: Assign Test-Cases Issue to Copilot
+    needs: create-testcases-task
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assign test-cases issue to Copilot
+        uses: otto-de/assign_issue_toCopilot_action@v1.0.1
+        with:
+          issue_number: ${{ needs.create-testcases-task.outputs.issue_number }}
+          github_token: ${{ secrets.COPILOT_PAT }}

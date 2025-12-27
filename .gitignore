@@ -6,3 +6,5 @@ npm-debug.log*
 .env*
 .DS_Store
 .angular/
+test-results/
+*/**/e2e/reports/

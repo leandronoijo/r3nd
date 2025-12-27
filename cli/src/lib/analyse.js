@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs').promises;
-const { runCodexCommand, runPlansSequential } = require('./llm/agentRunner');
+const { runCodexCommand, runPlansSequential, makeGitHubCommand } = require('./llm/agentRunner');
 const { writeBuffer, ensureDir } = require('./fs/fileWriter');
 const { buildOverviewPrompt, buildAppPrompt } = require('./analyse/prompts');
 const { confirmRunNow } = require('./ui/prompts');
@@ -11,10 +11,15 @@ async function parseAppsFromInstructions(content) {
   const jsonMatch = content.match(/```json\s*([\s\S]*?)```/i);
   if (jsonMatch) {
     try {
-      const parsed = JSON.parse(jsonMatch[1]);
-      if (Array.isArray(parsed.apps)) return parsed.apps;
+      const raw = jsonMatch[1].trim();
+      const parsed = JSON.parse(raw);
+      // If the JSON block is directly an array of apps
+      if (Array.isArray(parsed)) return parsed.map(a => ({ name: a.name || a.app || 'unknown', path: a.path || '.', purpose: a.purpose || '', stack: a.stack || '' }));
+      // If it's an object with `apps` property
+      if (Array.isArray(parsed.apps)) return parsed.apps.map(a => ({ name: a.name || a.app || 'unknown', path: a.path || '.', purpose: a.purpose || '', stack: a.stack || '' }));
     } catch (e) {
-      // fall through
+      console.warn('Failed to parse JSON fenced block for apps:', e && e.message ? e.message : e);
+      // fall through to other parsers
     }
   }
 
@@ -66,18 +71,21 @@ async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = 
     const projectPlanPath = 'rnd/build_plans/project-overview.md';
     function makeOverviewPlanPrompt(planPath) {
       const planName = path.basename(planPath, '.md');
+      if (agent === 'github') {
+        return `${overviewPrompt}\n\nIMPORTANT: Save the project-level instructions to ${path.relative(destRoot, projectInstructionsPath)}.`;
+      }
       const doneFile = `${planName}.done`;
       return `${overviewPrompt}\n\nIMPORTANT: Save the project-level instructions to ${path.relative(destRoot, projectInstructionsPath)}. When you have completely finished creating this file, create a file named ${doneFile} in the current directory to signal completion.`;
     }
 
     function makeCmdForPrompt(promptText) {
       if (agent === 'gemini') return `gemini --yolo -i "${promptText.replace(/"/g, '\\"')}"`;
-      if (agent === 'github') return `echo "GitHub agent not supported in local runner"`;
+      if (agent === 'github') return makeGitHubCommand(promptText);
       return `codex --yolo '${promptText.replace(/'/g, "'\\''")}'`;
     }
 
     const timeoutMs = parseInt(process.env.R3ND_AGENT_TIMEOUT || '3600000', 10);
-    await runPlansSequential([projectPlanPath], { cwd: destRoot, makePrompt: async (p) => makeOverviewPlanPrompt(p), makeCommand: (prompt) => makeCmdForPrompt(prompt), timeoutMs });
+    await runPlansSequential([projectPlanPath], { cwd: destRoot, makePrompt: async (p) => makeOverviewPlanPrompt(p), makeCommand: (prompt) => makeCmdForPrompt(prompt), timeoutMs, agentType: agent });
 
     // After agent signals completion, read project.instructions.md (or write placeholder)
     let fileContent = '';
@@ -105,12 +113,16 @@ async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = 
         const idx = appPlans.indexOf(planPath);
         const app = apps[idx];
         const planName = path.basename(planPath, '.md');
-        const doneFile = `${planName}.done`;
         const prompt = buildAppPrompt(app);
+        if (agent === 'github') {
+          return `${prompt}\n\nIMPORTANT: Save the instructions to ${path.relative(destRoot, path.join(instructionsDir, `${app.name}.instructions.md`))}.`;
+        }
+        const doneFile = `${planName}.done`;
         return `${prompt}\n\nIMPORTANT: Save the instructions to ${path.relative(destRoot, path.join(instructionsDir, `${app.name}.instructions.md`))}. When you have completely finished creating this file, create a file named ${doneFile} in the current directory to signal completion.`;
       },
       makeCommand: (prompt) => makeCmdForPrompt(prompt),
-      timeoutMs
+      timeoutMs,
+      agentType: agent
     });
 
     // Ensure any missing per-app files get placeholder content

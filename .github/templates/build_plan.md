@@ -396,24 +396,6 @@ Complete these items **before** starting any implementation tasks.
 
 ---
 
-### Phase 5: E2E Tests
-
-#### Task 11: E2E Tests (tooling per testing instructions)
-
-- [ ] **Create E2E test suite**
-- **File(s):** `tests/e2e/<feature>.spec.ts`
-- **Action:** create
-- **Dependencies:** All previous tasks
-- **Details:**
-  - Use `data-test-id` selectors only
-  - Test flows (see Section 5)
-- **Acceptance Criteria:**
-  - All critical user flows covered
-  - Tests are idempotent and isolated
-- **Effort:** medium
-
----
-
 ## 3. File/Module-level Changes
 
 | File Path | Action | Rationale | Golden Reference |
@@ -488,66 +470,6 @@ Complete these items **before** starting any implementation tasks.
 | `GET /entities/:id` | Invalid ID | 404 + NotFoundException |
 | `PATCH /entities/:id` | Partial update | 200 + updated entity |
 | `DELETE /entities/:id` | Valid ID | 204 No Content |
-
-### E2E Tests
-
-#### Flow 1: Create Entity
-
-1. Navigate to `/entities`
-2. Click "Add New" (`data-test-id="entity-list-add-btn"`)
-3. Fill form fields:
-   - `data-test-id="entity-form-field-name"` → enter value
-4. Click submit (`data-test-id="entity-form-submit-btn"`)
-5. `waitForResponse('**/api/entities', { method: 'POST' })`
-6. Assert success toast (`data-test-id="toast-success"`)
-7. Assert entity appears in list (`data-test-id="entity-list-item-*"`)
-
-#### Flow 2: View Entity Details
-
-1. Navigate to `/entities`
-2. Click entity row (`data-test-id="entity-list-item-{id}"`)
-3. Assert detail view shows (`data-test-id="entity-detail-container"`)
-4. Verify entity data displayed
-
-#### Flow 3: Edit Entity
-
-1. Navigate to `/entities/{id}`
-2. Click edit (`data-test-id="entity-detail-edit-btn"`)
-3. Modify field (`data-test-id="entity-form-field-name"`)
-4. Click submit
-5. `waitForResponse('**/api/entities/*', { method: 'PATCH' })`
-6. Assert success and updated data
-
-#### Flow 4: Delete Entity
-
-1. Navigate to `/entities/{id}`
-2. Click delete (`data-test-id="entity-detail-delete-btn"`)
-3. Confirm in dialog (`data-test-id="confirm-delete-btn"`)
-4. `waitForResponse('**/api/entities/*', { method: 'DELETE' })`
-5. Assert redirect to list
-6. Assert entity removed from list
-
-### Required `data-test-id` Values
-
-| Element | `data-test-id` |
-|---------|----------------|
-| Add button | `entity-list-add-btn` |
-| List container | `entity-list-container` |
-| List item | `entity-list-item-{id}` |
-| List loading | `entity-list-loading` |
-| List empty state | `entity-list-empty` |
-| Form container | `entity-form` |
-| Form field (each) | `entity-form-field-{fieldName}` |
-| Form submit | `entity-form-submit-btn` |
-| Form cancel | `entity-form-cancel-btn` |
-| Detail container | `entity-detail-container` |
-| Detail edit button | `entity-detail-edit-btn` |
-| Detail delete button | `entity-detail-delete-btn` |
-| Confirm delete | `confirm-delete-btn` |
-| Success toast | `toast-success` |
-| Error toast | `toast-error` |
-
----
 
 ## 6. Deployment & Rollout
 
@@ -628,7 +550,6 @@ Complete these items **before** starting any implementation tasks.
 
 - [ ] All unit tests passing
 - [ ] All integration tests passing
-- [ ] All E2E tests passing
 - [ ] Lint passing (`npm run lint`)
 - [ ] Type-check passing (`npm run type-check`)
 - [ ] No new warnings introduced
@@ -671,8 +592,6 @@ Task 8 (Components) ──→ Task 10 (Component Tests)
 Task 9 (View + Route)
     ↓
 [Frontend Complete]
-    ↓
-Task 11 (E2E Tests)
     ↓
 [Done]
 ```

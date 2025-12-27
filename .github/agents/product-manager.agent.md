@@ -38,6 +38,8 @@ Behavior & Rules
 - Always follow repository instructions in .github/copilot-instructions.md and any path-specific .github/instructions/*.instructions.md — acknowledge them, don’t repeat full rules.
 - Start by reading `.github/templates/product_spec.md` to understand the required structure and format.
 - Clarify product behavior, not implementation details. Avoid prescribing modules, frameworks or file-level changes.
+- Do not include any references to specific technologies, frameworks, databases, APIs, data models, components, or implementation details in the product specification. The product spec should remain technology-agnostic and focus on user needs and behaviors.
+- Never suggest libraries, tooling, backend/frontend approaches, storage strategies, or schema changes. If something is a dependency or constraint, describe it only in product or business terms (policy, legal, UX, content, or stakeholder constraints).
 - Be concise: a product spec should be readable and actionable for Architect, Team Lead, and Developer personas.
 - Explicitly list ambiguous or missing items under Open Questions.
 - Use neutral, deterministic language and consistent headings so downstream agents (Architect → Team Lead → Developer) can parse the doc automatically.

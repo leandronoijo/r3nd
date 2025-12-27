@@ -117,11 +117,6 @@ If any Mongo schema or DTO changes:
 - Module combinations to test
 - API endpoint request/response contracts
 
-### E2E tests
-- User flows with step-by-step actions
-- `data-test-id` values to add (list them explicitly)
-- Explicit waits: `waitForSelector`, `waitForResponse`
-
 ## 6. Deployment & Rollout
 - Feature flags (if any) — name and default value
 - Environment variables needed
@@ -178,7 +173,6 @@ Explicit warnings for Developer agent (see below).
 
 - Order tasks by dependency: schemas → DTOs → services → controllers → tests.
 - Frontend tasks depend on backend API being complete.
-- E2E tests come last after all unit/integration tests pass.
 
 ### Schema & DTO sync
 
@@ -205,7 +199,7 @@ Include a section in every build plan warning the Developer agent about:
 | Frontend | Follow `.github/instructions/frontend.instructions.md` for frontend stack and guardrails. | See frontend instructions |
 | Backend | Follow `.github/instructions/backend.instructions.md` for backend stack and guardrails. | See backend instructions |
 | DTOs | Always add validation decorators/annotations and keep DTO ↔ schema in sync. | See backend instructions |
-| Tests | Every new file needs a test. Use `data-test-id` for E2E. | `*.spec.ts` alongside source |
+| Tests | Every new file needs a test. Use `data-test-id` for stable UI selectors. | `*.spec.ts` alongside source |
 | Imports | Check `package.json` and `.github/instructions/*` for allowed packages. | Verify before adding new deps |
 | State | Follow `.github/instructions/frontend.instructions.md` for state management patterns. | See frontend instructions |
 | Queries | Follow `.github/instructions/backend.instructions.md` for data access patterns. | See backend instructions |
@@ -245,7 +239,7 @@ Include a section in every build plan warning the Developer agent about:
 - [ ] Golden reference module identified
 - [ ] Schema ↔ DTO sync verified for any DB changes
 - [ ] All test files specified with what to test
-- [ ] `data-test-id` values listed for E2E
+- [ ] `data-test-id` values listed for stable UI selectors
 - [ ] AI-Agent Guardrails section included
 - [ ] No vague or compound tasks
 - [ ] Effort estimates realistic
@@ -309,21 +303,4 @@ Include a section in every build plan warning the Developer agent about:
 
 - Test full request cycle: POST /orders with valid DTO → 201 + order object
 - Test validation: POST /orders with missing fields → 400 + error messages
-
-### E2E tests
-
-**Flow: Create Order**
-1. Navigate to `/orders/new`
-2. Fill form fields (use `data-test-id="order-form-*"`)
-3. Click submit (`data-test-id="order-submit-btn"`)
-4. Wait for the API response for the request (explicit wait) to `**/api/orders`
-5. Assert success toast (`data-test-id="toast-success"`)
-6. Assert redirect to order detail page
-
-**Required data-test-id values:**
-- `order-form-product-input`
-- `order-form-quantity-input`
-- `order-submit-btn`
-- `toast-success`
-- `order-detail-id`
 ```

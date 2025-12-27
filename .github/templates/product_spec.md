@@ -9,6 +9,7 @@
 ## 1. Overview
 A concise explanation of the feature in plain language.  
 Focus on *what* the feature is and *why* it matters — not how it will be implemented.
+Avoid any mention of libraries, frameworks, APIs, data models, or technical approaches.
 
 **Example:**  
 “This feature allows merchants to filter dispute records by billing status in the dashboard.”
@@ -39,7 +40,7 @@ Clarify what is *explicitly out of scope* to avoid misinterpretation later.
 
 Examples:
 - No bulk editing functionality.
-- No new API endpoints unless required by Team Lead or Architect.
+- No changes to pricing, billing, or contractual terms.
 
 ---
 
@@ -64,10 +65,10 @@ List clear, verifiable product requirements.
 - The feature should support …
 
 ### 6.2 Non-Functional Requirements
-- Performance constraints
-- UX requirements
+- Accessibility expectations
+- UX consistency requirements
 - Localization requirements
-- Compliance considerations
+- Compliance or policy considerations
 
 ---
 
@@ -91,11 +92,10 @@ Simple text flows are enough; diagrams are optional.
 ## 9. Dependencies & Constraints
 Call out anything that limits or influences the feature:
 
-- Existing APIs
-- Rate limits
-- External systems
-- Billing status logic
-- Authorization rules
+- Legal or regulatory constraints
+- Content or brand guidelines
+- Stakeholder approvals or dependencies
+- Data availability (from a user or policy perspective, not implementation)
 
 ---
 
@@ -121,4 +121,4 @@ These questions will usually be resolved by human reviewers before the Architect
 ---
 
 ## 12. Appendix (Optional)
-Relevant screenshots, links, or notes.
+Relevant screenshots, links, or notes (no technical notes).

@@ -2,6 +2,7 @@
 const path = require('path');
 const fs = require('fs');
 const { Command } = require('commander');
+const { detectAvailableTools } = require('./lib/utils/toolDetector');
 
 const pkg = require('../package.json');
 
@@ -24,6 +25,9 @@ process.stdout && process.stdout.on && process.stdout.on('error', (err) => {
 });
 
 async function main(argv = process.argv) {
+  // Pre-detect tools once at startup (caches results for later use)
+  detectAvailableTools();
+  
   const program = new Command();
   program.name(pkg.name).version(pkg.version).description(pkg.description || 'r3nd CLI');
 
