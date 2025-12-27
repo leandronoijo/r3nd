@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs').promises;
-const { runCodexCommand, runPlansSequential } = require('./llm/agentRunner');
+const { runCodexCommand, runPlansSequential, makeGitHubCommand } = require('./llm/agentRunner');
 const { writeBuffer, ensureDir } = require('./fs/fileWriter');
 const { buildOverviewPrompt, buildAppPrompt } = require('./analyse/prompts');
 const { confirmRunNow } = require('./ui/prompts');
@@ -71,13 +71,16 @@ async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = 
     const projectPlanPath = 'rnd/build_plans/project-overview.md';
     function makeOverviewPlanPrompt(planPath) {
       const planName = path.basename(planPath, '.md');
+      if (agent === 'github') {
+        return `${overviewPrompt}\n\nIMPORTANT: Save the project-level instructions to ${path.relative(destRoot, projectInstructionsPath)}.`;
+      }
       const doneFile = `${planName}.done`;
       return `${overviewPrompt}\n\nIMPORTANT: Save the project-level instructions to ${path.relative(destRoot, projectInstructionsPath)}. When you have completely finished creating this file, create a file named ${doneFile} in the current directory to signal completion.`;
     }
 
     function makeCmdForPrompt(promptText) {
       if (agent === 'gemini') return `gemini --yolo -i "${promptText.replace(/"/g, '\\"')}"`;
-      if (agent === 'github') return `echo "GitHub agent not supported in local runner"`;
+      if (agent === 'github') return makeGitHubCommand(promptText);
       return `codex --yolo '${promptText.replace(/'/g, "'\\''")}'`;
     }
 
@@ -110,8 +113,11 @@ async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = 
         const idx = appPlans.indexOf(planPath);
         const app = apps[idx];
         const planName = path.basename(planPath, '.md');
-        const doneFile = `${planName}.done`;
         const prompt = buildAppPrompt(app);
+        if (agent === 'github') {
+          return `${prompt}\n\nIMPORTANT: Save the instructions to ${path.relative(destRoot, path.join(instructionsDir, `${app.name}.instructions.md`))}.`;
+        }
+        const doneFile = `${planName}.done`;
         return `${prompt}\n\nIMPORTANT: Save the instructions to ${path.relative(destRoot, path.join(instructionsDir, `${app.name}.instructions.md`))}. When you have completely finished creating this file, create a file named ${doneFile} in the current directory to signal completion.`;
       },
       makeCommand: (prompt) => makeCmdForPrompt(prompt),

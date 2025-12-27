@@ -4,6 +4,7 @@ const { spawn } = require('child_process');
 
 const { askBugDescription, askBugfixLLMChoice, confirmBuildPlan } = require('./ui/prompts');
 const { ensureDir } = require('./fs/fileWriter');
+const { runGitHubAgent } = require('./llm/agentRunner');
 const logger = require('./utils/logger');
 
 async function runBugfix(opts = {}) {
@@ -31,11 +32,6 @@ async function runBugfix(opts = {}) {
   
   if (llmChoice === 'naa') {
     logger.info('Bugfix workflow cancelled.');
-    return;
-  }
-
-  if (llmChoice === 'github') {
-    logger.info('GitHub coding agent is not yet implemented. Please choose another option.');
     return;
   }
 
@@ -243,6 +239,25 @@ async function runBugfix(opts = {}) {
       logger.info('\n✓ Bugfix workflow completed successfully!');
     } catch (err) {
       logger.error('Failed to implement build plan:', err && err.message ? err.message : err);
+    }
+
+  } else if (llmChoice === 'github') {
+    // Run GitHub agent for build plan creation (first step only)
+    logger.info('\n=== Creating GitHub Agent Task ===');
+    logger.info('Sending initial prompt to GitHub agent...\n');
+
+    const fullPrompt = `${planPrompt}\n\nIMPORTANT: Save the build plan to ${planPath}.\n\nAfter creating the build plan, wait for user approval. Once approved, ${implementPrompt}`;
+    
+    try {
+      const url = await runGitHubAgent(fullPrompt, cwd, 'Bugfix task');
+      logger.info('\n📋 Next steps:');
+      logger.info('  1. Review the agent\'s progress at the link above');
+      logger.info('  2. The agent will create the build plan and wait for your approval');
+      logger.info('  3. Once approved, the agent will implement the fix');
+      logger.info('  4. Monitor the agent session on GitHub for completion\n');
+    } catch (err) {
+      logger.error('Failed to create GitHub agent task.');
+      return;
     }
 
   } else if (llmChoice === 'generate') {

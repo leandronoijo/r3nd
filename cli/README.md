@@ -74,6 +74,35 @@ Commands:
     node src/index.js bugfix
     ```
 
+- `agents`: Run AI agents for generating specs, plans, and implementing features. See [Agents Command Documentation](docs/agents-command.md) for details.
+  - Subcommands:
+    - `product-spec`: Generate a product specification from a feature description (free text input)
+    - `tech-spec`: Generate a technical specification from a product spec
+    - `build-plan`: Generate a build plan from a technical specification
+    - `develop`: Implement a build plan to completion
+  - **Note**: Only agents installed on your system will be available as options.
+  - Examples:
+
+    ```bash
+    # Interactive mode
+    r3nd agents product-spec
+    r3nd agents tech-spec
+    r3nd agents build-plan
+    r3nd agents develop
+
+    # With options
+    r3nd agents product-spec --input "Build user auth system" --agent github
+    r3nd agents tech-spec --file rnd/product_specs/auth.md --agent github
+    r3nd agents develop --file rnd/build_plans/feature.md --agent codex
+    ```
+
+- `tools`: Show which AI tools are available on your system.
+  - Example:
+
+    ```bash
+    r3nd tools
+    ```
+
 ## Installation
 
 ### r3nd CLI Installation

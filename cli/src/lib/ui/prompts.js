@@ -98,6 +98,22 @@ async function askBugDescription(nonInteractive = false) {
   return res.description.trim();
 }
 
+/**
+ * Prompt user for a feature description
+ * @param {boolean} nonInteractive - If true, throws error (requires interactive input)
+ * @returns {Promise<string>} Feature description text
+ */
+async function askFeatureDescription(nonInteractive = false) {
+  if (nonInteractive) throw new Error('Product spec generation requires interactive mode to provide feature description');
+  const res = await prompt([{ 
+    type: 'input', 
+    name: 'description', 
+    message: 'Describe the feature you want to build (be as detailed as possible):', 
+    validate: (input) => input.trim().length > 10 || 'Please provide a detailed description (at least 10 characters)' 
+  }]);
+  return res.description.trim();
+}
+
 async function askBugfixLLMChoice(nonInteractive = false) {
   if (nonInteractive) return 'naa';
   
@@ -159,4 +175,35 @@ async function askAnalyseAgent(defaultAgent = 'codex', nonInteractive = false) {
   return res.agent;
 }
 
-module.exports = { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askBugDescription, askBugfixLLMChoice, confirmBuildPlan, askAnalyseAgent };
+/**
+ * Prompt user to select a file from a list
+ * @param {Array<string>} files - Array of file paths
+ * @param {string} message - Prompt message
+ * @param {boolean} nonInteractive - If true, returns first file or null
+ * @returns {Promise<string|null>} Selected file path or null if none available
+ */
+async function chooseFile(files, message = 'Select a file:', nonInteractive = false) {
+  if (!files || files.length === 0) {
+    return null;
+  }
+  
+  if (nonInteractive) {
+    return files[0];
+  }
+  
+  const choices = files.map(file => ({
+    name: file,
+    value: file
+  }));
+  
+  const res = await prompt([{
+    type: 'list',
+    name: 'selectedFile',
+    message,
+    choices
+  }]);
+  
+  return res.selectedFile;
+}
+
+module.exports = { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askBugDescription, askFeatureDescription, askBugfixLLMChoice, confirmBuildPlan, askAnalyseAgent, buildAgentChoices, chooseFile };

@@ -4,7 +4,7 @@ const { GitHubClient } = require('./github/githubClient');
 const { mapDestination } = require('./overlays/overlayRegistry');
 const { writeBuffer, ensureDir } = require('./fs/fileWriter');
 const { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin } = require('./ui/prompts');
-const { runPlansSequential, waitForCompletionFile, runCodexCommand } = require('./llm/agentRunner');
+const { runPlansSequential, waitForCompletionFile, runCodexCommand, makeGitHubCommand } = require('./llm/agentRunner');
 const logger = require('./utils/logger');
 const fs = require('fs').promises;
 const { execSync } = require('child_process');
@@ -203,6 +203,48 @@ async function runScaffold(opts = {}, deps = {}) {
       logger.info('Gemini plans completed.');
     } catch (err) {
       logger.error('An error occurred while running Gemini plans:', err && err.message ? err.message : err);
+    }
+  } else if (llmChoice === 'github') {
+    // GitHub: send only first prompt, user continues on GitHub
+    const allPlansGithub = [
+      'rnd/build_plans/scaffold-backend-bootstrap-build-plan.md',
+      'rnd/build_plans/scaffold-frontend-bootstrap-build-plan.md',
+      'rnd/build_plans/scaffold-backend-complete-build-plan.md',
+      'rnd/build_plans/scaffold-frontend-complete-build-plan.md',
+      'rnd/build_plans/scaffold-infra-build-plan.md'
+    ];
+
+    const backendDirExistsGithub = await fs.access(path.join(cwd, 'src', 'backend')).then(() => true).catch(() => false);
+    const frontendDirExistsGithub = await fs.access(path.join(cwd, 'src', 'frontend')).then(() => true).catch(() => false);
+    const dockerComposeExistsGithub = await fs.access(path.join(cwd, 'docker-compose.yml')).then(() => true).catch(() => false);
+
+    const plansGithub = [];
+    if (!backendDirExistsGithub) { plansGithub.push(allPlansGithub[0]); plansGithub.push(allPlansGithub[2]); }
+    if (!frontendDirExistsGithub) { plansGithub.push(allPlansGithub[1]); plansGithub.push(allPlansGithub[3]); }
+    if (!dockerComposeExistsGithub) { plansGithub.push(allPlansGithub[4]); }
+
+    if (plansGithub.length === 0) { logger.info('\n✓ All scaffolding appears to be complete. Nothing to do!'); return; }
+
+    // Create a single comprehensive prompt with all plans
+    const allPlansText = plansGithub.map((p, i) => `${i + 1}. ${p}`).join('\n');
+    const comprehensivePrompt = `using the .github/agents/developer.agent.md as instructions please implement the following building plans to completion (in order):\n\n${allPlansText}`;
+
+    logger.info('\n=== Creating GitHub Agent Task ===');
+    logger.info('Sending scaffold plans to GitHub agent...\n');
+    
+    try {
+      const { runGitHubAgent } = require('./llm/agentRunner');
+      const url = await runGitHubAgent(comprehensivePrompt, cwd, 'Scaffold task');
+      logger.info('\n📋 Next steps:');
+      logger.info('  1. Monitor the agent\'s progress at the link above');
+      logger.info('  2. The agent will implement all build plans sequentially');
+      logger.info(`  3. Review the changes as they are made\n`);
+    } catch (err) {
+      if (err.message && err.message.includes('GitHub agent requires repository')) {
+        logger.error('GitHub agent failed: Requires a repository with proper permissions.');
+      } else {
+        logger.error('An error occurred while creating GitHub agent task:', err && err.message ? err.message : err);
+      }
     }
   } else if (llmChoice === 'generate') {
     // Produce prompts and optionally save (these prompts are intended for a human
