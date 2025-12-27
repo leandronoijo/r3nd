@@ -126,4 +126,22 @@ The r3nd CLI will automatically detect available tools and adjust its options ac
 
 ---
 
+## Development
+
+### Running Tests
+
+The CLI includes a comprehensive test suite using Jest. To run tests:
+
+```bash
+cd cli
+npm install          # Install dependencies including dev dependencies
+npm test             # Run all tests
+npm run test:watch   # Run tests in watch mode
+npm run test:coverage # Run tests with coverage report
+```
+
+All tests must pass before submitting pull requests.
+
+---
+
 This CLI is intended to be used as a scaffolder and helper for generating project overlays and instructions using the r3nd overlays and optional LLM-driven plans.
