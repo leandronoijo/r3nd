@@ -117,7 +117,7 @@ Commands:
 - Install globally from the seed repository:
 
   ```bash
-  sudo npm install -g git+https://github.com/leandronoijo/r3nd.git#0
+  sudo npm install -g git+https://github.com/leandronoijo/r3nd.git#0.2
   ```
 
   After global install you can run the CLI as `r3nd` from your shell.
