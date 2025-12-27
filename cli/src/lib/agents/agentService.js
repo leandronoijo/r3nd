@@ -3,10 +3,10 @@ const fs = require('fs').promises;
 const logger = require('../utils/logger');
 
 /**
- * List all markdown files in a directory
+ * List all markdown files in a directory, sorted by creation time (newest first)
  * @param {string} cwd - Current working directory
  * @param {string} dir - Relative directory path to scan
- * @returns {Promise<Array<string>>} Array of relative file paths
+ * @returns {Promise<Array<string>>} Array of relative file paths, limited to 20 most recent
  */
 async function listMarkdownFiles(cwd, dir) {
   const fullPath = path.join(cwd, dir);
@@ -15,9 +15,28 @@ async function listMarkdownFiles(cwd, dir) {
     const entries = await fs.readdir(fullPath, { withFileTypes: true });
     const mdFiles = entries
       .filter(entry => entry.isFile() && entry.name.endsWith('.md'))
-      .map(entry => path.join(dir, entry.name));
+      .map(entry => ({
+        name: entry.name,
+        path: path.join(dir, entry.name),
+        fullPath: path.join(fullPath, entry.name)
+      }));
     
-    return mdFiles.sort();
+    // Get file stats to sort by creation time
+    const filesWithStats = await Promise.all(
+      mdFiles.map(async (file) => {
+        const stats = await fs.stat(file.fullPath);
+        return {
+          path: file.path,
+          birthtime: stats.birthtime
+        };
+      })
+    );
+    
+    // Sort by creation time (newest first) and limit to 20
+    return filesWithStats
+      .sort((a, b) => b.birthtime - a.birthtime)
+      .slice(0, 20)
+      .map(file => file.path);
   } catch (err) {
     if (err.code === 'ENOENT') {
       logger.warn(`Directory not found: ${dir}`);

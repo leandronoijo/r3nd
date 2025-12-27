@@ -200,7 +200,8 @@ async function chooseFile(files, message = 'Select a file:', nonInteractive = fa
     type: 'list',
     name: 'selectedFile',
     message,
-    choices
+    choices,
+    pageSize: 15 // Show 15 items at a time for better scrolling UX
   }]);
   
   return res.selectedFile;
