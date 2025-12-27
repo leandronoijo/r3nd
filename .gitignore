@@ -8,3 +8,4 @@ npm-debug.log*
 .angular/
 test-results/
 */**/e2e/reports/
+*.fixed.js

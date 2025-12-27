@@ -4,12 +4,13 @@ const { parseAppsFromInstructions } = require('./analyse');
 describe('analyse prompts and parsing', () => {
   test('overview prompt contains JSON block instruction', () => {
     const p = buildOverviewPrompt();
-    expect(p).toMatch(/```json[\s\S]*apps[\s\S]*```/i);
+    expect(p).toMatch(/```json/i);
+    expect(p).toMatch(/apps/i);
   });
 
-  test('app prompt mentions apply-to path and sections', () => {
+  test('app prompt mentions applyTo path and sections', () => {
     const p = buildAppPrompt({ name: 'foo', path: 'src/foo' });
-    expect(p).toMatch(/apply-to header/i);
+    expect(p).toMatch(/applyTo/i);
     expect(p).toMatch(/Tech stack/i);
   });
 

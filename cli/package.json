@@ -5,6 +5,11 @@
   "bin": {
     "r3nd": "bin/r3nd"
   },
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
   "author": "leandronoijo",
   "license": "MIT",
   "dependencies": {
@@ -15,5 +20,8 @@
   },
   "engines": {
     "node": ">=16"
+  },
+  "devDependencies": {
+    "jest": "^30.2.0"
   }
 }
