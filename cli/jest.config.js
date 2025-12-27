@@ -10,9 +10,6 @@ module.exports = {
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
   verbose: true,
-  transformIgnorePatterns: [
-    'node_modules/(?!(inquirer)/)'
-  ],
   moduleNameMapper: {
     '^inquirer$': '<rootDir>/src/__mocks__/inquirer.js'
   }
