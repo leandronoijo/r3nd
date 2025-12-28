@@ -10,8 +10,12 @@
 
 Complete these items **before** starting any implementation tasks.
 
-- [ ] Read `.github/instructions/backend.instructions.md`
-- [ ] Read `.github/instructions/frontend.instructions.md`
+- [ ] Identify integration points in Section 1
+- [ ] Read instruction files in `.github/instructions/` that match those integration points
+  - Example: backend changes → `backend.instructions.md` (if present)
+  - Example: frontend changes → `frontend.instructions.md` (if present)
+  - Example: testing changes → `testing.instructions.md`
+  - Example: e2e changes → `e2e-testing.instructions.md`
 - [ ] Identify golden reference modules:
   - Backend: `src/backend/modules/example/`
   - Frontend: `src/frontend/components/example/`, `src/frontend/stores/exampleStore.ts`

@@ -46,11 +46,10 @@ Ask yourself before writing each task: *"Does this follow the patterns establish
 | Technical Spec | `rnd/tech_specs/<feature-id>-tech-spec.md` | Source of truth for what to build |
 | Existing Code | `src/backend/`, `src/frontend/` | Context for integration points |
 | Existing Tests | `tests/backend/`, `tests/frontend/` | Patterns for new tests |
-| Stack Rules | `.github/instructions/backend.instructions.md` | Backend conventions |
-| Stack Rules | `.github/instructions/frontend.instructions.md` | Frontend conventions |
+| Stack Rules | `.github/instructions/` | Relevant conventions (match instruction files to integration points) |
 | Architecture Docs | `docs/` | System context and constraints |
 
-**Always read instruction files before creating a plan.** Reference them; don't copy their content.
+**Always read instruction files relevant to the integration points before creating a plan.** Reference them; don't copy their content.
 
 ---
 
@@ -71,8 +70,8 @@ The template at `.github/templates/build_plan.md` defines the canonical structur
 # Build Plan: <feature-id>
 
 ## 0. Pre-Implementation Checklist
-- [ ] Read `.github/instructions/backend.instructions.md`
-- [ ] Read `.github/instructions/frontend.instructions.md`
+- [ ] Identify integration points in Section 1
+- [ ] Read instruction files in `.github/instructions/` that match those integration points
 - [ ] Identify golden reference modules to follow
 - [ ] Confirm no new dependencies needed (or justify)
 - [ ] List integration points with existing modules
@@ -157,8 +156,7 @@ Explicit warnings for Developer agent (see below).
 
 ### General
 
-- Follow `.github/instructions/backend.instructions.md` for backend tasks.
-- Follow `.github/instructions/frontend.instructions.md` for frontend tasks.
+- Follow the relevant instruction files in `.github/instructions/` based on the integration points.
 - Reference these files in the plan; do not copy their full content.
 - Always identify the **golden reference** module to follow (e.g., `src/backend/modules/example/`).
 
@@ -196,8 +194,8 @@ Include a section in every build plan warning the Developer agent about:
 
 | Area | Warning | Correct Pattern |
 |------|---------|-----------------|
-| Frontend | Follow `.github/instructions/frontend.instructions.md` for frontend stack and guardrails. | See frontend instructions |
-| Backend | Follow `.github/instructions/backend.instructions.md` for backend stack and guardrails. | See backend instructions |
+| Frontend | Follow relevant frontend instructions in `.github/instructions/`. | See frontend instructions |
+| Backend | Follow relevant backend instructions in `.github/instructions/`. | See backend instructions |
 | DTOs | Always add validation decorators/annotations and keep DTO ↔ schema in sync. | See backend instructions |
 | Tests | Every new file needs a test. Use `data-test-id` for stable UI selectors. | `*.spec.ts` alongside source |
 | Imports | Check `package.json` and `.github/instructions/*` for allowed packages. | Verify before adding new deps |
