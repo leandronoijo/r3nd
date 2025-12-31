@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs').promises;
 const { execSync } = require('child_process');
+const YAML = require('yaml');
 
 const { GitHubClient } = require('./github/githubClient');
 const { writeBuffer, ensureDir } = require('./fs/fileWriter');
@@ -14,37 +15,36 @@ const logger = require('./utils/logger');
  */
 function parseAgentFile(content) {
   const lines = content.split('\n');
-  const metadata = {};
-  let inFrontmatter = false;
-  let frontmatterEnd = 0;
+  let frontmatterStart = -1;
+  let frontmatterEnd = -1;
   
+  // Find frontmatter boundaries
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (line === '---') {
-      if (!inFrontmatter) {
-        inFrontmatter = true;
+    if (lines[i].trim() === '---') {
+      if (frontmatterStart === -1) {
+        frontmatterStart = i;
       } else {
-        frontmatterEnd = i + 1;
+        frontmatterEnd = i;
         break;
-      }
-    } else if (inFrontmatter) {
-      const match = line.match(/^(\w+):\s*(.+)$/);
-      if (match) {
-        let value = match[2].trim();
-        // Remove quotes if present
-        if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-          value = value.slice(1, -1);
-        }
-        // Parse array-like values
-        if (value.startsWith('[') && value.endsWith(']')) {
-          value = value.slice(1, -1).split(',').map(v => v.trim().replace(/^["']|["']$/g, ''));
-        }
-        metadata[match[1]] = value;
       }
     }
   }
   
-  const bodyContent = lines.slice(frontmatterEnd).join('\n').trim();
+  let metadata = {};
+  
+  // Parse YAML frontmatter if found
+  if (frontmatterStart !== -1 && frontmatterEnd !== -1) {
+    const frontmatterContent = lines.slice(frontmatterStart + 1, frontmatterEnd).join('\n');
+    try {
+      metadata = YAML.parse(frontmatterContent) || {};
+    } catch (err) {
+      // Fallback to defaults if YAML parsing fails
+      metadata = {};
+    }
+  }
+  
+  const bodyStartLine = frontmatterEnd !== -1 ? frontmatterEnd + 1 : 0;
+  const bodyContent = lines.slice(bodyStartLine).join('\n').trim();
   
   return {
     name: metadata.name || 'unknown',
@@ -60,9 +60,6 @@ function parseAgentFile(content) {
  * @returns {string} Cursor rule file content in .mdc format
  */
 function generateCursorRule(agent) {
-  const tools = Array.isArray(agent.tools) ? agent.tools : [agent.tools];
-  const toolsStr = tools.map(t => `"${t}"`).join(', ');
-  
   return `---
 description: "${agent.description}"
 globs: ["**/*"]
