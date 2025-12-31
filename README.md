@@ -209,6 +209,24 @@ This repository includes a small CLI (located in the `cli/` folder) that helps s
 		- `.github/instructions/e2e-testing.instructions.md`
 		- `.gitignore`
 
+- `update`: update r3nd components from the seed repository to get the latest versions:
+	- Presents an interactive checklist to select which components to update:
+		- Templates (`.github/templates/`)
+		- Agents (`.github/agents/`)
+		- GitHub workflows (`.github/workflows/`)
+		- Cursor commands (`.cursor/commands/`)
+		- VSCode Copilot chat modes (`.github/chatmodes/`)
+	- Options:
+		- `-y, --yes`: Non-interactive mode, update all components
+	- Example (interactive):
+		```bash
+		r3nd update
+		```
+	- Example (non-interactive, update all):
+		```bash
+		r3nd update --yes
+		```
+
 - `analyse`: Inspect the current git repository to generate `project.instructions.md` and per-app instruction files using the configured LLM agent. Useful to bootstrap instruction files from an existing codebase.
 	- Options:
 		- `-a, --agent <agent>`: Agent to use (`codex`, `gemini`, `github`, or `generate`). Default: `codex`.
@@ -227,6 +245,9 @@ node cli/src/index.js scaffold
 
 # Initialize current directory with minimal r3nd seed files
 node cli/src/index.js init
+
+# Update r3nd components to latest versions
+node cli/src/index.js update
 ```
 
 Installation (global):
@@ -237,7 +258,7 @@ You can install the CLI globally from the seed repository as requested:
 sudo npm install -g git+https://github.com/leandronoijo/r3nd.git#0.2
 ```
 
-After global install you can run the CLI as `r3nd` from your shell (e.g. `r3nd init`).
+After global install you can run the CLI as `r3nd` from your shell (e.g. `r3nd init`, `r3nd update`).
 
 ## 👤 For Maintainers
 
