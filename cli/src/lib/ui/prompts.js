@@ -232,4 +232,31 @@ async function askInitOptions(nonInteractive = false) {
   return res.initOptions;
 }
 
-module.exports = { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askBugDescription, askFeatureDescription, askBugfixLLMChoice, confirmBuildPlan, askAnalyseAgent, buildAgentChoices, chooseFile, askInitOptions };
+/**
+ * Prompt user to select which components to update
+ * @param {boolean} nonInteractive - If true, returns default selections
+ * @returns {Promise<string[]>} Array of selected option values
+ */
+async function askUpdateOptions(nonInteractive = false) {
+  const defaultOptions = ['templates', 'agents', 'github', 'cursor', 'vscode'];
+  if (nonInteractive) return defaultOptions;
+  
+  const choices = [
+    { name: 'Templates → Update .github/templates/', value: 'templates', checked: true },
+    { name: 'Agents → Update .github/agents/', value: 'agents', checked: true },
+    { name: 'GitHub → Update GitHub workflows (.github/workflows/)', value: 'github', checked: true },
+    { name: 'Cursor → Update .cursor commands for each agent', value: 'cursor', checked: true },
+    { name: 'VSCode → Update .github/chatmodes for each agent (Copilot personas)', value: 'vscode', checked: true },
+  ];
+  
+  const res = await prompt([{
+    type: 'checkbox',
+    name: 'updateOptions',
+    message: 'Select which components to update:',
+    choices,
+  }]);
+  
+  return res.updateOptions;
+}
+
+module.exports = { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askBugDescription, askFeatureDescription, askBugfixLLMChoice, confirmBuildPlan, askAnalyseAgent, buildAgentChoices, chooseFile, askInitOptions, askUpdateOptions };
