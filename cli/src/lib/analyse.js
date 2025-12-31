@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs').promises;
 const { runCodexCommand, runPlansSequential, makeGitHubCommand } = require('./llm/agentRunner');
 const { writeBuffer, ensureDir } = require('./fs/fileWriter');
-const { buildOverviewPrompt, buildAppPrompt } = require('./analyse/prompts');
+const { buildOverviewPrompt, buildAppPrompt, buildTargetedAppPrompt } = require('./analyse/prompts');
 const { confirmRunNow } = require('./ui/prompts');
 const YAML = require('yaml');
 
@@ -41,13 +41,47 @@ async function parseAppsFromInstructions(content) {
   return [];
 }
 
-async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = process.cwd() } = {}) {
+async function parseAppNameFromMetadata(content) {
+  // Try YAML fenced block first
+  const yamlMatch = content.match(/```(?:yaml|yml)\s*([\s\S]*?)```/i);
+  if (yamlMatch) {
+    try {
+      const parsed = YAML.parse(yamlMatch[1]);
+      if (parsed && parsed.name) return parsed.name;
+    } catch (e) {
+      // fall through to JSON
+    }
+  }
+
+  // Try JSON fenced block
+  const jsonMatch = content.match(/```json\s*([\s\S]*?)```/i);
+  if (jsonMatch) {
+    try {
+      const raw = jsonMatch[1].trim();
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.name) return parsed.name;
+    } catch (e) {
+      // fall through
+    }
+  }
+
+  return null;
+}
+
+async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = process.cwd(), targetDir = null } = {}) {
+  const instructionsDir = path.join(destRoot, '.github', 'instructions');
+  await ensureDir(instructionsDir);
+
+  // If targetDir is specified, run targeted app analysis
+  if (targetDir) {
+    return runTargetedAnalyse({ agent, nonInteractive, destRoot, targetDir, instructionsDir });
+  }
+
+  // Original full-project analysis flow
   // Phase 1: build overview prompt
   const overviewPrompt = buildOverviewPrompt(destRoot);
 
   // If agent is 'generate', write the prompt to a file and exit
-  const instructionsDir = path.join(destRoot, '.github', 'instructions');
-  await ensureDir(instructionsDir);
   const projectInstructionsPath = path.join(instructionsDir, 'project.instructions.md');
 
   if (agent === 'generate') {
@@ -143,4 +177,88 @@ async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = 
   }
 }
 
-module.exports = { runAnalyse, parseAppsFromInstructions };
+async function runTargetedAnalyse({ agent, nonInteractive, destRoot, targetDir, instructionsDir }) {
+  // Normalize targetDir to be relative to destRoot
+  const normalizedDir = path.isAbsolute(targetDir) 
+    ? path.relative(destRoot, targetDir) 
+    : targetDir;
+
+  console.log(`Analysing specific directory: ${normalizedDir}`);
+
+  const targetedPrompt = buildTargetedAppPrompt(normalizedDir);
+
+  if (agent === 'generate') {
+    // Generate a placeholder filename based on the directory
+    const dirName = path.basename(normalizedDir) || 'app';
+    const outputPath = path.join(instructionsDir, `${dirName}.instructions.md`);
+    const content = `<!-- GENERATED PROMPT -->\n\n${targetedPrompt}\n`;
+    await writeBuffer(destRoot, path.relative(destRoot, outputPath), Buffer.from(content));
+    console.log(`Generated prompt written to ${outputPath}`);
+    return;
+  }
+
+  if (!nonInteractive) {
+    const proceed = await confirmRunNow(nonInteractive);
+    if (!proceed) {
+      console.log('Aborted by user');
+      return;
+    }
+  }
+
+  try {
+    const dirName = path.basename(normalizedDir) || 'app';
+    const appPlanPath = `rnd/build_plans/${dirName}.md`;
+
+    function makeTargetedPlanPrompt(planPath) {
+      const planName = path.basename(planPath, '.md');
+      const outputPath = path.join(instructionsDir, `${dirName}.instructions.md`);
+      if (agent === 'github') {
+        return `${targetedPrompt}\n\nIMPORTANT: Save the instructions to ${path.relative(destRoot, outputPath)}.`;
+      }
+      const doneFile = `${planName}.done`;
+      return `${targetedPrompt}\n\nIMPORTANT: Save the instructions to ${path.relative(destRoot, outputPath)}. When you have completely finished creating this file, create a file named ${doneFile} in the current directory to signal completion.`;
+    }
+
+    function makeCmdForPrompt(promptText) {
+      if (agent === 'gemini') return `gemini --yolo -i "${promptText.replace(/"/g, '\\"')}"`;
+      if (agent === 'github') return makeGitHubCommand(promptText);
+      return `codex --yolo '${promptText.replace(/'/g, "'\\''")}'`;
+    }
+
+    const timeoutMs = parseInt(process.env.R3ND_AGENT_TIMEOUT || '3600000', 10);
+    await runPlansSequential([appPlanPath], { 
+      cwd: destRoot, 
+      makePrompt: async (p) => makeTargetedPlanPrompt(p), 
+      makeCommand: (prompt) => makeCmdForPrompt(prompt), 
+      timeoutMs, 
+      agentType: agent 
+    });
+
+    // Try to read the generated file to extract the app name
+    const outputPath = path.join(instructionsDir, `${dirName}.instructions.md`);
+    let fileContent = '';
+    try {
+      fileContent = await fs.readFile(outputPath, 'utf8');
+      
+      // Try to parse the app name from the metadata
+      const parsedName = await parseAppNameFromMetadata(fileContent);
+      if (parsedName && parsedName !== dirName) {
+        // Rename the file to match the parsed app name
+        const newOutputPath = path.join(instructionsDir, `${parsedName}.instructions.md`);
+        await fs.rename(outputPath, newOutputPath);
+        console.log(`Agent produced ${newOutputPath}`);
+      } else {
+        console.log(`Agent produced ${outputPath}`);
+      }
+    } catch (e) {
+      console.warn('Agent completed but did not produce the instruction file. Writing prompt as placeholder.');
+      await writeBuffer(destRoot, path.relative(destRoot, outputPath), Buffer.from(targetedPrompt), { overwrite: true });
+      console.log(`Wrote placeholder instructions to ${outputPath}`);
+    }
+  } catch (err) {
+    console.error('Agent run failed:', err && err.message ? err.message : err);
+    throw err;
+  }
+}
+
+module.exports = { runAnalyse, parseAppsFromInstructions, parseAppNameFromMetadata };
