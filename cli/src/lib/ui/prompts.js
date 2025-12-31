@@ -207,4 +207,29 @@ async function chooseFile(files, message = 'Select a file:', nonInteractive = fa
   return res.selectedFile;
 }
 
-module.exports = { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askBugDescription, askFeatureDescription, askBugfixLLMChoice, confirmBuildPlan, askAnalyseAgent, buildAgentChoices, chooseFile };
+/**
+ * Prompt user to select which components to initialize
+ * @param {boolean} nonInteractive - If true, returns default selections
+ * @returns {Promise<string[]>} Array of selected option values
+ */
+async function askInitOptions(nonInteractive = false) {
+  const defaultOptions = ['github', 'cursor', 'vscode'];
+  if (nonInteractive) return defaultOptions;
+  
+  const choices = [
+    { name: 'GitHub → Copy GitHub workflows (.github/workflows/)', value: 'github', checked: true },
+    { name: 'Cursor → Create .cursor commands for each agent', value: 'cursor', checked: true },
+    { name: 'VSCode → Create .github/chatmodes for each agent (Copilot personas)', value: 'vscode', checked: true },
+  ];
+  
+  const res = await prompt([{
+    type: 'checkbox',
+    name: 'initOptions',
+    message: 'Select which components to initialize:',
+    choices,
+  }]);
+  
+  return res.initOptions;
+}
+
+module.exports = { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askBugDescription, askFeatureDescription, askBugfixLLMChoice, confirmBuildPlan, askAnalyseAgent, buildAgentChoices, chooseFile, askInitOptions };

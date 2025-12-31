@@ -6,9 +6,10 @@ function register(program) {
   program
     .command('init')
     .description('Initialize repository and copy r3nd seed GitHub files')
-    .action(async () => {
+    .option('-y, --yes', 'Non-interactive mode, select all options')
+    .action(async (options) => {
       try {
-        await runInit();
+        await runInit({ nonInteractive: options.yes });
       } catch (err) {
         console.error('Init failed:', err && err.message ? err.message : err);
         process.exit(1);
