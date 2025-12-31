@@ -231,10 +231,18 @@ This repository includes a small CLI (located in the `cli/` folder) that helps s
 	- Options:
 		- `-a, --agent <agent>`: Agent to use (`codex`, `gemini`, `github`, or `generate`). Default: `codex`.
 		- `-n, --non-interactive`: Run without interactive prompts (assume defaults).
+		- `-d, --dir <directory>`: Target a specific app/service directory instead of the whole project. Generates instructions for just that directory.
 	- Example (non-interactive, use codex):
 
 		```bash
 		node cli/src/index.js analyse --non-interactive --agent codex
+		```
+	
+	- Example (analyse a specific directory):
+
+		```bash
+		node cli/src/index.js analyse --dir src/backend --agent codex
+		r3nd analyse --dir cli/src --agent generate --non-interactive
 		```
 
 Usage examples (from the repo root):

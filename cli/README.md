@@ -59,11 +59,17 @@ Commands:
   - Options:
     - `-a, --agent <agent>`: Agent to use (`codex|gemini|github|generate`). Default: `codex` (or first available agent).
     - `-n, --non-interactive`: Run without interactive prompts.
+    - `-d, --dir <directory>`: Target a specific app/service directory instead of the whole project. Generates instructions for just that directory.
   - **Note**: Only agents installed on your system will be available as options.
-  - Example:
+  - Examples:
 
     ```bash
+    # Analyse entire project
     node src/index.js analyse --non-interactive --agent codex
+    
+    # Analyse a specific directory
+    node src/index.js analyse --dir src/backend --agent codex
+    r3nd analyse --dir cli/src --agent generate --non-interactive
     ```
 
 - `bugfix`: Create and execute a bugfix plan using r3nd agents.
