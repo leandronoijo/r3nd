@@ -15,7 +15,7 @@ async function runUpdate(opts = {}, deps = {}) {
   // Check if directory is a git repository
   const isGitRepo = await fs.access(path.join(cwd, '.git')).then(() => true).catch(() => false);
   if (!isGitRepo) {
-    logger.warn('Warning: Current directory is not a git repository.');
+    logger.warn('Current directory is not a git repository.');
   }
 
   // Ask user which components to update
