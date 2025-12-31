@@ -218,8 +218,8 @@ async function askInitOptions(nonInteractive = false) {
   
   const choices = [
     { name: 'GitHub → Copy GitHub workflows (.github/workflows/)', value: 'github', checked: true },
-    { name: 'Cursor → Create .cursor rules for each agent', value: 'cursor', checked: true },
-    { name: 'VSCode → Create .vscode copilot-instructions.md with all agents', value: 'vscode', checked: true },
+    { name: 'Cursor → Create .cursor commands for each agent', value: 'cursor', checked: true },
+    { name: 'VSCode → Create .github/chatmodes for each agent (Copilot personas)', value: 'vscode', checked: true },
   ];
   
   const res = await prompt([{

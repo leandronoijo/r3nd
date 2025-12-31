@@ -55,48 +55,35 @@ function parseAgentFile(content) {
 }
 
 /**
- * Generate Cursor rule file content from agent data
+ * Generate Cursor command file content from agent data
  * @param {Object} agent - Parsed agent object
- * @returns {string} Cursor rule file content in .mdc format
+ * @returns {string} Cursor command file content in .md format
  */
-function generateCursorRule(agent) {
-  return `---
-description: "${agent.description}"
-globs: ["**/*"]
-alwaysApply: false
----
+function generateCursorCommand(agent) {
+  return `# ${agent.name}
 
-# ${agent.name}
+${agent.description}
 
 ${agent.content}
 `;
 }
 
 /**
- * Generate VSCode copilot-instructions.md content from all agents
- * @param {Object[]} agents - Array of parsed agent objects
- * @returns {string} Combined copilot instructions content
+ * Generate VSCode chat mode file content from agent data
+ * @param {Object} agent - Parsed agent object
+ * @returns {string} VSCode chatmode file content in .chatmode.md format
  */
-function generateVSCodeInstructions(agents) {
-  let content = `# Copilot Custom Instructions
-
-This file contains combined instructions from all r3nd agents. These instructions help GitHub Copilot understand the project conventions and provide better assistance.
-
-`;
-
-  for (const agent of agents) {
-    content += `## ${agent.name}
-
-**Description:** ${agent.description}
-
-${agent.content}
-
+function generateVSCodeChatMode(agent) {
+  const tools = Array.isArray(agent.tools) ? agent.tools : (agent.tools ? [agent.tools] : ['*']);
+  const toolsStr = tools.map(t => `"${t}"`).join(', ');
+  
+  return `---
+description: "${agent.description}"
+tools: [${toolsStr}]
 ---
 
+${agent.content}
 `;
-  }
-
-  return content;
 }
 
 async function runInit(opts = {}, deps = {}) {
@@ -161,11 +148,11 @@ async function runInit(opts = {}, deps = {}) {
   }
 
   if (selectedOptions.includes('cursor')) {
-    await createCursorRules(cwd, agents);
+    await createCursorCommands(cwd, agents);
   }
 
   if (selectedOptions.includes('vscode')) {
-    await createVSCodeInstructions(cwd, agents);
+    await createVSCodeChatModes(cwd, agents);
   }
 
   // Also copy templates if any option was selected
@@ -225,43 +212,44 @@ async function fetchAndParseAgents(tree, githubClient) {
 }
 
 /**
- * Create Cursor rule files for each agent
+ * Create Cursor command files for each agent
  */
-async function createCursorRules(cwd, agents) {
-  logger.info('\n📝 Creating Cursor rules...');
+async function createCursorCommands(cwd, agents) {
+  logger.info('\n📝 Creating Cursor commands...');
   
-  const cursorRulesDir = path.join(cwd, '.cursor', 'rules');
-  await ensureDir(cursorRulesDir);
+  const cursorCommandsDir = path.join(cwd, '.cursor', 'commands');
+  await ensureDir(cursorCommandsDir);
 
   for (const agent of agents) {
     try {
-      const ruleContent = generateCursorRule(agent);
-      const rulePath = path.join('.cursor', 'rules', `${agent.name}.mdc`);
-      await writeBuffer(cwd, rulePath, Buffer.from(ruleContent, 'utf-8'), { overwrite: true });
-      logger.info(`  Created: ${rulePath}`);
+      const commandContent = generateCursorCommand(agent);
+      const commandPath = path.join('.cursor', 'commands', `${agent.name}.md`);
+      await writeBuffer(cwd, commandPath, Buffer.from(commandContent, 'utf-8'), { overwrite: true });
+      logger.info(`  Created: ${commandPath}`);
     } catch (err) {
-      logger.error(`  Failed to create rule for ${agent.name}:`, err && err.message ? err.message : err);
+      logger.error(`  Failed to create command for ${agent.name}:`, err && err.message ? err.message : err);
     }
   }
 }
 
 /**
- * Create VSCode copilot-instructions.md with all agents
+ * Create VSCode chat mode files for each agent (Copilot personas)
  */
-async function createVSCodeInstructions(cwd, agents) {
-  logger.info('\n📄 Creating VSCode Copilot instructions...');
+async function createVSCodeChatModes(cwd, agents) {
+  logger.info('\n📄 Creating VSCode Copilot chat modes...');
   
-  const vscodeDir = path.join(cwd, '.vscode');
-  await ensureDir(vscodeDir);
+  const chatModesDir = path.join(cwd, '.github', 'chatmodes');
+  await ensureDir(chatModesDir);
 
-  const content = generateVSCodeInstructions(agents);
-  const instructionsPath = path.join('.vscode', 'copilot-instructions.md');
-  
-  try {
-    await writeBuffer(cwd, instructionsPath, Buffer.from(content, 'utf-8'), { overwrite: true });
-    logger.info(`  Created: ${instructionsPath}`);
-  } catch (err) {
-    logger.error(`  Failed to create ${instructionsPath}:`, err && err.message ? err.message : err);
+  for (const agent of agents) {
+    try {
+      const chatModeContent = generateVSCodeChatMode(agent);
+      const chatModePath = path.join('.github', 'chatmodes', `${agent.name}.chatmode.md`);
+      await writeBuffer(cwd, chatModePath, Buffer.from(chatModeContent, 'utf-8'), { overwrite: true });
+      logger.info(`  Created: ${chatModePath}`);
+    } catch (err) {
+      logger.error(`  Failed to create chat mode for ${agent.name}:`, err && err.message ? err.message : err);
+    }
   }
 }
 
@@ -291,4 +279,4 @@ async function copyTemplates(cwd, tree, githubClient) {
   }
 }
 
-module.exports = { runInit, parseAgentFile, generateCursorRule, generateVSCodeInstructions };
+module.exports = { runInit, parseAgentFile, generateCursorCommand, generateVSCodeChatMode };

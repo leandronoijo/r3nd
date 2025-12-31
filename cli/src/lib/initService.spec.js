@@ -3,7 +3,7 @@ jest.mock('./ui/prompts', () => ({
   askInitOptions: jest.fn().mockResolvedValue(['github', 'cursor', 'vscode'])
 }));
 
-const { parseAgentFile, generateCursorRule, generateVSCodeInstructions } = require('./initService');
+const { parseAgentFile, generateCursorCommand, generateVSCodeChatMode } = require('./initService');
 
 describe('initService', () => {
   describe('parseAgentFile', () => {
@@ -75,8 +75,8 @@ Content
     });
   });
 
-  describe('generateCursorRule', () => {
-    it('should generate valid .mdc format', () => {
+  describe('generateCursorCommand', () => {
+    it('should generate valid command format', () => {
       const agent = {
         name: 'developer',
         description: 'Implement features and tests.',
@@ -84,17 +84,15 @@ Content
         content: '# Developer Agent\n\nThis is the content.'
       };
 
-      const result = generateCursorRule(agent);
+      const result = generateCursorCommand(agent);
 
-      expect(result).toContain('---');
-      expect(result).toContain('description: "Implement features and tests."');
-      expect(result).toContain('globs: ["**/*"]');
-      expect(result).toContain('alwaysApply: false');
       expect(result).toContain('# developer');
+      expect(result).toContain('Implement features and tests.');
       expect(result).toContain('# Developer Agent');
+      expect(result).toContain('This is the content.');
     });
 
-    it('should include agent content in the rule', () => {
+    it('should include agent content in the command', () => {
       const agent = {
         name: 'architect',
         description: 'Convert specs to designs.',
@@ -102,56 +100,55 @@ Content
         content: '## Purpose\n\nCreate technical specifications.'
       };
 
-      const result = generateCursorRule(agent);
+      const result = generateCursorCommand(agent);
 
       expect(result).toContain('## Purpose');
       expect(result).toContain('Create technical specifications.');
     });
   });
 
-  describe('generateVSCodeInstructions', () => {
-    it('should generate combined instructions for multiple agents', () => {
-      const agents = [
-        {
-          name: 'developer',
-          description: 'Implement features.',
-          content: 'Developer content here.'
-        },
-        {
-          name: 'architect',
-          description: 'Create designs.',
-          content: 'Architect content here.'
-        }
-      ];
+  describe('generateVSCodeChatMode', () => {
+    it('should generate valid chatmode.md format with YAML frontmatter', () => {
+      const agent = {
+        name: 'developer',
+        description: 'Implement features.',
+        tools: ['*'],
+        content: 'Developer content here.'
+      };
 
-      const result = generateVSCodeInstructions(agents);
+      const result = generateVSCodeChatMode(agent);
 
-      expect(result).toContain('# Copilot Custom Instructions');
-      expect(result).toContain('## developer');
-      expect(result).toContain('**Description:** Implement features.');
+      expect(result).toContain('---');
+      expect(result).toContain('description: "Implement features."');
+      expect(result).toContain('tools: ["*"]');
       expect(result).toContain('Developer content here.');
-      expect(result).toContain('## architect');
-      expect(result).toContain('**Description:** Create designs.');
-      expect(result).toContain('Architect content here.');
     });
 
-    it('should handle empty agents array', () => {
-      const result = generateVSCodeInstructions([]);
+    it('should handle multiple tools', () => {
+      const agent = {
+        name: 'architect',
+        description: 'Create designs.',
+        tools: ['codebase', 'search', 'terminal'],
+        content: 'Architect content here.'
+      };
 
-      expect(result).toContain('# Copilot Custom Instructions');
-      // Should not throw, should just be the header
+      const result = generateVSCodeChatMode(agent);
+
+      expect(result).toContain('tools: ["codebase", "search", "terminal"]');
     });
 
-    it('should include horizontal rules between agents', () => {
-      const agents = [
-        { name: 'agent1', description: 'Desc 1', content: 'Content 1' },
-        { name: 'agent2', description: 'Desc 2', content: 'Content 2' }
-      ];
+    it('should include agent content after frontmatter', () => {
+      const agent = {
+        name: 'team-lead',
+        description: 'Lead the team.',
+        tools: ['*'],
+        content: '## Purpose\n\nLead the team effectively.'
+      };
 
-      const result = generateVSCodeInstructions(agents);
+      const result = generateVSCodeChatMode(agent);
 
-      // Should have separators between agents
-      expect(result.split('---').length).toBeGreaterThan(1);
+      expect(result).toContain('## Purpose');
+      expect(result).toContain('Lead the team effectively.');
     });
   });
 });
