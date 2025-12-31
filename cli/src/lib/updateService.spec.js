@@ -24,6 +24,7 @@ jest.mock('./fs/fileWriter', () => ({
 const { runUpdate } = require('./updateService');
 const { askUpdateOptions } = require('./ui/prompts');
 const { writeBuffer } = require('./fs/fileWriter');
+const logger = require('./utils/logger');
 
 describe('updateService', () => {
   let mockGithubClient;
@@ -104,7 +105,7 @@ describe('updateService', () => {
       const fs = require('fs').promises;
       fs.access = jest.fn().mockRejectedValue(new Error('Not found'));
       
-      const loggerSpy = jest.spyOn(require('./utils/logger'), 'warn');
+      const loggerSpy = jest.spyOn(logger, 'warn');
       
       askUpdateOptions.mockResolvedValueOnce(['templates']);
       

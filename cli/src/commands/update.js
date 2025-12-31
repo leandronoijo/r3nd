@@ -1,5 +1,3 @@
-const path = require('path');
-
 const { runUpdate } = require('../lib/update');
 
 function register(program) {
