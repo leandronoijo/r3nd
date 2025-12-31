@@ -54,8 +54,8 @@ async function runScaffold(opts = {}, deps = {}) {
   }
 
   const prefixes = [];
+  // Mandatory seed files (excluding agents which are handled separately)
   const mandatorySeedFiles = [
-    '.github/agents/retro.agent.md',
     '.github/templates/retro.md',
     '.github/workflows/06-retro-ready.yml'
   ];
@@ -121,6 +121,24 @@ async function runScaffold(opts = {}, deps = {}) {
     }
   }
 
+  // Ensure all agent files are present (required for CLI commands)
+  async function ensureAllAgentFiles() {
+    logger.info('Ensuring all agent files are present...');
+    const tree = await githubClient.getTree();
+    const agentFiles = tree.filter(item => 
+      item.type === 'blob' && item.path.startsWith('.github/agents/') && item.path.endsWith('.agent.md')
+    );
+    
+    if (agentFiles.length === 0) {
+      logger.warn('No agent files found in seed repo.');
+      return;
+    }
+
+    const agentPaths = agentFiles.map(f => f.path);
+    await ensureSeedFiles(agentPaths);
+  }
+
+  await ensureAllAgentFiles();
   await ensureSeedFiles(mandatorySeedFiles);
 
   logger.info('Next steps: install dependencies and adapt overlays as needed.');

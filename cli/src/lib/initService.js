@@ -103,13 +103,8 @@ async function runInit(opts = {}, deps = {}) {
   // Ask user which components to initialize
   logger.info('r3nd — repository initializer\n');
   const selectedOptions = await askInitOptions(nonInteractive);
-  
-  if (selectedOptions.length === 0) {
-    logger.warn('No options selected. Nothing to initialize.');
-    return;
-  }
 
-  logger.info(`\nSelected: ${selectedOptions.join(', ')}\n`);
+  logger.info(`\nSelected: ${selectedOptions.join(', ') || 'None (agents only)'}\n`);
 
   // Fetch file tree from GitHub
   logger.info('Fetching file list from GitHub (seed repo)...');
@@ -136,12 +131,15 @@ async function runInit(opts = {}, deps = {}) {
     }
   }
 
-  // Process selected options
+  // Always copy agent files (required for CLI commands to work)
+  await copyAgentFiles(cwd, tree, githubClient);
+
+  // Process selected options (these are optional)
   if (selectedOptions.includes('github')) {
     await copyGitHubWorkflows(cwd, tree, githubClient);
   }
 
-  // Fetch agents if needed for cursor or vscode
+  // Fetch and parse agents if needed for cursor or vscode
   let agents = [];
   if (selectedOptions.includes('cursor') || selectedOptions.includes('vscode')) {
     agents = await fetchAndParseAgents(tree, githubClient);
@@ -177,6 +175,32 @@ async function copyGitHubWorkflows(cwd, tree, githubClient) {
   }
 
   for (const file of workflowFiles) {
+    try {
+      const buffer = await githubClient.fetchRaw(file.path);
+      await writeBuffer(cwd, file.path, buffer, { overwrite: true });
+      logger.info(`  Copied: ${file.path}`);
+    } catch (err) {
+      logger.error(`  Failed to copy ${file.path}:`, err && err.message ? err.message : err);
+    }
+  }
+}
+
+/**
+ * Copy agent files (always required for CLI commands)
+ */
+async function copyAgentFiles(cwd, tree, githubClient) {
+  logger.info('\n🤖 Copying agent files...');
+  
+  const agentFiles = tree.filter(item => 
+    item.type === 'blob' && item.path.startsWith('.github/agents/') && item.path.endsWith('.agent.md')
+  );
+
+  if (agentFiles.length === 0) {
+    logger.warn('No agent files found in seed repo.');
+    return;
+  }
+
+  for (const file of agentFiles) {
     try {
       const buffer = await githubClient.fetchRaw(file.path);
       await writeBuffer(cwd, file.path, buffer, { overwrite: true });
