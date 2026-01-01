@@ -17,6 +17,9 @@ async function runScaffold(opts = {}, deps = {}) {
   // Initialize config manager
   const configManager = new ConfigManager(cwd);
   
+  // Get configured spec directory name
+  const specDirName = await configManager.getSpecDirName();
+  
   // Check if seed-repo is configured, prompt if not
   let seedRepo = await configManager.get('seed-repo');
   if (!seedRepo) {
@@ -74,7 +77,7 @@ async function runScaffold(opts = {}, deps = {}) {
     '.github/workflows/06-retro-ready.yml'
   ];
   if (!backendInstructionsExist && !frontendInstructionsExist) {
-    prefixes.push('.github/', 'rnd/', '.gitignore', 'README.md');
+    prefixes.push('.github/', `${specDirName}/`, '.gitignore', 'README.md');
   }
   if (!backendInstructionsExist) prefixes.push(`overlays/backend/${backend}/`);
   if (!frontendInstructionsExist) prefixes.push(`overlays/frontend/${frontend}/`);
@@ -94,7 +97,7 @@ async function runScaffold(opts = {}, deps = {}) {
     } else {
       logger.info(`Found ${toCopy.length} files to copy. Starting download...`);
       for (const remotePath of toCopy) {
-        const mapped = mapDestination(remotePath, backend, frontend);
+        const mapped = mapDestination(remotePath, backend, frontend, specDirName);
         const buffer = await githubClient.fetchRaw(remotePath);
         const rel = mapped || remotePath;
         await writeBuffer(cwd, rel, buffer, { overwrite: true });
@@ -102,8 +105,12 @@ async function runScaffold(opts = {}, deps = {}) {
       }
     }
 
-    const rndDirs = ['rnd/build_plans', 'rnd/product_specs', 'rnd/tech_specs'];
-    for (const r of rndDirs) {
+    const specDirs = [
+      `${specDirName}/build_plans`,
+      `${specDirName}/product_specs`,
+      `${specDirName}/tech_specs`
+    ];
+    for (const r of specDirs) {
       await ensureDir(path.join(cwd, r));
       logger.info(`Ensured directory: ${r}`);
     }
@@ -116,7 +123,7 @@ async function runScaffold(opts = {}, deps = {}) {
   async function ensureSeedFiles(files) {
     const missing = [];
     for (const remotePath of files) {
-      const rel = mapDestination(remotePath, backend, frontend) || remotePath;
+      const rel = mapDestination(remotePath, backend, frontend, specDirName) || remotePath;
       const exists = await fs.access(path.join(cwd, rel)).then(() => true).catch(() => false);
       if (!exists) missing.push({ remotePath, rel });
     }
@@ -160,11 +167,11 @@ async function runScaffold(opts = {}, deps = {}) {
   const llmChoice = await askLLMChoice(nonInteractive);
   if (llmChoice === 'codex') {
     const allPlans = [
-      'rnd/build_plans/scaffold-backend-bootstrap-build-plan.md',
-      'rnd/build_plans/scaffold-frontend-bootstrap-build-plan.md',
-      'rnd/build_plans/scaffold-backend-complete-build-plan.md',
-      'rnd/build_plans/scaffold-frontend-complete-build-plan.md',
-      'rnd/build_plans/scaffold-infra-build-plan.md'
+      `${specDirName}/build_plans/scaffold-backend-bootstrap-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-frontend-bootstrap-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-backend-complete-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-frontend-complete-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-infra-build-plan.md`
     ];
 
     const backendDirExists = await fs.access(path.join(cwd, 'src', 'backend')).then(() => true).catch(() => false);
@@ -202,11 +209,11 @@ async function runScaffold(opts = {}, deps = {}) {
   } else if (llmChoice === 'gemini') {
     // Gemini: run `gemini --yolo "prompt"` sequentially and wait for process exit.
     const allPlansGem = [
-      'rnd/build_plans/scaffold-backend-bootstrap-build-plan.md',
-      'rnd/build_plans/scaffold-frontend-bootstrap-build-plan.md',
-      'rnd/build_plans/scaffold-backend-complete-build-plan.md',
-      'rnd/build_plans/scaffold-frontend-complete-build-plan.md',
-      'rnd/build_plans/scaffold-infra-build-plan.md'
+      `${specDirName}/build_plans/scaffold-backend-bootstrap-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-frontend-bootstrap-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-backend-complete-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-frontend-complete-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-infra-build-plan.md`
     ];
 
     const backendDirExistsGem = await fs.access(path.join(cwd, 'src', 'backend')).then(() => true).catch(() => false);
@@ -239,11 +246,11 @@ async function runScaffold(opts = {}, deps = {}) {
   } else if (llmChoice === 'github') {
     // GitHub: send only first prompt, user continues on GitHub
     const allPlansGithub = [
-      'rnd/build_plans/scaffold-backend-bootstrap-build-plan.md',
-      'rnd/build_plans/scaffold-frontend-bootstrap-build-plan.md',
-      'rnd/build_plans/scaffold-backend-complete-build-plan.md',
-      'rnd/build_plans/scaffold-frontend-complete-build-plan.md',
-      'rnd/build_plans/scaffold-infra-build-plan.md'
+      `${specDirName}/build_plans/scaffold-backend-bootstrap-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-frontend-bootstrap-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-backend-complete-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-frontend-complete-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-infra-build-plan.md`
     ];
 
     const backendDirExistsGithub = await fs.access(path.join(cwd, 'src', 'backend')).then(() => true).catch(() => false);
@@ -283,11 +290,11 @@ async function runScaffold(opts = {}, deps = {}) {
     // operator or external agent and should NOT include the automated .done file
     // completion hack used by the local `codex` flow.)
     const allPlans = [
-      'rnd/build_plans/scaffold-backend-bootstrap-build-plan.md',
-      'rnd/build_plans/scaffold-frontend-bootstrap-build-plan.md',
-      'rnd/build_plans/scaffold-backend-complete-build-plan.md',
-      'rnd/build_plans/scaffold-frontend-complete-build-plan.md',
-      'rnd/build_plans/scaffold-infra-build-plan.md'
+      `${specDirName}/build_plans/scaffold-backend-bootstrap-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-frontend-bootstrap-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-backend-complete-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-frontend-complete-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-infra-build-plan.md`
     ];
 
     const backendDirExists = await fs.access(path.join(cwd, 'src', 'backend')).then(() => true).catch(() => false);
@@ -313,7 +320,7 @@ async function runScaffold(opts = {}, deps = {}) {
     const saveToFile = await confirmSavePrompts(nonInteractive);
     if (saveToFile) {
       try {
-        const savePath = path.join(process.cwd(), 'rnd', 'llm_create_prompts.txt');
+        const savePath = path.join(process.cwd(), specDirName, 'llm_create_prompts.txt');
         await ensureDir(path.dirname(savePath));
         await fs.writeFile(savePath, allPrompts, 'utf8');
         logger.info(`Saved prompts to ${savePath}`);

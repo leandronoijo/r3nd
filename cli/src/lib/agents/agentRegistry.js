@@ -4,7 +4,7 @@
  * Each agent entry defines:
  * - name: command name (e.g., 'tech-spec' becomes 'r3nd agents tech-spec')
  * - description: help text for the command
- * - filesDir: relative directory to scan for input files
+ * - filesDir: relative directory to scan for input files (can be a function for dynamic resolution)
  * - agentFile: path to the agent profile markdown file
  * - promptTemplate: function that generates the prompt text
  */
@@ -24,7 +24,7 @@ const AGENT_REGISTRY = [
   {
     name: 'tech-spec',
     description: 'Generate a technical specification from a product spec',
-    filesDir: 'rnd/product_specs',
+    filesDir: (specDirName) => `${specDirName}/product_specs`,
     agentFile: '.github/agents/architect.agent.md',
     promptTemplate: (agentFile, targetFile) => 
       `Using the ${agentFile} agent profile as instructions, please create a technical specification for the following product spec:\n\n${targetFile}\n\nFollow the template at .github/templates/tech_spec.md and ensure all sections are properly filled out.`,
@@ -34,7 +34,7 @@ const AGENT_REGISTRY = [
   {
     name: 'build-plan',
     description: 'Generate a build plan from a technical specification',
-    filesDir: 'rnd/tech_specs',
+    filesDir: (specDirName) => `${specDirName}/tech_specs`,
     agentFile: '.github/agents/team-lead.agent.md',
     promptTemplate: (agentFile, targetFile) =>
       `Using the ${agentFile} agent profile as instructions, please create a build plan for the following technical specification:\n\n${targetFile}\n\nFollow the template at .github/templates/build_plan.md and break down the work into atomic, testable tasks.`,
@@ -44,7 +44,7 @@ const AGENT_REGISTRY = [
   {
     name: 'develop',
     description: 'Implement a build plan to completion',
-    filesDir: 'rnd/build_plans',
+    filesDir: (specDirName) => `${specDirName}/build_plans`,
     agentFile: '.github/agents/developer.agent.md',
     promptTemplate: (agentFile, targetFile) =>
       `Using the ${agentFile} agent profile as instructions, please implement the following build plan to its completion:\n\n${targetFile}\n\nIMPORTANT: Follow all rules in the agent profile. Read instruction files before starting. Test as you implement. Mark tasks complete as you finish them.`,
@@ -54,7 +54,7 @@ const AGENT_REGISTRY = [
   {
     name: 'test-cases',
     description: 'Generate E2E test cases from a build plan',
-    filesDir: 'rnd/build_plans',
+    filesDir: (specDirName) => `${specDirName}/build_plans`,
     agentFile: '.github/agents/qa-team-lead.agent.md',
     promptTemplate: (agentFile, targetFile) =>
       `Using the ${agentFile} agent profile as instructions, please create E2E test cases for the following build plan:\n\n${targetFile}\n\nFollow the template at .github/templates/test_cases.md and generate up to 20 sanity-level test cases that validate core flows and interactions between touched components.`,
@@ -64,7 +64,7 @@ const AGENT_REGISTRY = [
   {
     name: 'e2e-tests',
     description: 'Generate, run, and diagnose E2E tests from test cases',
-    filesDir: 'rnd/test_cases',
+    filesDir: (specDirName) => `${specDirName}/test_cases`,
     agentFile: '.github/agents/e2e-engineer.agent.md',
     promptTemplate: (agentFile, targetFile) =>
       `Using the ${agentFile} agent profile as instructions, please implement and execute E2E tests for the following test cases:\n\n${targetFile}\n\nIMPORTANT: Follow all rules in the agent profile. Read .github/instructions/e2e-testing.instructions.md before starting. Start required services, run tests sequentially, diagnose failures, and generate a comprehensive result report.`,
