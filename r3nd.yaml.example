@@ -1,0 +1,22 @@
+# r3nd Configuration File
+#
+# This file contains configuration values for the r3nd CLI tool.
+# It should be placed at the root of your repository.
+#
+# Configuration values can be managed using the r3nd config command:
+#   r3nd config list              - List all configuration values
+#   r3nd config get <key>         - Get a specific configuration value
+#   r3nd config set <key> <value> - Set a configuration value
+
+# Seed Repository
+# The GitHub repository from which r3nd fetches seed files, overlays,
+# agents, workflows, and templates.
+#
+# Format: owner/repo[@branch]
+# Default: leandronoijo/r3nd@develop
+#
+# Examples:
+#   seed-repo: leandronoijo/r3nd@develop       # Use the develop branch
+#   seed-repo: leandronoijo/r3nd@main          # Use the main branch
+#   seed-repo: myorganization/custom-r3nd      # Use a custom fork (uses default branch: develop)
+seed-repo: leandronoijo/r3nd@develop

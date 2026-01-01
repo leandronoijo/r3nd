@@ -198,6 +198,44 @@ See the `docs/` directory for optional project documentation that explains the p
 
 This repository includes a small CLI (located in the `cli/` folder) that helps scaffold and initialize projects from the r3nd seed overlays.
 
+### Configuration
+
+The r3nd CLI uses a configuration file (`r3nd.yaml`) at the repository level to customize its behavior. Configuration values can be managed using the `config` command:
+
+- `config list`: Display all configuration values and defaults
+- `config get <key>`: Get a specific configuration value
+- `config set <key> <value>`: Set a configuration value
+
+#### Available Configuration Keys
+
+- **`seed-repo`**: The GitHub repository from which r3nd fetches seed files, overlays, agents, workflows, and templates.
+  - Format: `owner/repo[@branch]`
+  - Default: `leandronoijo/r3nd@develop`
+  - Examples:
+    - `leandronoijo/r3nd@develop` (use develop branch)
+    - `leandronoijo/r3nd@main` (use main branch)
+    - `myorganization/custom-r3nd` (use custom fork with default branch)
+
+Configuration examples:
+
+```bash
+# List all configuration values
+r3nd config list
+
+# Get the current seed repository
+r3nd config get seed-repo
+
+# Set a custom seed repository
+r3nd config set seed-repo myorganization/custom-r3nd@main
+
+# Use a different branch of the default repo
+r3nd config set seed-repo leandronoijo/r3nd@main
+```
+
+When running `init`, `scaffold`, or `update` commands, if no seed repository is configured, you will be prompted to enter one. The configuration is saved to `r3nd.yaml` in your repository root.
+
+### Commands
+
 - `scaffold`: interactive scaffolder that copies overlays and rnd build plans into the current working directory (existing behaviour). Ensures the retro agent/template/workflow are present even when resuming.
 
 - `init`: a lightweight initializer that will:
