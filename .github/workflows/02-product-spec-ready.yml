@@ -56,6 +56,9 @@ jobs:
           filters: |
             product_specs:
               - added: 'rnd/product_specs/**'
+              - added: 'r3nd/product_specs/**'
+              - added: '**/rnd/product_specs/**'
+              - added: '**/r3nd/product_specs/**'
       - name: Select changed files
         id: select
         run: |
@@ -122,6 +125,9 @@ jobs:
             const firstFile = changedFiles[0] || 'rnd/product_specs/';
             const specName = firstFile.split('/').pop().replace('.md', '');
             
+            // Determine the spec directory (rnd or r3nd) from the file path
+            const specDir = firstFile.match(/\/(rnd|r3nd)\//) ? firstFile.match(/\/(rnd|r3nd)\//)[1] : 'r3nd';
+            
             const issueTitle = 'Tech Spec: ' + specName;
             const issueBody = [
               '## Task for: Architect Agent',
@@ -137,7 +143,7 @@ jobs:
               '1. Read and follow the architect agent profile at `.github/agents/architect.agent.md`',
               '2. Read the product specification(s) listed above',
               '3. Use the template at `.github/templates/tech_spec.md` as the base for the tech spec',
-              '4. Output the tech spec to `rnd/tech_specs/` following the naming convention',
+              '4. Output the tech spec to `' + specDir + '/tech_specs/` following the naming convention',
               '',
               '### Context',
               'This task was automatically created by the Tech Spec workflow when changes were detected in the product specs directory.',

@@ -4,6 +4,8 @@ const { runCodexCommand, runPlansSequential, makeGitHubCommand } = require('./ll
 const { writeBuffer, ensureDir } = require('./fs/fileWriter');
 const { buildOverviewPrompt, buildAppPrompt, buildTargetedAppPrompt } = require('./analyse/prompts');
 const { confirmRunNow } = require('./ui/prompts');
+const { ConfigManager } = require('./config/configManager');
+const { findFirstSpecDirectory } = require('./fs/treeSearch');
 const YAML = require('yaml');
 
 async function parseAppsFromInstructions(content) {
@@ -72,9 +74,19 @@ async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = 
   const instructionsDir = path.join(destRoot, '.github', 'instructions');
   await ensureDir(instructionsDir);
 
+  // Get configured spec directory name
+  const configManager = new ConfigManager(destRoot);
+  const specDirName = await configManager.getSpecDirName();
+  
+  // Find spec directory
+  const specDir = await findFirstSpecDirectory(destRoot, specDirName);
+  if (!specDir) {
+    throw new Error(`No ${specDirName} directory found in repository`);
+  }
+
   // If targetDir is specified, run targeted app analysis
   if (targetDir) {
-    return runTargetedAnalyse({ agent, nonInteractive, destRoot, targetDir, instructionsDir });
+    return runTargetedAnalyse({ agent, nonInteractive, destRoot, targetDir, instructionsDir, specDir });
   }
 
   // Original full-project analysis flow
@@ -102,7 +114,7 @@ async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = 
 
   try {
     // Phase 1: require the agent to write project.instructions.md and create a .done file
-    const projectPlanPath = 'rnd/build_plans/project-overview.md';
+    const projectPlanPath = path.join(specDir, 'build_plans', 'project-overview.md');
     function makeOverviewPlanPrompt(planPath) {
       const planName = path.basename(planPath, '.md');
       if (agent === 'github') {
@@ -139,7 +151,7 @@ async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = 
     }
 
     // Phase 2: create per-app plans and require .done files for each
-    const appPlans = apps.map(a => `rnd/build_plans/${a.name}.md`);
+    const appPlans = apps.map(a => path.join(specDir, 'build_plans', `${a.name}.md`));
 
     await runPlansSequential(appPlans, {
       cwd: destRoot,
@@ -177,7 +189,7 @@ async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = 
   }
 }
 
-async function runTargetedAnalyse({ agent, nonInteractive, destRoot, targetDir, instructionsDir }) {
+async function runTargetedAnalyse({ agent, nonInteractive, destRoot, targetDir, instructionsDir, specDir }) {
   // Normalize targetDir to be relative to destRoot
   const normalizedDir = path.isAbsolute(targetDir) 
     ? path.relative(destRoot, targetDir) 
@@ -207,7 +219,7 @@ async function runTargetedAnalyse({ agent, nonInteractive, destRoot, targetDir, 
 
   try {
     const dirName = path.basename(normalizedDir) || 'app';
-    const appPlanPath = `rnd/build_plans/${dirName}.md`;
+    const appPlanPath = path.join(specDir, 'build_plans', `${dirName}.md`);
 
     function makeTargetedPlanPrompt(planPath) {
       const planName = path.basename(planPath, '.md');

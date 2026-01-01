@@ -5,6 +5,8 @@ const { spawn } = require('child_process');
 const { askBugDescription, askBugfixLLMChoice, confirmBuildPlan } = require('./ui/prompts');
 const { ensureDir } = require('./fs/fileWriter');
 const { runGitHubAgent } = require('./llm/agentRunner');
+const { ConfigManager } = require('./config/configManager');
+const { findFirstSpecDirectory } = require('./fs/treeSearch');
 const logger = require('./utils/logger');
 
 async function runBugfix(opts = {}) {
@@ -13,13 +15,20 @@ async function runBugfix(opts = {}) {
 
   logger.info('r3nd — bugfix workflow');
 
+  // Get configured spec directory name
+  const configManager = new ConfigManager(cwd);
+  const specDirName = await configManager.getSpecDirName();
+
   // Check if we're in a project root directory
   const githubDirExists = await fs.access(path.join(cwd, '.github')).then(() => true).catch(() => false);
-  const rndDirExists = await fs.access(path.join(cwd, 'rnd')).then(() => true).catch(() => false);
   const srcDirExists = await fs.access(path.join(cwd, 'src')).then(() => true).catch(() => false);
+  
+  // Find spec directory (backward compatible - supports both rnd and r3nd)
+  const specDir = await findFirstSpecDirectory(cwd, specDirName);
+  const specDirExists = specDir !== null;
 
-  if (!githubDirExists || !rndDirExists || !srcDirExists) {
-    logger.error('Error: Not in a project root directory. Required directories (.github/, rnd/, src/) not found.');
+  if (!githubDirExists || !specDirExists || !srcDirExists) {
+    logger.error(`Error: Not in a project root directory. Required directories (.github/, ${specDirName}/, src/) not found.`);
     logger.error('Please run this command from the root of your r3nd project.');
     process.exit(1);
   }
@@ -39,7 +48,7 @@ async function runBugfix(opts = {}) {
   const now = new Date();
   const timestamp = now.toISOString().replace(/[:.]/g, '-').replace('T', '-').substring(0, 19);
   const planName = `bugfix-${timestamp}`;
-  const planPath = `rnd/build_plans/${planName}.md`;
+  const planPath = path.join(specDir, 'build_plans', `${planName}.md`);
   const fullPlanPath = path.join(cwd, planPath);
 
   // Ensure the build_plans directory exists
@@ -279,7 +288,7 @@ async function runBugfix(opts = {}) {
     const saveContent = `=== BUGFIX WORKFLOW PROMPTS ===\n\nProblem Description:\n${problemDescription}\n\n--- STEP 1: Create Build Plan ---\n${planPrompt}\n\n(Save the resulting build plan to: ${planPath})\n\n--- STEP 2: Implement Build Plan ---\n(After reviewing and approving the build plan from Step 1)\n${implementPrompt}\n`;
     
     try {
-      const savePath = path.join(cwd, 'rnd', 'bugfix_prompts.txt');
+      const savePath = path.join(cwd, specDir, 'bugfix_prompts.txt');
       await ensureDir(path.dirname(savePath));
       await fs.writeFile(savePath, saveContent, 'utf8');
       logger.info(`Prompts saved to: ${savePath}`);

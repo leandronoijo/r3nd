@@ -19,6 +19,9 @@ on:
       - develop
     paths:
       - 'rnd/tech_specs/**'
+      - 'r3nd/tech_specs/**'
+      - '**/rnd/tech_specs/**'
+      - '**/r3nd/tech_specs/**'
   workflow_dispatch:
     inputs:
       branch:
@@ -56,6 +59,9 @@ jobs:
           filters: |
             tech_specs:
               - added: 'rnd/tech_specs/**'
+              - added: 'r3nd/tech_specs/**'
+              - added: '**/rnd/tech_specs/**'
+              - added: '**/r3nd/tech_specs/**'
       - name: Select changed files
         id: select
         run: |
@@ -120,6 +126,9 @@ jobs:
             const firstFile = changedFiles[0] || 'rnd/tech_specs/';
             const specName = firstFile.split('/').pop().replace('.md', '');
             
+            // Determine the spec directory (rnd or r3nd) from the file path
+            const specDir = firstFile.match(/\/(rnd|r3nd)\//) ? firstFile.match(/\/(rnd|r3nd)\//)[1] : 'r3nd';
+            
             const issueTitle = 'Build Plan: ' + specName;
             const issueBody = [
               '## Task for: Team Lead Agent',
@@ -135,7 +144,7 @@ jobs:
               '1. Read and follow the team lead agent profile at `.github/agents/team-lead.agent.md`',
               '2. Read the technical specification(s) listed above',
               '3. Use the template at `.github/templates/build_plan.md` as the base for the build plan',
-              '4. Output the build plan to `rnd/build_plans/` following the naming convention',
+              '4. Output the build plan to `' + specDir + '/build_plans/` following the naming convention',
               '',
               '### Context',
               'This task was automatically created by the Build Plan workflow when changes were detected in the tech specs directory.',

@@ -186,6 +186,7 @@ describe('ConfigManager', () => {
   describe('isValidKey', () => {
     it('should return true for valid keys', () => {
       expect(ConfigManager.isValidKey('seed-repo')).toBe(true);
+      expect(ConfigManager.isValidKey('spec-dir-name')).toBe(true);
     });
 
     it('should return false for invalid keys', () => {
@@ -198,8 +199,28 @@ describe('ConfigManager', () => {
     it('should return default configuration', () => {
       const defaults = ConfigManager.getDefaults();
       expect(defaults).toEqual({
-        'seed-repo': 'leandronoijo/r3nd@develop'
+        'seed-repo': 'leandronoijo/r3nd@develop',
+        'spec-dir-name': 'r3nd'
       });
+    });
+  });
+
+  describe('getSpecDirName', () => {
+    it('should return default value when not configured', async () => {
+      const dirName = await configManager.getSpecDirName();
+      expect(dirName).toBe('r3nd');
+    });
+
+    it('should return configured value', async () => {
+      await configManager.set('spec-dir-name', 'specs');
+      const dirName = await configManager.getSpecDirName();
+      expect(dirName).toBe('specs');
+    });
+
+    it('should return default when config file has other values', async () => {
+      await configManager.save({ 'seed-repo': 'owner/repo@branch' });
+      const dirName = await configManager.getSpecDirName();
+      expect(dirName).toBe('r3nd');
     });
   });
 });
