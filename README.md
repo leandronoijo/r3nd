@@ -54,7 +54,7 @@ Manual run inputs:
 | `06-retro-ready` | `pr_number` |
 
 ### 3. Clear R&D artifact structure
-Located under `rnd/`:
+By default, located under `r3nd/` (configurable via `r3nd.yaml`):
 
 - `product_specs/`
 - `tech_specs/`
@@ -65,6 +65,31 @@ Located under `rnd/`:
 - `history/`
 
 This ensures complete traceability from idea → architecture → plan → code.
+
+**Multi-Directory Support:** The CLI supports multiple spec directories anywhere in your repository tree. Perfect for monorepos or multi-service architectures:
+
+```
+project/
+├── r3nd/                    # Root-level specs (shared/platform)
+│   ├── product_specs/
+│   └── build_plans/
+├── apps/
+│   ├── backend/
+│   │   └── r3nd/           # Backend-specific specs
+│   └── frontend/
+│       └── r3nd/           # Frontend-specific specs
+└── services/
+    └── auth/
+        └── r3nd/           # Service-specific specs
+```
+
+Configure the directory name in `r3nd.yaml`:
+
+```yaml
+# Specification Directory Name
+# Default: r3nd (supports legacy 'rnd' for backward compatibility)
+spec-dir-name: r3nd
+```
 
 ### 4. Real application structure
 Located under:
@@ -167,24 +192,29 @@ All tech constraints live in your `.github/instructions` files.
 
 ## 📁 Repo Structure
 
+```
 .github/
-	&nbsp;&nbsp;workflows/
-	&nbsp;&nbsp;&nbsp;&nbsp;common/
-	&nbsp;&nbsp;templates/
-	&nbsp;&nbsp;agents/
-	&nbsp;&nbsp;instructions/
-	&nbsp;&nbsp;copilot-instructions.md
-rnd/  
-&nbsp;&nbsp;product_specs/  
-&nbsp;&nbsp;tech_specs/  
-&nbsp;&nbsp;build_plans/  
-&nbsp;&nbsp;test_cases/  
-&nbsp;&nbsp;e2e-results/  
-&nbsp;&nbsp;retros/  
-&nbsp;&nbsp;history/  
-src/  
-tests/  
+  workflows/
+    common/
+  templates/
+  agents/
+  instructions/
+  copilot-instructions.md
+r3nd/           # Configurable via r3nd.yaml (spec-dir-name)
+  product_specs/
+  tech_specs/
+  build_plans/
+  test_cases/
+  e2e-results/
+  retros/
+  history/
+src/
+tests/
 docs/
+r3nd.yaml       # Configuration file
+```
+
+**Note:** The spec directory name (`r3nd/`) is configurable via `r3nd.yaml`. For backward compatibility, the system also supports the legacy `rnd/` directory name.
 
 ---
 
