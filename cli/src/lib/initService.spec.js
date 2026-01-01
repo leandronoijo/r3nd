@@ -1,6 +1,15 @@
 // Mock inquirer to avoid ESM import issues
 jest.mock('./ui/prompts', () => ({
-  askInitOptions: jest.fn().mockResolvedValue(['github', 'cursor', 'vscode'])
+  askInitOptions: jest.fn().mockResolvedValue(['github', 'cursor', 'vscode']),
+  askSeedRepo: jest.fn().mockResolvedValue('leandronoijo/r3nd@develop')
+}));
+
+// Mock config manager
+jest.mock('./config/configManager', () => ({
+  ConfigManager: jest.fn().mockImplementation(() => ({
+    get: jest.fn().mockResolvedValue('leandronoijo/r3nd@develop'),
+    set: jest.fn().mockResolvedValue(undefined)
+  }))
 }));
 
 const { parseAgentFile, generateCursorCommand, generateVSCodeChatMode } = require('./initService');

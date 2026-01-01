@@ -1,6 +1,15 @@
 // Mock inquirer to avoid ESM import issues
 jest.mock('./ui/prompts', () => ({
-  askUpdateOptions: jest.fn().mockResolvedValue(['templates', 'agents', 'github', 'cursor', 'vscode'])
+  askUpdateOptions: jest.fn().mockResolvedValue(['templates', 'agents', 'github', 'cursor', 'vscode']),
+  askSeedRepo: jest.fn().mockResolvedValue('leandronoijo/r3nd@develop')
+}));
+
+// Mock config manager
+jest.mock('./config/configManager', () => ({
+  ConfigManager: jest.fn().mockImplementation(() => ({
+    get: jest.fn().mockResolvedValue('leandronoijo/r3nd@develop'),
+    set: jest.fn().mockResolvedValue(undefined)
+  }))
 }));
 
 // Mock initService functions
