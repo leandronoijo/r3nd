@@ -140,12 +140,21 @@ class ConfigManager {
   }
 
   /**
+   * Get the spec directory name from configuration
+   * @returns {Promise<string>} Spec directory name (defaults to 'r3nd')
+   */
+  async getSpecDirName() {
+    const config = await this.load();
+    return config['spec-dir-name'] || 'r3nd';
+  }
+
+  /**
    * Validate a configuration key
    * @param {string} key - Configuration key
    * @returns {boolean} True if key is valid
    */
   static isValidKey(key) {
-    const validKeys = ['seed-repo'];
+    const validKeys = ['seed-repo', 'spec-dir-name'];
     return validKeys.includes(key);
   }
 
@@ -155,7 +164,8 @@ class ConfigManager {
    */
   static getDefaults() {
     return {
-      'seed-repo': 'leandronoijo/r3nd@develop'
+      'seed-repo': 'leandronoijo/r3nd@develop',
+      'spec-dir-name': 'r3nd'
     };
   }
 }

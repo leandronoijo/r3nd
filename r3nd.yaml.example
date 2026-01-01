@@ -20,3 +20,20 @@
 #   seed-repo: leandronoijo/r3nd@main          # Use the main branch
 #   seed-repo: myorganization/custom-r3nd      # Use a custom fork (uses default branch: develop)
 seed-repo: leandronoijo/r3nd@develop
+
+# Specification Directory Name
+# The name of directories containing r3nd specifications.
+# The CLI will search the entire repository tree for directories with this name.
+# Default: r3nd
+#
+# Examples:
+#   spec-dir-name: r3nd        # Search for all 'r3nd' directories
+#   spec-dir-name: specs       # Search for all 'specs' directories
+#   spec-dir-name: rnd         # Use legacy 'rnd' directory name
+#
+# Note: The CLI supports multiple spec directories at different levels:
+#   project/
+#   ├── r3nd/                    # Root-level specs (shared)
+#   ├── apps/backend/r3nd/       # Backend-specific specs
+#   └── services/auth/r3nd/      # Service-specific specs
+spec-dir-name: r3nd
