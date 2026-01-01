@@ -259,4 +259,35 @@ async function askUpdateOptions(nonInteractive = false) {
   return res.updateOptions;
 }
 
-module.exports = { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askBugDescription, askFeatureDescription, askBugfixLLMChoice, confirmBuildPlan, askAnalyseAgent, buildAgentChoices, chooseFile, askInitOptions, askUpdateOptions };
+/**
+ * Prompt user for seed repository configuration
+ * @param {string} currentValue - Current seed-repo value if any
+ * @param {boolean} nonInteractive - If true, returns default value
+ * @returns {Promise<string>} Seed repository in format owner/repo[@branch]
+ */
+async function askSeedRepo(currentValue = null, nonInteractive = false) {
+  const defaultValue = currentValue || 'leandronoijo/r3nd@develop';
+  
+  if (nonInteractive) return defaultValue;
+  
+  const res = await prompt([{
+    type: 'input',
+    name: 'seedRepo',
+    message: 'Enter seed repository (format: owner/repo[@branch]):',
+    default: defaultValue,
+    validate: (input) => {
+      const trimmed = input.trim();
+      if (!trimmed) return 'Seed repository is required';
+      
+      // Basic validation - will be validated more thoroughly by ConfigManager
+      const hasSlash = trimmed.includes('/');
+      if (!hasSlash) return 'Invalid format. Expected: owner/repo[@branch]';
+      
+      return true;
+    }
+  }]);
+  
+  return res.seedRepo.trim();
+}
+
+module.exports = { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askBugDescription, askFeatureDescription, askBugfixLLMChoice, confirmBuildPlan, askAnalyseAgent, buildAgentChoices, chooseFile, askInitOptions, askUpdateOptions, askSeedRepo };

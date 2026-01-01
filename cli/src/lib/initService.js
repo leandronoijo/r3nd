@@ -5,7 +5,8 @@ const YAML = require('yaml');
 
 const { GitHubClient } = require('./github/githubClient');
 const { writeBuffer, ensureDir } = require('./fs/fileWriter');
-const { askInitOptions } = require('./ui/prompts');
+const { askInitOptions, askSeedRepo } = require('./ui/prompts');
+const { ConfigManager } = require('./config/configManager');
 const logger = require('./utils/logger');
 
 /**
@@ -89,7 +90,20 @@ ${agent.content}
 async function runInit(opts = {}, deps = {}) {
   const cwd = opts.cwd || process.cwd();
   const nonInteractive = !!opts.nonInteractive;
-  const githubClient = deps.githubClient || new GitHubClient({});
+  
+  // Initialize config manager
+  const configManager = new ConfigManager(cwd);
+  
+  // Check if seed-repo is configured, prompt if not
+  let seedRepo = await configManager.get('seed-repo');
+  if (!seedRepo) {
+    logger.info('No seed repository configured.');
+    seedRepo = await askSeedRepo(null, nonInteractive);
+    await configManager.set('seed-repo', seedRepo);
+    logger.info(`✓ Configured seed-repo: ${seedRepo}\n`);
+  }
+
+  const githubClient = deps.githubClient || new GitHubClient({ cwd });
 
   // Ensure git repo
   const isGitRepo = await fs.access(path.join(cwd, '.git')).then(() => true).catch(() => false);

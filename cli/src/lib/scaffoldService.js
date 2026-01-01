@@ -3,8 +3,9 @@ const path = require('path');
 const { GitHubClient } = require('./github/githubClient');
 const { mapDestination } = require('./overlays/overlayRegistry');
 const { writeBuffer, ensureDir } = require('./fs/fileWriter');
-const { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin } = require('./ui/prompts');
+const { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askSeedRepo } = require('./ui/prompts');
 const { runPlansSequential, waitForCompletionFile, runCodexCommand, makeGitHubCommand } = require('./llm/agentRunner');
+const { ConfigManager } = require('./config/configManager');
 const logger = require('./utils/logger');
 const fs = require('fs').promises;
 const { execSync } = require('child_process');
@@ -12,7 +13,20 @@ const { execSync } = require('child_process');
 async function runScaffold(opts = {}, deps = {}) {
   const cwd = opts.cwd || process.cwd();
   const nonInteractive = !!opts.nonInteractive;
-  const githubClient = deps.githubClient || new GitHubClient({});
+  
+  // Initialize config manager
+  const configManager = new ConfigManager(cwd);
+  
+  // Check if seed-repo is configured, prompt if not
+  let seedRepo = await configManager.get('seed-repo');
+  if (!seedRepo) {
+    logger.info('No seed repository configured.');
+    seedRepo = await askSeedRepo(null, nonInteractive);
+    await configManager.set('seed-repo', seedRepo);
+    logger.info(`✓ Configured seed-repo: ${seedRepo}\n`);
+  }
+
+  const githubClient = deps.githubClient || new GitHubClient({ cwd });
 
   // Check if current directory is a git repository, if not, initialize it
   const isGitRepo = await fs.access(path.join(cwd, '.git')).then(() => true).catch(() => false);
