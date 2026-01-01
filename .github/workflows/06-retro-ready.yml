@@ -128,7 +128,7 @@ jobs:
               '### Instructions',
               '1. Read the PR conversation, review comments, and review threads.',
               '2. Map feedback to the correct agent/template/instruction using the directory mapping in the retro agent profile.',
-              '3. Use the retro template and write the report to `rnd/retros/pr-' + pr.number + '-retro.md`.',
+              '3. Use the retro template and write the report to `r3nd/retros/pr-' + pr.number + '-retro.md` (or `rnd/retros/` if the repository uses the legacy directory name).',
               '4. Include evidence links for each recommendation.'
             ].join('\n');
 

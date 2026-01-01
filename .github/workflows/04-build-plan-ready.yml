@@ -19,6 +19,9 @@ on:
       - develop
     paths:
       - 'rnd/build_plans/**'
+      - 'r3nd/build_plans/**'
+      - '**/rnd/build_plans/**'
+      - '**/r3nd/build_plans/**'
   workflow_dispatch:
     inputs:
       branch:
@@ -56,6 +59,9 @@ jobs:
           filters: |
             build_plans:
               - added: 'rnd/build_plans/**'
+              - added: 'r3nd/build_plans/**'
+              - added: '**/rnd/build_plans/**'
+              - added: '**/r3nd/build_plans/**'
       - name: Select changed files
         id: select
         run: |
