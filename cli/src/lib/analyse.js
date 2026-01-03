@@ -30,10 +30,6 @@ async function parseAppsFromInstructions(content) {
       if (parsed && Array.isArray(parsed.apps)) {
         return parsed.apps.map(normalizeAppEntry);
       }
-      // If top-level is an object with app entries, try to normalize
-      if (parsed && parsed.apps) {
-        return parsed.apps.map(normalizeAppEntry);
-      }
     } catch (e) {
       console.warn('Failed to parse YAML fenced block for apps:', e && e.message ? e.message : e);
       // fall through to JSON parser

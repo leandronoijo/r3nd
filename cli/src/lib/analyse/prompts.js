@@ -10,7 +10,12 @@ Produce a markdown document that contains a machine-readable YAML code block wit
 Also include human-readable sections: Project Overview (what are the apps/services and where they live), Repo-level instructions (global conventions/shared tooling), and Out-of-scope sections.
 
 Output format requirements:
-- Include a YAML fenced block labeled as \`\`\`yaml containing: apps: [ {name: "...", applyTo: "path/to/app", purpose: "...", stack: "..."}, ... ]
+- Include a YAML fenced block labeled as \`\`\`yaml containing:
+  apps:
+    - name: "..."
+      applyTo: "path/to/app"
+      purpose: "..."
+      stack: "..."
 - After the YAML block, include the human-readable sections.
 
 Please keep the YAML block concise and valid YAML so it can be parsed programmatically.
