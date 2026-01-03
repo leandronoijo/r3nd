@@ -359,4 +359,23 @@ async function askSelectApps(apps, nonInteractive = false) {
   return res.selectedApps;
 }
 
-module.exports = { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askBugDescription, askFeatureDescription, askBugfixLLMChoice, confirmBuildPlan, askAnalyseAgent, buildAgentChoices, chooseFile, askInitOptions, askUpdateOptions, askSeedRepo, askSpecDirName, askSelectApps };
+/**
+ * Prompt user whether to overwrite an existing file
+ * @param {string} filePath - Path of the file that would be overwritten
+ * @param {boolean} nonInteractive - If true, returns false (don't overwrite)
+ * @returns {Promise<boolean>} True if user wants to overwrite, false otherwise
+ */
+async function askOverwriteFile(filePath, nonInteractive = false) {
+  if (nonInteractive) return false;
+  
+  const res = await prompt([{
+    type: 'confirm',
+    name: 'overwrite',
+    message: `File "${filePath}" already exists. Overwrite?`,
+    default: false
+  }]);
+  
+  return res.overwrite;
+}
+
+module.exports = { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askBugDescription, askFeatureDescription, askBugfixLLMChoice, confirmBuildPlan, askAnalyseAgent, buildAgentChoices, chooseFile, askInitOptions, askUpdateOptions, askSeedRepo, askSpecDirName, askOverwriteFile, askSelectApps };

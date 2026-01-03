@@ -1,13 +1,23 @@
 const path = require('path');
-const YAML = require('yaml');
 
 const { GitHubClient } = require('./github/githubClient');
-const { mapDestination } = require('./overlays/overlayRegistry');
-const { writeBuffer, ensureDir } = require('./fs/fileWriter');
+const { ensureDir } = require('./fs/fileWriter');
+const { 
+  copyAgentPersonas, 
+  copyGitHubWorkflows, 
+  composeAgentFiles, 
+  copyTemplates, 
+  copyCommonFiles 
+} = require('./fs/seedCopier');
+const { 
+  fetchSeedSpecDirName, 
+  copyOverlayFiles, 
+  ensureMandatorySeedFiles, 
+  ensureSpecDirectories 
+} = require('./overlays/overlaySeedService');
 const { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askSeedRepo, askInitOptions } = require('./ui/prompts');
 const { runPlansSequential, waitForCompletionFile, runCodexCommand, makeGitHubCommand } = require('./llm/agentRunner');
 const { ConfigManager } = require('./config/configManager');
-const { rewriteSpecDirBuffer, rewriteSpecDirContent } = require('./utils/specDirRewrite');
 const logger = require('./utils/logger');
 const fs = require('fs').promises;
 const { execSync } = require('child_process');
@@ -80,28 +90,11 @@ async function runScaffold(opts = {}, deps = {}) {
     logger.info(`\nSelected: ${selectedOptions.join(', ') || 'None (agents only)'}\n`);
   }
 
-  const prefixes = [];
   // Mandatory seed files (excluding agents which are handled separately)
   const mandatorySeedFiles = [
     '.github/templates/retro.md',
     '.github/workflows/06-retro-ready.yml'
   ];
-  if (!backendInstructionsExist && !frontendInstructionsExist) {
-    prefixes.push('.github/', `${specDirName}/`, '.gitignore', 'README.md');
-  }
-  if (!backendInstructionsExist) prefixes.push(`overlays/backend/${backend}/`);
-  if (!frontendInstructionsExist) prefixes.push(`overlays/frontend/${frontend}/`);
-
-  // Add selected component prefixes
-  if (selectedOptions.includes('github')) {
-    prefixes.push('.github/workflows/', '.github/agents/');
-  }
-  if (selectedOptions.includes('cursor')) {
-    prefixes.push('.cursor/');
-  }
-  if (selectedOptions.includes('vscode')) {
-    prefixes.push('.github/chatmodes/');
-  }
 
   if (backendInstructionsExist && frontendInstructionsExist) {
     logger.info('✓ Resuming from existing setup, skipping file download');
@@ -110,205 +103,53 @@ async function runScaffold(opts = {}, deps = {}) {
     const tree = await githubClient.getTree();
 
     // Fetch seed repo's spec-dir-name configuration
-    let seedSpecDirName = 'rnd'; // default for backwards compatibility
-    try {
-      const configBuffer = await githubClient.fetchRaw('r3nd.yaml');
-      const configContent = configBuffer.toString('utf-8');
-      const seedConfig = YAML.parse(configContent) || {};
-      seedSpecDirName = seedConfig['spec-dir-name'] || 'rnd';
-    } catch (err) {
-      // If r3nd.yaml doesn't exist in seed repo, use default 'rnd'
-      logger.debug('No r3nd.yaml in seed repo, using default "rnd"');
+    const seedSpecDirName = await fetchSeedSpecDirName(githubClient);
+
+    // Copy common files (gitignore, instructions)
+    await copyCommonFiles(cwd, tree, githubClient, specDirName, { nonInteractive });
+
+    // Copy overlay-specific files (instructions, build plans)
+    await copyOverlayFiles(cwd, tree, githubClient, specDirName, seedSpecDirName, { 
+      backend: !backendInstructionsExist ? backend : null, 
+      frontend: !frontendInstructionsExist ? frontend : null, 
+      nonInteractive 
+    });
+
+    // Copy platform-agnostic agent personas from seed repo
+    await copyAgentPersonas(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
+
+    // Process selected options (these are optional)
+    if (selectedOptions.includes('github')) {
+      await copyGitHubWorkflows(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
+      // Compose GitHub Copilot agent files from wrappers + personas
+      await composeAgentFiles(cwd, tree, githubClient, '.github/agents', '.agent.md', specDirName, seedSpecDirName, { nonInteractive });
     }
 
-    const toCopy = tree.filter(item => {
-      if (item.type !== 'blob') return false;
-      return prefixes.some(p => (p.endsWith('/') ? item.path.startsWith(p) : item.path === p));
-    }).map(i => i.path);
-
-    if (toCopy.length === 0) {
-      logger.warn('No files matched the requested prefixes.');
-    } else {
-      logger.info(`Found ${toCopy.length} files to copy. Starting download...`);
-      for (const remotePath of toCopy) {
-        const mapped = mapDestination(remotePath, backend, frontend, specDirName);
-        const buffer = await githubClient.fetchRaw(remotePath);
-        const rel = mapped || remotePath;
-        const rewritten = rewriteSpecDirBuffer(buffer, rel, ['rnd', 'r3nd'], specDirName);
-        await writeBuffer(cwd, rel, rewritten.buffer, { overwrite: true });
-        logger.info(`Copied: ${remotePath} -> ${rel}`);
-      }
+    if (selectedOptions.includes('cursor')) {
+      // Compose Cursor command files from wrappers + personas
+      await composeAgentFiles(cwd, tree, githubClient, '.cursor/commands', '.md', specDirName, seedSpecDirName, { nonInteractive });
     }
 
-    const specDirs = [
-      `${specDirName}/build_plans`,
-      `${specDirName}/product_specs`,
-      `${specDirName}/tech_specs`
-    ];
-    for (const r of specDirs) {
-      await ensureDir(path.join(cwd, r));
-      logger.info(`Ensured directory: ${r}`);
+    if (selectedOptions.includes('vscode')) {
+      // Compose VSCode chat mode files from wrappers + personas
+      await composeAgentFiles(cwd, tree, githubClient, '.github/chatmodes', '.chatmode.md', specDirName, seedSpecDirName, { nonInteractive });
     }
 
-    await ensureDir(path.join(cwd, '.github', 'instructions'));
-    logger.info('Ensured directory: .github/instructions');
+    // Copy templates
+    await copyTemplates(cwd, tree, githubClient, specDirName, { nonInteractive });
+
+    // Ensure spec directories exist
+    await ensureSpecDirectories(cwd, specDirName);
+
+    // Ensure mandatory seed files exist
+    await ensureMandatorySeedFiles(cwd, githubClient, specDirName, seedSpecDirName, mandatorySeedFiles, { 
+      backend, 
+      frontend, 
+      nonInteractive 
+    });
+
     logger.info('Scaffolding complete.');
   }
-
-  async function ensureSeedFiles(files, seedSpecDirName = 'rnd') {
-    const missing = [];
-    for (const remotePath of files) {
-      const rel = mapDestination(remotePath, backend, frontend, specDirName) || remotePath;
-      const exists = await fs.access(path.join(cwd, rel)).then(() => true).catch(() => false);
-      if (!exists) missing.push({ remotePath, rel });
-    }
-
-    if (missing.length === 0) return;
-
-    logger.info(`Fetching ${missing.length} mandatory file(s) from GitHub...`);
-    for (const item of missing) {
-      try {
-        const buffer = await githubClient.fetchRaw(item.remotePath);
-        const rewritten = rewriteSpecDirBuffer(buffer, item.rel, ['rnd', 'r3nd', seedSpecDirName], specDirName);
-        await writeBuffer(cwd, item.rel, rewritten.buffer, { overwrite: false });
-        logger.info(`Copied: ${item.remotePath} -> ${item.rel}`);
-      } catch (err) {
-        logger.error(`Failed to copy ${item.remotePath}:`, err && err.message ? err.message : err);
-      }
-    }
-  }
-
-  // Ensure all agent persona files and compose platform-specific agent files  
-  async function ensureAllAgentFiles() {
-    logger.info('Ensuring all agent persona files are present...');
-    const tree = await githubClient.getTree();
-    
-    // Fetch seed repo's spec-dir-name configuration
-    let seedSpecDirName = 'rnd'; // default for backwards compatibility
-    try {
-      const configBuffer = await githubClient.fetchRaw('r3nd.yaml');
-      const configContent = configBuffer.toString('utf-8');
-      const seedConfig = YAML.parse(configContent) || {};
-      seedSpecDirName = seedConfig['spec-dir-name'] || 'rnd';
-    } catch (err) {
-      // If r3nd.yaml doesn't exist in seed repo, use default 'rnd'
-      logger.debug('No r3nd.yaml in seed repo, using default "rnd"');
-    }
-    
-    // First, ensure agent persona files from seed repo
-    const seedAgentsPath = `${seedSpecDirName}/agents/`;
-    const personaFiles = tree.filter(item => 
-      item.type === 'blob' && item.path.startsWith(seedAgentsPath) && item.path.endsWith('.md')
-    );
-    
-    if (personaFiles.length === 0) {
-      logger.warn('No agent persona files found in seed repo.');
-      return;
-    }
-
-    const personaPaths = personaFiles.map(f => f.path);
-    await ensureSeedFiles(personaPaths, seedSpecDirName);
-    
-    // Then, compose platform-specific agent files
-    // Only create files for selected options (don't check if directories exist)
-    const githubAgentsExist = selectedOptions.includes('github');
-    const cursorCommandsExist = selectedOptions.includes('cursor');
-    const vscodeChatModesExist = selectedOptions.includes('vscode');
-    
-    // Import template resolver functions
-    const { resolveTemplate, createGitHubFileReader } = require('./templateResolver');
-    
-    // Build file cache for template resolution
-    const fileCache = new Map();
-    for (const file of personaFiles) {
-      try {
-        const buffer = await githubClient.fetchRaw(file.path);
-        fileCache.set(file.path, buffer);
-      } catch (err) {
-        logger.error(`  Failed to cache ${file.path}:`, err && err.message ? err.message : err);
-      }
-    }
-    
-    const fileReader = createGitHubFileReader(fileCache);
-    
-    // Compose GitHub Copilot agents if directory exists
-    if (githubAgentsExist) {
-      const githubWrappers = tree.filter(item => 
-        item.type === 'blob' && item.path.startsWith('.github/agents/') && item.path.endsWith('.agent.md')
-      );
-      
-      for (const file of githubWrappers) {
-        try {
-          const wrapperBuffer = await githubClient.fetchRaw(file.path);
-          const wrapperContent = wrapperBuffer.toString('utf-8');
-          const composedContent = await resolveTemplate(wrapperContent, fileReader);
-          const rewritten = rewriteSpecDirContent(composedContent, [seedSpecDirName], specDirName);
-          let finalContent = rewritten.content;
-          if (seedSpecDirName !== specDirName) {
-            const specDirPattern = new RegExp(`\\b${seedSpecDirName}/`, 'g');
-            finalContent = finalContent.replace(specDirPattern, `${specDirName}/`);
-          }
-          await writeBuffer(cwd, file.path, Buffer.from(finalContent, 'utf-8'), { overwrite: true });
-          logger.info(`  Composed: ${file.path}`);
-        } catch (err) {
-          logger.error(`  Failed to compose ${file.path}:`, err && err.message ? err.message : err);
-        }
-      }
-    }
-    
-    // Compose Cursor commands if directory exists
-    if (cursorCommandsExist) {
-      const cursorWrappers = tree.filter(item => 
-        item.type === 'blob' && item.path.startsWith('.cursor/commands/') && item.path.endsWith('.md')
-      );
-      
-      for (const file of cursorWrappers) {
-        try {
-          const wrapperBuffer = await githubClient.fetchRaw(file.path);
-          const wrapperContent = wrapperBuffer.toString('utf-8');
-          const composedContent = await resolveTemplate(wrapperContent, fileReader);
-          const rewritten = rewriteSpecDirContent(composedContent, [seedSpecDirName], specDirName);
-          let finalContent = rewritten.content;
-          if (seedSpecDirName !== specDirName) {
-            const specDirPattern = new RegExp(`\\b${seedSpecDirName}/`, 'g');
-            finalContent = finalContent.replace(specDirPattern, `${specDirName}/`);
-          }
-          await writeBuffer(cwd, file.path, Buffer.from(finalContent, 'utf-8'), { overwrite: true });
-          logger.info(`  Composed: ${file.path}`);
-        } catch (err) {
-          logger.error(`  Failed to compose ${file.path}:`, err && err.message ? err.message : err);
-        }
-      }
-    }
-    
-    // Compose VSCode chat modes if directory exists
-    if (vscodeChatModesExist) {
-      const vscodeWrappers = tree.filter(item => 
-        item.type === 'blob' && item.path.startsWith('.github/chatmodes/') && item.path.endsWith('.chatmode.md')
-      );
-      
-      for (const file of vscodeWrappers) {
-        try {
-          const wrapperBuffer = await githubClient.fetchRaw(file.path);
-          const wrapperContent = wrapperBuffer.toString('utf-8');
-          const composedContent = await resolveTemplate(wrapperContent, fileReader);
-          const rewritten = rewriteSpecDirContent(composedContent, [seedSpecDirName], specDirName);
-          let finalContent = rewritten.content;
-          if (seedSpecDirName !== specDirName) {
-            const specDirPattern = new RegExp(`\\b${seedSpecDirName}/`, 'g');
-            finalContent = finalContent.replace(specDirPattern, `${specDirName}/`);
-          }
-          await writeBuffer(cwd, file.path, Buffer.from(finalContent, 'utf-8'), { overwrite: true });
-          logger.info(`  Composed: ${file.path}`);
-        } catch (err) {
-          logger.error(`  Failed to compose ${file.path}:`, err && err.message ? err.message : err);
-        }
-      }
-    }
-  }
-
-  await ensureAllAgentFiles();
-  await ensureSeedFiles(mandatorySeedFiles);
 
   logger.info('Next steps: install dependencies and adapt overlays as needed.');
 
