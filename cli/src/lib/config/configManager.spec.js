@@ -223,4 +223,77 @@ describe('ConfigManager', () => {
       expect(dirName).toBe('r3nd');
     });
   });
+
+  describe('spec-dir rename on set', () => {
+    it('should rename existing spec directory when changing spec-dir-name', async () => {
+      // Create the default directory 'r3nd'
+      const oldDir = path.join(tempDir, 'r3nd');
+      await fs.mkdir(oldDir);
+
+      await configManager.set('spec-dir-name', 'specs');
+
+      // Ensure old directory no longer exists and new directory exists
+      let existsOld = true;
+      try {
+        await fs.access(oldDir);
+      } catch (err) {
+        if (err && err.code === 'ENOENT') existsOld = false;
+      }
+
+      const newDir = path.join(tempDir, 'specs');
+      let existsNew = false;
+      try {
+        await fs.access(newDir);
+        existsNew = true;
+      } catch (err) {
+        existsNew = false;
+      }
+
+      expect(existsOld).toBe(false);
+      expect(existsNew).toBe(true);
+
+      // And config persisted
+      const value = await configManager.get('spec-dir-name');
+      expect(value).toBe('specs');
+    });
+
+    it('should log message when rename succeeds', async () => {
+      const oldDir = path.join(tempDir, 'r3nd');
+      await fs.mkdir(oldDir);
+
+      // Spy on logger
+      const logger = require('../utils/logger');
+      const spy = jest.spyOn(logger, 'info').mockImplementation(() => {});
+
+      await configManager.set('spec-dir-name', 'specs');
+
+      expect(spy).toHaveBeenCalledWith(expect.stringContaining('Renamed spec directory'));
+      spy.mockRestore();
+    });
+
+    it('should throw when target directory already exists', async () => {
+      const oldDir = path.join(tempDir, 'r3nd');
+      const targetDir = path.join(tempDir, 'specs');
+      await fs.mkdir(oldDir);
+      await fs.mkdir(targetDir);
+
+      await expect(configManager.set('spec-dir-name', 'specs')).rejects.toThrow('Target directory already exists');
+
+      // original directories remain
+      await expect(fs.access(oldDir)).resolves.toBeUndefined();
+      await expect(fs.access(targetDir)).resolves.toBeUndefined();
+    });
+
+    it('should set value even if old directory does not exist', async () => {
+      // Ensure no old directory present
+      const oldDir = path.join(tempDir, 'r3nd');
+      try {
+        await fs.rm(oldDir, { recursive: true, force: true });
+      } catch (err) {}
+
+      await expect(configManager.set('spec-dir-name', 'specs')).resolves.toBeUndefined();
+      const value = await configManager.get('spec-dir-name');
+      expect(value).toBe('specs');
+    });
+  });
 });

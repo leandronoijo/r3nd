@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs').promises;
 const YAML = require('yaml');
+const logger = require('../utils/logger');
 
 const CONFIG_FILE_NAME = 'r3nd.yaml';
 
@@ -73,6 +74,44 @@ class ConfigManager {
    */
   async set(key, value) {
     const config = await this.load();
+
+    // If changing the spec dir name, attempt to rename the directory in the working tree
+    if (key === 'spec-dir-name') {
+      const oldName = config['spec-dir-name'] || 'r3nd';
+      const newName = value;
+
+      // Only attempt rename when the name actually changes
+      if (oldName !== newName) {
+        const oldPath = path.join(this.cwd, oldName);
+        const newPath = path.join(this.cwd, newName);
+
+        try {
+          const stat = await fs.stat(oldPath);
+            if (stat && stat.isDirectory()) {
+            // If target exists, throw so consumer can handle
+            try {
+              await fs.access(newPath);
+              throw new Error(`Target directory already exists: ${newName}`);
+            } catch (err) {
+              if (err && err.code === 'ENOENT') {
+                // safe to rename
+                await fs.rename(oldPath, newPath);
+                logger.info(`✓ Renamed spec directory: ${oldName} -> ${newName}`);
+              } else {
+                // rethrow unexpected errors
+                throw err;
+              }
+            }
+          }
+        } catch (err) {
+          // If old path doesn't exist, ignore and continue; otherwise rethrow
+          if (!(err && err.code === 'ENOENT')) {
+            throw new Error(`Failed to rename spec dir: ${err.message}`);
+          }
+        }
+      }
+    }
+
     config[key] = value;
     await this.save(config);
   }
