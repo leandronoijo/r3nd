@@ -284,6 +284,7 @@ When running `init`, `scaffold`, or `update` commands, if no seed repository is 
 		- GitHub workflows (`.github/workflows/`)
 		- Cursor commands (`.cursor/commands/`)
 		- VSCode Copilot chat modes (`.github/chatmodes/`)
+		- Codex CLI custom prompts (`.codex/prompts/`)
 	- Options:
 		- `-y, --yes`: Non-interactive mode, update all components
 	- Example (interactive):
