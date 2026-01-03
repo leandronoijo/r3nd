@@ -70,6 +70,17 @@ const AGENT_REGISTRY = [
       `Using the ${agentFile} agent profile as instructions, please implement and execute E2E tests for the following test cases:\n\n${targetFile}\n\nIMPORTANT: Follow all rules in the agent profile. Read .github/instructions/e2e-testing.instructions.md before starting. Start required services, run tests sequentially, diagnose failures, and generate a comprehensive result report.`,
     interactiveSuffix: (doneFile) =>
       `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After executing tests and generating the result report, provide a summary of test outcomes and failure categories.\n2. Ask if any failures need deeper investigation or if test methodology needs adjustment.\n3. After each of your responses, explicitly ask the user: "Are you satisfied with the E2E test execution and results? (yes/no)"\n4. If the user responds "yes" or confirms satisfaction, create a file named "${doneFile}" in the current directory to signal completion.\n5. If the user requests re-runs, additional diagnosis, or test updates, address them and repeat step 3.\n6. Continue this iterative process until the user is satisfied with the E2E test results.\n7. Do NOT start any server or docker foreground processes that require manual termination. Always run services in detached/background mode.`
+  },
+  {
+    name: 'retro',
+    description: 'Review PR discussions and create a retro report',
+    filesDir: null, // No file selection - uses free text input (PR number or URL)
+    agentFile: (specDirName) => `${specDirName}/agents/retro.md`,
+    useFreeTextInput: true,
+    promptTemplate: (agentFile, userInput) =>
+      `Using the ${agentFile} agent profile as instructions, please review the PR discussion and create a retro report for PR: ${userInput}\n\nFollow the template at .github/templates/retro.md and ensure all sections are properly filled out. Analyze review comments, review threads, and issue comments to identify improvements to agents, templates, or instructions.`,
+    interactiveSuffix: (doneFile) =>
+      `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After completing the retro report, provide a summary of the key findings and recommendations.\n2. Ask if any areas need further analysis or if additional recommendations should be included.\n3. After each of your responses, explicitly ask the user: "Are you satisfied with this retro report? (yes/no)"\n4. If the user responds "yes" or confirms satisfaction, create a file named "${doneFile}" in the current directory to signal completion.\n5. If the user has follow-up questions or requests changes, address them and repeat step 3.\n6. Continue this iterative process until the user is satisfied with the retro report.`
   }
 ];
 

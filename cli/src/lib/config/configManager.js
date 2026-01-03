@@ -193,7 +193,7 @@ class ConfigManager {
    * @returns {boolean} True if key is valid
    */
   static isValidKey(key) {
-    const validKeys = ['seed-repo', 'spec-dir-name'];
+    const validKeys = ['seed-repo', 'spec-dir-name', 'retro-agent-enabled', 'log-agent-interactions'];
     return validKeys.includes(key);
   }
 
@@ -204,7 +204,9 @@ class ConfigManager {
   static getDefaults() {
     return {
       'seed-repo': 'leandronoijo/r3nd@develop',
-      'spec-dir-name': 'r3nd'
+      'spec-dir-name': 'r3nd',
+      'retro-agent-enabled': true,
+      'log-agent-interactions': true
     };
   }
 }

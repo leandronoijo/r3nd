@@ -6,6 +6,7 @@ const { chooseFile, buildAgentChoices, askFeatureDescription } = require('../lib
 const { runPlansSequential, runGitHubAgent, spawnAgentWithDoneFile } = require('../lib/llm/agentRunner');
 const { ensureDir } = require('../lib/fs/fileWriter');
 const { ConfigManager } = require('../lib/config/configManager');
+const { InteractionLogger } = require('../lib/logging/interactionLogger');
 const logger = require('../lib/utils/logger');
 const inquirer = require('inquirer');
 const prompt = inquirer.createPromptModule();
@@ -279,6 +280,20 @@ async function runCodexAgent(targetInput, cwd, agentName, agentConfig) {
     
     if (success) {
       logger.info('✓ Codex agent completed successfully.');
+      
+      // Log the interaction
+      const interactionLogger = new InteractionLogger(cwd);
+      const logContent = `## Agent: ${agentName}\n\n**Tool:** Codex\n\n**Input:**\n${targetInput}\n\n**Status:** Completed successfully`;
+      const logPath = await interactionLogger.log(agentName, logContent);
+      if (logPath) {
+        logger.info(`📝 Interaction logged to: ${path.relative(cwd, logPath)}`);
+      }
+      
+      // If this is a retro agent, clear all summaries
+      if (agentName === 'retro') {
+        const clearedCount = await interactionLogger.clearLogs();
+        logger.info(`🧹 Cleared ${clearedCount} agent summary file(s)`);
+      }
     } else {
       logger.error('✗ Codex agent did not complete successfully.');
       process.exit(1);
@@ -311,6 +326,20 @@ async function runGeminiAgent(targetInput, cwd, agentName, agentConfig) {
     
     if (success) {
       logger.info('✓ Gemini agent completed successfully.');
+      
+      // Log the interaction
+      const interactionLogger = new InteractionLogger(cwd);
+      const logContent = `## Agent: ${agentName}\n\n**Tool:** Gemini\n\n**Input:**\n${targetInput}\n\n**Status:** Completed successfully`;
+      const logPath = await interactionLogger.log(agentName, logContent);
+      if (logPath) {
+        logger.info(`📝 Interaction logged to: ${path.relative(cwd, logPath)}`);
+      }
+      
+      // If this is a retro agent, clear all summaries
+      if (agentName === 'retro') {
+        const clearedCount = await interactionLogger.clearLogs();
+        logger.info(`🧹 Cleared ${clearedCount} agent summary file(s)`);
+      }
     } else {
       logger.error('✗ Gemini agent did not complete successfully.');
       process.exit(1);
@@ -335,6 +364,21 @@ async function runGitHubAgentWrapper(targetInput, cwd, agentName, agentConfig, o
     logger.info('\n📋 Next steps:');
     logger.info('  1. Monitor the agent\'s progress at the link above');
     logger.info('  2. Review the changes as they are made\n');
+    
+    // Log the interaction
+    const interactionLogger = new InteractionLogger(cwd);
+    const logContent = `## Agent: ${agentName}\n\n**Tool:** GitHub\n\n**Input:**\n${targetInput}\n\n**Status:** Task created\n\n**URL:** ${url}`;
+    const logPath = await interactionLogger.log(agentName, logContent);
+    if (logPath) {
+      logger.info(`📝 Interaction logged to: ${path.relative(cwd, logPath)}`);
+    }
+    
+    // If this is a retro agent, clear all summaries
+    if (agentName === 'retro') {
+      const clearedCount = await interactionLogger.clearLogs();
+      logger.info(`🧹 Cleared ${clearedCount} agent summary file(s)`);
+    }
+    
     return { ok: true };
   } catch (err) {
     if (err && err.code === 'GITHUB_BRANCH_PUSH_FAILED') {

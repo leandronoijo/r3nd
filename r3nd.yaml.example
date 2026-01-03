@@ -37,3 +37,24 @@ seed-repo: leandronoijo/r3nd@develop
 #   ├── apps/backend/r3nd/       # Backend-specific specs
 #   └── services/auth/r3nd/      # Service-specific specs
 spec-dir-name: r3nd
+
+# Retro Agent Enabled
+# Enable or disable the retro agent feature in the CLI.
+# When enabled, users can run 'r3nd agents retro' to create retro reports.
+# Default: true
+#
+# Examples:
+#   retro-agent-enabled: true   # Enable retro agent (default)
+#   retro-agent-enabled: false  # Disable retro agent
+retro-agent-enabled: true
+
+# Log Agent Interactions
+# Enable or disable logging of agent interactions to markdown files.
+# When enabled, agent interactions are logged to r3nd/agent_summaries/ with timestamps.
+# These logs are automatically cleared after a retro is created.
+# Default: true
+#
+# Examples:
+#   log-agent-interactions: true   # Enable interaction logging (default)
+#   log-agent-interactions: false  # Disable interaction logging
+log-agent-interactions: true
