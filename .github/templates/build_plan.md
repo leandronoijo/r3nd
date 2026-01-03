@@ -635,7 +635,7 @@ Step 9 (View + Route)
 [Task T<n> Complete]
 ```
 
-> **Note:** This is an example dependency graph for a full-stack task. Adjust based on what this specific tech spec task (T<n>) requires.
+> **Note:** This is an example dependency graph for the implementation steps within this task. Adjust based on what this specific tech spec task requires — not all tasks will have all phases.
 
 ---
 

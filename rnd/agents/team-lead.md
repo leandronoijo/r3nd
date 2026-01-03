@@ -53,9 +53,9 @@ Ask yourself before writing each build plan: *"Can this be implemented, tested, 
 
 ## Workflow: From Tech Spec to Build Plans
 
-1. **Read the tech spec** — Focus on Section 8 (Task Breakdown) to identify all tasks.
-2. **For each task (T1, T2, T3...):**
-   - Create a separate build plan file: `rnd/build_plans/<feature-id>-T<n>-build-plan.md`
+1. **Read the tech spec** — Focus on Section 8 (Task Breakdown) to identify all tasks (T1, T2, T3, etc.).
+2. **For each task:**
+   - Create a separate build plan file using the task number: `rnd/build_plans/<feature-id>-T1-build-plan.md`, `rnd/build_plans/<feature-id>-T2-build-plan.md`, etc.
    - The build plan covers ONLY that task's scope
    - Include interfaces from the tech spec (what this task exposes/consumes)
    - Ensure the plan is complete enough to be implemented in isolation
@@ -67,8 +67,11 @@ Ask yourself before writing each build plan: *"Can this be implemented, tested, 
 ## Outputs
 
 - **Multiple Markdown files**: One build plan per task from the tech spec
-  - Naming: `rnd/build_plans/<feature-id>-T<n>-build-plan.md`
-  - Example: `rnd/build_plans/payments-v2-T1-build-plan.md`, `rnd/build_plans/payments-v2-T2-build-plan.md`
+  - Naming convention: `rnd/build_plans/<feature-id>-T<task-number>-build-plan.md`
+  - Example for feature `payments-v2` with 3 tasks:
+    - `rnd/build_plans/payments-v2-T1-build-plan.md`
+    - `rnd/build_plans/payments-v2-T2-build-plan.md`
+    - `rnd/build_plans/payments-v2-T3-build-plan.md`
 - Each build plan is a **self-contained deliverable**:
   - Can be implemented, tested, and deployed independently
   - Has clear interfaces with other tasks (from the tech spec)

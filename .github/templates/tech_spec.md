@@ -276,11 +276,15 @@ This section defines the self-contained deliverables for this feature. Each task
 
 ### Task Dependency Graph
 
+Visualize how tasks depend on each other. Tasks can be sequential or parallel where dependencies allow.
+
 ```
 T1 ──→ T2 ──→ T3
         ↘
           T4
 ```
+
+> **Note:** In this example, T4 depends only on T2 and can be implemented in parallel with T3. Design your tasks to maximize parallelism where dependencies permit.
 
 ### References
 
