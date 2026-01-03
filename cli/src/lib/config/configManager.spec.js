@@ -187,8 +187,6 @@ describe('ConfigManager', () => {
     it('should return true for valid keys', () => {
       expect(ConfigManager.isValidKey('seed-repo')).toBe(true);
       expect(ConfigManager.isValidKey('spec-dir-name')).toBe(true);
-      expect(ConfigManager.isValidKey('retro-agent-enabled')).toBe(true);
-      expect(ConfigManager.isValidKey('log-agent-interactions')).toBe(true);
     });
 
     it('should return false for invalid keys', () => {
@@ -202,9 +200,7 @@ describe('ConfigManager', () => {
       const defaults = ConfigManager.getDefaults();
       expect(defaults).toEqual({
         'seed-repo': 'leandronoijo/r3nd@develop',
-        'spec-dir-name': 'r3nd',
-        'retro-agent-enabled': true,
-        'log-agent-interactions': true
+        'spec-dir-name': 'r3nd'
       });
     });
   });
