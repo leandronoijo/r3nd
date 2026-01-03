@@ -290,4 +290,40 @@ async function askSeedRepo(currentValue = null, nonInteractive = false) {
   return res.seedRepo.trim();
 }
 
-module.exports = { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askBugDescription, askFeatureDescription, askBugfixLLMChoice, confirmBuildPlan, askAnalyseAgent, buildAgentChoices, chooseFile, askInitOptions, askUpdateOptions, askSeedRepo };
+/**
+ * Prompt user for spec directory name configuration
+ * @param {string} currentValue - Current spec-dir-name value if any
+ * @param {boolean} nonInteractive - If true, returns default value
+ * @returns {Promise<string>} Spec directory name (e.g., 'r3nd', 'rnd', 'specs')
+ */
+async function askSpecDirName(currentValue = null, nonInteractive = false) {
+  const defaultValue = currentValue || 'r3nd';
+  
+  if (nonInteractive) return defaultValue;
+  
+  const res = await prompt([{
+    type: 'input',
+    name: 'specDirName',
+    message: 'Enter spec directory name (where agents and specs will be stored):',
+    default: defaultValue,
+    validate: (input) => {
+      const trimmed = input.trim();
+      if (!trimmed) return 'Spec directory name is required';
+      
+      // Validate it's a valid directory name (no slashes, no special chars that break paths)
+      if (trimmed.includes('/') || trimmed.includes('\\')) {
+        return 'Directory name cannot contain slashes';
+      }
+      
+      if (!/^[a-zA-Z0-9_.-]+$/.test(trimmed)) {
+        return 'Directory name can only contain letters, numbers, dots, dashes, and underscores';
+      }
+      
+      return true;
+    }
+  }]);
+  
+  return res.specDirName.trim();
+}
+
+module.exports = { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askBugDescription, askFeatureDescription, askBugfixLLMChoice, confirmBuildPlan, askAnalyseAgent, buildAgentChoices, chooseFile, askInitOptions, askUpdateOptions, askSeedRepo, askSpecDirName };

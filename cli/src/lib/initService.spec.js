@@ -1,7 +1,8 @@
 // Mock inquirer to avoid ESM import issues
 jest.mock('./ui/prompts', () => ({
   askInitOptions: jest.fn().mockResolvedValue(['github', 'cursor', 'vscode']),
-  askSeedRepo: jest.fn().mockResolvedValue('leandronoijo/r3nd@develop')
+  askSeedRepo: jest.fn().mockResolvedValue('leandronoijo/r3nd@develop'),
+  askSpecDirName: jest.fn().mockResolvedValue('r3nd')
 }));
 
 // Mock config manager

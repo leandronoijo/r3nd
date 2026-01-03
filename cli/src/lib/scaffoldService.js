@@ -1,4 +1,5 @@
 const path = require('path');
+const YAML = require('yaml');
 
 const { GitHubClient } = require('./github/githubClient');
 const { mapDestination } = require('./overlays/overlayRegistry');
@@ -122,7 +123,7 @@ async function runScaffold(opts = {}, deps = {}) {
     logger.info('Scaffolding complete.');
   }
 
-  async function ensureSeedFiles(files) {
+  async function ensureSeedFiles(files, seedSpecDirName = 'rnd') {
     const missing = [];
     for (const remotePath of files) {
       const rel = mapDestination(remotePath, backend, frontend, specDirName) || remotePath;
@@ -136,7 +137,7 @@ async function runScaffold(opts = {}, deps = {}) {
     for (const item of missing) {
       try {
         const buffer = await githubClient.fetchRaw(item.remotePath);
-        const rewritten = rewriteSpecDirBuffer(buffer, item.rel, ['rnd'], specDirName);
+        const rewritten = rewriteSpecDirBuffer(buffer, item.rel, [seedSpecDirName], specDirName);
         await writeBuffer(cwd, item.rel, rewritten.buffer, { overwrite: false });
         logger.info(`Copied: ${item.remotePath} -> ${item.rel}`);
       } catch (err) {
@@ -150,9 +151,22 @@ async function runScaffold(opts = {}, deps = {}) {
     logger.info('Ensuring all agent persona files are present...');
     const tree = await githubClient.getTree();
     
-    // First, ensure rnd/agents persona files
+    // Fetch seed repo's spec-dir-name configuration
+    let seedSpecDirName = 'rnd'; // default for backwards compatibility
+    try {
+      const configBuffer = await githubClient.fetchRaw('r3nd.yaml');
+      const configContent = configBuffer.toString('utf-8');
+      const seedConfig = YAML.parse(configContent) || {};
+      seedSpecDirName = seedConfig['spec-dir-name'] || 'rnd';
+    } catch (err) {
+      // If r3nd.yaml doesn't exist in seed repo, use default 'rnd'
+      logger.debug('No r3nd.yaml in seed repo, using default "rnd"');
+    }
+    
+    // First, ensure agent persona files from seed repo
+    const seedAgentsPath = `${seedSpecDirName}/agents/`;
     const personaFiles = tree.filter(item => 
-      item.type === 'blob' && item.path.startsWith('rnd/agents/') && item.path.endsWith('.md')
+      item.type === 'blob' && item.path.startsWith(seedAgentsPath) && item.path.endsWith('.md')
     );
     
     if (personaFiles.length === 0) {
@@ -161,7 +175,7 @@ async function runScaffold(opts = {}, deps = {}) {
     }
 
     const personaPaths = personaFiles.map(f => f.path);
-    await ensureSeedFiles(personaPaths);
+    await ensureSeedFiles(personaPaths, seedSpecDirName);
     
     // Then, compose platform-specific agent files
     // Check which platforms are configured/exist in the project
@@ -196,8 +210,13 @@ async function runScaffold(opts = {}, deps = {}) {
           const wrapperBuffer = await githubClient.fetchRaw(file.path);
           const wrapperContent = wrapperBuffer.toString('utf-8');
           const composedContent = await resolveTemplate(wrapperContent, fileReader);
-          const rewritten = rewriteSpecDirContent(composedContent, ['rnd'], specDirName);
-          await writeBuffer(cwd, file.path, Buffer.from(rewritten.content, 'utf-8'), { overwrite: true });
+          const rewritten = rewriteSpecDirContent(composedContent, [seedSpecDirName], specDirName);
+          let finalContent = rewritten.content;
+          if (seedSpecDirName !== specDirName) {
+            const specDirPattern = new RegExp(`\\b${seedSpecDirName}/`, 'g');
+            finalContent = finalContent.replace(specDirPattern, `${specDirName}/`);
+          }
+          await writeBuffer(cwd, file.path, Buffer.from(finalContent, 'utf-8'), { overwrite: true });
           logger.info(`  Composed: ${file.path}`);
         } catch (err) {
           logger.error(`  Failed to compose ${file.path}:`, err && err.message ? err.message : err);
@@ -216,8 +235,13 @@ async function runScaffold(opts = {}, deps = {}) {
           const wrapperBuffer = await githubClient.fetchRaw(file.path);
           const wrapperContent = wrapperBuffer.toString('utf-8');
           const composedContent = await resolveTemplate(wrapperContent, fileReader);
-          const rewritten = rewriteSpecDirContent(composedContent, ['rnd'], specDirName);
-          await writeBuffer(cwd, file.path, Buffer.from(rewritten.content, 'utf-8'), { overwrite: true });
+          const rewritten = rewriteSpecDirContent(composedContent, [seedSpecDirName], specDirName);
+          let finalContent = rewritten.content;
+          if (seedSpecDirName !== specDirName) {
+            const specDirPattern = new RegExp(`\\b${seedSpecDirName}/`, 'g');
+            finalContent = finalContent.replace(specDirPattern, `${specDirName}/`);
+          }
+          await writeBuffer(cwd, file.path, Buffer.from(finalContent, 'utf-8'), { overwrite: true });
           logger.info(`  Composed: ${file.path}`);
         } catch (err) {
           logger.error(`  Failed to compose ${file.path}:`, err && err.message ? err.message : err);
@@ -236,8 +260,13 @@ async function runScaffold(opts = {}, deps = {}) {
           const wrapperBuffer = await githubClient.fetchRaw(file.path);
           const wrapperContent = wrapperBuffer.toString('utf-8');
           const composedContent = await resolveTemplate(wrapperContent, fileReader);
-          const rewritten = rewriteSpecDirContent(composedContent, ['rnd'], specDirName);
-          await writeBuffer(cwd, file.path, Buffer.from(rewritten.content, 'utf-8'), { overwrite: true });
+          const rewritten = rewriteSpecDirContent(composedContent, [seedSpecDirName], specDirName);
+          let finalContent = rewritten.content;
+          if (seedSpecDirName !== specDirName) {
+            const specDirPattern = new RegExp(`\\b${seedSpecDirName}/`, 'g');
+            finalContent = finalContent.replace(specDirPattern, `${specDirName}/`);
+          }
+          await writeBuffer(cwd, file.path, Buffer.from(finalContent, 'utf-8'), { overwrite: true });
           logger.info(`  Composed: ${file.path}`);
         } catch (err) {
           logger.error(`  Failed to compose ${file.path}:`, err && err.message ? err.message : err);
