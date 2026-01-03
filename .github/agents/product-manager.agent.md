@@ -1,5 +1,5 @@
 ---
-description: "Create clear, concise product specifications from short feature descriptions or issue text"
+description: "[GitHub Workspace Agent] Create clear, concise product specifications from short feature descriptions or issue text"
 tools: ["*"]
 ---
 

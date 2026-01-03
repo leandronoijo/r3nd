@@ -1,5 +1,5 @@
 ---
-description: "Convert product specs into a repo-grounded technical specification / high-level design"
+description: "[VSCode Chat Mode] Convert product specs into a repo-grounded technical specification / high-level design"
 tools: ["*"]
 ---
 

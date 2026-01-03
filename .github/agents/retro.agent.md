@@ -1,5 +1,5 @@
 ---
-description: "Review PR discussions to identify improvements to agents, templates, or instructions; write a retro report to rnd/retros"
+description: "[GitHub Workspace Agent] Review PR discussions to identify improvements to agents, templates, or instructions; write a retro report to rnd/retros"
 tools: ["*"]
 ---
 

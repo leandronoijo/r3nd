@@ -1,5 +1,5 @@
 ---
-description: "Implement features and tests based on a build plan; follow repository standards and keep diffs small and test-driven"
+description: "[GitHub Workspace Agent] Implement features and tests based on a build plan; follow repository standards and keep diffs small and test-driven"
 tools: ["*"]
 ---
 

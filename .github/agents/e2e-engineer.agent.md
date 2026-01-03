@@ -1,5 +1,5 @@
 ---
-description: "Generate, run, and diagnose E2E tests from test cases; output structured results to rnd/e2e-results"
+description: "[GitHub Workspace Agent] Generate, run, and diagnose E2E tests from test cases; output structured results to rnd/e2e-results"
 tools: ["*"]
 ---
 

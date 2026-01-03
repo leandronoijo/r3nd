@@ -4,7 +4,7 @@ const YAML = require('yaml');
 const { GitHubClient } = require('./github/githubClient');
 const { mapDestination } = require('./overlays/overlayRegistry');
 const { writeBuffer, ensureDir } = require('./fs/fileWriter');
-const { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askSeedRepo } = require('./ui/prompts');
+const { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askSeedRepo, askInitOptions } = require('./ui/prompts');
 const { runPlansSequential, waitForCompletionFile, runCodexCommand, makeGitHubCommand } = require('./llm/agentRunner');
 const { ConfigManager } = require('./config/configManager');
 const { rewriteSpecDirBuffer, rewriteSpecDirContent } = require('./utils/specDirRewrite');
@@ -72,6 +72,14 @@ async function runScaffold(opts = {}, deps = {}) {
     }
   }
 
+  // Ask user which components to initialize (similar to init command)
+  let selectedOptions = [];
+  if (!backendInstructionsExist || !frontendInstructionsExist) {
+    logger.info('\nr3nd — component initializer\n');
+    selectedOptions = await askInitOptions(nonInteractive);
+    logger.info(`\nSelected: ${selectedOptions.join(', ') || 'None (agents only)'}\n`);
+  }
+
   const prefixes = [];
   // Mandatory seed files (excluding agents which are handled separately)
   const mandatorySeedFiles = [
@@ -83,6 +91,17 @@ async function runScaffold(opts = {}, deps = {}) {
   }
   if (!backendInstructionsExist) prefixes.push(`overlays/backend/${backend}/`);
   if (!frontendInstructionsExist) prefixes.push(`overlays/frontend/${frontend}/`);
+
+  // Add selected component prefixes
+  if (selectedOptions.includes('github')) {
+    prefixes.push('.github/workflows/', '.github/agents/');
+  }
+  if (selectedOptions.includes('cursor')) {
+    prefixes.push('.cursor/');
+  }
+  if (selectedOptions.includes('vscode')) {
+    prefixes.push('.github/chatmodes/');
+  }
 
   if (backendInstructionsExist && frontendInstructionsExist) {
     logger.info('✓ Resuming from existing setup, skipping file download');
@@ -159,7 +178,7 @@ async function runScaffold(opts = {}, deps = {}) {
     }
   }
 
-  // Ensure all agent persona files and compose platform-specific agent files
+  // Ensure all agent persona files and compose platform-specific agent files  
   async function ensureAllAgentFiles() {
     logger.info('Ensuring all agent persona files are present...');
     const tree = await githubClient.getTree();
@@ -191,10 +210,10 @@ async function runScaffold(opts = {}, deps = {}) {
     await ensureSeedFiles(personaPaths, seedSpecDirName);
     
     // Then, compose platform-specific agent files
-    // Check which platforms are configured/exist in the project
-    const githubAgentsExist = await fs.access(path.join(cwd, '.github', 'agents')).then(() => true).catch(() => false);
-    const cursorCommandsExist = await fs.access(path.join(cwd, '.cursor', 'commands')).then(() => true).catch(() => false);
-    const vscodeChatModesExist = await fs.access(path.join(cwd, '.github', 'chatmodes')).then(() => true).catch(() => false);
+    // Only create files for selected options (don't check if directories exist)
+    const githubAgentsExist = selectedOptions.includes('github');
+    const cursorCommandsExist = selectedOptions.includes('cursor');
+    const vscodeChatModesExist = selectedOptions.includes('vscode');
     
     // Import template resolver functions
     const { resolveTemplate, createGitHubFileReader } = require('./templateResolver');

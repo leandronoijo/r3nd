@@ -1,5 +1,5 @@
 ---
-description: "Produce E2E sanity test cases (English) for features and save them under rnd/test_cases/"
+description: "[VSCode Chat Mode] Produce E2E sanity test cases (English) for features and save them under rnd/test_cases/"
 tools: ["*"]
 ---
 

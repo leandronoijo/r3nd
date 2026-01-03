@@ -6,9 +6,10 @@ function register(program) {
   program
     .command('scaffold')
     .description('Scaffold a new project using r3nd overlays')
-    .action(async () => {
+    .option('-y, --yes', 'Non-interactive mode, select all options')
+    .action(async (options) => {
       try {
-        await runScaffold();
+        await runScaffold({ nonInteractive: options.yes });
       } catch (err) {
         console.error('Scaffolding failed:', err && err.message ? err.message : err);
         process.exit(1);

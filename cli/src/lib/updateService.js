@@ -86,7 +86,6 @@ async function runUpdate(opts = {}, deps = {}) {
   if (selectedOptions.includes('vscode')) {
     await updateComposedAgents(cwd, tree, githubClient, '.github/chatmodes', '.chatmode.md', specDirName, seedSpecDirName);
   }
-  }
 
   logger.info('\nUpdate complete.');
 }
