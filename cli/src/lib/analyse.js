@@ -3,39 +3,51 @@ const fs = require('fs').promises;
 const { runCodexCommand, runPlansSequential, makeGitHubCommand } = require('./llm/agentRunner');
 const { writeBuffer, ensureDir } = require('./fs/fileWriter');
 const { buildOverviewPrompt, buildAppPrompt, buildTargetedAppPrompt } = require('./analyse/prompts');
-const { confirmRunNow } = require('./ui/prompts');
+const { confirmRunNow, askSelectApps } = require('./ui/prompts');
 const { ConfigManager } = require('./config/configManager');
 const { findFirstSpecDirectory } = require('./fs/treeSearch');
 const YAML = require('yaml');
 
+// Regex patterns for parsing fenced code blocks
+const YAML_FENCED_BLOCK_REGEX = /```(?:yaml|yml)\s*([\s\S]*?)```/i;
+const JSON_FENCED_BLOCK_REGEX = /```json\s*([\s\S]*?)```/i;
+
+function normalizeAppEntry(a) {
+  return { 
+    name: a.name || a.app || 'unknown', 
+    path: a.path || '.', 
+    purpose: a.purpose || '', 
+    stack: a.stack || '' 
+  };
+}
+
 async function parseAppsFromInstructions(content) {
-  // Try JSON fenced block first
-  const jsonMatch = content.match(/```json\s*([\s\S]*?)```/i);
+  // Try YAML fenced block first (preferred format)
+  const yamlMatch = content.match(YAML_FENCED_BLOCK_REGEX);
+  if (yamlMatch) {
+    try {
+      const parsed = YAML.parse(yamlMatch[1]);
+      if (parsed && Array.isArray(parsed.apps)) {
+        return parsed.apps.map(normalizeAppEntry);
+      }
+    } catch (e) {
+      console.warn('Failed to parse YAML fenced block for apps:', e && e.message ? e.message : e);
+      // fall through to JSON parser
+    }
+  }
+
+  // Fallback to JSON fenced block for backwards compatibility
+  const jsonMatch = content.match(JSON_FENCED_BLOCK_REGEX);
   if (jsonMatch) {
     try {
       const raw = jsonMatch[1].trim();
       const parsed = JSON.parse(raw);
       // If the JSON block is directly an array of apps
-      if (Array.isArray(parsed)) return parsed.map(a => ({ name: a.name || a.app || 'unknown', path: a.path || '.', purpose: a.purpose || '', stack: a.stack || '' }));
+      if (Array.isArray(parsed)) return parsed.map(normalizeAppEntry);
       // If it's an object with `apps` property
-      if (Array.isArray(parsed.apps)) return parsed.apps.map(a => ({ name: a.name || a.app || 'unknown', path: a.path || '.', purpose: a.purpose || '', stack: a.stack || '' }));
+      if (Array.isArray(parsed.apps)) return parsed.apps.map(normalizeAppEntry);
     } catch (e) {
       console.warn('Failed to parse JSON fenced block for apps:', e && e.message ? e.message : e);
-      // fall through to other parsers
-    }
-  }
-
-  // Try YAML fenced block using yaml parser
-  const yamlMatch = content.match(/```(?:yaml|yml)\s*([\s\S]*?)```/i);
-  if (yamlMatch) {
-    try {
-      const parsed = YAML.parse(yamlMatch[1]);
-      if (parsed && Array.isArray(parsed.apps)) return parsed.apps.map(a => ({ name: a.name || a.app || 'unknown', path: a.path || '.', purpose: a.purpose || '', stack: a.stack || '' }));
-      // If top-level is an object with app entries, try to normalize
-      if (parsed && parsed.apps) {
-        return parsed.apps.map(a => ({ name: a.name || a.app || 'unknown', path: a.path || '.', purpose: a.purpose || '', stack: a.stack || '' }));
-      }
-    } catch (e) {
       // fall through to empty
     }
   }
@@ -45,7 +57,7 @@ async function parseAppsFromInstructions(content) {
 
 async function parseAppNameFromMetadata(content) {
   // Try YAML fenced block first
-  const yamlMatch = content.match(/```(?:yaml|yml)\s*([\s\S]*?)```/i);
+  const yamlMatch = content.match(YAML_FENCED_BLOCK_REGEX);
   if (yamlMatch) {
     try {
       const parsed = YAML.parse(yamlMatch[1]);
@@ -56,7 +68,7 @@ async function parseAppNameFromMetadata(content) {
   }
 
   // Try JSON fenced block
-  const jsonMatch = content.match(/```json\s*([\s\S]*?)```/i);
+  const jsonMatch = content.match(JSON_FENCED_BLOCK_REGEX);
   if (jsonMatch) {
     try {
       const raw = jsonMatch[1].trim();
@@ -150,14 +162,23 @@ async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = 
       return;
     }
 
+    // Let user select which apps to analyze
+    const selectedApps = await askSelectApps(apps, nonInteractive);
+    if (!selectedApps || selectedApps.length === 0) {
+      console.log('No apps selected for analysis.');
+      return;
+    }
+
+    console.log(`Selected ${selectedApps.length} app(s) for analysis: ${selectedApps.map(a => a.name).join(', ')}`);
+
     // Phase 2: create per-app plans and require .done files for each
-    const appPlans = apps.map(a => path.join(specDir, 'build_plans', `${a.name}.md`));
+    const appPlans = selectedApps.map(a => path.join(specDir, 'build_plans', `${a.name}.md`));
 
     await runPlansSequential(appPlans, {
       cwd: destRoot,
       makePrompt: async (planPath) => {
         const idx = appPlans.indexOf(planPath);
-        const app = apps[idx];
+        const app = selectedApps[idx];
         const planName = path.basename(planPath, '.md');
         const prompt = buildAppPrompt(app);
         if (agent === 'github') {
@@ -172,7 +193,7 @@ async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = 
     });
 
     // Ensure any missing per-app files get placeholder content
-    for (const app of apps) {
+    for (const app of selectedApps) {
       const targetPath = path.join(instructionsDir, `${app.name}.instructions.md`);
       try {
         await fs.access(targetPath);

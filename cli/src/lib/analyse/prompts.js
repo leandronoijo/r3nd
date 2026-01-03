@@ -1,7 +1,7 @@
 function buildOverviewPrompt(repoRoot = '.') {
   return `You are an assistant that inspects a repository and produces a project-level instructions file.
 
-Produce a markdown document that contains a machine-readable JSON code block with a top-level key "apps" listing each app/service. Each app entry must use the following keys (camelCase):
+Produce a markdown document that contains a machine-readable YAML code block with a top-level key "apps" listing each app/service. Each app entry must use the following keys (camelCase):
 - name: short canonical name for the app (used as filename)
 - applyTo: path or glob that the instructions apply to (use repo-relative paths)
 - purpose: short purpose/summary
@@ -10,10 +10,15 @@ Produce a markdown document that contains a machine-readable JSON code block wit
 Also include human-readable sections: Project Overview (what are the apps/services and where they live), Repo-level instructions (global conventions/shared tooling), and Out-of-scope sections.
 
 Output format requirements:
-- Include a JSON fenced block labeled as \`\`\`json containing: {"apps": [ {"name":"...","applyTo":"path/to/app","purpose":"...","stack":"..."}, ... ]}
-- After the JSON block, include the human-readable sections.
+- Include a YAML fenced block labeled as \`\`\`yaml containing:
+  apps:
+    - name: "..."
+      applyTo: "path/to/app"
+      purpose: "..."
+      stack: "..."
+- After the YAML block, include the human-readable sections.
 
-Please keep the JSON block concise and valid JSON so it can be parsed programmatically.
+Please keep the YAML block concise and valid YAML so it can be parsed programmatically.
 `;
 }
 
