@@ -331,7 +331,7 @@ Installation (global):
 You can install the CLI globally from the seed repository as requested:
 
 ```bash
-sudo npm install -g git+https://github.com/leandronoijo/r3nd.git#0.2
+sudo npm install -g git+https://github.com/leandronoijo/r3nd.git#0.2.5
 ```
 
 After global install you can run the CLI as `r3nd` from your shell (e.g. `r3nd init`, `r3nd update`).
