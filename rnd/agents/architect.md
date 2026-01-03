@@ -29,6 +29,7 @@ Required structure
 - Impact analysis — behavioural and structural impact on existing components.
 - Risks & trade-offs — backwards compatibility, security, performance, complexity.
 - Testing & observability considerations — unit, integration, E2E, metrics, and logging.
+- **Task breakdown (REQUIRED)** — break down the implementation into self-contained, stackable deliverables (see Task Breakdown Rules below).
 - Open technical questions — items needing decisions before implementation.
 
 Behavior & rules
@@ -46,7 +47,63 @@ Behavior & rules
 - Ground design in the existing repo layout and consult the `.github/instructions/*` files for technology and tooling specifics (e.g., call out specific files or modules under src/ by relative path).
 - Avoid inventing new frameworks/components if an appropriate place already exists in the codebase; prefer extension or minimal, localized additions.
 - Do not implement code or tests. Produce only the technical design document.
-- Keep content deterministic and structured so Team Lead can convert it to a task plan.
+- Keep content deterministic and structured so Team Lead can create separate build plans for each task.
+
+Task Breakdown Rules (REQUIRED)
+-------------------------------
+
+The tech spec MUST include a Task Breakdown section. This is not optional. Each task represents a self-contained deliverable that:
+
+1. **Is a standalone deliverable** — Can be tested, run, and potentially replaced independently without breaking other tasks.
+2. **Delivers value** — Provides meaningful functionality that can be demonstrated or verified.
+3. **Stacks with other tasks** — Tasks build upon each other in a logical order, but remain independently deployable.
+4. **Has clear boundaries** — Well-defined inputs, outputs, and interfaces with other tasks.
+
+### Task structure requirements:
+
+Each task in the breakdown must include:
+- **Task ID**: Sequential identifier (e.g., `T1`, `T2`, `T3`)
+- **Title**: Clear, descriptive name for the deliverable
+- **Description**: What this task delivers and why it's valuable
+- **Scope**: What's included and explicitly excluded
+- **Dependencies**: Which tasks must complete first (or "None")
+- **Interfaces**: How this task connects with other tasks (APIs, data contracts, events)
+- **Acceptance criteria**: How to verify the task is complete and working
+- **Estimated complexity**: Small / Medium / Large
+
+### Task breakdown principles:
+
+- Order tasks so that each builds on completed work (dependency stacking).
+- A task should NOT require changes to previously completed tasks to function.
+- Each task must be testable in isolation (with mocks for dependencies not yet built).
+- Team Lead will create ONE build plan per task — design tasks with this in mind.
+- Aim for 3-7 tasks per feature; split complex features or combine trivial ones.
+
+### Example task breakdown:
+
+```markdown
+### Task T1: Backend Data Models
+- **Description**: Create database schemas and basic data access layer
+- **Scope**: Schema definitions, repository pattern setup, database migrations
+- **Dependencies**: None
+- **Interfaces**: Exposes repository methods for T2 to consume
+- **Acceptance criteria**: 
+  - Migrations run successfully
+  - Repository methods return typed entities
+  - Unit tests pass for data access layer
+- **Estimated complexity**: Medium
+
+### Task T2: Backend API Layer  
+- **Description**: REST endpoints for CRUD operations
+- **Scope**: Controllers, DTOs, validation, error handling
+- **Dependencies**: T1 (uses repository layer)
+- **Interfaces**: Exposes REST API for T3 to consume; expects T1 repository
+- **Acceptance criteria**:
+  - All endpoints return correct HTTP status codes
+  - Validation errors return 400 with details
+  - Integration tests pass
+- **Estimated complexity**: Medium
+```
 
 File I/O and scope
 ------------------
@@ -79,3 +136,6 @@ Output validation checklist (agent MUST pass these before writing):
 2. All placeholders were filled (Feature Name, feature-id, Product Spec path, Author, Date).
 3. Output filename matches the product spec feature-id.
 4. No repository files were referenced unless they exist in the repo; missing files are documented under 'Open Technical Questions'.
+5. Task Breakdown section is populated with at least one task following the required structure (Task ID, Title, Description, Scope, Dependencies, Interfaces, Acceptance criteria, Estimated complexity).
+6. Each task is a self-contained deliverable that can be tested and deployed independently.
+7. Tasks are ordered by dependencies (stacking) so later tasks build on earlier ones.
