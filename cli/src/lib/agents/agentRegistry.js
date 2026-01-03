@@ -5,7 +5,7 @@
  * - name: command name (e.g., 'tech-spec' becomes 'r3nd agents tech-spec')
  * - description: help text for the command
  * - filesDir: relative directory to scan for input files (can be a function for dynamic resolution)
- * - agentFile: path to the agent profile markdown file
+ * - agentFile: path to the agent profile markdown file (or function returning it)
  * - promptTemplate: function that generates the prompt text
  */
 
@@ -14,7 +14,7 @@ const AGENT_REGISTRY = [
     name: 'product-spec',
     description: 'Generate a product specification from a feature description',
     filesDir: null, // No file selection - uses free text input
-    agentFile: '.github/agents/product-manager.agent.md',
+    agentFile: (specDirName) => `${specDirName}/agents/product-manager.md`,
     useFreeTextInput: true,
     promptTemplate: (agentFile, userInput) => 
       `Using the ${agentFile} agent profile as instructions, please create a product specification for the following feature description:\n\n${userInput}\n\nFollow the template at .github/templates/product_spec.md and ensure all sections are properly filled out. Generate an appropriate feature-id based on the description.`,
@@ -25,7 +25,7 @@ const AGENT_REGISTRY = [
     name: 'tech-spec',
     description: 'Generate a technical specification from a product spec',
     filesDir: (specDirName) => `${specDirName}/product_specs`,
-    agentFile: '.github/agents/architect.agent.md',
+    agentFile: (specDirName) => `${specDirName}/agents/architect.md`,
     promptTemplate: (agentFile, targetFile) => 
       `Using the ${agentFile} agent profile as instructions, please create a technical specification for the following product spec:\n\n${targetFile}\n\nFollow the template at .github/templates/tech_spec.md and ensure all sections are properly filled out.`,
     interactiveSuffix: (doneFile) =>
@@ -35,7 +35,7 @@ const AGENT_REGISTRY = [
     name: 'build-plan',
     description: 'Generate a build plan from a technical specification',
     filesDir: (specDirName) => `${specDirName}/tech_specs`,
-    agentFile: '.github/agents/team-lead.agent.md',
+    agentFile: (specDirName) => `${specDirName}/agents/team-lead.md`,
     promptTemplate: (agentFile, targetFile) =>
       `Using the ${agentFile} agent profile as instructions, please create a build plan for the following technical specification:\n\n${targetFile}\n\nFollow the template at .github/templates/build_plan.md and break down the work into atomic, testable tasks.`,
     interactiveSuffix: (doneFile) =>
@@ -45,7 +45,7 @@ const AGENT_REGISTRY = [
     name: 'develop',
     description: 'Implement a build plan to completion',
     filesDir: (specDirName) => `${specDirName}/build_plans`,
-    agentFile: '.github/agents/developer.agent.md',
+    agentFile: (specDirName) => `${specDirName}/agents/developer.md`,
     promptTemplate: (agentFile, targetFile) =>
       `Using the ${agentFile} agent profile as instructions, please implement the following build plan to its completion:\n\n${targetFile}\n\nIMPORTANT: Follow all rules in the agent profile. Read instruction files before starting. Test as you implement. Mark tasks complete as you finish them.`,
     interactiveSuffix: (doneFile) =>
@@ -55,7 +55,7 @@ const AGENT_REGISTRY = [
     name: 'test-cases',
     description: 'Generate E2E test cases from a build plan',
     filesDir: (specDirName) => `${specDirName}/build_plans`,
-    agentFile: '.github/agents/qa-team-lead.agent.md',
+    agentFile: (specDirName) => `${specDirName}/agents/qa-team-lead.md`,
     promptTemplate: (agentFile, targetFile) =>
       `Using the ${agentFile} agent profile as instructions, please create E2E test cases for the following build plan:\n\n${targetFile}\n\nFollow the template at .github/templates/test_cases.md and generate up to 20 sanity-level test cases that validate core flows and interactions between touched components.`,
     interactiveSuffix: (doneFile) =>
@@ -65,7 +65,7 @@ const AGENT_REGISTRY = [
     name: 'e2e-tests',
     description: 'Generate, run, and diagnose E2E tests from test cases',
     filesDir: (specDirName) => `${specDirName}/test_cases`,
-    agentFile: '.github/agents/e2e-engineer.agent.md',
+    agentFile: (specDirName) => `${specDirName}/agents/e2e-engineer.md`,
     promptTemplate: (agentFile, targetFile) =>
       `Using the ${agentFile} agent profile as instructions, please implement and execute E2E tests for the following test cases:\n\n${targetFile}\n\nIMPORTANT: Follow all rules in the agent profile. Read .github/instructions/e2e-testing.instructions.md before starting. Start required services, run tests sequentially, diagnose failures, and generate a comprehensive result report.`,
     interactiveSuffix: (doneFile) =>
@@ -90,6 +90,21 @@ function getAgent(name) {
   return AGENT_REGISTRY.find(agent => agent.name === name);
 }
 
+function resolveAgentConfig(agentConfig, specDirName) {
+  if (!specDirName) {
+    throw new Error('specDirName is required to resolve agent configuration');
+  }
+
+  const resolved = { ...agentConfig };
+  resolved.agentFile = typeof agentConfig.agentFile === 'function'
+    ? agentConfig.agentFile(specDirName)
+    : agentConfig.agentFile;
+  resolved.filesDir = typeof agentConfig.filesDir === 'function'
+    ? agentConfig.filesDir(specDirName)
+    : agentConfig.filesDir;
+  return resolved;
+}
+
 /**
  * Register a new agent dynamically (for extensibility)
  * @param {Object} agentConfig - Agent configuration object
@@ -112,5 +127,6 @@ function registerAgent(agentConfig) {
 module.exports = {
   getAgents,
   getAgent,
+  resolveAgentConfig,
   registerAgent
 };

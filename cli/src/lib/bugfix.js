@@ -20,15 +20,17 @@ async function runBugfix(opts = {}) {
   const specDirName = await configManager.getSpecDirName();
 
   // Check if we're in a project root directory
-  const githubDirExists = await fs.access(path.join(cwd, '.github')).then(() => true).catch(() => false);
   const srcDirExists = await fs.access(path.join(cwd, 'src')).then(() => true).catch(() => false);
   
   // Find spec directory (backward compatible - supports both rnd and r3nd)
   const specDir = await findFirstSpecDirectory(cwd, specDirName);
   const specDirExists = specDir !== null;
+  const agentsDirExists = specDir
+    ? await fs.access(path.join(cwd, specDir, 'agents')).then(() => true).catch(() => false)
+    : false;
 
-  if (!githubDirExists || !specDirExists || !srcDirExists) {
-    logger.error(`Error: Not in a project root directory. Required directories (.github/, ${specDirName}/, src/) not found.`);
+  if (!specDirExists || !srcDirExists || !agentsDirExists) {
+    logger.error(`Error: Not in a project root directory. Required directories (${specDirName}/agents, ${specDirName}/, src/) not found.`);
     logger.error('Please run this command from the root of your r3nd project.');
     process.exit(1);
   }
@@ -55,8 +57,10 @@ async function runBugfix(opts = {}) {
   await ensureDir(path.dirname(fullPlanPath));
 
   // Step 3: Create prompts based on LLM choice
-  const planPrompt = `using the instructions in .github/agents/team-lead.agent.md please create a build plan to fix the following problem: ${problemDescription}`;
-  const implementPrompt = `using the instructions in .github/agents/developer.agent.md implement the following plan to completion: ${planPath}`;
+  const teamLeadAgentPath = path.join(specDir, 'agents', 'team-lead.md');
+  const developerAgentPath = path.join(specDir, 'agents', 'developer.md');
+  const planPrompt = `using the instructions in ${teamLeadAgentPath} please create a build plan to fix the following problem: ${problemDescription}`;
+  const implementPrompt = `using the instructions in ${developerAgentPath} implement the following plan to completion: ${planPath}`;
 
   if (llmChoice === 'codex') {
     // Run codex for build plan creation

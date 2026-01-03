@@ -25,7 +25,7 @@ Review all PR discussion (review comments, review threads, and issue comments) a
 |-------|----------|---------|
 | PR discussion | PR conversation, reviews, and review threads | Source of issues and evidence |
 | PR files | PR file list | Map feedback to directories and process assets |
-| Agent profiles | `.github/agents/*.agent.md` | Update guidance for agents |
+| Agent profiles | `rnd/agents/*.md` | Update guidance for agents |
 | Templates | `.github/templates/*.md` | Update doc templates |
 | Instructions | `.github/instructions/*.instructions.md` | Update execution rules |
 
@@ -52,7 +52,7 @@ Use the file path referenced in the comment to determine which process artifact 
 | `src/backend/` | `developer` agent + `.github/instructions/backend.instructions.md` |
 | `src/frontend/` | `developer` agent + `.github/instructions/frontend.instructions.md` |
 | `tests/backend/` or `tests/frontend/` | `developer` agent + `.github/instructions/testing.instructions.md` |
-| `.github/agents/` | The referenced agent profile |
+| `rnd/agents/` | The referenced agent profile |
 | `.github/templates/` | The referenced template |
 | `.github/instructions/` | The referenced instruction file |
 

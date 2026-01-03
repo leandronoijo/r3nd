@@ -1,10 +1,11 @@
 const path = require('path');
 const fs = require('fs').promises;
-const { getAgents } = require('../lib/agents/agentRegistry');
+const { getAgents, resolveAgentConfig } = require('../lib/agents/agentRegistry');
 const { listMarkdownFiles, buildPrompt, buildInteractivePrompt, validateAgentSetup, getFileDisplayName } = require('../lib/agents/agentService');
 const { chooseFile, buildAgentChoices, askFeatureDescription } = require('../lib/ui/prompts');
 const { runPlansSequential, runGitHubAgent, spawnAgentWithDoneFile } = require('../lib/llm/agentRunner');
 const { ensureDir } = require('../lib/fs/fileWriter');
+const { ConfigManager } = require('../lib/config/configManager');
 const logger = require('../lib/utils/logger');
 const inquirer = require('inquirer');
 const prompt = inquirer.createPromptModule();
@@ -50,12 +51,15 @@ function register(program) {
 async function runAgentCommand(agentConfig, opts = {}) {
   const cwd = process.cwd();
   const nonInteractive = !!opts.nonInteractive;
+  const configManager = new ConfigManager(cwd);
+  const specDirName = await configManager.getSpecDirName();
+  const resolvedAgentConfig = resolveAgentConfig(agentConfig, specDirName);
 
-  logger.info(`\nr3nd agents ${agentConfig.name}`);
-  logger.info(`Using agent: ${agentConfig.agentFile}`);
+  logger.info(`\nr3nd agents ${resolvedAgentConfig.name}`);
+  logger.info(`Using agent: ${resolvedAgentConfig.agentFile}`);
 
   // Validate agent setup
-  const validation = await validateAgentSetup(cwd, agentConfig);
+  const validation = await validateAgentSetup(cwd, resolvedAgentConfig);
   
   if (!validation.agentExists) {
     logger.error(`Agent file not found: ${validation.agentPath}`);
@@ -64,8 +68,8 @@ async function runAgentCommand(agentConfig, opts = {}) {
   }
 
   // Handle free text input agents (like product-spec)
-  if (agentConfig.useFreeTextInput) {
-    await handleFreeTextAgent(agentConfig, opts, cwd, nonInteractive);
+  if (resolvedAgentConfig.useFreeTextInput) {
+    await handleFreeTextAgent(resolvedAgentConfig, opts, cwd, nonInteractive);
     return;
   }
 
@@ -77,10 +81,10 @@ async function runAgentCommand(agentConfig, opts = {}) {
   }
 
   // List available files
-  const files = await listMarkdownFiles(cwd, agentConfig.filesDir);
+  const files = await listMarkdownFiles(cwd, resolvedAgentConfig.filesDir);
   
   if (files.length === 0) {
-    logger.warn(`No markdown files found in ${agentConfig.filesDir}`);
+    logger.warn(`No markdown files found in ${resolvedAgentConfig.filesDir}`);
     logger.info(`Create a file there first, then run this command again.`);
     process.exit(0);
   }
@@ -89,7 +93,7 @@ async function runAgentCommand(agentConfig, opts = {}) {
   let selectedFile = opts.file;
   
   if (!selectedFile) {
-    logger.info(`\nFound ${files.length} file(s) in ${agentConfig.filesDir}:`);
+    logger.info(`\nFound ${files.length} file(s) in ${resolvedAgentConfig.filesDir}:`);
     files.forEach(f => logger.info(`  - ${getFileDisplayName(f)}`));
     
     selectedFile = await chooseFile(
@@ -150,13 +154,13 @@ async function runAgentCommand(agentConfig, opts = {}) {
 
     // Execute based on agent choice
     if (agentChoice === 'codex') {
-      await runCodexAgent(selectedFile, cwd, agentConfig.name, agentConfig);
+      await runCodexAgent(selectedFile, cwd, resolvedAgentConfig.name, resolvedAgentConfig);
       return;
     } else if (agentChoice === 'gemini') {
-      await runGeminiAgent(selectedFile, cwd, agentConfig.name, agentConfig);
+      await runGeminiAgent(selectedFile, cwd, resolvedAgentConfig.name, resolvedAgentConfig);
       return;
     } else if (agentChoice === 'github') {
-      const result = await runGitHubAgentWrapper(selectedFile, cwd, agentConfig.name, agentConfig, { featureLabel, allowRetry: !nonInteractive });
+      const result = await runGitHubAgentWrapper(selectedFile, cwd, resolvedAgentConfig.name, resolvedAgentConfig, { featureLabel, allowRetry: !nonInteractive });
       if (result && result.retry) {
         if (nonInteractive) {
           process.exit(1);
@@ -166,7 +170,7 @@ async function runAgentCommand(agentConfig, opts = {}) {
       }
       return;
     } else if (agentChoice === 'generate') {
-      await generatePrompt(selectedFile, cwd, agentConfig.name, agentConfig);
+      await generatePrompt(selectedFile, cwd, resolvedAgentConfig.name, resolvedAgentConfig);
       return;
     } else {
       logger.error(`Unknown agent choice: ${agentChoice}`);
