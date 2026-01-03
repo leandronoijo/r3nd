@@ -36,6 +36,10 @@ Review all PR discussion (review comments, review threads, and issue comments) a
 - Retro report: `rnd/retros/pr-<number>-retro.md`
 - Use template: `.github/templates/retro.md`
 
+Spec directory resolution:
+- If `r3nd.yaml` contains `spec-dir-name`, use that value as `rnd`.
+- Otherwise, look for a directory named `r3nd` or `rnd` (prefer `r3nd` if both exist).
+
 ---
 
 ## Directory-to-Process Mapping
