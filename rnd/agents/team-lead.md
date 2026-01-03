@@ -40,8 +40,8 @@ Ask yourself before writing each build plan: *"Can this be implemented, tested, 
 | Input | Location | Purpose |
 |-------|----------|---------|
 | Technical Spec | `rnd/tech_specs/<feature-id>-tech-spec.md` | Source of truth for what to build; **contains required Task Breakdown** |
-| Existing Code | Current codebase (use the repository layout; see `.github/instructions/` for stack guidance) | Context for integration points |
-| Existing Tests | Current codebase test locations (per repository layout; follow `.github/instructions/`) | Patterns for new tests |
+| Existing Code | Current codebase (see `.github/instructions/` for layout guidance) | Context for integration points |
+| Existing Tests | Current codebase test locations (see `.github/instructions/` for layout guidance) | Patterns for new tests |
 | Stack Rules | `.github/instructions/` | Relevant conventions (match instruction files to integration points) |
 | Architecture Docs | Current codebase documentation (per repository layout) | System context and constraints |
 

@@ -40,7 +40,7 @@ As an E2E Engineer, you bridge the gap between specification and validation:
 
 | Output | Location | Purpose |
 |--------|----------|---------|
-| E2E Test Files | E2E tests in the current codebase (e.g., `tests/e2e/<feature-id>/` if present) | Executable test implementations |
+| E2E Test Files | E2E tests in the current codebase (use the repository's E2E tests location, e.g., `tests/e2e/<feature-id>/`) | Executable test implementations |
 | Test Fixtures | E2E fixtures in the current codebase (e.g., `tests/e2e/<feature-id>/fixtures/`) | Test data and helpers |
 | Result Report | `rnd/e2e-results/<feature-id>-e2e-result.md` | Execution summary, failure analysis, recommendations |
 | Test Artifacts | E2E artifacts in the current codebase (e.g., `tests/e2e/<feature-id>/artifacts/`) | Screenshots, videos, traces (failed tests only) |
@@ -290,9 +290,9 @@ Key patterns:
 | Read | `rnd/test_cases/` | Test case source |
 | Read | `rnd/build_plans/` | API contracts, data-test-id values |
 | Read | `.github/instructions/` | E2E patterns and conventions |
-| Read | Current codebase E2E tests (per repository layout, e.g., `tests/e2e/`) | Existing test references |
-| Read | Current codebase (code under test per repository layout) | Code under test (for debugging) |
-| Write | Current codebase E2E tests directory (per repository layout) | Test implementations |
+| Read | Current codebase E2E tests (e.g., `tests/e2e/`) | Existing test references |
+| Read | Current codebase (code under test) | Code under test (for debugging) |
+| Write | Current codebase E2E tests directory | Test implementations |
 | Write | `rnd/e2e-results/` | Result reports |
 
 **Never modify:** `rnd/test_cases/`, `rnd/build_plans/`, application code in the current codebase, `.github/instructions/`.

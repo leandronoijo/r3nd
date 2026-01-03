@@ -39,8 +39,8 @@ Ask yourself before writing each line: *"Does this follow the patterns establish
 | Build Plan | `rnd/build_plans/<feature-id>-build-plan.md` | Source of truth — follow exactly |
 | Backend Rules | `.github/instructions/backend.instructions.md` | Backend stack and conventions (see instructions file) |
 | Frontend Rules | `.github/instructions/frontend.instructions.md` | Frontend stack and conventions (see instructions file) |
-| Existing Code | Current codebase (use repository layout; see `.github/instructions/` for stack guidance) | Context and integration points |
-| Existing Tests | Current codebase test locations (per repository layout; follow `.github/instructions/`) | Test patterns to follow |
+| Existing Code | Current codebase (see `.github/instructions/` for layout guidance) | Context and integration points |
+| Existing Tests | Current codebase test locations (see `.github/instructions/` for layout guidance) | Test patterns to follow |
 | Golden References | As specified in build plan | Canonical examples to copy |
 
 **Always read instruction files before starting implementation.**
@@ -126,7 +126,7 @@ Do not guess; rely on golden references in the current codebase and instruction 
 
 ### Golden References
 
-Refer to the repository's golden references for backend and frontend implementation examples in the current codebase (see `.github/instructions/` for default locations from the seed example modules).
+Refer to the repository's golden references for backend and frontend implementation examples in the current codebase. Use `.github/instructions/` to find where this repository keeps its example modules; if locations are not specified, identify the example module in the current codebase before proceeding.
 
 Refer to DTOs in the backend example module within the current codebase for canonical examples and validation rules. Use the backend instructions file for precise decorators and validation patterns.
 
@@ -274,16 +274,16 @@ Always refer to these as canonical examples:
 
 | Type | Location | Use For |
 |------|----------|---------|
-| Backend Module | Backend example module in the current codebase (see `.github/instructions/` for default seed location) | Module structure, DI patterns |
-| Backend Service | Backend example service in the current codebase | Service methods, error handling |
-| Backend Controller | Backend example controller in the current codebase | Route handlers, DTO usage |
-| Backend DTO | Backend example DTOs in the current codebase | Validation decorators |
-| Backend Schema | Backend example schemas in the current codebase | Data model definition examples (follow backend instructions) |
-| Frontend Component | Frontend example component in the current codebase | Frontend component structure (follow frontend instructions) |
-| Frontend Store | Frontend example store in the current codebase | Store patterns (follow frontend instructions) |
-| Backend Tests | Backend test examples in the current codebase | Backend test patterns |
-| Frontend Tests | Frontend test examples in the current codebase | Frontend test patterns |
-| E2E Tests | E2E test examples in the current codebase | E2E test patterns and selector contracts |
+| Backend Module | Backend example module in the current codebase (see `.github/instructions/` for pointers) | Module structure, DI patterns |
+| Backend Service | Backend example service in the current codebase (see `.github/instructions/` for pointers) | Service methods, error handling |
+| Backend Controller | Backend example controller in the current codebase (see `.github/instructions/` for pointers) | Route handlers, DTO usage |
+| Backend DTO | Backend example DTOs in the current codebase (see `.github/instructions/` for pointers) | Validation decorators |
+| Backend Schema | Backend example schemas in the current codebase (see `.github/instructions/` for pointers) | Data model definition examples (follow backend instructions) |
+| Frontend Component | Frontend example component in the current codebase (see `.github/instructions/` for pointers) | Frontend component structure (follow frontend instructions) |
+| Frontend Store | Frontend example store in the current codebase (see `.github/instructions/` for pointers) | Store patterns (follow frontend instructions) |
+| Backend Tests | Backend test examples in the current codebase (see `.github/instructions/` for pointers) | Backend test patterns |
+| Frontend Tests | Frontend test examples in the current codebase (see `.github/instructions/` for pointers) | Frontend test patterns |
+| E2E Tests | E2E test examples in the current codebase (see `.github/instructions/` for pointers) | E2E test patterns and selector contracts |
 
 **Copy their structure for new features. Do not invent new patterns.**
 
