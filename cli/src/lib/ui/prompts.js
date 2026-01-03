@@ -326,4 +326,37 @@ async function askSpecDirName(currentValue = null, nonInteractive = false) {
   return res.specDirName.trim();
 }
 
-module.exports = { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askBugDescription, askFeatureDescription, askBugfixLLMChoice, confirmBuildPlan, askAnalyseAgent, buildAgentChoices, chooseFile, askInitOptions, askUpdateOptions, askSeedRepo, askSpecDirName };
+/**
+ * Prompt user to select which apps to analyze
+ * @param {Array} apps - Array of app objects with name, path, purpose, stack
+ * @param {boolean} nonInteractive - If true, returns all apps
+ * @returns {Promise<Array>} Array of selected apps
+ */
+async function askSelectApps(apps, nonInteractive = false) {
+  if (nonInteractive || !apps || apps.length === 0) {
+    return apps;
+  }
+  
+  const choices = apps.map(app => ({
+    name: `${app.name} (${app.path}) - ${app.purpose || 'No description'}`,
+    value: app,
+    checked: true, // All checked by default
+  }));
+  
+  const res = await prompt([{
+    type: 'checkbox',
+    name: 'selectedApps',
+    message: 'Select which apps/libs to analyze:',
+    choices,
+    validate: (answer) => {
+      if (answer.length === 0) {
+        return 'You must choose at least one app to analyze.';
+      }
+      return true;
+    },
+  }]);
+  
+  return res.selectedApps;
+}
+
+module.exports = { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askBugDescription, askFeatureDescription, askBugfixLLMChoice, confirmBuildPlan, askAnalyseAgent, buildAgentChoices, chooseFile, askInitOptions, askUpdateOptions, askSeedRepo, askSpecDirName, askSelectApps };
