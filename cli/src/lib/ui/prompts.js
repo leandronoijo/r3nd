@@ -213,14 +213,13 @@ async function chooseFile(files, message = 'Select a file:', nonInteractive = fa
  * @returns {Promise<string[]>} Array of selected option values
  */
 async function askInitOptions(nonInteractive = false) {
-  const defaultOptions = ['github', 'cursor', 'vscode', 'codex'];
+  const defaultOptions = ['github', 'cursor', 'vscode'];
   if (nonInteractive) return defaultOptions;
   
   const choices = [
     { name: 'GitHub → Copy GitHub workflows (.github/workflows/)', value: 'github', checked: true },
     { name: 'Cursor → Create .cursor commands for each agent', value: 'cursor', checked: true },
     { name: 'VSCode → Create .github/chatmodes for each agent (Copilot personas)', value: 'vscode', checked: true },
-    { name: 'Codex CLI → Create .codex/prompts custom prompts for each agent', value: 'codex', checked: true },
   ];
   
   const res = await prompt([{
@@ -239,7 +238,7 @@ async function askInitOptions(nonInteractive = false) {
  * @returns {Promise<string[]>} Array of selected option values
  */
 async function askUpdateOptions(nonInteractive = false) {
-  const defaultOptions = ['templates', 'agents', 'github', 'cursor', 'vscode', 'codex'];
+  const defaultOptions = ['templates', 'agents', 'github', 'cursor', 'vscode'];
   if (nonInteractive) return defaultOptions;
   
   const choices = [
@@ -248,7 +247,6 @@ async function askUpdateOptions(nonInteractive = false) {
     { name: 'GitHub → Update GitHub workflows (.github/workflows/)', value: 'github', checked: true },
     { name: 'Cursor → Update .cursor commands for each agent', value: 'cursor', checked: true },
     { name: 'VSCode → Update .github/chatmodes for each agent (Copilot personas)', value: 'vscode', checked: true },
-    { name: 'Codex CLI → Update .codex/prompts custom prompts for each agent', value: 'codex', checked: true },
   ];
   
   const res = await prompt([{

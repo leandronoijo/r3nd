@@ -86,9 +86,6 @@ async function runUpdate(opts = {}, deps = {}) {
   if (selectedOptions.includes('vscode')) {
     await updateComposedAgents(cwd, tree, githubClient, '.github/chatmodes', '.chatmode.md', specDirName, seedSpecDirName);
   }
-
-  if (selectedOptions.includes('codex')) {
-    await updateComposedAgents(cwd, tree, githubClient, '.codex/prompts', '.md', specDirName, seedSpecDirName);
   }
 
   logger.info('\nUpdate complete.');
@@ -200,8 +197,7 @@ async function updateGitHubWorkflows(cwd, tree, githubClient, specDirName, seedS
  */
 async function updateComposedAgents(cwd, tree, githubClient, wrapperDir, extension, specDirName, seedSpecDirName) {
   const platformName = wrapperDir === '.github/agents' ? 'GitHub Copilot' : 
-                       wrapperDir === '.cursor/commands' ? 'Cursor' :
-                       wrapperDir === '.github/chatmodes' ? 'VSCode' : 'Codex CLI';
+                       wrapperDir === '.cursor/commands' ? 'Cursor' : 'VSCode';
   logger.info(`\n📝 Updating ${platformName} agent files...`);
   
   // Check if the platform directory exists locally

@@ -162,22 +162,17 @@ async function runInit(opts = {}, deps = {}) {
   if (selectedOptions.includes('github')) {
     await copyGitHubWorkflows(cwd, tree, githubClient, specDirName, seedSpecDirName);
     // Compose GitHub Copilot agent files from wrappers + personas
-    await composeAgentFiles(cwd, tree, githubClient, '.github/agents', '.agent.md', specDirName, seedSpecDirName);
+  await composeAgentFiles(cwd, tree, githubClient, '.github/agents', '.agent.md', specDirName, seedSpecDirName);
   }
 
   if (selectedOptions.includes('cursor')) {
     // Compose Cursor command files from wrappers + personas
-    await composeAgentFiles(cwd, tree, githubClient, '.cursor/commands', '.md', specDirName, seedSpecDirName);
+  await composeAgentFiles(cwd, tree, githubClient, '.cursor/commands', '.md', specDirName, seedSpecDirName);
   }
 
   if (selectedOptions.includes('vscode')) {
     // Compose VSCode chat mode files from wrappers + personas
-    await composeAgentFiles(cwd, tree, githubClient, '.github/chatmodes', '.chatmode.md', specDirName, seedSpecDirName);
-  }
-
-  if (selectedOptions.includes('codex')) {
-    // Compose Codex CLI custom prompts from wrappers + personas
-    await composeAgentFiles(cwd, tree, githubClient, '.codex/prompts', '.md', specDirName, seedSpecDirName);
+  await composeAgentFiles(cwd, tree, githubClient, '.github/chatmodes', '.chatmode.md', specDirName, seedSpecDirName);
   }
 
   // Also copy templates if any option was selected
@@ -265,8 +260,7 @@ async function copyAgentPersonas(cwd, tree, githubClient, specDirName, seedSpecD
  */
 async function composeAgentFiles(cwd, tree, githubClient, wrapperDir, extension, specDirName, seedSpecDirName) {
   const platformName = wrapperDir === '.github/agents' ? 'GitHub Copilot' : 
-                       wrapperDir === '.cursor/commands' ? 'Cursor' :
-                       wrapperDir === '.github/chatmodes' ? 'VSCode' : 'Codex CLI';
+                       wrapperDir === '.cursor/commands' ? 'Cursor' : 'VSCode';
   logger.info(`\n📝 Composing ${platformName} agent files...`);
   
   // Find all wrapper template files

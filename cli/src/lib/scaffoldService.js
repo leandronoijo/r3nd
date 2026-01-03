@@ -195,7 +195,6 @@ async function runScaffold(opts = {}, deps = {}) {
     const githubAgentsExist = await fs.access(path.join(cwd, '.github', 'agents')).then(() => true).catch(() => false);
     const cursorCommandsExist = await fs.access(path.join(cwd, '.cursor', 'commands')).then(() => true).catch(() => false);
     const vscodeChatModesExist = await fs.access(path.join(cwd, '.github', 'chatmodes')).then(() => true).catch(() => false);
-    const codexPromptsExist = await fs.access(path.join(cwd, '.codex', 'prompts')).then(() => true).catch(() => false);
     
     // Import template resolver functions
     const { resolveTemplate, createGitHubFileReader } = require('./templateResolver');
@@ -245,31 +244,6 @@ async function runScaffold(opts = {}, deps = {}) {
       );
       
       for (const file of cursorWrappers) {
-        try {
-          const wrapperBuffer = await githubClient.fetchRaw(file.path);
-          const wrapperContent = wrapperBuffer.toString('utf-8');
-          const composedContent = await resolveTemplate(wrapperContent, fileReader);
-          const rewritten = rewriteSpecDirContent(composedContent, [seedSpecDirName], specDirName);
-          let finalContent = rewritten.content;
-          if (seedSpecDirName !== specDirName) {
-            const specDirPattern = new RegExp(`\\b${seedSpecDirName}/`, 'g');
-            finalContent = finalContent.replace(specDirPattern, `${specDirName}/`);
-          }
-          await writeBuffer(cwd, file.path, Buffer.from(finalContent, 'utf-8'), { overwrite: true });
-          logger.info(`  Composed: ${file.path}`);
-        } catch (err) {
-          logger.error(`  Failed to compose ${file.path}:`, err && err.message ? err.message : err);
-        }
-      }
-    }
-
-    // Compose Codex CLI prompts if directory exists
-    if (codexPromptsExist) {
-      const codexWrappers = tree.filter(item =>
-        item.type === 'blob' && item.path.startsWith('.codex/prompts/') && item.path.endsWith('.md')
-      );
-      
-      for (const file of codexWrappers) {
         try {
           const wrapperBuffer = await githubClient.fetchRaw(file.path);
           const wrapperContent = wrapperBuffer.toString('utf-8');
