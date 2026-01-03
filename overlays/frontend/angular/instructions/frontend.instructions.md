@@ -1,4 +1,3 @@
-````instructions
 ---
 title: Frontend Instructions
 applyTo: src/frontend/**
@@ -184,5 +183,3 @@ export class UserStateService {
 | Missing `trackBy` in `*ngFor` | Always provide a trackBy function. |
 | Manual subscriptions without cleanup | Use `async` pipe or unsubscribe in `ngOnDestroy`. |
 | Forgetting to import CommonModule | Standalone components must explicitly import CommonModule for `*ngIf`, `*ngFor`, etc. |
-
-````

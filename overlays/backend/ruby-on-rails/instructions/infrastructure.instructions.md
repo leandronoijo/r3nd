@@ -1,4 +1,3 @@
-```instructions
 ---
 title: Infrastructure Instructions - Ruby on Rails Backend
 applyTo: src/backend/Dockerfile, docker-compose.yml
@@ -594,4 +593,3 @@ docker compose down --remove-orphans
 - PostgreSQL Docker image: https://hub.docker.com/_/postgres
 - Ruby Docker best practices: https://lipanski.com/posts/dockerfile-ruby-best-practices
 - Solid Queue: https://github.com/rails/solid_queue
-```

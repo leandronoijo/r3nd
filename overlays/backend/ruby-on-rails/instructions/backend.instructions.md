@@ -1,4 +1,3 @@
-```instructions
 ---
 title: Backend Instructions
 applyTo: src/backend/**
@@ -368,5 +367,3 @@ Before committing:
 - **RSpec Rails**: https://github.com/rspec/rspec-rails
 - **FactoryBot**: https://github.com/thoughtbot/factory_bot
 - **Shoulda Matchers**: https://github.com/thoughtbot/shoulda-matchers
-
-```

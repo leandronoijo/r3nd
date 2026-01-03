@@ -1,4 +1,3 @@
-```instructions
 ---
 title: Infrastructure Instructions - NestJS Backend
 applyTo: src/backend/Dockerfile, docker-compose.yml
@@ -403,4 +402,3 @@ docker-compose down -v
 - NestJS Docker documentation: https://docs.nestjs.com/recipes/docker
 - Node.js Docker best practices: https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md
 - MongoDB Docker image: https://hub.docker.com/_/mongo
-```
