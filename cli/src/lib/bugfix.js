@@ -258,13 +258,18 @@ async function runBugfix(opts = {}) {
     const fullPrompt = `${planPrompt}\n\nIMPORTANT: Save the build plan to ${planPath}.\n\nAfter creating the build plan, wait for user approval. Once approved, ${implementPrompt}`;
     
     try {
-      const url = await runGitHubAgent(fullPrompt, cwd, 'Bugfix task');
+      const url = await runGitHubAgent(fullPrompt, cwd, 'Bugfix task', { featureLabel: problemDescription });
       logger.info('\n📋 Next steps:');
       logger.info('  1. Review the agent\'s progress at the link above');
       logger.info('  2. The agent will create the build plan and wait for your approval');
       logger.info('  3. Once approved, the agent will implement the fix');
       logger.info('  4. Monitor the agent session on GitHub for completion\n');
     } catch (err) {
+      if (err && err.code === 'GITHUB_BRANCH_PUSH_FAILED') {
+        logger.error('GitHub agent run will not work: snapshot branch could not be pushed to origin.');
+        logger.info('Use a local CLI tool, or fix your git remote/auth and rerun the command.');
+        return;
+      }
       logger.error('Failed to create GitHub agent task.');
       return;
     }

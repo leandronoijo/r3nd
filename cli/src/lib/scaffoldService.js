@@ -273,12 +273,17 @@ async function runScaffold(opts = {}, deps = {}) {
     
     try {
       const { runGitHubAgent } = require('./llm/agentRunner');
-      const url = await runGitHubAgent(comprehensivePrompt, cwd, 'Scaffold task');
+      const url = await runGitHubAgent(comprehensivePrompt, cwd, 'Scaffold task', { featureLabel: 'scaffold' });
       logger.info('\n📋 Next steps:');
       logger.info('  1. Monitor the agent\'s progress at the link above');
       logger.info('  2. The agent will implement all build plans sequentially');
       logger.info(`  3. Review the changes as they are made\n`);
     } catch (err) {
+      if (err && err.code === 'GITHUB_BRANCH_PUSH_FAILED') {
+        logger.error('GitHub agent run will not work: snapshot branch could not be pushed to origin.');
+        logger.info('Use a local CLI tool, or fix your git remote/auth and rerun the command.');
+        return;
+      }
       if (err.message && err.message.includes('GitHub agent requires repository')) {
         logger.error('GitHub agent failed: Requires a repository with proper permissions.');
       } else {

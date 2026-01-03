@@ -117,47 +117,61 @@ async function runAgentCommand(agentConfig, opts = {}) {
 
   // Select agent tool
   let agentChoice = opts.agent;
-  
-  if (!agentChoice) {
-    const choices = buildAgentChoices({
-      labels: {
-        codex: 'Use local codex CLI (run now)',
-        gemini: 'Use Gemini CLI (run now)',
-        github: 'Use GitHub coding agent',
-      },
-      extraChoices: [
-        { name: 'Generate prompt to copy & paste', value: 'generate' },
-        { name: 'Cancel', value: 'cancel' }
-      ]
-    });
+  const featureLabel = selectedFile;
 
-    const res = await prompt([{
-      type: 'list',
-      name: 'agent',
-      message: 'Which tool would you like to use?',
-      choices
-    }]);
+  while (true) {
+    if (!agentChoice) {
+      const choices = buildAgentChoices({
+        labels: {
+          codex: 'Use local codex CLI (run now)',
+          gemini: 'Use Gemini CLI (run now)',
+          github: 'Use GitHub coding agent',
+        },
+        extraChoices: [
+          { name: 'Generate prompt to copy & paste', value: 'generate' },
+          { name: 'Cancel', value: 'cancel' }
+        ]
+      });
 
-    agentChoice = res.agent;
-  }
+      const res = await prompt([{
+        type: 'list',
+        name: 'agent',
+        message: 'Which tool would you like to use?',
+        choices
+      }]);
 
-  if (agentChoice === 'cancel') {
-    logger.info('Cancelled.');
-    process.exit(0);
-  }
+      agentChoice = res.agent;
+    }
 
-  // Execute based on agent choice
-  if (agentChoice === 'codex') {
-    await runCodexAgent(selectedFile, cwd, agentConfig.name, agentConfig);
-  } else if (agentChoice === 'gemini') {
-    await runGeminiAgent(selectedFile, cwd, agentConfig.name, agentConfig);
-  } else if (agentChoice === 'github') {
-    await runGitHubAgentWrapper(selectedFile, cwd, agentConfig.name, agentConfig);
-  } else if (agentChoice === 'generate') {
-    await generatePrompt(selectedFile, cwd, agentConfig.name, agentConfig);
-  } else {
-    logger.error(`Unknown agent choice: ${agentChoice}`);
-    process.exit(1);
+    if (agentChoice === 'cancel') {
+      logger.info('Cancelled.');
+      process.exit(0);
+    }
+
+    // Execute based on agent choice
+    if (agentChoice === 'codex') {
+      await runCodexAgent(selectedFile, cwd, agentConfig.name, agentConfig);
+      return;
+    } else if (agentChoice === 'gemini') {
+      await runGeminiAgent(selectedFile, cwd, agentConfig.name, agentConfig);
+      return;
+    } else if (agentChoice === 'github') {
+      const result = await runGitHubAgentWrapper(selectedFile, cwd, agentConfig.name, agentConfig, { featureLabel, allowRetry: !nonInteractive });
+      if (result && result.retry) {
+        if (nonInteractive) {
+          process.exit(1);
+        }
+        agentChoice = undefined;
+        continue;
+      }
+      return;
+    } else if (agentChoice === 'generate') {
+      await generatePrompt(selectedFile, cwd, agentConfig.name, agentConfig);
+      return;
+    } else {
+      logger.error(`Unknown agent choice: ${agentChoice}`);
+      process.exit(1);
+    }
   }
 }
 
@@ -181,47 +195,61 @@ async function handleFreeTextAgent(agentConfig, opts, cwd, nonInteractive) {
 
   // Select agent tool
   let agentChoice = opts.agent;
-  
-  if (!agentChoice) {
-    const choices = buildAgentChoices({
-      labels: {
-        codex: 'Use local codex CLI (run now)',
-        gemini: 'Use Gemini CLI (run now)',
-        github: 'Use GitHub coding agent',
-      },
-      extraChoices: [
-        { name: 'Generate prompt to copy & paste', value: 'generate' },
-        { name: 'Cancel', value: 'cancel' }
-      ]
-    });
+  const featureLabel = userInput;
 
-    const res = await prompt([{
-      type: 'list',
-      name: 'agent',
-      message: 'Which tool would you like to use?',
-      choices
-    }]);
+  while (true) {
+    if (!agentChoice) {
+      const choices = buildAgentChoices({
+        labels: {
+          codex: 'Use local codex CLI (run now)',
+          gemini: 'Use Gemini CLI (run now)',
+          github: 'Use GitHub coding agent',
+        },
+        extraChoices: [
+          { name: 'Generate prompt to copy & paste', value: 'generate' },
+          { name: 'Cancel', value: 'cancel' }
+        ]
+      });
 
-    agentChoice = res.agent;
-  }
+      const res = await prompt([{
+        type: 'list',
+        name: 'agent',
+        message: 'Which tool would you like to use?',
+        choices
+      }]);
 
-  if (agentChoice === 'cancel') {
-    logger.info('Cancelled.');
-    process.exit(0);
-  }
+      agentChoice = res.agent;
+    }
 
-  // Execute based on agent choice
-  if (agentChoice === 'codex') {
-    await runCodexAgent(userInput, cwd, agentConfig.name, agentConfig);
-  } else if (agentChoice === 'gemini') {
-    await runGeminiAgent(userInput, cwd, agentConfig.name, agentConfig);
-  } else if (agentChoice === 'github') {
-    await runGitHubAgentWrapper(userInput, cwd, agentConfig.name, agentConfig);
-  } else if (agentChoice === 'generate') {
-    await generatePrompt(userInput, cwd, agentConfig.name, agentConfig);
-  } else {
-    logger.error(`Unknown agent choice: ${agentChoice}`);
-    process.exit(1);
+    if (agentChoice === 'cancel') {
+      logger.info('Cancelled.');
+      process.exit(0);
+    }
+
+    // Execute based on agent choice
+    if (agentChoice === 'codex') {
+      await runCodexAgent(userInput, cwd, agentConfig.name, agentConfig);
+      return;
+    } else if (agentChoice === 'gemini') {
+      await runGeminiAgent(userInput, cwd, agentConfig.name, agentConfig);
+      return;
+    } else if (agentChoice === 'github') {
+      const result = await runGitHubAgentWrapper(userInput, cwd, agentConfig.name, agentConfig, { featureLabel, allowRetry: !nonInteractive });
+      if (result && result.retry) {
+        if (nonInteractive) {
+          process.exit(1);
+        }
+        agentChoice = undefined;
+        continue;
+      }
+      return;
+    } else if (agentChoice === 'generate') {
+      await generatePrompt(userInput, cwd, agentConfig.name, agentConfig);
+      return;
+    } else {
+      logger.error(`Unknown agent choice: ${agentChoice}`);
+      process.exit(1);
+    }
   }
 }
 
@@ -292,18 +320,27 @@ async function runGeminiAgent(targetInput, cwd, agentName, agentConfig) {
 /**
  * Run GitHub agent
  */
-async function runGitHubAgentWrapper(targetInput, cwd, agentName, agentConfig) {
+async function runGitHubAgentWrapper(targetInput, cwd, agentName, agentConfig, options = {}) {
   logger.info('\nCreating GitHub agent task...');
   
   // Build the prompt for GitHub agent (no interactive suffix needed)
   const promptText = buildPrompt(agentConfig, targetInput);
   
   try {
-    const url = await runGitHubAgent(promptText, cwd, `Agent: ${agentName}`);
+    const url = await runGitHubAgent(promptText, cwd, `Agent: ${agentName}`, { featureLabel: options.featureLabel });
     logger.info('\n📋 Next steps:');
     logger.info('  1. Monitor the agent\'s progress at the link above');
     logger.info('  2. Review the changes as they are made\n');
+    return { ok: true };
   } catch (err) {
+    if (err && err.code === 'GITHUB_BRANCH_PUSH_FAILED') {
+      logger.error('GitHub agent run will not work: snapshot branch could not be pushed to origin.');
+      logger.info('Use a local CLI tool, or fix your git remote/auth and then choose GitHub again.');
+      if (!options.allowRetry) {
+        process.exit(1);
+      }
+      return { retry: true };
+    }
     if (err.message && err.message.includes('GitHub agent requires repository')) {
       logger.error('GitHub agent failed: Requires a repository with proper permissions.');
     } else {
