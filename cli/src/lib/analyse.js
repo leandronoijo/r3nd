@@ -8,6 +8,10 @@ const { ConfigManager } = require('./config/configManager');
 const { findFirstSpecDirectory } = require('./fs/treeSearch');
 const YAML = require('yaml');
 
+// Regex patterns for parsing fenced code blocks
+const YAML_FENCED_BLOCK_REGEX = /```(?:yaml|yml)\s*([\s\S]*?)```/i;
+const JSON_FENCED_BLOCK_REGEX = /```json\s*([\s\S]*?)```/i;
+
 function normalizeAppEntry(a) {
   return { 
     name: a.name || a.app || 'unknown', 
@@ -19,7 +23,7 @@ function normalizeAppEntry(a) {
 
 async function parseAppsFromInstructions(content) {
   // Try YAML fenced block first (preferred format)
-  const yamlMatch = content.match(/```(?:yaml|yml)\s*([\s\S]*?)```/i);
+  const yamlMatch = content.match(YAML_FENCED_BLOCK_REGEX);
   if (yamlMatch) {
     try {
       const parsed = YAML.parse(yamlMatch[1]);
@@ -37,7 +41,7 @@ async function parseAppsFromInstructions(content) {
   }
 
   // Fallback to JSON fenced block for backwards compatibility
-  const jsonMatch = content.match(/```json\s*([\s\S]*?)```/i);
+  const jsonMatch = content.match(JSON_FENCED_BLOCK_REGEX);
   if (jsonMatch) {
     try {
       const raw = jsonMatch[1].trim();
@@ -57,7 +61,7 @@ async function parseAppsFromInstructions(content) {
 
 async function parseAppNameFromMetadata(content) {
   // Try YAML fenced block first
-  const yamlMatch = content.match(/```(?:yaml|yml)\s*([\s\S]*?)```/i);
+  const yamlMatch = content.match(YAML_FENCED_BLOCK_REGEX);
   if (yamlMatch) {
     try {
       const parsed = YAML.parse(yamlMatch[1]);
@@ -68,7 +72,7 @@ async function parseAppNameFromMetadata(content) {
   }
 
   // Try JSON fenced block
-  const jsonMatch = content.match(/```json\s*([\s\S]*?)```/i);
+  const jsonMatch = content.match(JSON_FENCED_BLOCK_REGEX);
   if (jsonMatch) {
     try {
       const raw = jsonMatch[1].trim();
