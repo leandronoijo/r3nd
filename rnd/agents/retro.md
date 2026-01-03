@@ -3,7 +3,7 @@
 Purpose
 -------
 
-Review all PR discussion (review comments, review threads, and issue comments) and identify improvements to this repo's agents, templates, or instructions so the same mistakes do not repeat. Produce a retro report in `rnd/retros/pr-<number>-retro.md`.
+Review all PR discussion (review comments, review threads, and issue comments) and identify improvements to this repo's agents, templates, or instructions so the same mistakes do not repeat. Produce a retro report in `<spec-dir-name>/retros/pr-<number>-retro.md`.
 
 **Critical context:** You are an AI agent. Your focus is process improvements to agent profiles, templates, and instruction files — not product code changes.
 
@@ -33,8 +33,12 @@ Review all PR discussion (review comments, review threads, and issue comments) a
 
 ## Output
 
-- Retro report: `rnd/retros/pr-<number>-retro.md`
+- Retro report: `<spec-dir-name>/retros/pr-<number>-retro.md`
 - Use template: `.github/templates/retro.md`
+
+Spec directory resolution:
+- If `r3nd.yaml` contains `spec-dir-name`, use that value as `<spec-dir-name>`.
+- Otherwise, look for a directory named `r3nd` or `rnd` (prefer `r3nd` if both exist).
 
 ---
 
@@ -44,11 +48,11 @@ Use the file path referenced in the comment to determine which process artifact 
 
 | Commented Path Prefix | Improve |
 |-----------------------|---------|
-| `rnd/product_specs/` | `product-manager` agent + `.github/templates/product_spec.md` |
-| `rnd/tech_specs/` | `architect` agent + `.github/templates/tech_spec.md` |
-| `rnd/build_plans/` | `team-lead` agent + `.github/templates/build_plan.md` |
-| `rnd/test_cases/` | `qa-team-lead` agent + `.github/templates/test_cases.md` |
-| `tests/e2e/` or `rnd/e2e-results/` | `e2e-engineer` agent + `.github/instructions/e2e-testing.instructions.md` + `.github/templates/e2e-result.md` |
+| `<spec-dir-name>/product_specs/` | `product-manager` agent + `.github/templates/product_spec.md` |
+| `<spec-dir-name>/tech_specs/` | `architect` agent + `.github/templates/tech_spec.md` |
+| `<spec-dir-name>/build_plans/` | `team-lead` agent + `.github/templates/build_plan.md` |
+| `<spec-dir-name>/test_cases/` | `qa-team-lead` agent + `.github/templates/test_cases.md` |
+| `tests/e2e/` or `<spec-dir-name>/e2e-results/` | `e2e-engineer` agent + `.github/instructions/e2e-testing.instructions.md` + `.github/templates/e2e-result.md` |
 | `src/backend/` | `developer` agent + `.github/instructions/backend.instructions.md` |
 | `src/frontend/` | `developer` agent + `.github/instructions/frontend.instructions.md` |
 | `tests/backend/` or `tests/frontend/` | `developer` agent + `.github/instructions/testing.instructions.md` |
