@@ -223,29 +223,70 @@ Items requiring decisions before implementation begins.
 
 ---
 
-## 8. Implementation Notes
+## 8. Task Breakdown (REQUIRED)
 
-Optional guidance for the Team Lead / developers.
+This section defines the self-contained deliverables for this feature. Each task is a standalone piece of software that delivers value and can be tested, run, and deployed independently. The Team Lead will create a **separate build plan for each task**.
 
-### 8.1 Suggested Task Breakdown
+### Task Breakdown Principles
 
-High-level tasks (Team Lead will refine into detailed build plan):
+- Each task is a **self-contained deliverable** — it works on its own
+- Tasks **stack** — later tasks build on earlier ones, but don't require changes to them
+- Each task has **clear interfaces** with other tasks
+- A task can be **tested in isolation** (with mocks for missing dependencies)
 
-1. Backend: Create module structure and DTOs
-2. Backend: Implement service and controller
-3. Backend: Add unit and integration tests
-4. Frontend: Create store and API client
-5. Frontend: Build components
-6. Frontend: Add component tests
-7. E2E: Add end-to-end tests
-8. Docs: Update API documentation
+---
 
-### 8.2 Dependencies Between Tasks
+### Task T1: [Task Title]
 
-- Frontend work depends on API contract being finalized
-- E2E tests depend on both backend and frontend completion
+- **Description**: What this task delivers and why it's valuable
+- **Scope**: 
+  - Included: [list what's in scope]
+  - Excluded: [list what's explicitly out of scope]
+- **Dependencies**: None | T[n] (specify which)
+- **Interfaces**:
+  - Exposes: [APIs, data contracts, events this task provides]
+  - Consumes: [what it expects from dependencies]
+- **Acceptance Criteria**:
+  - [ ] Criterion 1
+  - [ ] Criterion 2
+  - [ ] All tests pass
+- **Estimated Complexity**: Small | Medium | Large
 
-### 8.3 References
+---
+
+### Task T2: [Task Title]
+
+- **Description**: What this task delivers and why it's valuable
+- **Scope**: 
+  - Included: [list what's in scope]
+  - Excluded: [list what's explicitly out of scope]
+- **Dependencies**: T1 (describe the dependency)
+- **Interfaces**:
+  - Exposes: [APIs, data contracts, events this task provides]
+  - Consumes: [what it expects from T1]
+- **Acceptance Criteria**:
+  - [ ] Criterion 1
+  - [ ] Criterion 2
+  - [ ] All tests pass
+- **Estimated Complexity**: Small | Medium | Large
+
+---
+
+<!-- Add more tasks as needed following the same structure -->
+
+### Task Dependency Graph
+
+Visualize how tasks depend on each other. Tasks can be sequential or parallel where dependencies allow.
+
+```
+T1 ──→ T2 ──→ T3
+        ↘
+          T4
+```
+
+> **Note:** In this example, T4 depends only on T2 and can be implemented in parallel with T3. Design your tasks to maximize parallelism where dependencies permit.
+
+### References
 
 - Related product spec: `rnd/product_specs/<feature-id>-product-spec.md`
 - Existing similar implementation: `src/backend/modules/<similar>/`

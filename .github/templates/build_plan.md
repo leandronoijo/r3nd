@@ -1,8 +1,25 @@
-# Build Plan: `<feature-id>`
+# Build Plan: `<feature-id>-T<n>`
 
 > **Source:** `rnd/tech_specs/<feature-id>-tech-spec.md`  
+> **Task:** T<n> — [Task Title from Tech Spec]  
 > **Created:** YYYY-MM-DD  
 > **Status:** Draft | In Progress | Complete
+
+---
+
+## Task Reference (from Tech Spec)
+
+Copy the task definition from the tech spec's Task Breakdown section:
+
+- **Task ID**: T<n>
+- **Title**: [Copy from tech spec]
+- **Description**: [Copy from tech spec]
+- **Scope**: [Copy from tech spec]
+- **Dependencies**: [Copy from tech spec — e.g., "T1, T2" or "None"]
+- **Interfaces**:
+  - Exposes: [What this task provides to future tasks]
+  - Consumes: [What this task expects from dependencies]
+- **Acceptance Criteria**: [Copy from tech spec]
 
 ---
 
@@ -10,6 +27,7 @@
 
 Complete these items **before** starting any implementation tasks.
 
+- [ ] **Verify previous task dependencies are complete** (if T>1)
 - [ ] Identify integration points in Section 1
 - [ ] Read instruction files in `.github/instructions/` that match those integration points
   - Example: backend changes → `backend.instructions.md` (if present)
@@ -20,8 +38,8 @@ Complete these items **before** starting any implementation tasks.
   - Backend: `src/backend/modules/example/`
   - Frontend: `src/frontend/components/example/`, `src/frontend/stores/exampleStore.ts`
 - [ ] Confirm no new dependencies needed (or justify additions below)
-- [ ] List integration points with existing modules (see Section 1)
-- [ ] Review tech spec for any open questions
+- [ ] Review interfaces this task must expose (from tech spec)
+- [ ] Review interfaces this task consumes from previous tasks
 
 ### New Dependencies (if any)
 
@@ -33,27 +51,39 @@ Complete these items **before** starting any implementation tasks.
 
 ## 1. Implementation Overview
 
-<!-- 2-3 sentences summarizing the approach and key decisions -->
+<!-- 2-3 sentences summarizing the approach and key decisions for THIS TASK ONLY -->
 
-**Approach:** _Brief description of the architectural approach chosen._
+**Approach:** _Brief description of the architectural approach chosen for this task._
 
 **Key Decisions:**
 - _Decision 1 and why_
 - _Decision 2 and why_
 
+**Dependencies on Previous Tasks:**
+| Task | What This Task Uses From It |
+|------|----------------------------|
+| T<n-1> | [Describe interface/output consumed] |
+
+**Interfaces This Task Exposes:**
+| Interface | Consumer Tasks | Description |
+|-----------|----------------|-------------|
+| [API/Contract/Event] | T<n+1>, T<n+2> | [What future tasks will use] |
+
 **Integration Points:**
 | Existing Module | Integration Type | Notes |
 |-----------------|------------------|-------|
-| `src/backend/modules/xxx/` | Extends / Imports / Calls | _How this feature integrates_ |
-| `src/frontend/stores/xxxStore.ts` | Uses | _How this feature integrates_ |
+| `src/backend/modules/xxx/` | Extends / Imports / Calls | _How this task integrates_ |
+| `src/frontend/stores/xxxStore.ts` | Uses | _How this task integrates_ |
 
 ---
 
-## 2. Task Breakdown
+## 2. Implementation Steps
 
-### Phase 1: Backend Foundation
+> **Note:** These are the implementation steps for tech spec task T<n> only. Each step is an atomic unit of work.
 
--#### Task 1: Create Entity Schema
+### Phase 1: [Phase Name — e.g., Backend Foundation]
+
+#### Step 1: Create Entity Schema
 
 - [ ] **Create data model/schema (per backend instructions)**
 - **File(s):** `src/backend/modules/<module-name>/schemas/<entity>.schema.ts`
@@ -76,12 +106,12 @@ Complete these items **before** starting any implementation tasks.
 
 ---
 
-#### Task 2: Create DTOs
+#### Step 2: Create DTOs
 
 - [ ] **Create CreateEntityDto**
 - **File(s):** `src/backend/modules/<module-name>/dto/create-<entity>.dto.ts`
 - **Action:** create
-- **Dependencies:** Task 1
+- **Dependencies:** Step 1
 - **Golden Reference:** `src/backend/modules/example/dto/create-example.dto.ts`
 - **Details:**
   - Class with validation decorators/annotations (follow `.github/instructions/backend.instructions.md` for examples)
@@ -97,7 +127,7 @@ Complete these items **before** starting any implementation tasks.
 - [ ] **Create UpdateEntityDto**
 - **File(s):** `src/backend/modules/<module-name>/dto/update-<entity>.dto.ts`
 - **Action:** create
-- **Dependencies:** Task 2 (CreateEntityDto)
+- **Dependencies:** Step 2 (CreateEntityDto)
 - **Details:**
   - Extend the Create DTO with a language-appropriate partial/patch DTO pattern per backend instructions
   - Add any update-specific fields
@@ -107,12 +137,12 @@ Complete these items **before** starting any implementation tasks.
 
 ---
 
-#### Task 3: Create Service
+#### Step 3: Create Service
 
 - [ ] **Create EntityService**
 - **File(s):** `src/backend/modules/<module-name>/<module-name>.service.ts`
 - **Action:** create
-- **Dependencies:** Task 1, Task 2
+- **Dependencies:** Step 1, Step 2
 - **Golden Reference:** `src/backend/modules/example/example.service.ts`
 - **Details:**
   - Class registered as a service per backend DI conventions (see `.github/instructions/backend.instructions.md`)
@@ -135,12 +165,12 @@ Complete these items **before** starting any implementation tasks.
 
 ---
 
-#### Task 4: Create Controller
+#### Step 4: Create Controller
 
 - [ ] **Create EntityController**
 - **File(s):** `src/backend/modules/<module-name>/<module-name>.controller.ts`
 - **Action:** create
-- **Dependencies:** Task 3
+- **Dependencies:** Step 3
 - **Golden Reference:** `src/backend/modules/example/example.controller.ts`
 - **Details:**
   - Class decorated with `@Controller('<route-prefix>')`
@@ -160,12 +190,12 @@ Complete these items **before** starting any implementation tasks.
 
 ---
 
-#### Task 5: Create Module
+#### Step 5: Create Module
 
 - [ ] **Create EntityModule**
 - **File(s):** `src/backend/modules/<module-name>/<module-name>.module.ts`
 - **Action:** create
-- **Dependencies:** Task 1, Task 3, Task 4
+- **Dependencies:** Step 1, Step 3, Step 4
 - **Golden Reference:** `src/backend/modules/example/example.module.ts`
 - **Details:**
   - Register the model/provider according to backend module conventions (see `.github/instructions/backend.instructions.md`)
@@ -182,7 +212,7 @@ Complete these items **before** starting any implementation tasks.
 - [ ] **Register module in AppModule**
 - **File(s):** `src/backend/app.module.ts`
 - **Action:** modify
-- **Dependencies:** Task 5
+- **Dependencies:** Step 5
 - **Details:**
   - Add `EntityModule` to imports array
 - **Acceptance Criteria:**
@@ -193,12 +223,12 @@ Complete these items **before** starting any implementation tasks.
 
 ### Phase 2: Backend Tests
 
-#### Task 6: Unit Tests
+#### Step 6: Unit Tests
 
 - [ ] **Create service unit tests**
 - **File(s):** `src/backend/modules/<module-name>/<module-name>.service.spec.ts`
 - **Action:** create
-- **Dependencies:** Task 3
+- **Dependencies:** Step 3
 - **Golden Reference:** `src/backend/modules/example/example.service.spec.ts`
 - **Details:**
   - Use the repository's backend testing harness and patterns (see `.github/instructions/testing.instructions.md`)
@@ -221,7 +251,7 @@ Complete these items **before** starting any implementation tasks.
 - [ ] **Create controller unit tests**
 - **File(s):** `src/backend/modules/<module-name>/<module-name>.controller.spec.ts`
 - **Action:** create
-- **Dependencies:** Task 4, Task 6
+- **Dependencies:** Step 4, Step 6
 - **Details:**
   - Mock service
   - Verify controller methods call correct service methods
@@ -235,12 +265,12 @@ Complete these items **before** starting any implementation tasks.
 
 ### Phase 3: Frontend Implementation
 
-#### Task 7: Create store
+#### Step 7: Create store
 
 - [ ] **Create useEntityStore**
 - **File(s):** `src/frontend/stores/useEntityStore.ts`
 - **Action:** create
-- **Dependencies:** Backend API complete (Task 4)
+- **Dependencies:** Backend API complete (Step 4)
 - **Golden Reference:** `src/frontend/stores/exampleStore.ts`
 - **Details:**
   - Use `defineStore` with setup syntax (Composition API)
@@ -265,12 +295,12 @@ Complete these items **before** starting any implementation tasks.
 
 ---
 
-#### Task 8: Create Components
+#### Step 8: Create Components
 
 - [ ] **Create EntityList component**
 -- **File(s):** `src/frontend/components/<feature>/EntityList` (component file)
 - **Action:** create
-- **Dependencies:** Task 7
+- **Dependencies:** Step 7
 -- **Golden Reference:** `src/frontend/components/example/ExampleList` (component file)
 - **Details:**
   - Use the frontend component pattern/syntax as defined in `.github/instructions/frontend.instructions.md`
@@ -293,7 +323,7 @@ Complete these items **before** starting any implementation tasks.
 - [ ] **Create EntityForm component**
 -- **File(s):** `src/frontend/components/<feature>/EntityForm` (component file)
 - **Action:** create
-- **Dependencies:** Task 7
+- **Dependencies:** Step 7
 - **Details:**
   - Use the frontend component pattern/syntax as defined in `.github/instructions/frontend.instructions.md`
   - Props: `entity?: Entity` (for edit mode), `mode: 'create' | 'edit'`
@@ -317,7 +347,7 @@ Complete these items **before** starting any implementation tasks.
 - [ ] **Create EntityDetail component**
 -- **File(s):** `src/frontend/components/<feature>/EntityDetail` (component file)
 - **Action:** create
-- **Dependencies:** Task 7
+- **Dependencies:** Step 7
 - **Details:**
   - Display entity details
   - Actions: Edit, Delete buttons
@@ -333,12 +363,12 @@ Complete these items **before** starting any implementation tasks.
 
 ---
 
-#### Task 9: Create View and Route
+#### Step 9: Create View and Route
 
 - [ ] **Create EntityView**
 -- **File(s):** `src/frontend/views/<Feature>View` (view component/file)
 - **Action:** create
-- **Dependencies:** Task 8
+- **Dependencies:** Step 8
 - **Details:**
   - Compose EntityList, EntityForm, EntityDetail
   - Handle routing for create/edit/view modes
@@ -352,7 +382,7 @@ Complete these items **before** starting any implementation tasks.
 - [ ] **Add route**
 - **File(s):** `src/frontend/router/index.ts`
 - **Action:** modify
-- **Dependencies:** Task 9
+- **Dependencies:** Step 9
 - **Details:**
   - Add routes:
     - `/entities` → EntityView (list mode)
@@ -368,12 +398,12 @@ Complete these items **before** starting any implementation tasks.
 
 ### Phase 4: Frontend Tests
 
-#### Task 10: Frontend Unit Tests
+#### Step 10: Frontend Unit Tests
 
 - [ ] **Create store tests**
 - **File(s):** `tests/frontend/stores/useEntityStore.spec.ts`
 - **Action:** create
-- **Dependencies:** Task 7
+- **Dependencies:** Step 7
 - **Details:**
   - Use the repository's frontend store test harness (see `.github/instructions/testing.instructions.md`)
   - Mock API calls
@@ -388,7 +418,7 @@ Complete these items **before** starting any implementation tasks.
 - [ ] **Create component tests**
 - **File(s):** `tests/frontend/components/EntityList.spec.ts`, `tests/frontend/components/EntityForm.spec.ts`
 - **Action:** create
-- **Dependencies:** Task 8
+- **Dependencies:** Step 8
 - **Details:**
   - Use the repository's frontend testing utilities and patterns (see `.github/instructions/testing.instructions.md`)
   - Mock store using the repository's frontend testing harness (see `.github/instructions/testing.instructions.md`)
@@ -544,11 +574,12 @@ Complete these items **before** starting any implementation tasks.
 
 ## 8. Definition of Done
 
-### Implementation Complete
+### Implementation Complete (for this task T<n>)
 
-- [ ] All tasks in Section 2 marked complete
+- [ ] All steps in Section 2 marked complete
 - [ ] No `TODO` or `FIXME` comments left unresolved
 - [ ] Code follows golden reference patterns
+- [ ] Interfaces documented in tech spec are properly exposed
 
 ### Quality Gates
 
@@ -557,6 +588,12 @@ Complete these items **before** starting any implementation tasks.
 - [ ] Lint passing (`npm run lint`)
 - [ ] Type-check passing (`npm run type-check`)
 - [ ] No new warnings introduced
+
+### Independence Verification
+
+- [ ] This task works independently (can be tested in isolation)
+- [ ] Does not require modification to previous tasks (T1, T2, etc.)
+- [ ] Interfaces match what was specified in tech spec
 
 ### Documentation
 
@@ -570,35 +607,35 @@ Complete these items **before** starting any implementation tasks.
 - [ ] Golden reference patterns verified
 - [ ] Schema ↔ DTO sync verified
 - [ ] All `data-test-id` values added
-- [ ] Feature tested manually in development
+- [ ] Task tested manually in development
 
 ---
 
-## Appendix: Task Dependency Graph
+## Appendix: Step Dependency Graph
 
 ```
-Task 1 (Schema)
+Step 1 (Schema)
     ↓
-Task 2 (DTOs)
+Step 2 (DTOs)
     ↓
-Task 3 (Service) ──→ Task 6 (Service Tests)
+Step 3 (Service) ──→ Step 6 (Service Tests)
     ↓
-Task 4 (Controller) ──→ Task 6 (Controller Tests)
+Step 4 (Controller) ──→ Step 6 (Controller Tests)
     ↓
-Task 5 (Module)
+Step 5 (Module)
     ↓
 [Backend Complete]
     ↓
-Task 7 (Store) ──→ Task 10 (Store Tests)
+Step 7 (Store) ──→ Step 10 (Store Tests)
     ↓
-Task 8 (Components) ──→ Task 10 (Component Tests)
+Step 8 (Components) ──→ Step 10 (Component Tests)
     ↓
-Task 9 (View + Route)
+Step 9 (View + Route)
     ↓
-[Frontend Complete]
-    ↓
-[Done]
+[Task T<n> Complete]
 ```
+
+> **Note:** This is an example dependency graph for the implementation steps within this task. Adjust based on what this specific tech spec task requires — not all tasks will have all phases.
 
 ---
 
