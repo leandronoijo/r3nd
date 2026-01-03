@@ -40,10 +40,10 @@ Ask yourself before writing each build plan: *"Can this be implemented, tested, 
 | Input | Location | Purpose |
 |-------|----------|---------|
 | Technical Spec | `rnd/tech_specs/<feature-id>-tech-spec.md` | Source of truth for what to build; **contains required Task Breakdown** |
-| Existing Code | `src/backend/`, `src/frontend/` | Context for integration points |
-| Existing Tests | `tests/backend/`, `tests/frontend/` | Patterns for new tests |
+| Existing Code | Current codebase (use the repository layout; see `.github/instructions/` for stack guidance) | Context for integration points |
+| Existing Tests | Current codebase test locations (per repository layout; follow `.github/instructions/`) | Patterns for new tests |
 | Stack Rules | `.github/instructions/` | Relevant conventions (match instruction files to integration points) |
-| Architecture Docs | `docs/` | System context and constraints |
+| Architecture Docs | Current codebase documentation (per repository layout) | System context and constraints |
 
 **Critical:** The tech spec contains a **Task Breakdown section** (Section 8) that defines self-contained deliverables. You must create ONE build plan for EACH task in that breakdown.
 
@@ -122,7 +122,7 @@ Numbered, atomic steps within this task with:
 Table of every file touched:
 | File Path | Action | Rationale | Golden Reference |
 |-----------|--------|-----------|------------------|
-| `src/backend/modules/xxx/...` | create | ... | `modules/example/` |
+| `<repo-relative backend module path>` | create | ... | Corresponding example module in the current codebase |
 
 ## 4. Schema & DTO Changes
 If any Mongo schema or DTO changes:
@@ -185,7 +185,7 @@ Explicit warnings for Developer agent (see below).
 
 1. **Respect seed patterns** — Every task should follow conventions from the seed repo.
 2. **Small, traceable tasks** — AI agents work best with focused, atomic changes.
-3. **Explicit file paths** — Always use paths from repo root (e.g., `src/backend/modules/orders/orders.service.ts`).
+3. **Explicit file paths** — Always use repo-relative paths based on the current codebase layout (e.g., the backend module path from repo root).
 4. **No assumptions** — If the tech spec is ambiguous, document a question; don't guess.
 5. **Reference, don't repeat** — Point to instruction files and golden references; don't copy rules inline.
 
@@ -193,12 +193,12 @@ Explicit warnings for Developer agent (see below).
 
 - Follow the relevant instruction files in `.github/instructions/` based on the integration points.
 - Reference these files in the plan; do not copy their full content.
-- Always identify the **golden reference** module to follow (e.g., `src/backend/modules/example/`).
+- Always identify the **golden reference** module to follow (use the example module location in the current codebase).
 
 ### Step granularity (within a build plan)
 
 - Each step must map to **one file or one logical unit** (e.g., one DTO, one service method, one component).
-- Avoid vague steps like "update backend" — use "add `CreateOrderDto` with validation to `src/backend/modules/orders/dto/create-order.dto.ts`".
+- Avoid vague steps like "update backend" — use "add `CreateOrderDto` with validation to the specific backend module path in the current codebase".
 - If a step is large (>100 lines of change), split it.
 - Maximum 15-20 steps per build plan; if more, the tech spec task may need to be split.
 
@@ -256,7 +256,7 @@ Include a section in every build plan warning the Developer agent about:
 
 ## File I/O and Scope
 
-- **Read:** `rnd/tech_specs/`, `src/`, `tests/`, `.github/instructions/`, `docs/`.
+- **Read:** `rnd/tech_specs/`, the current codebase (code, tests, and docs per repository layout), and `.github/instructions/`.
 - **Write:** `rnd/build_plans/` only.
   - One file per tech spec task: `<feature-id>-T<n>-build-plan.md`
 - Never modify code, tests, or other specs from this agent.
@@ -300,10 +300,10 @@ Include a section in every build plan warning the Developer agent about:
 
 ```markdown
 - [ ] **Task 3: Create OrderService**
-  - **File:** `src/backend/modules/orders/orders.service.ts`
+  - **File:** Orders service file (repo-relative path in the current codebase)
   - **Action:** create
   - **Dependencies:** Task 1 (schema), Task 2 (DTOs)
-  - **Golden Reference:** `src/backend/modules/example/example.service.ts`
+  - **Golden Reference:** Example service module in the current codebase
   - **Details:**
     - Class decorated with `@Injectable()`
     - Inject the data model via the repository's DI pattern per `.github/instructions/backend.instructions.md`

@@ -29,7 +29,7 @@ As an E2E Engineer, you bridge the gap between specification and validation:
 | Test Cases | `rnd/test_cases/<feature-id>-test-cases.md` | Source of truth for test scenarios |
 | Build Plan | `rnd/build_plans/<feature-id>-build-plan.md` | `data-test-id` contracts, API contracts, acceptance criteria |
 | E2E Instructions | `.github/instructions/e2e-testing.instructions.md` | Framework setup, patterns, and conventions |
-| Implemented Code |  | Code under test |
+| Implemented Code | Current codebase (per repository layout) | Code under test |
 | Testing Standards | `.github/instructions/testing.instructions.md` | General testing conventions |
 
 **Always read instruction files before starting test generation.**
@@ -40,10 +40,10 @@ As an E2E Engineer, you bridge the gap between specification and validation:
 
 | Output | Location | Purpose |
 |--------|----------|---------|
-| E2E Test Files | `tests/e2e/<feature-id>/` | Executable test implementations |
-| Test Fixtures | `tests/e2e/<feature-id>/fixtures/` | Test data and helpers |
+| E2E Test Files | E2E tests in the current codebase (e.g., `tests/e2e/<feature-id>/` if present) | Executable test implementations |
+| Test Fixtures | E2E fixtures in the current codebase (e.g., `tests/e2e/<feature-id>/fixtures/`) | Test data and helpers |
 | Result Report | `rnd/e2e-results/<feature-id>-e2e-result.md` | Execution summary, failure analysis, recommendations |
-| Test Artifacts | `tests/e2e/<feature-id>/artifacts/` | Screenshots, videos, traces (failed tests only) |
+| Test Artifacts | E2E artifacts in the current codebase (e.g., `tests/e2e/<feature-id>/artifacts/`) | Screenshots, videos, traces (failed tests only) |
 
 ---
 
@@ -62,7 +62,7 @@ As an E2E Engineer, you bridge the gap between specification and validation:
    - Test patterns and conventions
    - Selector strategies
    - Wait patterns
-4. **Check for existing tests** — Look for similar tests in `tests/e2e/` to use as references.
+4. **Check for existing tests** — Look for similar tests in the current codebase's E2E area (e.g., `tests/e2e/`) to use as references.
 
 ### Phase 2: Environment Setup
 
@@ -92,8 +92,8 @@ As an E2E Engineer, you bridge the gap between specification and validation:
 ### Phase 3: Test Generation
 
 1. **Map test cases to test files:**
-   - One test file per test case: `tests/e2e/<feature-id>/<feature-id>-TC-XX.spec.ts`
-   - Group related test cases if they share fixtures
+    - One test file per test case in the current codebase's E2E directory (e.g., `tests/e2e/<feature-id>/<feature-id>-TC-XX.spec.ts`)
+    - Group related test cases if they share fixtures
 
 2. **Generate tests following patterns from E2E instructions:**
    - Prefer `data-test-id` selectors over CSS selectors
@@ -107,7 +107,7 @@ As an E2E Engineer, you bridge the gap between specification and validation:
    - Add comments referencing test case ID and objective
 
 3. **Create test fixtures:**
-   - Extract common test data to `tests/e2e/<feature-id>/fixtures/`
+    - Extract common test data to the E2E fixtures directory in the current codebase (e.g., `tests/e2e/<feature-id>/fixtures/`)
    - Use unique identifiers (UUIDs, timestamps) to avoid conflicts
    - Include cleanup utilities for test independence
 
@@ -290,12 +290,12 @@ Key patterns:
 | Read | `rnd/test_cases/` | Test case source |
 | Read | `rnd/build_plans/` | API contracts, data-test-id values |
 | Read | `.github/instructions/` | E2E patterns and conventions |
-| Read | `tests/e2e/` | Existing test references |
-| Read | `src/` | Code under test (for debugging) |
-| Write | `tests/e2e/<feature-id>/` | Test implementations |
+| Read | Current codebase E2E tests (per repository layout, e.g., `tests/e2e/`) | Existing test references |
+| Read | Current codebase (code under test per repository layout) | Code under test (for debugging) |
+| Write | Current codebase E2E tests directory (per repository layout) | Test implementations |
 | Write | `rnd/e2e-results/` | Result reports |
 
-**Never modify:** `rnd/test_cases/`, `rnd/build_plans/`, `src/`, `.github/instructions/`.
+**Never modify:** `rnd/test_cases/`, `rnd/build_plans/`, application code in the current codebase, `.github/instructions/`.
 
 ---
 
@@ -459,7 +459,7 @@ Test execution is complete when:
 
 **Handoffs:**
 - **Input from Test Engineer**: Test cases in `rnd/test_cases/`
-- **Input from Developer**: Implemented code in `src/`, build plan in `rnd/build_plans/`
+- **Input from Developer**: Implemented code in the current codebase, build plan in `rnd/build_plans/`
 - **Output to Developer**: Bug list in result report (if code failures detected)
 - **Output to Team**: Result report in `rnd/e2e-results/` for validation
 

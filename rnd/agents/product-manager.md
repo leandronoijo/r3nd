@@ -41,7 +41,7 @@ Behavior & Rules
 File I/O and scope
 ------------------
 
-- Read allowed: rnd/, src/, tests/, docs/, .github/templates/product_spec.md.
+- Read allowed: rnd/, the current codebase (code/docs/tests per repository layout), `.github/templates/product_spec.md`.
 - Write allowed: rnd/product_specs/ only.
 - Do not modify other files or directories.
 

@@ -3,7 +3,7 @@
 Purpose
 -------
 
-Implement the tasks described in `rnd/build_plans/<feature-id>-build-plan.md`. Make focused, standards-compliant code and test changes in `src/` and `tests/` only.
+Implement the tasks described in `rnd/build_plans/<feature-id>-build-plan.md`. Make focused, standards-compliant code and test changes within the current codebase (follow the repository layout and `.github/instructions/`).
 
 **Critical context:** You are an AI agent. 95% of this codebase is written by AI. Follow these rules exactly to avoid architectural drift.
 
@@ -39,8 +39,8 @@ Ask yourself before writing each line: *"Does this follow the patterns establish
 | Build Plan | `rnd/build_plans/<feature-id>-build-plan.md` | Source of truth — follow exactly |
 | Backend Rules | `.github/instructions/backend.instructions.md` | Backend stack and conventions (see instructions file) |
 | Frontend Rules | `.github/instructions/frontend.instructions.md` | Frontend stack and conventions (see instructions file) |
-| Existing Code | `src/backend/`, `src/frontend/` | Context and integration points |
-| Existing Tests | `tests/backend/`, `tests/frontend/` | Test patterns to follow |
+| Existing Code | Current codebase (use repository layout; see `.github/instructions/` for stack guidance) | Context and integration points |
+| Existing Tests | Current codebase test locations (per repository layout; follow `.github/instructions/`) | Test patterns to follow |
 | Golden References | As specified in build plan | Canonical examples to copy |
 
 **Always read instruction files before starting implementation.**
@@ -49,8 +49,8 @@ Ask yourself before writing each line: *"Does this follow the patterns establish
 
 ## Outputs
 
-- Code changes under `src/backend/` and `src/frontend/`.
-- Test files under `tests/backend/` and `tests/frontend/`.
+- Code changes within the current codebase (follow repository layout for backend/frontend or equivalent stacks).
+- Test files within the current codebase test locations (per repository layout).
 - Checkbox updates in `rnd/build_plans/<feature-id>-build-plan.md` marking tasks `[x]`.
 - Minimal clarifications appended to build plan if reality diverges (append-only, never delete).
 
@@ -61,12 +61,12 @@ Ask yourself before writing each line: *"Does this follow the patterns establish
 ### Frontend
 
 Follow the frontend-specific instructions in `.github/instructions/frontend.instructions.md` for framework, UI library, state management, and test conventions.
-Keep changes small, component-focused, and rely on the repository's golden references (see `src/frontend/components/example/` and `src/frontend/stores/exampleStore.ts`).
+Keep changes small, component-focused, and rely on the repository's golden references in the current codebase (see `.github/instructions/` for stack-specific pointers).
 
 ### Backend
 
 Follow backend-specific rules in `.github/instructions/backend.instructions.md` (module patterns, DTOs, schema rules, and service/controller hygiene).
-Do not guess; rely on golden references (`src/backend/modules/example/`) and instruction file guidance for framework-specific code patterns.
+Do not guess; rely on golden references in the current codebase and instruction file guidance for framework-specific code patterns.
 
 
 ### General
@@ -126,11 +126,11 @@ Do not guess; rely on golden references (`src/backend/modules/example/`) and ins
 
 ### Golden References
 
-Refer to the repository's golden references for backend and frontend implementation examples. These live under `src/backend/modules/example/` and `src/frontend/components/example/` and are the canonical source for code patterns.
+Refer to the repository's golden references for backend and frontend implementation examples in the current codebase (see `.github/instructions/` for default locations from the seed example modules).
 
-Refer to DTOs in `src/backend/modules/example/dto/` for canonical examples and validation rules. Use the backend instructions file for precise decorators and validation patterns.
+Refer to DTOs in the backend example module within the current codebase for canonical examples and validation rules. Use the backend instructions file for precise decorators and validation patterns.
 
-Frontend component and store patterns live in the frontend golden references; consult `src/frontend/components/example/` and `src/frontend/stores/exampleStore.ts` for examples and patterns.
+Frontend component and store patterns live in the frontend golden references within the current codebase (see `.github/instructions/` for pointers to the example module and store).
 
 Refer to frontend golden references for example stores and composables.
 
@@ -141,14 +141,14 @@ Refer to frontend golden references for example stores and composables.
 | Access | Locations | Purpose |
 |--------|-----------|---------|
 | Read | `rnd/build_plans/` | Source of truth for tasks |
-| Read | `src/`, `tests/` | Existing code context |
-| Read | `docs/` | Architecture documentation |
+| Read | Current codebase (code and tests per repository layout) | Existing code context |
+| Read | Current codebase documentation (per repository layout) | Architecture documentation |
 | Read | `.github/instructions/` | Stack rules and patterns |
-| Write | `src/backend/`, `src/frontend/` | Implementation code |
-| Write | `tests/backend/`, `tests/frontend/` | Test code |
+| Write | Current codebase application code locations (per repository layout) | Implementation code |
+| Write | Current codebase test locations (per repository layout) | Test code |
 | Write | `rnd/build_plans/` | Checkbox updates and clarifications |
 
-**Never modify:** `docs/`, `rnd/product_specs/`, `rnd/tech_specs/`, `.github/workflows/`, `.github/instructions/`.
+**Never modify:** documentation directories in the current codebase, `rnd/product_specs/`, `rnd/tech_specs/`, `.github/workflows/`, `.github/instructions/`.
 
 ---
 
@@ -274,16 +274,16 @@ Always refer to these as canonical examples:
 
 | Type | Location | Use For |
 |------|----------|---------|
-| Backend Module | `src/backend/modules/example/` | Module structure, DI patterns |
-| Backend Service | `src/backend/modules/example/example.service.ts` | Service methods, error handling |
-| Backend Controller | `src/backend/modules/example/example.controller.ts` | Route handlers, DTO usage |
-| Backend DTO | `src/backend/modules/example/dto/` | Validation decorators |
-| Backend Schema | `src/backend/modules/example/schemas/` | Data model definition examples (follow backend instructions) |
-| Frontend Component | `src/frontend/components/example/` | Frontend component structure (follow frontend instructions) |
-| Frontend Store | `src/frontend/stores/exampleStore.ts` | Store patterns (follow frontend instructions) |
-| Backend Tests | `tests/backend/` | Backend test patterns |
-| Frontend Tests | `tests/frontend/` | Frontend test patterns |
-| E2E Tests | `tests/e2e/` (or configured path) | E2E test patterns and selector contracts |
+| Backend Module | Backend example module in the current codebase (see `.github/instructions/` for default seed location) | Module structure, DI patterns |
+| Backend Service | Backend example service in the current codebase | Service methods, error handling |
+| Backend Controller | Backend example controller in the current codebase | Route handlers, DTO usage |
+| Backend DTO | Backend example DTOs in the current codebase | Validation decorators |
+| Backend Schema | Backend example schemas in the current codebase | Data model definition examples (follow backend instructions) |
+| Frontend Component | Frontend example component in the current codebase | Frontend component structure (follow frontend instructions) |
+| Frontend Store | Frontend example store in the current codebase | Store patterns (follow frontend instructions) |
+| Backend Tests | Backend test examples in the current codebase | Backend test patterns |
+| Frontend Tests | Frontend test examples in the current codebase | Frontend test patterns |
+| E2E Tests | E2E test examples in the current codebase | E2E test patterns and selector contracts |
 
 **Copy their structure for new features. Do not invent new patterns.**
 
@@ -310,7 +310,7 @@ Format for clarifications:
 
 ### Task 3 Clarification
 The `OrderModel` type was inferred from schema rather than explicitly imported. 
-Created `src/backend/modules/orders/types/order.types.ts` for explicit typing.
+Created an orders types file in the backend module for explicit typing.
 ```
 
 ---
