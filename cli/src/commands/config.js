@@ -65,9 +65,9 @@ function register(program) {
         logger.info(`✓ Set ${key} = ${value}`);
 
         if (key === 'spec-dir-name' && previousSpecDirName && previousSpecDirName !== value) {
-          const fromNames = ['rnd', previousSpecDirName];
+          const fromNames = ['rnd', 'r3nd', previousSpecDirName];
           const result = await rewriteSpecDirInRepo(process.cwd(), fromNames, value);
-          logger.info(`✓ Updated ${result.updated} markdown file(s) (scanned ${result.scanned}).`);
+          logger.info(`✓ Updated ${result.updated} rewritable file(s) (scanned ${result.scanned}).`);
         }
       } catch (err) {
         logger.error('Failed to set config:', err && err.message ? err.message : err);

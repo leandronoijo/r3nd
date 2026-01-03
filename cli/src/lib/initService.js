@@ -146,7 +146,7 @@ async function runInit(opts = {}, deps = {}) {
     if (exists) {
       try {
         const buffer = await githubClient.fetchRaw(remotePath);
-        const rewritten = rewriteSpecDirBuffer(buffer, remotePath, ['rnd'], specDirName);
+        const rewritten = rewriteSpecDirBuffer(buffer, remotePath, ['rnd', 'r3nd'], specDirName);
         await writeBuffer(cwd, remotePath, rewritten.buffer, { overwrite: true });
         logger.info(`Copied: ${remotePath}`);
       } catch (err) {
@@ -160,7 +160,7 @@ async function runInit(opts = {}, deps = {}) {
 
   // Process selected options (these are optional)
   if (selectedOptions.includes('github')) {
-    await copyGitHubWorkflows(cwd, tree, githubClient);
+    await copyGitHubWorkflows(cwd, tree, githubClient, specDirName, seedSpecDirName);
     // Compose GitHub Copilot agent files from wrappers + personas
     await composeAgentFiles(cwd, tree, githubClient, '.github/agents', '.agent.md', specDirName, seedSpecDirName);
   }
@@ -189,7 +189,7 @@ async function runInit(opts = {}, deps = {}) {
 /**
  * Copy GitHub workflow files
  */
-async function copyGitHubWorkflows(cwd, tree, githubClient) {
+async function copyGitHubWorkflows(cwd, tree, githubClient, specDirName, seedSpecDirName) {
   logger.info('\n📦 Copying GitHub workflows...');
   
   const workflowFiles = tree.filter(item => 
@@ -204,7 +204,9 @@ async function copyGitHubWorkflows(cwd, tree, githubClient) {
   for (const file of workflowFiles) {
     try {
       const buffer = await githubClient.fetchRaw(file.path);
-      await writeBuffer(cwd, file.path, buffer, { overwrite: true });
+      // Rewrite spec directory references
+      const rewritten = rewriteSpecDirBuffer(buffer, file.path, ['rnd', 'r3nd'], specDirName);
+      await writeBuffer(cwd, file.path, rewritten.buffer, { overwrite: true });
       logger.info(`  Copied: ${file.path}`);
     } catch (err) {
       logger.error(`  Failed to copy ${file.path}:`, err && err.message ? err.message : err);

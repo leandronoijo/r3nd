@@ -11,8 +11,10 @@ const DEFAULT_IGNORED_DIRS = new Set([
   '.turbo'
 ]);
 
-function isMarkdownFile(filePath) {
-  return typeof filePath === 'string' && filePath.toLowerCase().endsWith('.md');
+function isRewritableFile(filePath) {
+  if (typeof filePath !== 'string') return false;
+  const lower = filePath.toLowerCase();
+  return lower.endsWith('.md') || lower.endsWith('.yml') || lower.endsWith('.yaml');
 }
 
 function normalizeFromNames(fromNames, toName) {
@@ -38,9 +40,11 @@ function rewriteSpecDirContent(content, fromNames, toName) {
   let changed = false;
 
   for (const name of sources) {
-    const needle = `${name}/`;
-    if (updated.includes(needle)) {
-      updated = updated.split(needle).join(`${toName}/`);
+    // Use regex with lookbehind to only replace when preceded by specific characters
+    const regex = new RegExp('(?<=^|[\\s"\'`\\(\\.\\./])' + name + '/', 'g');
+    const newUpdated = updated.replace(regex, `${toName}/`);
+    if (newUpdated !== updated) {
+      updated = newUpdated;
       changed = true;
     }
   }
@@ -49,7 +53,7 @@ function rewriteSpecDirContent(content, fromNames, toName) {
 }
 
 function rewriteSpecDirBuffer(buffer, filePath, fromNames, toName) {
-  if (!isMarkdownFile(filePath)) {
+  if (!isRewritableFile(filePath)) {
     return { buffer, changed: false };
   }
 
@@ -83,7 +87,7 @@ async function rewriteSpecDirInRepo(rootDir, fromNames, toName, options = {}) {
         await walk(fullPath);
         continue;
       }
-      if (!entry.isFile() || !isMarkdownFile(entry.name)) {
+      if (!entry.isFile() || !isRewritableFile(entry.name)) {
         continue;
       }
 
@@ -105,5 +109,5 @@ module.exports = {
   rewriteSpecDirContent,
   rewriteSpecDirBuffer,
   rewriteSpecDirInRepo,
-  isMarkdownFile
+  isRewritableFile
 };

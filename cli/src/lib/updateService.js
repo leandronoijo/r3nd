@@ -74,7 +74,7 @@ async function runUpdate(opts = {}, deps = {}) {
   }
 
   if (selectedOptions.includes('github')) {
-    await updateGitHubWorkflows(cwd, tree, githubClient);
+    await updateGitHubWorkflows(cwd, tree, githubClient, specDirName, seedSpecDirName);
     // Also update composed GitHub Copilot agent files
     await updateComposedAgents(cwd, tree, githubClient, '.github/agents', '.agent.md', specDirName, seedSpecDirName);
   }
@@ -112,7 +112,7 @@ async function updateTemplates(cwd, tree, githubClient, specDirName, seedSpecDir
   for (const file of templateFiles) {
     try {
       const buffer = await githubClient.fetchRaw(file.path);
-      const rewritten = rewriteSpecDirBuffer(buffer, file.path, [seedSpecDirName], specDirName);
+      const rewritten = rewriteSpecDirBuffer(buffer, file.path, ['rnd', 'r3nd', seedSpecDirName], specDirName);
       await writeBuffer(cwd, file.path, rewritten.buffer, { overwrite: true });
       logger.info(`  Updated: ${file.path}`);
     } catch (err) {
@@ -151,7 +151,7 @@ async function updateAgentPersonas(cwd, tree, githubClient, specDirName, seedSpe
       const localPath = `${specDirName}/agents/${relativePath}`;
 
       // Rewrite internal spec-dir references using seed spec dir name
-      const rewritten = rewriteSpecDirBuffer(buffer, file.path, [seedSpecDirName], specDirName);
+      const rewritten = rewriteSpecDirBuffer(buffer, file.path, ['rnd', 'r3nd', seedSpecDirName], specDirName);
       await writeBuffer(cwd, localPath, rewritten.buffer, { overwrite: true });
       logger.info(`  Updated: ${localPath}`);
     } catch (err) {
@@ -163,7 +163,7 @@ async function updateAgentPersonas(cwd, tree, githubClient, specDirName, seedSpe
 /**
  * Update GitHub workflow files
  */
-async function updateGitHubWorkflows(cwd, tree, githubClient) {
+async function updateGitHubWorkflows(cwd, tree, githubClient, specDirName, seedSpecDirName) {
   logger.info('\n📦 Updating GitHub workflows...');
   
   const workflowFiles = tree.filter(item => 
@@ -178,7 +178,9 @@ async function updateGitHubWorkflows(cwd, tree, githubClient) {
   for (const file of workflowFiles) {
     try {
       const buffer = await githubClient.fetchRaw(file.path);
-      await writeBuffer(cwd, file.path, buffer, { overwrite: true });
+      // Rewrite spec directory references
+      const rewritten = rewriteSpecDirBuffer(buffer, file.path, ['rnd', 'r3nd'], specDirName);
+      await writeBuffer(cwd, file.path, rewritten.buffer, { overwrite: true });
       logger.info(`  Updated: ${file.path}`);
     } catch (err) {
       logger.error(`  Failed to update ${file.path}:`, err && err.message ? err.message : err);

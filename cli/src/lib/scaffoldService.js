@@ -89,6 +89,19 @@ async function runScaffold(opts = {}, deps = {}) {
   } else {
     logger.info('Fetching file list from GitHub...');
     const tree = await githubClient.getTree();
+
+    // Fetch seed repo's spec-dir-name configuration
+    let seedSpecDirName = 'rnd'; // default for backwards compatibility
+    try {
+      const configBuffer = await githubClient.fetchRaw('r3nd.yaml');
+      const configContent = configBuffer.toString('utf-8');
+      const seedConfig = YAML.parse(configContent) || {};
+      seedSpecDirName = seedConfig['spec-dir-name'] || 'rnd';
+    } catch (err) {
+      // If r3nd.yaml doesn't exist in seed repo, use default 'rnd'
+      logger.debug('No r3nd.yaml in seed repo, using default "rnd"');
+    }
+
     const toCopy = tree.filter(item => {
       if (item.type !== 'blob') return false;
       return prefixes.some(p => (p.endsWith('/') ? item.path.startsWith(p) : item.path === p));
@@ -102,7 +115,7 @@ async function runScaffold(opts = {}, deps = {}) {
         const mapped = mapDestination(remotePath, backend, frontend, specDirName);
         const buffer = await githubClient.fetchRaw(remotePath);
         const rel = mapped || remotePath;
-        const rewritten = rewriteSpecDirBuffer(buffer, rel, ['rnd'], specDirName);
+        const rewritten = rewriteSpecDirBuffer(buffer, rel, ['rnd', 'r3nd'], specDirName);
         await writeBuffer(cwd, rel, rewritten.buffer, { overwrite: true });
         logger.info(`Copied: ${remotePath} -> ${rel}`);
       }
@@ -137,7 +150,7 @@ async function runScaffold(opts = {}, deps = {}) {
     for (const item of missing) {
       try {
         const buffer = await githubClient.fetchRaw(item.remotePath);
-        const rewritten = rewriteSpecDirBuffer(buffer, item.rel, [seedSpecDirName], specDirName);
+        const rewritten = rewriteSpecDirBuffer(buffer, item.rel, ['rnd', 'r3nd', seedSpecDirName], specDirName);
         await writeBuffer(cwd, item.rel, rewritten.buffer, { overwrite: false });
         logger.info(`Copied: ${item.remotePath} -> ${item.rel}`);
       } catch (err) {
