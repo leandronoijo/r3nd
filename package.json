@@ -1,6 +1,6 @@
 {
   "name": "r3nd",
-  "version": "0.2.1",
+  "version": "0.2.5",
   "description": "r3nd project scaffolder CLI",
   "bin": {
     "r3nd": "cli/bin/r3nd"
@@ -15,5 +15,8 @@
   },
   "engines": {
     "node": ">=16"
+  },
+  "devDependencies": {
+    "jest": "^30.2.0"
   }
 }
