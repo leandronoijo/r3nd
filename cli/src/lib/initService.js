@@ -8,6 +8,7 @@ const { writeBuffer, ensureDir } = require('./fs/fileWriter');
 const { askInitOptions, askSeedRepo } = require('./ui/prompts');
 const { ConfigManager } = require('./config/configManager');
 const { resolveTemplate, createGitHubFileReader } = require('./templateResolver');
+const { rewriteSpecDirBuffer, rewriteSpecDirContent } = require('./utils/specDirRewrite');
 const logger = require('./utils/logger');
 
 /**
@@ -72,6 +73,7 @@ async function runInit(opts = {}, deps = {}) {
   
   // Initialize config manager
   const configManager = new ConfigManager(cwd);
+  const specDirName = await configManager.getSpecDirName();
   
   // Check if seed-repo is configured, prompt if not
   let seedRepo = await configManager.get('seed-repo');
@@ -116,7 +118,8 @@ async function runInit(opts = {}, deps = {}) {
     if (exists) {
       try {
         const buffer = await githubClient.fetchRaw(remotePath);
-        await writeBuffer(cwd, remotePath, buffer, { overwrite: true });
+        const rewritten = rewriteSpecDirBuffer(buffer, remotePath, ['rnd'], specDirName);
+        await writeBuffer(cwd, remotePath, rewritten.buffer, { overwrite: true });
         logger.info(`Copied: ${remotePath}`);
       } catch (err) {
         logger.error(`Failed to copy ${remotePath}:`, err && err.message ? err.message : err);
@@ -125,27 +128,27 @@ async function runInit(opts = {}, deps = {}) {
   }
 
   // Copy platform-agnostic agent personas from rnd/agents
-  await copyAgentPersonas(cwd, tree, githubClient);
+  await copyAgentPersonas(cwd, tree, githubClient, specDirName);
 
   // Process selected options (these are optional)
   if (selectedOptions.includes('github')) {
     await copyGitHubWorkflows(cwd, tree, githubClient);
     // Compose GitHub Copilot agent files from wrappers + personas
-    await composeAgentFiles(cwd, tree, githubClient, '.github/agents', '.agent.md');
+    await composeAgentFiles(cwd, tree, githubClient, '.github/agents', '.agent.md', specDirName);
   }
 
   if (selectedOptions.includes('cursor')) {
     // Compose Cursor command files from wrappers + personas
-    await composeAgentFiles(cwd, tree, githubClient, '.cursor/commands', '.md');
+    await composeAgentFiles(cwd, tree, githubClient, '.cursor/commands', '.md', specDirName);
   }
 
   if (selectedOptions.includes('vscode')) {
     // Compose VSCode chat mode files from wrappers + personas
-    await composeAgentFiles(cwd, tree, githubClient, '.github/chatmodes', '.chatmode.md');
+    await composeAgentFiles(cwd, tree, githubClient, '.github/chatmodes', '.chatmode.md', specDirName);
   }
 
   // Also copy templates if any option was selected
-  await copyTemplates(cwd, tree, githubClient);
+  await copyTemplates(cwd, tree, githubClient, specDirName);
 
   logger.info('\nInit complete.');
 }
@@ -179,7 +182,7 @@ async function copyGitHubWorkflows(cwd, tree, githubClient) {
 /**
  * Copy platform-agnostic agent persona files from rnd/agents
  */
-async function copyAgentPersonas(cwd, tree, githubClient) {
+async function copyAgentPersonas(cwd, tree, githubClient, specDirName) {
   logger.info('\n🤖 Copying agent personas...');
   
   const agentFiles = tree.filter(item => 
@@ -194,7 +197,8 @@ async function copyAgentPersonas(cwd, tree, githubClient) {
   for (const file of agentFiles) {
     try {
       const buffer = await githubClient.fetchRaw(file.path);
-      await writeBuffer(cwd, file.path, buffer, { overwrite: true });
+      const rewritten = rewriteSpecDirBuffer(buffer, file.path, ['rnd'], specDirName);
+      await writeBuffer(cwd, file.path, rewritten.buffer, { overwrite: true });
       logger.info(`  Copied: ${file.path}`);
     } catch (err) {
       logger.error(`  Failed to copy ${file.path}:`, err && err.message ? err.message : err);
@@ -210,7 +214,7 @@ async function copyAgentPersonas(cwd, tree, githubClient) {
  * @param {string} wrapperDir - Directory containing wrapper templates (e.g., '.github/agents')
  * @param {string} extension - File extension to filter (e.g., '.agent.md')
  */
-async function composeAgentFiles(cwd, tree, githubClient, wrapperDir, extension) {
+async function composeAgentFiles(cwd, tree, githubClient, wrapperDir, extension, specDirName) {
   const platformName = wrapperDir === '.github/agents' ? 'GitHub Copilot' : 
                        wrapperDir === '.cursor/commands' ? 'Cursor' : 'VSCode';
   logger.info(`\n📝 Composing ${platformName} agent files...`);
@@ -257,9 +261,10 @@ async function composeAgentFiles(cwd, tree, githubClient, wrapperDir, extension)
       
       // Resolve template placeholders
       const composedContent = await resolveTemplate(wrapperContent, fileReader);
+      const rewritten = rewriteSpecDirContent(composedContent, ['rnd'], specDirName);
       
       // Write composed file
-      await writeBuffer(cwd, file.path, Buffer.from(composedContent, 'utf-8'), { overwrite: true });
+      await writeBuffer(cwd, file.path, Buffer.from(rewritten.content, 'utf-8'), { overwrite: true });
       logger.info(`  Composed: ${file.path}`);
     } catch (err) {
       logger.error(`  Failed to compose ${file.path}:`, err && err.message ? err.message : err);
@@ -270,7 +275,7 @@ async function composeAgentFiles(cwd, tree, githubClient, wrapperDir, extension)
 /**
  * Copy template files
  */
-async function copyTemplates(cwd, tree, githubClient) {
+async function copyTemplates(cwd, tree, githubClient, specDirName) {
   logger.info('\n📋 Copying templates...');
   
   const templateFiles = tree.filter(item => 
@@ -285,7 +290,8 @@ async function copyTemplates(cwd, tree, githubClient) {
   for (const file of templateFiles) {
     try {
       const buffer = await githubClient.fetchRaw(file.path);
-      await writeBuffer(cwd, file.path, buffer, { overwrite: true });
+      const rewritten = rewriteSpecDirBuffer(buffer, file.path, ['rnd'], specDirName);
+      await writeBuffer(cwd, file.path, rewritten.buffer, { overwrite: true });
       logger.info(`  Copied: ${file.path}`);
     } catch (err) {
       logger.error(`  Failed to copy ${file.path}:`, err && err.message ? err.message : err);

@@ -6,6 +6,7 @@ const { writeBuffer, ensureDir } = require('./fs/fileWriter');
 const { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askSeedRepo } = require('./ui/prompts');
 const { runPlansSequential, waitForCompletionFile, runCodexCommand, makeGitHubCommand } = require('./llm/agentRunner');
 const { ConfigManager } = require('./config/configManager');
+const { rewriteSpecDirBuffer, rewriteSpecDirContent } = require('./utils/specDirRewrite');
 const logger = require('./utils/logger');
 const fs = require('fs').promises;
 const { execSync } = require('child_process');
@@ -100,7 +101,8 @@ async function runScaffold(opts = {}, deps = {}) {
         const mapped = mapDestination(remotePath, backend, frontend, specDirName);
         const buffer = await githubClient.fetchRaw(remotePath);
         const rel = mapped || remotePath;
-        await writeBuffer(cwd, rel, buffer, { overwrite: true });
+        const rewritten = rewriteSpecDirBuffer(buffer, rel, ['rnd'], specDirName);
+        await writeBuffer(cwd, rel, rewritten.buffer, { overwrite: true });
         logger.info(`Copied: ${remotePath} -> ${rel}`);
       }
     }
@@ -134,7 +136,8 @@ async function runScaffold(opts = {}, deps = {}) {
     for (const item of missing) {
       try {
         const buffer = await githubClient.fetchRaw(item.remotePath);
-        await writeBuffer(cwd, item.rel, buffer, { overwrite: false });
+        const rewritten = rewriteSpecDirBuffer(buffer, item.rel, ['rnd'], specDirName);
+        await writeBuffer(cwd, item.rel, rewritten.buffer, { overwrite: false });
         logger.info(`Copied: ${item.remotePath} -> ${item.rel}`);
       } catch (err) {
         logger.error(`Failed to copy ${item.remotePath}:`, err && err.message ? err.message : err);
@@ -193,7 +196,8 @@ async function runScaffold(opts = {}, deps = {}) {
           const wrapperBuffer = await githubClient.fetchRaw(file.path);
           const wrapperContent = wrapperBuffer.toString('utf-8');
           const composedContent = await resolveTemplate(wrapperContent, fileReader);
-          await writeBuffer(cwd, file.path, Buffer.from(composedContent, 'utf-8'), { overwrite: true });
+          const rewritten = rewriteSpecDirContent(composedContent, ['rnd'], specDirName);
+          await writeBuffer(cwd, file.path, Buffer.from(rewritten.content, 'utf-8'), { overwrite: true });
           logger.info(`  Composed: ${file.path}`);
         } catch (err) {
           logger.error(`  Failed to compose ${file.path}:`, err && err.message ? err.message : err);
@@ -212,7 +216,8 @@ async function runScaffold(opts = {}, deps = {}) {
           const wrapperBuffer = await githubClient.fetchRaw(file.path);
           const wrapperContent = wrapperBuffer.toString('utf-8');
           const composedContent = await resolveTemplate(wrapperContent, fileReader);
-          await writeBuffer(cwd, file.path, Buffer.from(composedContent, 'utf-8'), { overwrite: true });
+          const rewritten = rewriteSpecDirContent(composedContent, ['rnd'], specDirName);
+          await writeBuffer(cwd, file.path, Buffer.from(rewritten.content, 'utf-8'), { overwrite: true });
           logger.info(`  Composed: ${file.path}`);
         } catch (err) {
           logger.error(`  Failed to compose ${file.path}:`, err && err.message ? err.message : err);
@@ -231,7 +236,8 @@ async function runScaffold(opts = {}, deps = {}) {
           const wrapperBuffer = await githubClient.fetchRaw(file.path);
           const wrapperContent = wrapperBuffer.toString('utf-8');
           const composedContent = await resolveTemplate(wrapperContent, fileReader);
-          await writeBuffer(cwd, file.path, Buffer.from(composedContent, 'utf-8'), { overwrite: true });
+          const rewritten = rewriteSpecDirContent(composedContent, ['rnd'], specDirName);
+          await writeBuffer(cwd, file.path, Buffer.from(rewritten.content, 'utf-8'), { overwrite: true });
           logger.info(`  Composed: ${file.path}`);
         } catch (err) {
           logger.error(`  Failed to compose ${file.path}:`, err && err.message ? err.message : err);
