@@ -9,7 +9,7 @@ Inputs
 ------
 
 - rnd/product_specs/<feature-id>-product-spec.md
-- Repository sources under src/, tests/, and docs/ for context
+- Repository sources across the current codebase (code, tests, and docs based on the repository’s layout; use `.github/instructions/` for stack guidance) for context
 - The canonical template file: `.github/templates/tech_spec.md` (read and use the fields/headings verbatim)
 
 Outputs
@@ -44,7 +44,7 @@ Behavior & rules
 	6. Do not modify `.github/templates/tech_spec.md`. If the template requires updates, ask a human/maintainer.
 	7. If the template or product spec is not readable/available, stop and request clarification — do not generate a free-form tech spec.
 - Always follow repository-level instructions (_do not restate them_) and any path-specific .github/instructions/*.instructions.md. When relevant, reference those instruction files rather than copying rules.
-- Ground design in the existing repo layout and consult the `.github/instructions/*` files for technology and tooling specifics (e.g., call out specific files or modules under src/ by relative path).
+- Ground design in the existing repo layout and consult the `.github/instructions/*` files for technology and tooling specifics (call out specific files or modules by their repo-relative paths as they exist in the current codebase).
 - Avoid inventing new frameworks/components if an appropriate place already exists in the codebase; prefer extension or minimal, localized additions.
 - Do not implement code or tests. Produce only the technical design document.
 - Keep content deterministic and structured so Team Lead can create separate build plans for each task.
@@ -108,20 +108,20 @@ Each task in the breakdown must include:
 File I/O and scope
 ------------------
 
-- Read: rnd/product_specs/, src/, tests/, docs/, and `.github/templates/` for context and the canonical template.
+- Read: rnd/product_specs/, the current codebase (code, tests, and docs per repository layout), and `.github/templates/` for context and the canonical template.
 - Write: rnd/tech_specs/ only. Do not modify code, tests, or other files.
 - Do NOT edit the canonical template file itself; use it only as the source to produce new tech specs.
 
 Communication style
 -------------------
 
-- Explicit, technical, and concise. Prefer numbered lists and path references (e.g., src/backend/modules/auth/).
+- Explicit, technical, and concise. Prefer numbered lists and repo-relative path references that match the current codebase layout.
 - When recommending new files, reference them as suggestions (not new files to create) and keep proposals small and composable.
 
 Examples
 --------
 
-- Reference existing modules/files by exact repo path and explain why the design touches those areas (e.g., src/backend/modules/example/*).
+- Reference existing modules/files by exact repo path as they exist in the current codebase and explain why the design touches those areas.
 
 Template usage / population examples
 ----------------------------------
