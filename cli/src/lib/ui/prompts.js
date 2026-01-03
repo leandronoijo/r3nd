@@ -243,7 +243,7 @@ async function askUpdateOptions(nonInteractive = false) {
   
   const choices = [
     { name: 'Templates → Update .github/templates/', value: 'templates', checked: true },
-    { name: 'Agents → Update .github/agents/', value: 'agents', checked: true },
+    { name: 'Agents → Update spec-dir-name/agents/ (personas)', value: 'agents', checked: true },
     { name: 'GitHub → Update GitHub workflows (.github/workflows/)', value: 'github', checked: true },
     { name: 'Cursor → Update .cursor commands for each agent', value: 'cursor', checked: true },
     { name: 'VSCode → Update .github/chatmodes for each agent (Copilot personas)', value: 'vscode', checked: true },

@@ -26,14 +26,14 @@ describe('agentService', () => {
 
       fs.readdir.mockResolvedValue(mockEntries);
 
-      const result = await listMarkdownFiles('/test/cwd', 'rnd/specs');
+      const result = await listMarkdownFiles('/test/cwd', 'specs');
 
       expect(result).toEqual([
-        'rnd/specs/file1.md',
-        'rnd/specs/file2.md'
+        'specs/file1.md',
+        'specs/file2.md'
       ]);
       expect(fs.readdir).toHaveBeenCalledWith(
-        '/test/cwd/rnd/specs',
+        '/test/cwd/specs',
         { withFileTypes: true }
       );
     });
@@ -77,13 +77,13 @@ describe('agentService', () => {
     it('should build prompt using agent promptTemplate function', () => {
       const agent = {
         name: 'test-agent',
-        agentFile: '.github/agents/test.agent.md',
+        agentFile: 'specs/agents/test.md',
         promptTemplate: (agentFile, targetFile) => `Process ${targetFile} with ${agentFile}`
       };
 
       const result = buildPrompt(agent, 'path/to/spec.md');
 
-      expect(result).toBe('Process path/to/spec.md with .github/agents/test.agent.md');
+      expect(result).toBe('Process path/to/spec.md with specs/agents/test.md');
     });
 
     it('should throw error if promptTemplate is not a function', () => {
@@ -101,17 +101,17 @@ describe('agentService', () => {
       fs.access.mockResolvedValue(undefined);
 
       const agent = {
-        agentFile: '.github/agents/test.agent.md',
-        filesDir: 'rnd/specs'
+        agentFile: 'specs/agents/test.md',
+        filesDir: 'specs'
       };
 
       const result = await validateAgentSetup('/test/cwd', agent);
 
       expect(result).toEqual({
         agentExists: true,
-        agentPath: '.github/agents/test.agent.md',
+        agentPath: 'specs/agents/test.md',
         targetDirExists: true,
-        targetDir: 'rnd/specs'
+        targetDir: 'specs'
       });
     });
 
@@ -121,8 +121,8 @@ describe('agentService', () => {
         .mockResolvedValueOnce(undefined); // Target dir
 
       const agent = {
-        agentFile: '.github/agents/missing.agent.md',
-        filesDir: 'rnd/specs'
+        agentFile: 'specs/agents/missing.md',
+        filesDir: 'specs'
       };
 
       const result = await validateAgentSetup('/test/cwd', agent);
@@ -137,8 +137,8 @@ describe('agentService', () => {
         .mockRejectedValueOnce(new Error('Not found')); // Target dir
 
       const agent = {
-        agentFile: '.github/agents/test.agent.md',
-        filesDir: 'rnd/missing'
+        agentFile: 'specs/agents/test.md',
+        filesDir: 'specs/missing'
       };
 
       const result = await validateAgentSetup('/test/cwd', agent);

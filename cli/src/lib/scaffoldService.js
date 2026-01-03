@@ -273,7 +273,7 @@ async function runScaffold(opts = {}, deps = {}) {
     if (plans.length === 0) { logger.info('\n✓ All scaffolding appears to be complete. Nothing to do!'); return; }
 
     function getPlanName(planPath) { return path.basename(planPath, '.md'); }
-    function makePrompt(planPath) { const planName = getPlanName(planPath); const doneFile = `${planName}.done`; return `using the .github/agents/developer.agent.md as instructions please implement the following building plan to its completion:\n\n1. ${planPath}\n\nIMPORTANT: When you have completely finished implementing this build plan, create a file named ${doneFile} in the current directory to signal completion.`; }
+    function makePrompt(planPath) { const planName = getPlanName(planPath); const doneFile = `${planName}.done`; return `using the ${specDirName}/agents/developer.md as instructions please implement the following building plan to its completion:\n\n1. ${planPath}\n\nIMPORTANT: When you have completely finished implementing this build plan, create a file named ${doneFile} in the current directory to signal completion.`; }
     function makeCodexCommand(promptText) { return `codex --yolo '${promptText.replace(/"/g, '\"')}'`; }
 
     logger.info('\nLocal codex CLI commands (will be run sequentially):');
@@ -319,7 +319,7 @@ async function runScaffold(opts = {}, deps = {}) {
       // and require a .done file to signal completion (same automation hack as codex).
       const planName = path.basename(planPath, '.md');
       const doneFile = `${planName}.done`;
-    return `using the .github/agents/developer.agent.md as instructions please implement the following building plan to its completion:\n\n1. ${planPath}\n\nIMPORTANT: Do NOT start any server or docker foreground processes that require manual termination (like "npm run dev", "docker-compose up" without -d flag, "uvicorn" without --daemon, etc.). If you need to start servers or services, always run them in detached/background mode and output their logs. (e.g., "docker-compose up -d", "npm run dev &", or use process managers like PM2). Only start foreground processes if they naturally exit on their own. IF U START A SERVER FOREGROUND PROCESS THE UNIVERSE WILL END\n\nIMPORTANT: When you have completely finished implementing this build plan, create a file named ${doneFile} in the current directory to signal completion.`;
+    return `using the ${specDirName}/agents/developer.md as instructions please implement the following building plan to its completion:\n\n1. ${planPath}\n\nIMPORTANT: Do NOT start any server or docker foreground processes that require manual termination (like "npm run dev", "docker-compose up" without -d flag, "uvicorn" without --daemon, etc.). If you need to start servers or services, always run them in detached/background mode and output their logs. (e.g., "docker-compose up -d", "npm run dev &", or use process managers like PM2). Only start foreground processes if they naturally exit on their own. IF U START A SERVER FOREGROUND PROCESS THE UNIVERSE WILL END\n\nIMPORTANT: When you have completely finished implementing this build plan, create a file named ${doneFile} in the current directory to signal completion.`;
     }
     function makeGeminiCommand(promptText) { return `gemini --yolo -i "${promptText.replace(/"/g, '\\"')}"`; }
 
@@ -353,7 +353,7 @@ async function runScaffold(opts = {}, deps = {}) {
 
     // Create a single comprehensive prompt with all plans
     const allPlansText = plansGithub.map((p, i) => `${i + 1}. ${p}`).join('\n');
-    const comprehensivePrompt = `using the .github/agents/developer.agent.md as instructions please implement the following building plans to completion (in order):\n\n${allPlansText}`;
+    const comprehensivePrompt = `using the ${specDirName}/agents/developer.md as instructions please implement the following building plans to completion (in order):\n\n${allPlansText}`;
 
     logger.info('\n=== Creating GitHub Agent Task ===');
     logger.info('Sending scaffold plans to GitHub agent...\n');
@@ -401,7 +401,7 @@ async function runScaffold(opts = {}, deps = {}) {
     function getPlanName(planPath) { return path.basename(planPath, '.md'); }
     // For user-facing prompts we omit the automated completion-file instruction.
     function makePrompt(planPath) {
-      return `using the .github/agents/developer.agent.md as instructions please implement the following building plan to its completion:\n\n1. ${planPath}`;
+      return `using the ${specDirName}/agents/developer.md as instructions please implement the following building plan to its completion:\n\n1. ${planPath}`;
     }
 
     logger.info('\n--- COPY & PASTE PROMPTS (in order) ---\n');

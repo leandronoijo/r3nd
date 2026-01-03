@@ -1,4 +1,4 @@
-const { getAgents, getAgent, registerAgent } = require('./agentRegistry');
+const { getAgents, getAgent, registerAgent, resolveAgentConfig } = require('./agentRegistry');
 
 describe('agentRegistry', () => {
   describe('getAgents', () => {
@@ -34,7 +34,7 @@ describe('agentRegistry', () => {
       const agent = getAgent('tech-spec');
       expect(agent).toBeDefined();
       expect(agent.name).toBe('tech-spec');
-      expect(agent.filesDir).toBe('rnd/product_specs');
+      expect(typeof agent.filesDir).toBe('function');
     });
 
     it('should return undefined for non-existent agent', () => {
@@ -64,7 +64,7 @@ describe('agentRegistry', () => {
         name: 'test-agent',
         description: 'Test agent',
         filesDir: 'test/dir',
-        agentFile: '.github/agents/test.agent.md',
+        agentFile: 'specs/agents/test.md',
         promptTemplate: (agentFile, targetFile) => `Test prompt for ${targetFile}`
       };
 
@@ -113,28 +113,31 @@ describe('agentRegistry', () => {
   describe('promptTemplate functions', () => {
     it('should generate correct prompt for tech-spec agent', () => {
       const agent = getAgent('tech-spec');
-      const prompt = agent.promptTemplate(agent.agentFile, 'rnd/product_specs/feature.md');
+      const resolved = resolveAgentConfig(agent, 'specs');
+      const prompt = resolved.promptTemplate(resolved.agentFile, 'specs/product_specs/feature.md');
       
-      expect(prompt).toContain('.github/agents/architect.agent.md');
-      expect(prompt).toContain('rnd/product_specs/feature.md');
+      expect(prompt).toContain('specs/agents/architect.md');
+      expect(prompt).toContain('specs/product_specs/feature.md');
       expect(prompt).toContain('technical specification');
     });
 
     it('should generate correct prompt for build-plan agent', () => {
       const agent = getAgent('build-plan');
-      const prompt = agent.promptTemplate(agent.agentFile, 'rnd/tech_specs/feature.md');
+      const resolved = resolveAgentConfig(agent, 'specs');
+      const prompt = resolved.promptTemplate(resolved.agentFile, 'specs/tech_specs/feature.md');
       
-      expect(prompt).toContain('.github/agents/team-lead.agent.md');
-      expect(prompt).toContain('rnd/tech_specs/feature.md');
+      expect(prompt).toContain('specs/agents/team-lead.md');
+      expect(prompt).toContain('specs/tech_specs/feature.md');
       expect(prompt).toContain('build plan');
     });
 
     it('should generate correct prompt for develop agent', () => {
       const agent = getAgent('develop');
-      const prompt = agent.promptTemplate(agent.agentFile, 'rnd/build_plans/feature.md');
+      const resolved = resolveAgentConfig(agent, 'specs');
+      const prompt = resolved.promptTemplate(resolved.agentFile, 'specs/build_plans/feature.md');
       
-      expect(prompt).toContain('.github/agents/developer.agent.md');
-      expect(prompt).toContain('rnd/build_plans/feature.md');
+      expect(prompt).toContain('specs/agents/developer.md');
+      expect(prompt).toContain('specs/build_plans/feature.md');
       expect(prompt).toContain('implement');
     });
   });
