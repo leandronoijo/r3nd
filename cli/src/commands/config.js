@@ -1,4 +1,5 @@
 const { ConfigManager } = require('../lib/config/configManager');
+const { rewriteSpecDirInRepo } = require('../lib/utils/specDirRewrite');
 const logger = require('../lib/utils/logger');
 
 function register(program) {
@@ -15,7 +16,7 @@ function register(program) {
         
         if (!ConfigManager.isValidKey(key)) {
           logger.error(`Invalid config key: ${key}`);
-          logger.info(`Valid keys: seed-repo`);
+          logger.info(`Valid keys: seed-repo, spec-dir-name`);
           process.exit(1);
         }
 
@@ -44,7 +45,7 @@ function register(program) {
         
         if (!ConfigManager.isValidKey(key)) {
           logger.error(`Invalid config key: ${key}`);
-          logger.info(`Valid keys: seed-repo`);
+          logger.info(`Valid keys: seed-repo, spec-dir-name`);
           process.exit(1);
         }
 
@@ -59,8 +60,15 @@ function register(program) {
           }
         }
 
+        const previousSpecDirName = key === 'spec-dir-name' ? await configManager.getSpecDirName() : null;
         await configManager.set(key, value);
         logger.info(`✓ Set ${key} = ${value}`);
+
+        if (key === 'spec-dir-name' && previousSpecDirName && previousSpecDirName !== value) {
+          const fromNames = ['rnd', previousSpecDirName];
+          const result = await rewriteSpecDirInRepo(process.cwd(), fromNames, value);
+          logger.info(`✓ Updated ${result.updated} markdown file(s) (scanned ${result.scanned}).`);
+        }
       } catch (err) {
         logger.error('Failed to set config:', err && err.message ? err.message : err);
         process.exit(1);

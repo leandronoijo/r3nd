@@ -8,7 +8,8 @@ jest.mock('./ui/prompts', () => ({
 jest.mock('./config/configManager', () => ({
   ConfigManager: jest.fn().mockImplementation(() => ({
     get: jest.fn().mockResolvedValue('leandronoijo/r3nd@develop'),
-    set: jest.fn().mockResolvedValue(undefined)
+    set: jest.fn().mockResolvedValue(undefined),
+    getSpecDirName: jest.fn().mockResolvedValue('r3nd')
   }))
 }));
 
