@@ -8,7 +8,7 @@ The r3nd CLI now includes automatic interaction logging for all agents. Each age
 
 ### 1. Agent Summary Logs
 
-When using CLI tools (codex, gemini), each agent automatically creates a summary log in `rnd/agent_summaries/` before creating the `.done` file. The log includes:
+When using CLI tools (codex, gemini), each agent automatically creates a summary log in `<spec-dir>/agent_summaries/` before creating the `.done` file. The log includes:
 - What was accomplished
 - Key decisions or changes made
 - Important notes or context for future reference
@@ -21,15 +21,17 @@ When using CLI tools (codex, gemini), each agent automatically creates a summary
 - `test-cases` - E2E test case creation
 - `e2e-tests` - E2E test execution
 
-**Note:** GitHub Copilot agents don't create summary logs as they already track interactions in the PR itself.
+**Note:** 
+- GitHub Copilot agents don't create summary logs as they already track interactions in the PR itself.
+- The `<spec-dir>` is configurable via `r3nd.yaml` (defaults to `rnd` or `r3nd` depending on your configuration).
 
 ### 2. Retro Agent
 
-The retro agent reads all summary logs from `rnd/agent_summaries/` to understand what happened during the development process, then:
+The retro agent reads all summary logs from `<spec-dir>/agent_summaries/` to understand what happened during the development process, then:
 1. Reads agent summary logs for context
 2. Reviews PR discussion and comments
 3. Identifies process improvements
-4. Creates a retro report in `rnd/retros/pr-<number>-retro.md`
+4. Creates a retro report in `<spec-dir>/retros/pr-<number>-retro.md`
 5. Cleans up all summary logs after completion
 
 ## Usage
@@ -96,9 +98,11 @@ User requested that password reset use magic links instead of temporary password
 
 ### Summary Log Location
 
-Logs are stored in: `rnd/agent_summaries/<agent-name>-<timestamp>.md`
+Logs are stored in: `<spec-dir>/agent_summaries/<agent-name>-<timestamp>.md`
 
 Example: `rnd/agent_summaries/product-spec-2026-01-03-14-30-45.md`
+
+**Note:** The `<spec-dir>` is determined by the `spec-dir-name` setting in `r3nd.yaml` (defaults to `rnd` or `r3nd`).
 
 ### Log Creation
 
@@ -110,7 +114,7 @@ Agents are instructed (via their `interactiveSuffix`) to:
 
 ### Cleanup
 
-The retro agent is instructed to delete all files in `rnd/agent_summaries/` after creating the done file, ensuring a clean slate for the next development cycle.
+The retro agent is instructed to delete all files in `<spec-dir>/agent_summaries/` after creating the done file, ensuring a clean slate for the next development cycle.
 
 ## See Also
 

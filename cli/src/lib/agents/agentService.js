@@ -48,7 +48,7 @@ async function listMarkdownFiles(cwd, dir) {
 
 /**
  * Build the prompt text for an agent
- * @param {Object} agent - Agent configuration from registry
+ * @param {Object} agent - Agent configuration from registry (resolved)
  * @param {string} targetFile - The selected file to process
  * @returns {string} Formatted prompt text
  */
@@ -57,12 +57,17 @@ function buildPrompt(agent, targetFile) {
     throw new Error('Agent promptTemplate must be a function');
   }
   
+  // Pass specDirName as third parameter if available (for agents that need it)
+  if (agent.specDirName) {
+    return agent.promptTemplate(agent.agentFile, targetFile, agent.specDirName);
+  }
+  
   return agent.promptTemplate(agent.agentFile, targetFile);
 }
 
 /**
  * Build an interactive prompt with completion instructions
- * @param {Object} agent - Agent configuration from registry
+ * @param {Object} agent - Agent configuration from registry (resolved)
  * @param {string} targetFile - The selected file to process or user input
  * @param {string} doneFileName - Name of the done file to create when complete
  * @returns {string} Formatted prompt text with interactive suffix
@@ -75,7 +80,7 @@ function buildInteractivePrompt(agent, targetFile, doneFileName) {
     return `${basePrompt}\n\nIMPORTANT: When you have completely finished and the user is satisfied, create a file named "${doneFileName}" in the current directory to signal completion.`;
   }
   
-  const suffix = agent.interactiveSuffix(doneFileName);
+  const suffix = agent.interactiveSuffix(doneFileName, agent.specDirName);
   return `${basePrompt}${suffix}`;
 }
 
