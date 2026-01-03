@@ -142,21 +142,102 @@ async function runScaffold(opts = {}, deps = {}) {
     }
   }
 
-  // Ensure all agent files are present (required for CLI commands)
+  // Ensure all agent persona files and compose platform-specific agent files
   async function ensureAllAgentFiles() {
-    logger.info('Ensuring all agent files are present...');
+    logger.info('Ensuring all agent persona files are present...');
     const tree = await githubClient.getTree();
-    const agentFiles = tree.filter(item => 
-      item.type === 'blob' && item.path.startsWith('.github/agents/') && item.path.endsWith('.agent.md')
+    
+    // First, ensure rnd/agents persona files
+    const personaFiles = tree.filter(item => 
+      item.type === 'blob' && item.path.startsWith('rnd/agents/') && item.path.endsWith('.md')
     );
     
-    if (agentFiles.length === 0) {
-      logger.warn('No agent files found in seed repo.');
+    if (personaFiles.length === 0) {
+      logger.warn('No agent persona files found in seed repo.');
       return;
     }
 
-    const agentPaths = agentFiles.map(f => f.path);
-    await ensureSeedFiles(agentPaths);
+    const personaPaths = personaFiles.map(f => f.path);
+    await ensureSeedFiles(personaPaths);
+    
+    // Then, compose platform-specific agent files
+    // Check which platforms are configured/exist in the project
+    const githubAgentsExist = await fs.access(path.join(cwd, '.github', 'agents')).then(() => true).catch(() => false);
+    const cursorCommandsExist = await fs.access(path.join(cwd, '.cursor', 'commands')).then(() => true).catch(() => false);
+    const vscodeChatModesExist = await fs.access(path.join(cwd, '.github', 'chatmodes')).then(() => true).catch(() => false);
+    
+    // Import template resolver functions
+    const { resolveTemplate, createGitHubFileReader } = require('./templateResolver');
+    
+    // Build file cache for template resolution
+    const fileCache = new Map();
+    for (const file of personaFiles) {
+      try {
+        const buffer = await githubClient.fetchRaw(file.path);
+        fileCache.set(file.path, buffer);
+      } catch (err) {
+        logger.error(`  Failed to cache ${file.path}:`, err && err.message ? err.message : err);
+      }
+    }
+    
+    const fileReader = createGitHubFileReader(fileCache);
+    
+    // Compose GitHub Copilot agents if directory exists
+    if (githubAgentsExist) {
+      const githubWrappers = tree.filter(item => 
+        item.type === 'blob' && item.path.startsWith('.github/agents/') && item.path.endsWith('.agent.md')
+      );
+      
+      for (const file of githubWrappers) {
+        try {
+          const wrapperBuffer = await githubClient.fetchRaw(file.path);
+          const wrapperContent = wrapperBuffer.toString('utf-8');
+          const composedContent = await resolveTemplate(wrapperContent, fileReader);
+          await writeBuffer(cwd, file.path, Buffer.from(composedContent, 'utf-8'), { overwrite: true });
+          logger.info(`  Composed: ${file.path}`);
+        } catch (err) {
+          logger.error(`  Failed to compose ${file.path}:`, err && err.message ? err.message : err);
+        }
+      }
+    }
+    
+    // Compose Cursor commands if directory exists
+    if (cursorCommandsExist) {
+      const cursorWrappers = tree.filter(item => 
+        item.type === 'blob' && item.path.startsWith('.cursor/commands/') && item.path.endsWith('.md')
+      );
+      
+      for (const file of cursorWrappers) {
+        try {
+          const wrapperBuffer = await githubClient.fetchRaw(file.path);
+          const wrapperContent = wrapperBuffer.toString('utf-8');
+          const composedContent = await resolveTemplate(wrapperContent, fileReader);
+          await writeBuffer(cwd, file.path, Buffer.from(composedContent, 'utf-8'), { overwrite: true });
+          logger.info(`  Composed: ${file.path}`);
+        } catch (err) {
+          logger.error(`  Failed to compose ${file.path}:`, err && err.message ? err.message : err);
+        }
+      }
+    }
+    
+    // Compose VSCode chat modes if directory exists
+    if (vscodeChatModesExist) {
+      const vscodeWrappers = tree.filter(item => 
+        item.type === 'blob' && item.path.startsWith('.github/chatmodes/') && item.path.endsWith('.chatmode.md')
+      );
+      
+      for (const file of vscodeWrappers) {
+        try {
+          const wrapperBuffer = await githubClient.fetchRaw(file.path);
+          const wrapperContent = wrapperBuffer.toString('utf-8');
+          const composedContent = await resolveTemplate(wrapperContent, fileReader);
+          await writeBuffer(cwd, file.path, Buffer.from(composedContent, 'utf-8'), { overwrite: true });
+          logger.info(`  Composed: ${file.path}`);
+        } catch (err) {
+          logger.error(`  Failed to compose ${file.path}:`, err && err.message ? err.message : err);
+        }
+      }
+    }
   }
 
   await ensureAllAgentFiles();

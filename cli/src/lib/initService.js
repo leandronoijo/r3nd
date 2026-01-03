@@ -7,10 +7,11 @@ const { GitHubClient } = require('./github/githubClient');
 const { writeBuffer, ensureDir } = require('./fs/fileWriter');
 const { askInitOptions, askSeedRepo } = require('./ui/prompts');
 const { ConfigManager } = require('./config/configManager');
+const { resolveTemplate, createGitHubFileReader } = require('./templateResolver');
 const logger = require('./utils/logger');
 
 /**
- * Parse agent markdown file to extract metadata and content
+ * Legacy function for backwards compatibility - migrate old agent files
  * @param {string} content - Raw markdown content of agent file
  * @returns {Object} Parsed agent with name, description, tools, and content
  */
@@ -56,35 +57,13 @@ function parseAgentFile(content) {
 }
 
 /**
- * Generate Cursor command file content from agent data
- * @param {Object} agent - Parsed agent object
- * @returns {string} Cursor command file content in .md format
+ * Migrate legacy agent file to new rnd/agents structure
+ * @param {string} content - Legacy agent file content with frontmatter
+ * @returns {string} Platform-agnostic agent persona content (without frontmatter)
  */
-function generateCursorCommand(agent) {
-  return `# ${agent.name}
-
-${agent.description}
-
-${agent.content}
-`;
-}
-
-/**
- * Generate VSCode chat mode file content from agent data
- * @param {Object} agent - Parsed agent object
- * @returns {string} VSCode chatmode file content in .chatmode.md format
- */
-function generateVSCodeChatMode(agent) {
-  const tools = Array.isArray(agent.tools) ? agent.tools : (agent.tools ? [agent.tools] : ['*']);
-  const toolsStr = tools.map(t => `"${t}"`).join(', ');
-  
-  return `---
-description: "${agent.description}"
-tools: [${toolsStr}]
----
-
-${agent.content}
-`;
+function migrateLegacyAgent(content) {
+  const parsed = parseAgentFile(content);
+  return parsed.content;
 }
 
 async function runInit(opts = {}, deps = {}) {
@@ -145,26 +124,24 @@ async function runInit(opts = {}, deps = {}) {
     }
   }
 
-  // Always copy agent files (required for CLI commands to work)
-  await copyAgentFiles(cwd, tree, githubClient);
+  // Copy platform-agnostic agent personas from rnd/agents
+  await copyAgentPersonas(cwd, tree, githubClient);
 
   // Process selected options (these are optional)
   if (selectedOptions.includes('github')) {
     await copyGitHubWorkflows(cwd, tree, githubClient);
-  }
-
-  // Fetch and parse agents if needed for cursor or vscode
-  let agents = [];
-  if (selectedOptions.includes('cursor') || selectedOptions.includes('vscode')) {
-    agents = await fetchAndParseAgents(tree, githubClient);
+    // Compose GitHub Copilot agent files from wrappers + personas
+    await composeAgentFiles(cwd, tree, githubClient, '.github/agents', '.agent.md');
   }
 
   if (selectedOptions.includes('cursor')) {
-    await createCursorCommands(cwd, agents);
+    // Compose Cursor command files from wrappers + personas
+    await composeAgentFiles(cwd, tree, githubClient, '.cursor/commands', '.md');
   }
 
   if (selectedOptions.includes('vscode')) {
-    await createVSCodeChatModes(cwd, agents);
+    // Compose VSCode chat mode files from wrappers + personas
+    await composeAgentFiles(cwd, tree, githubClient, '.github/chatmodes', '.chatmode.md');
   }
 
   // Also copy templates if any option was selected
@@ -200,17 +177,17 @@ async function copyGitHubWorkflows(cwd, tree, githubClient) {
 }
 
 /**
- * Copy agent files (always required for CLI commands)
+ * Copy platform-agnostic agent persona files from rnd/agents
  */
-async function copyAgentFiles(cwd, tree, githubClient) {
-  logger.info('\n🤖 Copying agent files...');
+async function copyAgentPersonas(cwd, tree, githubClient) {
+  logger.info('\n🤖 Copying agent personas...');
   
   const agentFiles = tree.filter(item => 
-    item.type === 'blob' && item.path.startsWith('.github/agents/') && item.path.endsWith('.agent.md')
+    item.type === 'blob' && item.path.startsWith('rnd/agents/') && item.path.endsWith('.md')
   );
 
   if (agentFiles.length === 0) {
-    logger.warn('No agent files found in seed repo.');
+    logger.warn('No agent persona files found in seed repo.');
     return;
   }
 
@@ -226,67 +203,66 @@ async function copyAgentFiles(cwd, tree, githubClient) {
 }
 
 /**
- * Fetch and parse all agent files
+ * Compose agent files from platform-specific wrappers and rnd/agents personas
+ * @param {string} cwd - Current working directory
+ * @param {Array} tree - GitHub tree
+ * @param {GitHubClient} githubClient - GitHub client instance
+ * @param {string} wrapperDir - Directory containing wrapper templates (e.g., '.github/agents')
+ * @param {string} extension - File extension to filter (e.g., '.agent.md')
  */
-async function fetchAndParseAgents(tree, githubClient) {
-  const agentFiles = tree.filter(item => 
-    item.type === 'blob' && item.path.startsWith('.github/agents/') && item.path.endsWith('.agent.md')
+async function composeAgentFiles(cwd, tree, githubClient, wrapperDir, extension) {
+  const platformName = wrapperDir === '.github/agents' ? 'GitHub Copilot' : 
+                       wrapperDir === '.cursor/commands' ? 'Cursor' : 'VSCode';
+  logger.info(`\n📝 Composing ${platformName} agent files...`);
+  
+  // Find all wrapper template files
+  const wrapperFiles = tree.filter(item => 
+    item.type === 'blob' && 
+    item.path.startsWith(wrapperDir + '/') && 
+    item.path.endsWith(extension)
   );
 
-  const agents = [];
-  for (const file of agentFiles) {
+  if (wrapperFiles.length === 0) {
+    logger.warn(`  No wrapper templates found in ${wrapperDir}`);
+    return;
+  }
+
+  // Build a cache of all files from tree for template resolution
+  const fileCache = new Map();
+  
+  // Fetch all rnd/agents files into cache
+  const personaFiles = tree.filter(item => 
+    item.type === 'blob' && item.path.startsWith('rnd/agents/')
+  );
+  
+  for (const file of personaFiles) {
     try {
       const buffer = await githubClient.fetchRaw(file.path);
-      const content = buffer.toString('utf-8');
-      const agent = parseAgentFile(content);
-      agent.originalPath = file.path;
-      agents.push(agent);
+      fileCache.set(file.path, buffer);
     } catch (err) {
-      logger.error(`Failed to parse agent ${file.path}:`, err && err.message ? err.message : err);
+      logger.error(`  Failed to cache ${file.path}:`, err && err.message ? err.message : err);
     }
   }
-
-  return agents;
-}
-
-/**
- * Create Cursor command files for each agent
- */
-async function createCursorCommands(cwd, agents) {
-  logger.info('\n📝 Creating Cursor commands...');
   
-  const cursorCommandsDir = path.join(cwd, '.cursor', 'commands');
-  await ensureDir(cursorCommandsDir);
-
-  for (const agent of agents) {
-    try {
-      const commandContent = generateCursorCommand(agent);
-      const commandPath = path.join('.cursor', 'commands', `${agent.name}.md`);
-      await writeBuffer(cwd, commandPath, Buffer.from(commandContent, 'utf-8'), { overwrite: true });
-      logger.info(`  Created: ${commandPath}`);
-    } catch (err) {
-      logger.error(`  Failed to create command for ${agent.name}:`, err && err.message ? err.message : err);
-    }
-  }
-}
-
-/**
- * Create VSCode chat mode files for each agent (Copilot personas)
- */
-async function createVSCodeChatModes(cwd, agents) {
-  logger.info('\n📄 Creating VSCode Copilot chat modes...');
+  const fileReader = createGitHubFileReader(fileCache);
   
-  const chatModesDir = path.join(cwd, '.github', 'chatmodes');
-  await ensureDir(chatModesDir);
+  // Ensure output directory exists
+  await ensureDir(path.join(cwd, wrapperDir));
 
-  for (const agent of agents) {
+  // Process each wrapper template
+  for (const file of wrapperFiles) {
     try {
-      const chatModeContent = generateVSCodeChatMode(agent);
-      const chatModePath = path.join('.github', 'chatmodes', `${agent.name}.chatmode.md`);
-      await writeBuffer(cwd, chatModePath, Buffer.from(chatModeContent, 'utf-8'), { overwrite: true });
-      logger.info(`  Created: ${chatModePath}`);
+      const wrapperBuffer = await githubClient.fetchRaw(file.path);
+      const wrapperContent = wrapperBuffer.toString('utf-8');
+      
+      // Resolve template placeholders
+      const composedContent = await resolveTemplate(wrapperContent, fileReader);
+      
+      // Write composed file
+      await writeBuffer(cwd, file.path, Buffer.from(composedContent, 'utf-8'), { overwrite: true });
+      logger.info(`  Composed: ${file.path}`);
     } catch (err) {
-      logger.error(`  Failed to create chat mode for ${agent.name}:`, err && err.message ? err.message : err);
+      logger.error(`  Failed to compose ${file.path}:`, err && err.message ? err.message : err);
     }
   }
 }
@@ -317,4 +293,4 @@ async function copyTemplates(cwd, tree, githubClient) {
   }
 }
 
-module.exports = { runInit, parseAgentFile, generateCursorCommand, generateVSCodeChatMode };
+module.exports = { runInit, parseAgentFile, migrateLegacyAgent };

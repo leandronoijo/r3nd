@@ -1,11 +1,4 @@
----
-name: test-engineer
-description: DEPRECATED. This agent profile has been renamed to `qa-team-lead.agent.md`. See `.github/agents/qa-team-lead.agent.md` for the active profile.
-target: github-copilot
-tools: ["*"]
----
-
-# Test Engineer — DEPRECATED
+# QA Team Lead — Agent profile
 
 Purpose
 -------
@@ -98,3 +91,5 @@ Then the payment completes and a confirmation message is shown
 ---
 
 Keep cases compact, focused, and suitable for immediate automation by QA engineers or the automation pipeline.
+
+```

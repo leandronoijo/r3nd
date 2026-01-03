@@ -4,7 +4,7 @@ const fs = require('fs').promises;
 const { GitHubClient } = require('./github/githubClient');
 const { writeBuffer, ensureDir } = require('./fs/fileWriter');
 const { askUpdateOptions, askSeedRepo } = require('./ui/prompts');
-const { parseAgentFile, generateCursorCommand, generateVSCodeChatMode } = require('./initService');
+const { resolveTemplate, createGitHubFileReader } = require('./templateResolver');
 const { ConfigManager } = require('./config/configManager');
 const logger = require('./utils/logger');
 
@@ -52,26 +52,22 @@ async function runUpdate(opts = {}, deps = {}) {
     await updateTemplates(cwd, tree, githubClient);
   }
 
-  // Fetch agents if needed for cursor, vscode, or agents themselves
-  let agents = [];
-  if (selectedOptions.includes('agents') || selectedOptions.includes('cursor') || selectedOptions.includes('vscode')) {
-    agents = await fetchAndParseAgents(tree, githubClient);
-  }
-
   if (selectedOptions.includes('agents')) {
-    await updateAgents(cwd, tree, githubClient);
+    await updateAgentPersonas(cwd, tree, githubClient);
   }
 
   if (selectedOptions.includes('github')) {
     await updateGitHubWorkflows(cwd, tree, githubClient);
+    // Also update composed GitHub Copilot agent files
+    await updateComposedAgents(cwd, tree, githubClient, '.github/agents', '.agent.md');
   }
 
   if (selectedOptions.includes('cursor')) {
-    await updateCursorCommands(cwd, agents);
+    await updateComposedAgents(cwd, tree, githubClient, '.cursor/commands', '.md');
   }
 
   if (selectedOptions.includes('vscode')) {
-    await updateVSCodeChatModes(cwd, agents);
+    await updateComposedAgents(cwd, tree, githubClient, '.github/chatmodes', '.chatmode.md');
   }
 
   logger.info('\nUpdate complete.');
@@ -104,17 +100,17 @@ async function updateTemplates(cwd, tree, githubClient) {
 }
 
 /**
- * Update agent files
+ * Update agent persona files from rnd/agents
  */
-async function updateAgents(cwd, tree, githubClient) {
-  logger.info('\n🤖 Updating agents...');
+async function updateAgentPersonas(cwd, tree, githubClient) {
+  logger.info('\n🤖 Updating agent personas...');
   
   const agentFiles = tree.filter(item => 
-    item.type === 'blob' && item.path.startsWith('.github/agents/') && item.path.endsWith('.agent.md')
+    item.type === 'blob' && item.path.startsWith('rnd/agents/') && item.path.endsWith('.md')
   );
 
   if (agentFiles.length === 0) {
-    logger.warn('  No agent files found in seed repo.');
+    logger.warn('  No agent persona files found in seed repo.');
     return;
   }
 
@@ -156,67 +152,72 @@ async function updateGitHubWorkflows(cwd, tree, githubClient) {
 }
 
 /**
- * Fetch and parse all agent files
+ * Update composed agent files from wrappers + personas
+ * @param {string} cwd - Current working directory
+ * @param {Array} tree - GitHub tree
+ * @param {GitHubClient} githubClient - GitHub client instance
+ * @param {string} wrapperDir - Directory containing wrapper templates
+ * @param {string} extension - File extension to filter
  */
-async function fetchAndParseAgents(tree, githubClient) {
-  const agentFiles = tree.filter(item => 
-    item.type === 'blob' && item.path.startsWith('.github/agents/') && item.path.endsWith('.agent.md')
+async function updateComposedAgents(cwd, tree, githubClient, wrapperDir, extension) {
+  const platformName = wrapperDir === '.github/agents' ? 'GitHub Copilot' : 
+                       wrapperDir === '.cursor/commands' ? 'Cursor' : 'VSCode';
+  logger.info(`\n📝 Updating ${platformName} agent files...`);
+  
+  // Check if the platform directory exists locally
+  const dirExists = await fs.access(path.join(cwd, wrapperDir)).then(() => true).catch(() => false);
+  if (!dirExists) {
+    logger.info(`  ${wrapperDir} directory does not exist locally, skipping.`);
+    return;
+  }
+  
+  // Find wrapper templates
+  const wrapperFiles = tree.filter(item => 
+    item.type === 'blob' && 
+    item.path.startsWith(wrapperDir + '/') && 
+    item.path.endsWith(extension)
   );
 
-  const agents = [];
-  for (const file of agentFiles) {
+  if (wrapperFiles.length === 0) {
+    logger.warn(`  No wrapper templates found in ${wrapperDir}`);
+    return;
+  }
+
+  // Build file cache for template resolution
+  const fileCache = new Map();
+  
+  const personaFiles = tree.filter(item => 
+    item.type === 'blob' && item.path.startsWith('rnd/agents/')
+  );
+  
+  for (const file of personaFiles) {
     try {
       const buffer = await githubClient.fetchRaw(file.path);
-      const content = buffer.toString('utf-8');
-      const agent = parseAgentFile(content);
-      agent.originalPath = file.path;
-      agents.push(agent);
+      fileCache.set(file.path, buffer);
     } catch (err) {
-      logger.error(`  Failed to parse agent ${file.path}:`, err && err.message ? err.message : err);
+      logger.error(`  Failed to cache ${file.path}:`, err && err.message ? err.message : err);
     }
   }
-
-  return agents;
-}
-
-/**
- * Update Cursor command files for each agent
- */
-async function updateCursorCommands(cwd, agents) {
-  logger.info('\n📝 Updating Cursor commands...');
   
-  const cursorCommandsDir = path.join(cwd, '.cursor', 'commands');
-  await ensureDir(cursorCommandsDir);
-
-  for (const agent of agents) {
-    try {
-      const commandContent = generateCursorCommand(agent);
-      const commandPath = path.join('.cursor', 'commands', `${agent.name}.md`);
-      await writeBuffer(cwd, commandPath, Buffer.from(commandContent, 'utf-8'), { overwrite: true });
-      logger.info(`  Updated: ${commandPath}`);
-    } catch (err) {
-      logger.error(`  Failed to update command for ${agent.name}:`, err && err.message ? err.message : err);
-    }
-  }
-}
-
-/**
- * Update VSCode chat mode files for each agent (Copilot personas)
- */
-async function updateVSCodeChatModes(cwd, agents) {
-  logger.info('\n📄 Updating VSCode Copilot chat modes...');
+  const fileReader = createGitHubFileReader(fileCache);
   
-  const chatModesDir = path.join(cwd, '.github', 'chatmodes');
-  await ensureDir(chatModesDir);
+  // Ensure output directory exists
+  await ensureDir(path.join(cwd, wrapperDir));
 
-  for (const agent of agents) {
+  // Process each wrapper template
+  for (const file of wrapperFiles) {
     try {
-      const chatModeContent = generateVSCodeChatMode(agent);
-      const chatModePath = path.join('.github', 'chatmodes', `${agent.name}.chatmode.md`);
-      await writeBuffer(cwd, chatModePath, Buffer.from(chatModeContent, 'utf-8'), { overwrite: true });
-      logger.info(`  Updated: ${chatModePath}`);
+      const wrapperBuffer = await githubClient.fetchRaw(file.path);
+      const wrapperContent = wrapperBuffer.toString('utf-8');
+      
+      // Resolve template placeholders
+      const composedContent = await resolveTemplate(wrapperContent, fileReader);
+      
+      // Write composed file
+      await writeBuffer(cwd, file.path, Buffer.from(composedContent, 'utf-8'), { overwrite: true });
+      logger.info(`  Updated: ${file.path}`);
     } catch (err) {
-      logger.error(`  Failed to update chat mode for ${agent.name}:`, err && err.message ? err.message : err);
+      logger.error(`  Failed to update ${file.path}:`, err && err.message ? err.message : err);
     }
   }
 }

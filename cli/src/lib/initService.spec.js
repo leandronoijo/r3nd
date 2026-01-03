@@ -12,7 +12,7 @@ jest.mock('./config/configManager', () => ({
   }))
 }));
 
-const { parseAgentFile, generateCursorCommand, generateVSCodeChatMode } = require('./initService');
+const { parseAgentFile, migrateLegacyAgent } = require('./initService');
 
 describe('initService', () => {
   describe('parseAgentFile', () => {
@@ -84,80 +84,38 @@ Content
     });
   });
 
-  describe('generateCursorCommand', () => {
-    it('should generate valid command format', () => {
-      const agent = {
-        name: 'developer',
-        description: 'Implement features and tests.',
-        tools: ['*'],
-        content: '# Developer Agent\n\nThis is the content.'
-      };
+  describe('migrateLegacyAgent', () => {
+    it('should extract content from legacy agent file', () => {
+      const legacyContent = `---
+name: developer
+description: Implement features and tests based on a build plan.
+target: github-copilot
+tools: ["*"]
+---
 
-      const result = generateCursorCommand(agent);
+# Developer Agent
 
-      expect(result).toContain('# developer');
-      expect(result).toContain('Implement features and tests.');
+This is the developer agent.
+`;
+
+      const result = migrateLegacyAgent(legacyContent);
+
       expect(result).toContain('# Developer Agent');
-      expect(result).toContain('This is the content.');
+      expect(result).toContain('This is the developer agent.');
+      expect(result).not.toContain('---');
+      expect(result).not.toContain('name: developer');
     });
 
-    it('should include agent content in the command', () => {
-      const agent = {
-        name: 'architect',
-        description: 'Convert specs to designs.',
-        tools: ['*'],
-        content: '## Purpose\n\nCreate technical specifications.'
-      };
-
-      const result = generateCursorCommand(agent);
-
-      expect(result).toContain('## Purpose');
-      expect(result).toContain('Create technical specifications.');
+    it('should handle agent file without frontmatter', () => {
+      const content = '# Developer Agent\n\nContent here.';
+      
+      const result = migrateLegacyAgent(content);
+      
+      expect(result).toBe('# Developer Agent\n\nContent here.');
     });
   });
 
-  describe('generateVSCodeChatMode', () => {
-    it('should generate valid chatmode.md format with YAML frontmatter', () => {
-      const agent = {
-        name: 'developer',
-        description: 'Implement features.',
-        tools: ['*'],
-        content: 'Developer content here.'
-      };
-
-      const result = generateVSCodeChatMode(agent);
-
-      expect(result).toContain('---');
-      expect(result).toContain('description: "Implement features."');
-      expect(result).toContain('tools: ["*"]');
-      expect(result).toContain('Developer content here.');
-    });
-
-    it('should handle multiple tools', () => {
-      const agent = {
-        name: 'architect',
-        description: 'Create designs.',
-        tools: ['codebase', 'search', 'terminal'],
-        content: 'Architect content here.'
-      };
-
-      const result = generateVSCodeChatMode(agent);
-
-      expect(result).toContain('tools: ["codebase", "search", "terminal"]');
-    });
-
-    it('should include agent content after frontmatter', () => {
-      const agent = {
-        name: 'team-lead',
-        description: 'Lead the team.',
-        tools: ['*'],
-        content: '## Purpose\n\nLead the team effectively.'
-      };
-
-      const result = generateVSCodeChatMode(agent);
-
-      expect(result).toContain('## Purpose');
-      expect(result).toContain('Lead the team effectively.');
-    });
-  });
+  // Legacy function tests removed - generateCursorCommand and generateVSCodeChatMode
+  // are now internal functions only used during migration. The new template-based
+  // composition approach (via templateResolver) replaces these functions.
 });
