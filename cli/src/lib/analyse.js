@@ -8,16 +8,27 @@ const { ConfigManager } = require('./config/configManager');
 const { findFirstSpecDirectory } = require('./fs/treeSearch');
 const YAML = require('yaml');
 
+function normalizeAppEntry(a) {
+  return { 
+    name: a.name || a.app || 'unknown', 
+    path: a.path || '.', 
+    purpose: a.purpose || '', 
+    stack: a.stack || '' 
+  };
+}
+
 async function parseAppsFromInstructions(content) {
   // Try YAML fenced block first (preferred format)
   const yamlMatch = content.match(/```(?:yaml|yml)\s*([\s\S]*?)```/i);
   if (yamlMatch) {
     try {
       const parsed = YAML.parse(yamlMatch[1]);
-      if (parsed && Array.isArray(parsed.apps)) return parsed.apps.map(a => ({ name: a.name || a.app || 'unknown', path: a.path || '.', purpose: a.purpose || '', stack: a.stack || '' }));
+      if (parsed && Array.isArray(parsed.apps)) {
+        return parsed.apps.map(normalizeAppEntry);
+      }
       // If top-level is an object with app entries, try to normalize
       if (parsed && parsed.apps) {
-        return parsed.apps.map(a => ({ name: a.name || a.app || 'unknown', path: a.path || '.', purpose: a.purpose || '', stack: a.stack || '' }));
+        return parsed.apps.map(normalizeAppEntry);
       }
     } catch (e) {
       console.warn('Failed to parse YAML fenced block for apps:', e && e.message ? e.message : e);
@@ -32,9 +43,9 @@ async function parseAppsFromInstructions(content) {
       const raw = jsonMatch[1].trim();
       const parsed = JSON.parse(raw);
       // If the JSON block is directly an array of apps
-      if (Array.isArray(parsed)) return parsed.map(a => ({ name: a.name || a.app || 'unknown', path: a.path || '.', purpose: a.purpose || '', stack: a.stack || '' }));
+      if (Array.isArray(parsed)) return parsed.map(normalizeAppEntry);
       // If it's an object with `apps` property
-      if (Array.isArray(parsed.apps)) return parsed.apps.map(a => ({ name: a.name || a.app || 'unknown', path: a.path || '.', purpose: a.purpose || '', stack: a.stack || '' }));
+      if (Array.isArray(parsed.apps)) return parsed.apps.map(normalizeAppEntry);
     } catch (e) {
       console.warn('Failed to parse JSON fenced block for apps:', e && e.message ? e.message : e);
       // fall through to empty
