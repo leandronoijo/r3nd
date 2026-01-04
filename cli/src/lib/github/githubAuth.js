@@ -4,6 +4,16 @@ const { isCommandAvailable } = require('../utils/toolDetector');
 const logger = require('../utils/logger');
 
 /**
+ * Escape shell arguments to prevent command injection
+ * @param {string} arg - Argument to escape
+ * @returns {string} Escaped argument
+ */
+function escapeShellArg(arg) {
+  // Replace single quotes with '\'' to safely escape them
+  return `'${arg.replace(/'/g, "'\\''")}'`;
+}
+
+/**
  * Check if gh CLI is authenticated
  * @returns {boolean} True if gh is authenticated
  */
@@ -29,8 +39,9 @@ function isGhAuthenticated() {
  */
 async function fetchTreeWithGh(owner, repo, branch) {
   try {
-    const apiUrl = `repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
-    const output = execSync(`gh api ${apiUrl}`, { 
+    // Construct API path - gh api handles the path as a single argument
+    const apiPath = `repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
+    const output = execSync(`gh api ${escapeShellArg(apiPath)}`, { 
       encoding: 'utf-8',
       maxBuffer: 10 * 1024 * 1024 // 10MB buffer for large repos
     });
@@ -55,8 +66,10 @@ async function fetchTreeWithGh(owner, repo, branch) {
  */
 async function fetchRawWithGh(owner, repo, branch, remotePath) {
   try {
+    // Construct API path - gh api handles the path as a single argument
+    const apiPath = `repos/${owner}/${repo}/contents/${remotePath}?ref=${branch}`;
     const output = execSync(
-      `gh api repos/${owner}/${repo}/contents/${remotePath}?ref=${branch} --jq .content | base64 -d`,
+      `gh api ${escapeShellArg(apiPath)} --jq .content | base64 -d`,
       { 
         encoding: 'buffer',
         maxBuffer: 10 * 1024 * 1024 // 10MB buffer
@@ -224,4 +237,5 @@ module.exports = {
   fetchTreeWithAxios,
   fetchRawWithAxios,
   AuthorizationError,
+  escapeShellArg,
 };

@@ -31,7 +31,17 @@ echo ""
 echo "=== Testing Authentication Module ==="
 echo ""
 
-cd "$(dirname "$0")"/../cli
+# Get the script directory and navigate to the correct location
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+CLI_DIR="$SCRIPT_DIR/cli"
+
+if [ ! -d "$CLI_DIR" ]; then
+    echo "Error: CLI directory not found at $CLI_DIR"
+    echo "This script should be run from the repository root"
+    exit 1
+fi
+
+cd "$CLI_DIR"
 
 # Run the authentication tests
 echo "Running authentication tests..."

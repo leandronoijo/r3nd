@@ -7,6 +7,7 @@ const {
   fetchTreeWithAxios,
   fetchRawWithAxios,
   AuthorizationError,
+  escapeShellArg,
 } = require('./githubAuth');
 
 // Mock dependencies
@@ -30,6 +31,30 @@ describe('githubAuth', () => {
 
   afterEach(() => {
     process.exit.mockRestore();
+  });
+
+  describe('escapeShellArg', () => {
+    it('should escape single quotes correctly', () => {
+      expect(escapeShellArg("test'value")).toBe("'test'\\''value'");
+    });
+
+    it('should handle strings without special characters', () => {
+      expect(escapeShellArg('simple')).toBe("'simple'");
+    });
+
+    it('should handle empty strings', () => {
+      expect(escapeShellArg('')).toBe("''");
+    });
+
+    it('should handle multiple single quotes', () => {
+      expect(escapeShellArg("it's a test's value")).toBe("'it'\\''s a test'\\''s value'");
+    });
+
+    it('should wrap result in single quotes', () => {
+      const result = escapeShellArg('test');
+      expect(result.startsWith("'")).toBe(true);
+      expect(result.endsWith("'")).toBe(true);
+    });
   });
 
   describe('isGhAuthenticated', () => {
@@ -63,7 +88,7 @@ describe('githubAuth', () => {
 
       expect(result).toEqual(mockTree);
       expect(execSync).toHaveBeenCalledWith(
-        'gh api repos/owner/repo/git/trees/main?recursive=1',
+        "gh api 'repos/owner/repo/git/trees/main?recursive=1'",
         expect.objectContaining({ encoding: 'utf-8' })
       );
     });
@@ -108,7 +133,7 @@ describe('githubAuth', () => {
 
       expect(Buffer.isBuffer(result)).toBe(true);
       expect(execSync).toHaveBeenCalledWith(
-        'gh api repos/owner/repo/contents/path/to/file.js?ref=main --jq .content | base64 -d',
+        "gh api 'repos/owner/repo/contents/path/to/file.js?ref=main' --jq .content | base64 -d",
         expect.objectContaining({ encoding: 'buffer' })
       );
     });
@@ -190,7 +215,7 @@ describe('githubAuth', () => {
 
       expect(result).toEqual(mockTree);
       expect(execSync).toHaveBeenCalledWith(
-        'gh api repos/owner/repo/git/trees/main?recursive=1',
+        "gh api 'repos/owner/repo/git/trees/main?recursive=1'",
         expect.any(Object)
       );
     });
@@ -256,7 +281,7 @@ describe('githubAuth', () => {
 
       expect(Buffer.isBuffer(result)).toBe(true);
       expect(execSync).toHaveBeenCalledWith(
-        'gh api repos/owner/repo/contents/file.js?ref=main --jq .content | base64 -d',
+        "gh api 'repos/owner/repo/contents/file.js?ref=main' --jq .content | base64 -d",
         expect.any(Object)
       );
     });
