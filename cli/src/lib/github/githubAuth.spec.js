@@ -108,7 +108,7 @@ describe('githubAuth', () => {
 
       expect(Buffer.isBuffer(result)).toBe(true);
       expect(execSync).toHaveBeenCalledWith(
-        'gh api repos/owner/repo/contents/path/to/file.js --jq .content | base64 -d',
+        'gh api repos/owner/repo/contents/path/to/file.js?ref=main --jq .content | base64 -d',
         expect.objectContaining({ encoding: 'buffer' })
       );
     });
@@ -256,7 +256,7 @@ describe('githubAuth', () => {
 
       expect(Buffer.isBuffer(result)).toBe(true);
       expect(execSync).toHaveBeenCalledWith(
-        'gh api repos/owner/repo/contents/file.js --jq .content | base64 -d',
+        'gh api repos/owner/repo/contents/file.js?ref=main --jq .content | base64 -d',
         expect.any(Object)
       );
     });

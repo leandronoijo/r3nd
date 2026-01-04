@@ -56,7 +56,7 @@ async function fetchTreeWithGh(owner, repo, branch) {
 async function fetchRawWithGh(owner, repo, branch, remotePath) {
   try {
     const output = execSync(
-      `gh api repos/${owner}/${repo}/contents/${remotePath} --jq .content | base64 -d`,
+      `gh api repos/${owner}/${repo}/contents/${remotePath}?ref=${branch} --jq .content | base64 -d`,
       { 
         encoding: 'buffer',
         maxBuffer: 10 * 1024 * 1024 // 10MB buffer
