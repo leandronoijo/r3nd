@@ -55,6 +55,19 @@ describe('githubAuth', () => {
       expect(result.startsWith("'")).toBe(true);
       expect(result.endsWith("'")).toBe(true);
     });
+
+    it('should handle path-like strings with special characters', () => {
+      // Simulates a malicious path attempting command injection
+      const malicious = "test/file.js; rm -rf /";
+      const escaped = escapeShellArg(malicious);
+      expect(escaped).toBe("'test/file.js; rm -rf /'");
+      // The semicolon is now within quotes and won't be interpreted as command separator
+    });
+
+    it('should handle paths with spaces', () => {
+      const pathWithSpaces = "my folder/my file.js";
+      expect(escapeShellArg(pathWithSpaces)).toBe("'my folder/my file.js'");
+    });
   });
 
   describe('isGhAuthenticated', () => {

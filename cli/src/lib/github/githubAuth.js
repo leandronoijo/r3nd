@@ -41,6 +41,8 @@ async function fetchTreeWithGh(owner, repo, branch) {
   try {
     // Construct API path - gh api handles the path as a single argument
     const apiPath = `repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
+    // Note: escapeShellArg() wraps the entire path in single quotes to prevent injection
+    // Template literal interpolation here is safe because escapeShellArg returns a quoted string
     const output = execSync(`gh api ${escapeShellArg(apiPath)}`, { 
       encoding: 'utf-8',
       maxBuffer: 10 * 1024 * 1024 // 10MB buffer for large repos
@@ -68,6 +70,8 @@ async function fetchRawWithGh(owner, repo, branch, remotePath) {
   try {
     // Construct API path - gh api handles the path as a single argument
     const apiPath = `repos/${owner}/${repo}/contents/${remotePath}?ref=${branch}`;
+    // Note: escapeShellArg() wraps the entire path in single quotes to prevent injection
+    // Template literal interpolation here is safe because escapeShellArg returns a quoted string
     const output = execSync(
       `gh api ${escapeShellArg(apiPath)} --jq .content | base64 -d`,
       { 
