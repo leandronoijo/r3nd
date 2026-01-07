@@ -120,9 +120,9 @@ Updated spec to reflect magic link preference. Session timeout set to 24 hours f
 
 Logs are stored in: `<spec-dir>/agent_summaries/<agent-name>-<timestamp>.md`
 
-Example: `rnd/agent_summaries/product-manager-2026-01-03-14-30-45.md`
+Example: `r3nd/agent_summaries/product-manager-2026-01-03-14-30-45.md`
 
-**Note:** The `<spec-dir>` is determined by the `spec-dir-name` setting in `r3nd.yaml` (defaults to `rnd` or `r3nd`).
+**Note:** The `<spec-dir>` is determined by the `spec-dir-name` setting in `r3nd.yaml` (defaults to `r3nd`, with `rnd` supported for backward compatibility).
 
 ### Log Creation
 
