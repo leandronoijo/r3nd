@@ -31,7 +31,7 @@ After executing tests and generating the result report:
 
 ### Agent Summary Log
 
-When the user is satisfied, create a summary log file at `rnd/agent_summaries/e2e-engineer-<timestamp>.md` with the following structure:
+When the user is satisfied, create a summary log file at `rnd/agent_summaries/e2e-engineer-<timestamp>.md` (where `<timestamp>` is in `YYYY-MM-DD-HH-MM-SS` format, e.g., `2026-01-07-14-30-45`) with the following structure:
 
 ```markdown
 # e2e-engineer - Interaction Summary
