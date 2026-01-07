@@ -1,4 +1,4 @@
-# qa-team-lead
+# create-test-cases
 
 Produce E2E sanity test cases (English) for features and save them under rnd/test_cases/.
 

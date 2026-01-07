@@ -1,4 +1,4 @@
-# retro
+# create-retro-report
 
 Review PR discussions to identify improvements to agents, templates, or instructions; write a retro report to rnd/retros.
 
