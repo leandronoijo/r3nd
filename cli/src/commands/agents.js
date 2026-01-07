@@ -27,7 +27,8 @@ function register(program) {
       .command(agent.name)
       .description(agent.description)
       .option('--agent <type>', 'Agent type to use: codex, gemini, github, or generate')
-      .option('--non-interactive', 'Run in non-interactive mode with defaults');
+      .option('--non-interactive', 'Run in non-interactive mode with defaults')
+      .option('--spec-dir <path>', 'Directory containing the spec folder (e.g., "apps/my-app" for "apps/my-app/r3nd/"). Defaults to root directory.');
     
     // Add --file option only for file-based agents
     if (!agent.useFreeTextInput) {
@@ -53,10 +54,18 @@ async function runAgentCommand(agentConfig, opts = {}) {
   const nonInteractive = !!opts.nonInteractive;
   const configManager = new ConfigManager(cwd);
   const specDirName = await configManager.getSpecDirName();
-  const resolvedAgentConfig = resolveAgentConfig(agentConfig, specDirName);
+  
+  // Determine the base directory for specs (e.g., "", "apps/my-app", "workspaces/my-workspace")
+  const specDirBase = opts.specDir || '';
+  const fullSpecDir = specDirBase ? path.join(specDirBase, specDirName) : specDirName;
+  
+  const resolvedAgentConfig = resolveAgentConfig(agentConfig, specDirName, specDirBase);
 
   logger.info(`\nr3nd agents ${resolvedAgentConfig.name}`);
   logger.info(`Using agent: ${resolvedAgentConfig.agentFile}`);
+  if (specDirBase) {
+    logger.info(`Spec directory: ${fullSpecDir}`);
+  }
 
   // Validate agent setup
   const validation = await validateAgentSetup(cwd, resolvedAgentConfig);
