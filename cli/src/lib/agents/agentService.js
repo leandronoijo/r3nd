@@ -57,9 +57,10 @@ function buildPrompt(agent, targetFile) {
     throw new Error('Agent promptTemplate must be a function');
   }
   
-  // Pass specDirName as third parameter if available (for agents that need it)
-  if (agent.specDirName) {
-    return agent.promptTemplate(agent.agentFile, targetFile, agent.specDirName);
+  // Pass fullSpecDir as third parameter (fallback to specDirName for backward compatibility)
+  const specDirPath = agent.fullSpecDir || agent.specDirName;
+  if (specDirPath) {
+    return agent.promptTemplate(agent.agentFile, targetFile, specDirPath);
   }
   
   return agent.promptTemplate(agent.agentFile, targetFile);
@@ -80,7 +81,9 @@ function buildInteractivePrompt(agent, targetFile, doneFileName) {
     return `${basePrompt}\n\nIMPORTANT: When you have completely finished and the user is satisfied, create a file named "${doneFileName}" in the current directory to signal completion.`;
   }
   
-  const suffix = agent.interactiveSuffix(doneFileName, agent.specDirName);
+  // Use fullSpecDir if available, otherwise fall back to specDirName
+  const specDirPath = agent.fullSpecDir || agent.specDirName;
+  const suffix = agent.interactiveSuffix(doneFileName, specDirPath);
   return `${basePrompt}${suffix}`;
 }
 

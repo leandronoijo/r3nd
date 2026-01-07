@@ -114,31 +114,55 @@ describe('agentRegistry', () => {
     it('should generate correct prompt for tech-spec agent', () => {
       const agent = getAgent('tech-spec');
       const resolved = resolveAgentConfig(agent, 'specs');
-      const prompt = resolved.promptTemplate(resolved.agentFile, 'specs/product_specs/feature.md');
+      const prompt = resolved.promptTemplate(resolved.agentFile, 'specs/product_specs/feature.md', resolved.fullSpecDir);
       
       expect(prompt).toContain('specs/agents/architect.md');
       expect(prompt).toContain('specs/product_specs/feature.md');
       expect(prompt).toContain('technical specification');
+      expect(prompt).toContain('specs/tech_specs/');
     });
 
     it('should generate correct prompt for build-plan agent', () => {
       const agent = getAgent('build-plan');
       const resolved = resolveAgentConfig(agent, 'specs');
-      const prompt = resolved.promptTemplate(resolved.agentFile, 'specs/tech_specs/feature.md');
+      const prompt = resolved.promptTemplate(resolved.agentFile, 'specs/tech_specs/feature.md', resolved.fullSpecDir);
       
       expect(prompt).toContain('specs/agents/team-lead.md');
       expect(prompt).toContain('specs/tech_specs/feature.md');
       expect(prompt).toContain('build plan');
+      expect(prompt).toContain('specs/build_plans/');
     });
 
     it('should generate correct prompt for develop agent', () => {
       const agent = getAgent('develop');
       const resolved = resolveAgentConfig(agent, 'specs');
-      const prompt = resolved.promptTemplate(resolved.agentFile, 'specs/build_plans/feature.md');
+      const prompt = resolved.promptTemplate(resolved.agentFile, 'specs/build_plans/feature.md', resolved.fullSpecDir);
       
       expect(prompt).toContain('specs/agents/developer.md');
       expect(prompt).toContain('specs/build_plans/feature.md');
       expect(prompt).toContain('implement');
+    });
+
+    it('should use custom spec directory base', () => {
+      const agent = getAgent('product-spec');
+      const resolved = resolveAgentConfig(agent, 'r3nd', 'apps/my-app');
+      
+      expect(resolved.fullSpecDir).toBe('apps/my-app/r3nd');
+      expect(resolved.agentFile).toBe('apps/my-app/r3nd/agents/product-manager.md');
+      
+      const prompt = resolved.promptTemplate(resolved.agentFile, 'test input', resolved.fullSpecDir);
+      expect(prompt).toContain('apps/my-app/r3nd/product_specs/');
+    });
+
+    it('should default to root spec directory when no base provided', () => {
+      const agent = getAgent('product-spec');
+      const resolved = resolveAgentConfig(agent, 'r3nd');
+      
+      expect(resolved.fullSpecDir).toBe('r3nd');
+      expect(resolved.agentFile).toBe('r3nd/agents/product-manager.md');
+      
+      const prompt = resolved.promptTemplate(resolved.agentFile, 'test input', resolved.fullSpecDir);
+      expect(prompt).toContain('r3nd/product_specs/');
     });
   });
 });
