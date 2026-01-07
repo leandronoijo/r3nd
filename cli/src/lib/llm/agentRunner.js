@@ -350,6 +350,10 @@ async function runPlansSequential(plans, { cwd = process.cwd(), makePrompt, make
       if (!childExited) {
         await childExitPromise;
       }
+      
+      // Clear terminal for next interaction
+      process.stdout.write('\x1Bc');
+      
       console.log(`✓ Plan completed: ${planName}`);
       continue; // proceed to next plan
     }
