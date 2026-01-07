@@ -6,6 +6,7 @@ const { chooseFile, buildAgentChoices, askFeatureDescription } = require('../lib
 const { runPlansSequential, runGitHubAgent, spawnAgentWithDoneFile } = require('../lib/llm/agentRunner');
 const { ensureDir } = require('../lib/fs/fileWriter');
 const { ConfigManager } = require('../lib/config/configManager');
+const { inferSpecDirBase } = require('../lib/utils/specDirInference');
 const logger = require('../lib/utils/logger');
 const inquirer = require('inquirer');
 const prompt = inquirer.createPromptModule();
@@ -56,7 +57,11 @@ async function runAgentCommand(agentConfig, opts = {}) {
   const specDirName = await configManager.getSpecDirName();
   
   // Determine the base directory for specs (e.g., "", "apps/my-app", "workspaces/my-workspace")
-  const specDirBase = opts.specDir || '';
+  // If --file is provided but --spec-dir is not, infer from the file path
+  let specDirBase = opts.specDir || '';
+  if (!specDirBase && opts.file) {
+    specDirBase = inferSpecDirBase(opts.file, specDirName);
+  }
   const fullSpecDir = specDirBase ? path.join(specDirBase, specDirName) : specDirName;
   
   const resolvedAgentConfig = resolveAgentConfig(agentConfig, specDirName, specDirBase);
