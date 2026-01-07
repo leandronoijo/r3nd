@@ -13,12 +13,12 @@
  * Generate summary log creation instructions for agents
  * @param {string} agentName - Name of the agent
  * @param {string} doneFile - Name of the done file
- * @param {string} specDirName - Spec directory name from configuration
+ * @param {string} specDirPath - Full spec directory path (e.g., "r3nd" or "apps/my-app/r3nd")
  * @returns {string} Instructions for creating summary log
  */
-function getSummaryLogInstructions(agentName, doneFile, specDirName) {
+function getSummaryLogInstructions(agentName, doneFile, specDirPath) {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '-').substring(0, 19);
-  const summaryFile = `${specDirName}/agent_summaries/${agentName}-${timestamp}.md`;
+  const summaryFile = `${specDirPath}/agent_summaries/${agentName}-${timestamp}.md`;
   
   return `\n\nBEFORE CREATING THE DONE FILE:\n` +
     `Create a summary log file at "${summaryFile}" with the following content:\n` +
@@ -49,7 +49,7 @@ const AGENT_REGISTRY = [
     name: 'product-spec',
     description: 'Generate a product specification from a feature description',
     filesDir: null, // No file selection - uses free text input
-    agentFile: (specDirName) => `${specDirName}/agents/product-manager.md`,
+    agentFile: (specDirPath) => `${specDirPath}/agents/product-manager.md`,
     useFreeTextInput: true,
     promptTemplate: (agentFile, userInput, specDirPath) => 
       `Using the ${agentFile} agent profile as instructions, please create a product specification for the following feature description:\n\n${userInput}\n\nFollow the template at .github/templates/product_spec.md and ensure all sections are properly filled out. Generate an appropriate feature-id based on the description.\n\nIMPORTANT: Save the product specification in the directory: ${specDirPath}/product_specs/`,
@@ -59,8 +59,8 @@ const AGENT_REGISTRY = [
   {
     name: 'tech-spec',
     description: 'Generate a technical specification from a product spec',
-    filesDir: (specDirName) => `${specDirName}/product_specs`,
-    agentFile: (specDirName) => `${specDirName}/agents/architect.md`,
+    filesDir: (specDirPath) => `${specDirPath}/product_specs`,
+    agentFile: (specDirPath) => `${specDirPath}/agents/architect.md`,
     promptTemplate: (agentFile, targetFile, specDirPath) => 
       `Using the ${agentFile} agent profile as instructions, please create a technical specification for the following product spec:\n\n${targetFile}\n\nFollow the template at .github/templates/tech_spec.md and ensure all sections are properly filled out.\n\nIMPORTANT: Save the technical specification in the directory: ${specDirPath}/tech_specs/`,
     interactiveSuffix: (doneFile, specDirPath) =>
@@ -69,8 +69,8 @@ const AGENT_REGISTRY = [
   {
     name: 'build-plan',
     description: 'Generate a build plan from a technical specification',
-    filesDir: (specDirName) => `${specDirName}/tech_specs`,
-    agentFile: (specDirName) => `${specDirName}/agents/team-lead.md`,
+    filesDir: (specDirPath) => `${specDirPath}/tech_specs`,
+    agentFile: (specDirPath) => `${specDirPath}/agents/team-lead.md`,
     promptTemplate: (agentFile, targetFile, specDirPath) =>
       `Using the ${agentFile} agent profile as instructions, please create a build plan for the following technical specification:\n\n${targetFile}\n\nFollow the template at .github/templates/build_plan.md and break down the work into atomic, testable tasks.\n\nIMPORTANT: Save the build plan in the directory: ${specDirPath}/build_plans/`,
     interactiveSuffix: (doneFile, specDirPath) =>
@@ -79,8 +79,8 @@ const AGENT_REGISTRY = [
   {
     name: 'develop',
     description: 'Implement a build plan to completion',
-    filesDir: (specDirName) => `${specDirName}/build_plans`,
-    agentFile: (specDirName) => `${specDirName}/agents/developer.md`,
+    filesDir: (specDirPath) => `${specDirPath}/build_plans`,
+    agentFile: (specDirPath) => `${specDirPath}/agents/developer.md`,
     promptTemplate: (agentFile, targetFile, specDirPath) =>
       `Using the ${agentFile} agent profile as instructions, please implement the following build plan to its completion:\n\n${targetFile}\n\nIMPORTANT: Follow all rules in the agent profile. Read instruction files before starting. Test as you implement. Mark tasks complete as you finish them.`,
     interactiveSuffix: (doneFile, specDirPath) =>
@@ -89,8 +89,8 @@ const AGENT_REGISTRY = [
   {
     name: 'test-cases',
     description: 'Generate E2E test cases from a build plan',
-    filesDir: (specDirName) => `${specDirName}/build_plans`,
-    agentFile: (specDirName) => `${specDirName}/agents/qa-team-lead.md`,
+    filesDir: (specDirPath) => `${specDirPath}/build_plans`,
+    agentFile: (specDirPath) => `${specDirPath}/agents/qa-team-lead.md`,
     promptTemplate: (agentFile, targetFile, specDirPath) =>
       `Using the ${agentFile} agent profile as instructions, please create E2E test cases for the following build plan:\n\n${targetFile}\n\nFollow the template at .github/templates/test_cases.md and generate up to 20 sanity-level test cases that validate core flows and interactions between touched components.\n\nIMPORTANT: Save the test cases in the directory: ${specDirPath}/test_cases/`,
     interactiveSuffix: (doneFile, specDirPath) =>
@@ -99,8 +99,8 @@ const AGENT_REGISTRY = [
   {
     name: 'e2e-tests',
     description: 'Generate, run, and diagnose E2E tests from test cases',
-    filesDir: (specDirName) => `${specDirName}/test_cases`,
-    agentFile: (specDirName) => `${specDirName}/agents/e2e-engineer.md`,
+    filesDir: (specDirPath) => `${specDirPath}/test_cases`,
+    agentFile: (specDirPath) => `${specDirPath}/agents/e2e-engineer.md`,
     promptTemplate: (agentFile, targetFile, specDirPath) =>
       `Using the ${agentFile} agent profile as instructions, please implement and execute E2E tests for the following test cases:\n\n${targetFile}\n\nIMPORTANT: Follow all rules in the agent profile. Read .github/instructions/e2e-testing.instructions.md before starting. Start required services, run tests sequentially, diagnose failures, and generate a comprehensive result report.\n\nTest results should be saved to: ${specDirPath}/e2e_results/`,
     interactiveSuffix: (doneFile, specDirPath) =>
@@ -110,7 +110,7 @@ const AGENT_REGISTRY = [
     name: 'retro',
     description: 'Review PR discussions and create a retro report',
     filesDir: null, // No file selection - uses free text input (PR number or URL)
-    agentFile: (specDirName) => `${specDirName}/agents/retro.md`,
+    agentFile: (specDirPath) => `${specDirPath}/agents/retro.md`,
     useFreeTextInput: true,
     promptTemplate: (agentFile, userInput, specDirPath) =>
       `Using the ${agentFile} agent profile as instructions, \n\nFollow the template at .github/templates/retro.md and ensure all sections are properly filled out. Analyze review comments, review threads, and issue comments to identify improvements to agents, templates, or instructions.\n\nIMPORTANT: Before analyzing the PR, read all agent summary logs from ${specDirPath}/agent_summaries/ to understand what happened during the development process. These logs contain summaries of agent interactions and will provide context about the workflow that led to this PR.\n\nSave the retro report in: ${specDirPath}/retros/`,
