@@ -86,11 +86,15 @@ Commands:
     - `tech-spec`: Generate a technical specification from a product spec
     - `build-plan`: Generate a build plan from a technical specification
     - `develop`: Implement a build plan to completion
+    - `test-cases`: Generate E2E test cases from a build plan
+    - `e2e-tests`: Generate, run, and diagnose E2E tests from test cases
+    - `retro`: Review PR discussions and create a retro report
   - **Note**: Only agents installed on your system will be available as options.
+  - **Spec Directory Option**: Use `--spec-dir <path>` to specify where spec files should be saved (e.g., `apps/my-app`, `services/auth`). Files will be saved in `<spec-dir>/<spec-dir-name>/` where `spec-dir-name` comes from your r3nd.yaml config (defaults to `r3nd`).
   - Examples:
 
     ```bash
-    # Interactive mode
+    # Interactive mode (saves to root r3nd/ directory by default)
     r3nd agents product-spec
     r3nd agents tech-spec
     r3nd agents build-plan
@@ -98,8 +102,17 @@ Commands:
 
     # With options
     r3nd agents product-spec --input "Build user auth system" --agent github
-    r3nd agents tech-spec --file rnd/product_specs/auth.md --agent github
-    r3nd agents develop --file rnd/build_plans/feature.md --agent codex
+    r3nd agents tech-spec --file r3nd/product_specs/auth.md --agent github
+    r3nd agents develop --file r3nd/build_plans/feature.md --agent codex
+
+    # Using custom spec directory (saves to apps/backend/r3nd/)
+    r3nd agents product-spec --spec-dir apps/backend --input "Add OAuth2" --agent github
+    r3nd agents tech-spec --spec-dir services/auth --file services/auth/r3nd/product_specs/feature.md --agent codex
+    
+    # Example for monorepo with multiple apps
+    r3nd agents product-spec --spec-dir apps/mobile --agent github    # → apps/mobile/r3nd/product_specs/
+    r3nd agents product-spec --spec-dir apps/web --agent github       # → apps/web/r3nd/product_specs/
+    r3nd agents tech-spec --spec-dir workspaces/shared --agent codex  # → workspaces/shared/r3nd/tech_specs/
     ```
 
 - `tools`: Show which AI tools are available on your system.
