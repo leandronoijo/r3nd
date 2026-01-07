@@ -1,5 +1,5 @@
-const axios = require('axios');
 const { ConfigManager } = require('../config/configManager');
+const { fetchTreeWithAuth, fetchRawWithAuth } = require('./githubAuth');
 
 class GitHubClient {
   constructor({ owner, repo, branch, cwd } = {}) {
@@ -56,15 +56,13 @@ class GitHubClient {
 
   async getTree() {
     await this._ensureInitialized();
-    const res = await axios.get(this.apiTreeUrl, { headers: { Accept: 'application/vnd.github.v3+json' } });
-    return res.data.tree || [];
+    return await fetchTreeWithAuth(this.owner, this.repo, this.branch, this.apiTreeUrl);
   }
 
   async fetchRaw(remotePath) {
     await this._ensureInitialized();
     const url = this.rawBase + remotePath;
-    const resp = await axios.get(url, { responseType: 'arraybuffer' });
-    return Buffer.from(resp.data);
+    return await fetchRawWithAuth(this.owner, this.repo, this.branch, remotePath, url);
   }
 }
 
