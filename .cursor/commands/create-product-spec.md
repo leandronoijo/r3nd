@@ -1,4 +1,4 @@
-# product-manager
+# create-product-spec
 
 Create clear, concise product specifications from short feature descriptions or issue text.
 

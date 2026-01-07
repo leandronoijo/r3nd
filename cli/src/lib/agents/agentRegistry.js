@@ -46,7 +46,7 @@ function getSummaryLogInstructions(agentName, doneFile, specDirPath) {
 
 const AGENT_REGISTRY = [
   {
-    name: 'product-spec',
+    name: 'create-product-spec',
     description: 'Generate a product specification from a feature description',
     filesDir: null, // No file selection - uses free text input
     agentFile: (specDirPath) => `${specDirPath}/agents/product-manager.md`,
@@ -54,60 +54,60 @@ const AGENT_REGISTRY = [
     promptTemplate: (agentFile, userInput, specDirPath) => 
       `Using the ${agentFile} agent profile as instructions, please create a product specification for the following feature description:\n\n${userInput}\n\nFollow the template at .github/templates/product_spec.md and ensure all sections are properly filled out. Generate an appropriate feature-id based on the description.\n\nIMPORTANT: Save the product specification in the directory: ${specDirPath}/product_specs/`,
     interactiveSuffix: (doneFile, specDirPath) =>
-      `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After completing the product specification, provide a summary of the document you created.\n2. Ask if there are any sections that need clarification or additional detail.\n3. After each of your responses, explicitly ask the user: "Are you satisfied with this product specification? (yes/no)"\n4. If the user responds "yes" or confirms satisfaction:\n   a. First, create a summary log of this interaction (see instructions below)\n   b. Then create a file named "${doneFile}" in the current directory to signal completion.\n5. If the user has follow-up questions or requests changes, address them and repeat step 3.\n6. Continue this iterative process until the user is satisfied with the product specification.${getSummaryLogInstructions('product-spec', doneFile, specDirPath)}`
+      `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After completing the product specification, provide a summary of the document you created.\n2. Ask if there are any sections that need clarification or additional detail.\n3. After each of your responses, explicitly ask the user: "Are you satisfied with this product specification? (yes/no)"\n4. If the user responds "yes" or confirms satisfaction:\n   a. First, create a summary log of this interaction (see instructions below)\n   b. Then create a file named "${doneFile}" in the current directory to signal completion.\n5. If the user has follow-up questions or requests changes, address them and repeat step 3.\n6. Continue this iterative process until the user is satisfied with the product specification.${getSummaryLogInstructions('create-product-spec', doneFile, specDirPath)}`
   },
   {
-    name: 'tech-spec',
+    name: 'create-tech-spec',
     description: 'Generate a technical specification from a product spec',
     filesDir: (specDirPath) => `${specDirPath}/product_specs`,
     agentFile: (specDirPath) => `${specDirPath}/agents/architect.md`,
     promptTemplate: (agentFile, targetFile, specDirPath) => 
       `Using the ${agentFile} agent profile as instructions, please create a technical specification for the following product spec:\n\n${targetFile}\n\nFollow the template at .github/templates/tech_spec.md and ensure all sections are properly filled out.\n\nIMPORTANT: Save the technical specification in the directory: ${specDirPath}/tech_specs/`,
     interactiveSuffix: (doneFile, specDirPath) =>
-      `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After completing the technical specification, provide a summary highlighting the key technical decisions and architecture.\n2. Ask if there are any technical aspects that need further elaboration or alternative approaches to consider.\n3. After each of your responses, explicitly ask the user: "Are you satisfied with this technical specification? (yes/no)"\n4. If the user responds "yes" or confirms satisfaction:\n   a. First, create a summary log of this interaction (see instructions below)\n   b. Then create a file named "${doneFile}" in the current directory to signal completion.\n5. If the user has follow-up questions or requests changes, address them and repeat step 3.\n6. Continue this iterative process until the user is satisfied with the technical specification.${getSummaryLogInstructions('tech-spec', doneFile, specDirPath)}`
+      `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After completing the technical specification, provide a summary highlighting the key technical decisions and architecture.\n2. Ask if there are any technical aspects that need further elaboration or alternative approaches to consider.\n3. After each of your responses, explicitly ask the user: "Are you satisfied with this technical specification? (yes/no)"\n4. If the user responds "yes" or confirms satisfaction:\n   a. First, create a summary log of this interaction (see instructions below)\n   b. Then create a file named "${doneFile}" in the current directory to signal completion.\n5. If the user has follow-up questions or requests changes, address them and repeat step 3.\n6. Continue this iterative process until the user is satisfied with the technical specification.${getSummaryLogInstructions('create-tech-spec', doneFile, specDirPath)}`
   },
   {
-    name: 'build-plan',
+    name: 'create-build-plan',
     description: 'Generate a build plan from a technical specification',
     filesDir: (specDirPath) => `${specDirPath}/tech_specs`,
     agentFile: (specDirPath) => `${specDirPath}/agents/team-lead.md`,
     promptTemplate: (agentFile, targetFile, specDirPath) =>
       `Using the ${agentFile} agent profile as instructions, please create a build plan for the following technical specification:\n\n${targetFile}\n\nFollow the template at .github/templates/build_plan.md and break down the work into atomic, testable tasks.\n\nIMPORTANT: Save the build plan in the directory: ${specDirPath}/build_plans/`,
     interactiveSuffix: (doneFile, specDirPath) =>
-      `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After completing the build plan, provide a summary of the tasks and estimated complexity.\n2. Ask if any tasks need to be broken down further or if dependencies are clear.\n3. After each of your responses, explicitly ask the user: "Are you satisfied with this build plan? (yes/no)"\n4. If the user responds "yes" or confirms satisfaction:\n   a. First, create a summary log of this interaction (see instructions below)\n   b. Then create a file named "${doneFile}" in the current directory to signal completion.\n5. If the user has follow-up questions or requests changes, address them and repeat step 3.\n6. Continue this iterative process until the user is satisfied with the build plan.${getSummaryLogInstructions('build-plan', doneFile, specDirPath)}`
+      `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After completing the build plan, provide a summary of the tasks and estimated complexity.\n2. Ask if any tasks need to be broken down further or if dependencies are clear.\n3. After each of your responses, explicitly ask the user: "Are you satisfied with this build plan? (yes/no)"\n4. If the user responds "yes" or confirms satisfaction:\n   a. First, create a summary log of this interaction (see instructions below)\n   b. Then create a file named "${doneFile}" in the current directory to signal completion.\n5. If the user has follow-up questions or requests changes, address them and repeat step 3.\n6. Continue this iterative process until the user is satisfied with the build plan.${getSummaryLogInstructions('create-build-plan', doneFile, specDirPath)}`
   },
   {
-    name: 'develop',
+    name: 'implement-build-plan',
     description: 'Implement a build plan to completion',
     filesDir: (specDirPath) => `${specDirPath}/build_plans`,
     agentFile: (specDirPath) => `${specDirPath}/agents/developer.md`,
     promptTemplate: (agentFile, targetFile, specDirPath) =>
       `Using the ${agentFile} agent profile as instructions, please implement the following build plan to its completion:\n\n${targetFile}\n\nIMPORTANT: Follow all rules in the agent profile. Read instruction files before starting. Test as you implement. Mark tasks complete as you finish them.`,
     interactiveSuffix: (doneFile, specDirPath) =>
-      `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After implementing each major task or checkpoint, provide a summary of what was completed and any issues encountered.\n2. Ask if there are any concerns about the implementation or if testing reveals problems.\n3. After each of your responses, explicitly ask the user: "Are you satisfied with the current implementation progress? (yes/no)"\n4. If the user responds "yes" or confirms the implementation is complete and satisfactory:\n   a. First, create a summary log of this interaction (see instructions below)\n   b. Then create a file named "${doneFile}" in the current directory to signal completion.\n5. If the user has concerns, requests changes, or identifies bugs, address them and repeat step 3.\n6. Continue this iterative process until the user is satisfied with the complete implementation.\n7. Do NOT start any server or docker foreground processes that require manual termination. Always run services in detached/background mode.${getSummaryLogInstructions('develop', doneFile, specDirPath)}`
+      `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After implementing each major task or checkpoint, provide a summary of what was completed and any issues encountered.\n2. Ask if there are any concerns about the implementation or if testing reveals problems.\n3. After each of your responses, explicitly ask the user: "Are you satisfied with the current implementation progress? (yes/no)"\n4. If the user responds "yes" or confirms the implementation is complete and satisfactory:\n   a. First, create a summary log of this interaction (see instructions below)\n   b. Then create a file named "${doneFile}" in the current directory to signal completion.\n5. If the user has concerns, requests changes, or identifies bugs, address them and repeat step 3.\n6. Continue this iterative process until the user is satisfied with the complete implementation.\n7. Do NOT start any server or docker foreground processes that require manual termination. Always run services in detached/background mode.${getSummaryLogInstructions('implement-build-plan', doneFile, specDirPath)}`
   },
   {
-    name: 'test-cases',
+    name: 'create-test-cases',
     description: 'Generate E2E test cases from a build plan',
     filesDir: (specDirPath) => `${specDirPath}/build_plans`,
     agentFile: (specDirPath) => `${specDirPath}/agents/qa-team-lead.md`,
     promptTemplate: (agentFile, targetFile, specDirPath) =>
       `Using the ${agentFile} agent profile as instructions, please create E2E test cases for the following build plan:\n\n${targetFile}\n\nFollow the template at .github/templates/test_cases.md and generate up to 20 sanity-level test cases that validate core flows and interactions between touched components.\n\nIMPORTANT: Save the test cases in the directory: ${specDirPath}/test_cases/`,
     interactiveSuffix: (doneFile, specDirPath) =>
-      `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After completing the test cases, provide a summary of the test coverage and priority distribution.\n2. Ask if any critical scenarios are missing or if existing test cases need refinement.\n3. After each of your responses, explicitly ask the user: "Are you satisfied with these test cases? (yes/no)"\n4. If the user responds "yes" or confirms satisfaction:\n   a. First, create a summary log of this interaction (see instructions below)\n   b. Then create a file named "${doneFile}" in the current directory to signal completion.\n5. If the user has concerns or requests changes, address them and repeat step 3.\n6. Continue this iterative process until the user is satisfied with the test cases.${getSummaryLogInstructions('test-cases', doneFile, specDirPath)}`
+      `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After completing the test cases, provide a summary of the test coverage and priority distribution.\n2. Ask if any critical scenarios are missing or if existing test cases need refinement.\n3. After each of your responses, explicitly ask the user: "Are you satisfied with these test cases? (yes/no)"\n4. If the user responds "yes" or confirms satisfaction:\n   a. First, create a summary log of this interaction (see instructions below)\n   b. Then create a file named "${doneFile}" in the current directory to signal completion.\n5. If the user has concerns or requests changes, address them and repeat step 3.\n6. Continue this iterative process until the user is satisfied with the test cases.${getSummaryLogInstructions('create-test-cases', doneFile, specDirPath)}`
   },
   {
-    name: 'e2e-tests',
+    name: 'run-e2e-tests',
     description: 'Generate, run, and diagnose E2E tests from test cases',
     filesDir: (specDirPath) => `${specDirPath}/test_cases`,
     agentFile: (specDirPath) => `${specDirPath}/agents/e2e-engineer.md`,
     promptTemplate: (agentFile, targetFile, specDirPath) =>
       `Using the ${agentFile} agent profile as instructions, please implement and execute E2E tests for the following test cases:\n\n${targetFile}\n\nIMPORTANT: Follow all rules in the agent profile. Read .github/instructions/e2e-testing.instructions.md before starting. Start required services, run tests sequentially, diagnose failures, and generate a comprehensive result report.\n\nTest results should be saved to: ${specDirPath}/e2e_results/`,
     interactiveSuffix: (doneFile, specDirPath) =>
-      `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After executing tests and generating the result report, provide a summary of test outcomes and failure categories.\n2. Ask if any failures need deeper investigation or if test methodology needs adjustment.\n3. After each of your responses, explicitly ask the user: "Are you satisfied with the E2E test execution and results? (yes/no)"\n4. If the user responds "yes" or confirms satisfaction:\n   a. First, create a summary log of this interaction (see instructions below)\n   b. Then create a file named "${doneFile}" in the current directory to signal completion.\n5. If the user requests re-runs, additional diagnosis, or test updates, address them and repeat step 3.\n6. Continue this iterative process until the user is satisfied with the E2E test results.\n7. Do NOT start any server or docker foreground processes that require manual termination. Always run services in detached/background mode.${getSummaryLogInstructions('e2e-tests', doneFile, specDirPath)}`
+      `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After executing tests and generating the result report, provide a summary of test outcomes and failure categories.\n2. Ask if any failures need deeper investigation or if test methodology needs adjustment.\n3. After each of your responses, explicitly ask the user: "Are you satisfied with the E2E test execution and results? (yes/no)"\n4. If the user responds "yes" or confirms satisfaction:\n   a. First, create a summary log of this interaction (see instructions below)\n   b. Then create a file named "${doneFile}" in the current directory to signal completion.\n5. If the user requests re-runs, additional diagnosis, or test updates, address them and repeat step 3.\n6. Continue this iterative process until the user is satisfied with the E2E test results.\n7. Do NOT start any server or docker foreground processes that require manual termination. Always run services in detached/background mode.${getSummaryLogInstructions('run-e2e-tests', doneFile, specDirPath)}`
   },
   {
-    name: 'retro',
+    name: 'create-retro-report',
     description: 'Review PR discussions and create a retro report',
     filesDir: null, // No file selection - uses free text input (PR number or URL)
     agentFile: (specDirPath) => `${specDirPath}/agents/retro.md`,

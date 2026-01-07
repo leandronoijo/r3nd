@@ -1,4 +1,4 @@
-# architect
+# create-tech-spec
 
 Convert product specs into a repo-grounded technical specification / high-level design.
 

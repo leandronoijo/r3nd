@@ -20,20 +20,20 @@ describe('agentRegistry', () => {
       });
     });
 
-    it('should include tech-spec, build-plan, and develop agents', () => {
+    it('should include create-tech-spec, create-build-plan, and implement-build-plan agents', () => {
       const agents = getAgents();
       const names = agents.map(a => a.name);
-      expect(names).toContain('tech-spec');
-      expect(names).toContain('build-plan');
-      expect(names).toContain('develop');
+      expect(names).toContain('create-tech-spec');
+      expect(names).toContain('create-build-plan');
+      expect(names).toContain('implement-build-plan');
     });
   });
 
   describe('getAgent', () => {
     it('should return agent config by name', () => {
-      const agent = getAgent('tech-spec');
+      const agent = getAgent('create-tech-spec');
       expect(agent).toBeDefined();
-      expect(agent.name).toBe('tech-spec');
+      expect(agent.name).toBe('create-tech-spec');
       expect(typeof agent.filesDir).toBe('function');
     });
 
@@ -87,7 +87,7 @@ describe('agentRegistry', () => {
 
     it('should throw error if agent name already exists', () => {
       const duplicateAgent = {
-        name: 'tech-spec', // Already exists
+        name: 'create-tech-spec', // Already exists
         description: 'Duplicate',
         filesDir: 'test',
         agentFile: 'test',
@@ -111,8 +111,8 @@ describe('agentRegistry', () => {
   });
 
   describe('promptTemplate functions', () => {
-    it('should generate correct prompt for tech-spec agent', () => {
-      const agent = getAgent('tech-spec');
+    it('should generate correct prompt for create-tech-spec agent', () => {
+      const agent = getAgent('create-tech-spec');
       const resolved = resolveAgentConfig(agent, 'specs');
       const prompt = resolved.promptTemplate(resolved.agentFile, 'specs/product_specs/feature.md', resolved.fullSpecDir);
       
@@ -122,8 +122,8 @@ describe('agentRegistry', () => {
       expect(prompt).toContain('specs/tech_specs/');
     });
 
-    it('should generate correct prompt for build-plan agent', () => {
-      const agent = getAgent('build-plan');
+    it('should generate correct prompt for create-build-plan agent', () => {
+      const agent = getAgent('create-build-plan');
       const resolved = resolveAgentConfig(agent, 'specs');
       const prompt = resolved.promptTemplate(resolved.agentFile, 'specs/tech_specs/feature.md', resolved.fullSpecDir);
       
@@ -133,8 +133,8 @@ describe('agentRegistry', () => {
       expect(prompt).toContain('specs/build_plans/');
     });
 
-    it('should generate correct prompt for develop agent', () => {
-      const agent = getAgent('develop');
+    it('should generate correct prompt for implement-build-plan agent', () => {
+      const agent = getAgent('implement-build-plan');
       const resolved = resolveAgentConfig(agent, 'specs');
       const prompt = resolved.promptTemplate(resolved.agentFile, 'specs/build_plans/feature.md', resolved.fullSpecDir);
       
@@ -144,7 +144,7 @@ describe('agentRegistry', () => {
     });
 
     it('should use custom spec directory base', () => {
-      const agent = getAgent('product-spec');
+      const agent = getAgent('create-product-spec');
       const resolved = resolveAgentConfig(agent, 'r3nd', 'apps/my-app');
       
       expect(resolved.fullSpecDir).toBe('apps/my-app/r3nd');
@@ -155,7 +155,7 @@ describe('agentRegistry', () => {
     });
 
     it('should default to root spec directory when no base provided', () => {
-      const agent = getAgent('product-spec');
+      const agent = getAgent('create-product-spec');
       const resolved = resolveAgentConfig(agent, 'r3nd');
       
       expect(resolved.fullSpecDir).toBe('r3nd');
