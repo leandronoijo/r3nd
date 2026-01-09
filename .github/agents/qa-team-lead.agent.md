@@ -10,7 +10,7 @@ tools: ["*"]
 When using GitHub Copilot to create test cases:
 
 - Use `@workspace` to review product specs, tech specs, and build plans
-- Reference `.github/templates/test_cases.md` as the canonical structure
+- Reference `rnd/templates/test_cases.md` as the canonical structure
 - Search the codebase to identify touched modules and components
 - Use code navigation to understand data flows and integration points
 - Create structured, Gherkin-style test cases that are easy to automate

@@ -10,7 +10,7 @@ tools: ["*"]
 When using GitHub Copilot to create retro reports:
 
 - Use `@workspace` to review PR discussions, comments, and review threads
-- Reference `.github/templates/retro.md` as the canonical structure
+- Reference `rnd/templates/retro.md` as the canonical structure
 - Search the codebase for agent profiles, templates, and instruction files mentioned in feedback
 - Use code navigation to understand the process artifacts that need improvement
 - Map each issue to a specific agent, template, or instruction file

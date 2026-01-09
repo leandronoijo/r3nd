@@ -10,13 +10,13 @@ Inputs
 
 - rnd/product_specs/<feature-id>-product-spec.md
 - Repository sources across the current codebase (code, tests, and docs based on the repository’s layout; use `.github/instructions/` for stack guidance) for context
-- The canonical template file: `.github/templates/tech_spec.md` (read and use the fields/headings verbatim)
+- The canonical template file: `rnd/templates/tech_spec.md` (read and use the fields/headings verbatim)
 
 Outputs
 -------
 
 - One Markdown file: rnd/tech_specs/<feature-id>-tech-spec.md
-- The document MUST be produced by starting from the canonical template `.github/templates/tech_spec.md` and filling its placeholders.
+- The document MUST be produced by starting from the canonical template `rnd/templates/tech_spec.md` and filling its placeholders.
 	- Preserve the template's top-level headings and sections (do not re-order or remove sections).
 	- Populate the template placeholders: `<Feature Name>`, `<feature-id>`, `Product Spec` path, `Author`, and `Date`.
 	- File name must exactly match the product spec feature id (e.g. `rnd/tech_specs/payments-v2-tech-spec.md` for `rnd/product_specs/payments-v2-product-spec.md`).
@@ -35,13 +35,13 @@ Required structure
 Behavior & rules
 ----------------
 
-- Use the template at `.github/templates/tech_spec.md` for structuring the technical specification document and follow these enforcement rules:
-	1. Always open `.github/templates/tech_spec.md` and use it as the canonical starting point for any new tech spec.
+- Use the template at `rnd/templates/tech_spec.md` for structuring the technical specification document and follow these enforcement rules:
+	1. Always open `rnd/templates/tech_spec.md` and use it as the canonical starting point for any new tech spec.
 	2. Preserve the template's top-level headings/section order. You may add small subsection notes if needed, but do not remove or reorder core sections.
 	3. Fill placeholders explicitly: replace `<Feature Name>`, `<feature-id>`, `Product Spec` path, `Author`, and `Date` with correct values. Use ISO yyyy-mm-dd for Date.
 	4. Ensure `feature-id` comes from the product spec filename (rnd/product_specs/<feature-id>-product-spec.md). The output filename must use the same <feature-id>.
 	5. Verify referenced repository files exist before naming them in the spec. If a referenced path does not exist, note that in the 'Open Technical Questions' section rather than inventing paths.
-	6. Do not modify `.github/templates/tech_spec.md`. If the template requires updates, ask a human/maintainer.
+	6. Do not modify `rnd/templates/tech_spec.md`. If the template requires updates, ask a human/maintainer.
 	7. If the template or product spec is not readable/available, stop and request clarification — do not generate a free-form tech spec.
 - Always follow repository-level instructions (_do not restate them_) and any path-specific .github/instructions/*.instructions.md. When relevant, reference those instruction files rather than copying rules.
 - Ground design in the existing repo layout and consult the `.github/instructions/*` files for technology and tooling specifics (call out specific files or modules by their repo-relative paths as they exist in the current codebase).
@@ -108,7 +108,7 @@ Each task in the breakdown must include:
 File I/O and scope
 ------------------
 
-- Read: rnd/product_specs/, the current codebase (code, tests, and docs per repository layout), and `.github/templates/` for context and the canonical template.
+- Read: rnd/product_specs/, the current codebase (code, tests, and docs per repository layout), and `rnd/templates/` for context and the canonical template.
 - Write: rnd/tech_specs/ only. Do not modify code, tests, or other files.
 - Do NOT edit the canonical template file itself; use it only as the source to produce new tech specs.
 
@@ -132,7 +132,7 @@ Template usage / population examples
 - Before writing the tech spec, verify the product spec file exists. If it does not, create a short note under 'Open Technical Questions' explaining the missing product spec and stop.
 
 Output validation checklist (agent MUST pass these before writing):
-1. Template file `.github/templates/tech_spec.md` was read and used as the base.
+1. Template file `rnd/templates/tech_spec.md` was read and used as the base.
 2. All placeholders were filled (Feature Name, feature-id, Product Spec path, Author, Date).
 3. Output filename matches the product spec feature-id.
 4. No repository files were referenced unless they exist in the repo; missing files are documented under 'Open Technical Questions'.

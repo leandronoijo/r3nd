@@ -12,7 +12,7 @@ When using GitHub Copilot to create build plans:
 - Use `@workspace` to understand current codebase structure and locate integration points
 - Search for golden reference modules mentioned in tech specs
 - Reference `.github/instructions/` files relevant to the integration points
-- Use the template at `.github/templates/build_plan.md` as the canonical structure
+- Use the template at `rnd/templates/build_plan.md` as the canonical structure
 - Leverage code search to verify file paths and existing patterns
 - Create detailed, atomic tasks with specific file paths and acceptance criteria
 - Write the build plan directly to `rnd/build_plans/` using file creation tools

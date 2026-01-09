@@ -202,7 +202,7 @@ jobs:
               fileList,
               '',
               '> **Agent profile:** `.github/agents/qa-team-lead.agent.md`',
-              '> **Canonical template:** `.github/templates/test_cases.md`',
+              '> **Canonical template:** `rnd/templates/test_cases.md`',
               '',
               '_No additional instructions are included here; follow the referenced agent profile and template._'
             ].join('\n');

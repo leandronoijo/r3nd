@@ -210,7 +210,7 @@ When tests fail, diagnose the root cause by category:
 
 ### Phase 6: Result Reporting
 
-1. **Generate result report** using template from `.github/templates/e2e-result-template.md`:
+1. **Generate result report** using template from `rnd/templates/e2e-result-template.md`:
    - Metadata: feature-id, timestamp, environment info, framework version
    - Execution summary: total/passed/failed/skipped counts, total duration
    - Per-test-case details: status, duration, stdout/stderr, errors

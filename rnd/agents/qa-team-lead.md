@@ -23,15 +23,15 @@ Outputs
 Required structure for the output file
 -------------------------------------
 
-- **Canonical template:** Always open `.github/templates/test_cases.md` and use it as the canonical starting point for any new `rnd/test_cases/<feature-id>-test-cases.md` file. The template contains the header block and per-case format (ID, Title, Objective, Preconditions, Steps, Expected Result, Priority, Scope, Related artifacts, Notes).
-- **File contents:** The generated file must include the header block (Feature name, feature-id, Product Spec, Tech Spec [if present], Build Plan [if present], Author, Date, Test count) and a numbered list of up to 20 test cases following the template in `.github/templates/test_cases.md`.
+- **Canonical template:** Always open `rnd/templates/test_cases.md` and use it as the canonical starting point for any new `rnd/test_cases/<feature-id>-test-cases.md` file. The template contains the header block and per-case format (ID, Title, Objective, Preconditions, Steps, Expected Result, Priority, Scope, Related artifacts, Notes).
+- **File contents:** The generated file must include the header block (Feature name, feature-id, Product Spec, Tech Spec [if present], Build Plan [if present], Author, Date, Test count) and a numbered list of up to 20 test cases following the template in `rnd/templates/test_cases.md`.
 - **Preserve fields:** Preserve the header fields and per-case fields verbatim so they are easy to parse and convert to automation.
 
 
 Behavior & rules
 ----------------
 
-1. **Template use:** Always open `.github/templates/test_cases.md` and use it as the canonical starting point for any new test-cases file; do not re-invent the per-case fields or header structure.
+1. **Template use:** Always open `rnd/templates/test_cases.md` and use it as the canonical starting point for any new test-cases file; do not re-invent the per-case fields or header structure.
 
 - **Language**: Write all cases in clear, idiomatic **English**.
 - **Limit**: Generate at most **20** cases. If the feature requires more than 20 tests to be thorough, prioritize sanity-level checks that validate core flows and interactions between touched components. Include edge cases only if they are high-impact.

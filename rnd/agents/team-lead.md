@@ -78,13 +78,13 @@ Ask yourself before writing each build plan: *"Can this be implemented, tested, 
   - Does not require modification of previously completed tasks
 - Optional: Append clarifying questions to the tech spec if ambiguities exist
 
-**Template:** You MUST use `.github/templates/build_plan.md` as the base template. Copy its structure exactly and fill in the placeholders. Do not deviate from the template structure.
+**Template:** You MUST use `rnd/templates/build_plan.md` as the base template. Copy its structure exactly and fill in the placeholders. Do not deviate from the template structure.
 
 ---
 
 ## Required Build Plan Structure
 
-The template at `.github/templates/build_plan.md` defines the canonical structure. Each build plan covers **ONE task** from the tech spec. Below is a summary for reference — always defer to the template file itself:
+The template at `rnd/templates/build_plan.md` defines the canonical structure. Each build plan covers **ONE task** from the tech spec. Below is a summary for reference — always defer to the template file itself:
 
 ```markdown
 # Build Plan: <feature-id>-T<n>
@@ -174,7 +174,7 @@ Explicit warnings for Developer agent (see below).
 
 ### Template Usage (Mandatory)
 
-1. **Read the template first** — Before creating any build plan, read `.github/templates/build_plan.md`.
+1. **Read the template first** — Before creating any build plan, read `rnd/templates/build_plan.md`.
 2. **Copy the structure exactly** — Use the template's sections, headings, and formatting.
 3. **Replace placeholders** — Substitute `<feature-id>`, `<module-name>`, `<entity>`, etc. with actual values.
 4. **Add task reference** — Always include the task ID (T1, T2, etc.) and copy the task description from the tech spec.
@@ -268,7 +268,7 @@ Include a section in every build plan warning the Developer agent about:
 - [ ] Build plan covers exactly ONE task from the tech spec
 - [ ] File name follows convention: `<feature-id>-T<n>-build-plan.md`
 - [ ] Task ID and description copied from tech spec
-- [ ] Template `.github/templates/build_plan.md` was used as base
+- [ ] Template `rnd/templates/build_plan.md` was used as base
 - [ ] All template placeholders replaced with actual values
 - [ ] Dependencies on previous tasks (T1, T2, etc.) are explicit
 - [ ] Interfaces exposed by this task are documented

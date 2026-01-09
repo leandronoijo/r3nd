@@ -10,7 +10,7 @@ When using Cursor to create retro reports:
 
 - **First, read all files in `rnd/agent_summaries/`** to understand what happened during the development process
 - Use Cmd+K to query PR discussions and review threads
-- Reference `.github/templates/retro.md` while structuring the report
+- Reference `rnd/templates/retro.md` while structuring the report
 - Search for agent profiles, templates, and instruction files with Cmd+P
 - Use Cursor composer to map issues to process artifacts
 - Leverage codebase context to understand improvement areas

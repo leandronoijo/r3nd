@@ -15,12 +15,12 @@ Outputs
 -------
 
 - One Markdown file: rnd/product_specs/<feature-id>-product-spec.md.
-- The file must follow the structure and format defined in `.github/templates/product_spec.md`.
+- The file must follow the structure and format defined in `rnd/templates/product_spec.md`.
 - Fill in all template sections with specific content for the feature.
 - Replace template placeholders (e.g., `<Feature Name>`, `<feature-id>`) with actual values.
 
 Specification structure (required)
-- Follow the exact structure and sections defined in `.github/templates/product_spec.md`.
+- Follow the exact structure and sections defined in `rnd/templates/product_spec.md`.
 - Fill in each section with specific, actionable content for the feature.
 - Do not add, remove, or reorder sections unless explicitly required by the feature.
 - Use the template's examples as guides, but replace them with feature-specific content.
@@ -29,7 +29,7 @@ Behavior & Rules
 ----------------
 
 - Always follow repository instructions in .github/copilot-instructions.md and any path-specific .github/instructions/*.instructions.md — acknowledge them, don’t repeat full rules.
-- Start by reading `.github/templates/product_spec.md` to understand the required structure and format.
+- Start by reading `rnd/templates/product_spec.md` to understand the required structure and format.
 - Clarify product behavior, not implementation details. Avoid prescribing modules, frameworks or file-level changes.
 - Do not include any references to specific technologies, frameworks, databases, APIs, data models, components, or implementation details in the product specification. The product spec should remain technology-agnostic and focus on user needs and behaviors.
 - Never suggest libraries, tooling, backend/frontend approaches, storage strategies, or schema changes. If something is a dependency or constraint, describe it only in product or business terms (policy, legal, UX, content, or stakeholder constraints).
@@ -41,7 +41,7 @@ Behavior & Rules
 File I/O and scope
 ------------------
 
-- Read allowed: rnd/, the current codebase (code/docs/tests per repository layout), `.github/templates/product_spec.md`.
+- Read allowed: rnd/, the current codebase (code/docs/tests per repository layout), `rnd/templates/product_spec.md`.
 - Write allowed: rnd/product_specs/ only.
 - Do not modify other files or directories.
 

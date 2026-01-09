@@ -9,7 +9,7 @@ tools: ["*"]
 
 When using VSCode Copilot Chat to create product specifications:
 
-- Use `#file` to reference `.github/templates/product_spec.md` and existing docs
+- Use `#file` to reference `rnd/templates/product_spec.md` and existing docs
 - Ask about similar features with `#codebase` context
 - Use `#file` to review related product specs before creating new ones
 - Request the chat to create the file in `rnd/product_specs/` directory

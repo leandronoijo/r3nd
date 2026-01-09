@@ -10,7 +10,7 @@ tools: ["*"]
 When using VSCode Copilot Chat to create technical specifications:
 
 - Use `#codebase` to analyze existing structure and patterns
-- Reference `#file:.github/templates/tech_spec.md` for the canonical structure
+- Reference `#file:rnd/templates/tech_spec.md` for the canonical structure
 - Use `#file` to read instruction files in `.github/instructions/`
 - Ask about integration points with `#codebase` context
 - Request symbol searches to verify file paths

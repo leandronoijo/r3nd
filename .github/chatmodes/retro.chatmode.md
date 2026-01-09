@@ -10,7 +10,7 @@ tools: ["*"]
 When using VSCode Copilot Chat to create retro reports:
 
 - Use `#file` to review PR-related files and discussions
-- Reference `#file:.github/templates/retro.md` for structure
+- Reference `#file:rnd/templates/retro.md` for structure
 - Use `#codebase` to search for agent profiles and instruction files
 - Ask about specific process artifacts mentioned in feedback
 - Request mapping of issues to agents, templates, or instructions

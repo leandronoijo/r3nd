@@ -142,7 +142,7 @@ jobs:
               '### Instructions',
               '1. Read and follow the architect agent profile at `.github/agents/architect.agent.md`',
               '2. Read the product specification(s) listed above',
-              '3. Use the template at `.github/templates/tech_spec.md` as the base for the tech spec',
+              '3. Use the template at `rnd/templates/tech_spec.md` as the base for the tech spec',
               '4. Output the tech spec to `' + specDir + '/tech_specs/` following the naming convention',
               '',
               '### Context',

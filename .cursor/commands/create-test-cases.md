@@ -9,7 +9,7 @@ Produce E2E sanity test cases (English) for features and save them under rnd/tes
 When using Cursor to create test cases:
 
 - Use Cmd+K to review product specs, tech specs, and build plans
-- Reference `.github/templates/test_cases.md` while structuring
+- Reference `rnd/templates/test_cases.md` while structuring
 - Search the codebase to identify touched modules
 - Use Cursor composer to generate structured Gherkin-style test cases
 - Leverage codebase context to understand data flows

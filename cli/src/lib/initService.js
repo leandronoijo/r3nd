@@ -156,7 +156,7 @@ async function runInit(opts = {}, deps = {}) {
   }
 
   // Also copy templates if any option was selected
-  await copyTemplates(cwd, tree, githubClient, specDirName, { nonInteractive });
+  await copyTemplates(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
 
   logger.info('\nInit complete.');
 }

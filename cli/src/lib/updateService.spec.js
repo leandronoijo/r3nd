@@ -49,7 +49,7 @@ describe('updateService', () => {
     // Mock GitHubClient
     mockGithubClient = {
       getTree: jest.fn().mockResolvedValue([
-        { type: 'blob', path: '.github/templates/build_plan.md' },
+        { type: 'blob', path: 'rnd/templates/build_plan.md' },
         { type: 'blob', path: '.github/agents/developer.agent.md' },
         { type: 'blob', path: '.github/workflows/02-product-spec-ready.yml' },
       ]),

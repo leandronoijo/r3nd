@@ -42,7 +42,7 @@ Commands:
 
 - `init`: Initialize the current directory as a git repository (runs `git init` if `.git` is missing) and copy a minimal set of seed files from the r3nd seed repository. Files copied include:
   - `.github/agents/**`
-  - `.github/templates/**`
+  - `rnd/templates/**`
   - `.github/workflows/**`
   - `.github/instructions/e2e-testing.instructions.md`
   - `.gitignore`

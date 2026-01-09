@@ -147,4 +147,4 @@ The retro agent is instructed to delete all files in `<spec-dir>/agent_summaries
 - [r3nd CLI Documentation](../cli/README.md)
 - [Agent Profiles](../.github/agents/)
 - [Cursor Commands](../.cursor/commands/)
-- [Retro Template](../.github/templates/retro.md)
+- [Retro Template](../rnd/templates/retro.md)

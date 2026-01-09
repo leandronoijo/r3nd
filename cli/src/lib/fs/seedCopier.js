@@ -222,14 +222,16 @@ async function composeAgentFiles(cwd, tree, githubClient, wrapperDir, extension,
  * @param {Array} tree - GitHub tree
  * @param {Object} githubClient - GitHub client instance
  * @param {string} specDirName - Spec directory name for local references
+ * @param {string} seedSpecDirName - Seed repo's spec directory name
  * @param {Object} options - Options
  * @param {boolean} options.nonInteractive - If true, skip files that exist
  */
-async function copyTemplates(cwd, tree, githubClient, specDirName, { nonInteractive = false } = {}) {
+async function copyTemplates(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive = false } = {}) {
   logger.info('\n📋 Copying templates...');
   
+  const seedTemplatesPath = `${seedSpecDirName}/templates/`;
   const templateFiles = tree.filter(item => 
-    item.type === 'blob' && item.path.startsWith('.github/templates/')
+    item.type === 'blob' && item.path.startsWith(seedTemplatesPath)
   );
 
   if (templateFiles.length === 0) {
@@ -240,10 +242,14 @@ async function copyTemplates(cwd, tree, githubClient, specDirName, { nonInteract
   for (const file of templateFiles) {
     try {
       const buffer = await githubClient.fetchRaw(file.path);
-      const rewritten = rewriteSpecDirBuffer(buffer, file.path, ['rnd'], specDirName);
-      const written = await writeWithOverwritePrompt(cwd, file.path, rewritten.buffer, { nonInteractive });
+      // Map from seed repo path to local path
+      const relativePath = file.path.substring(seedTemplatesPath.length);
+      const localPath = `${specDirName}/templates/${relativePath}`;
+      
+      const rewritten = rewriteSpecDirBuffer(buffer, file.path, [seedSpecDirName], specDirName);
+      const written = await writeWithOverwritePrompt(cwd, localPath, rewritten.buffer, { nonInteractive });
       if (written) {
-        logger.info(`  Copied: ${file.path}`);
+        logger.info(`  Copied: ${localPath}`);
       }
     } catch (err) {
       logger.error(`  Failed to copy ${file.path}:`, err && err.message ? err.message : err);

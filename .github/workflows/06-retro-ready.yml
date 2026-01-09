@@ -110,7 +110,7 @@ jobs:
               '## Task for: Retro Agent',
               '',
               '> **Agent Profile:** `.github/agents/retro.agent.md`',
-              '> **Template:** `.github/templates/retro.md`',
+              '> **Template:** `rnd/templates/retro.md`',
               '',
               'Review the full PR discussion and propose improvements to agents, templates, or instructions.',
               '',

@@ -10,7 +10,7 @@ tools: ["*"]
 When using VSCode Copilot Chat to create build plans:
 
 - Use `#codebase` to find golden reference modules
-- Reference `#file:.github/templates/build_plan.md` for structure
+- Reference `#file:rnd/templates/build_plan.md` for structure
 - Use `#file` to read relevant instruction files
 - Ask about file paths and module boundaries with `#codebase`
 - Request detailed task breakdowns with acceptance criteria

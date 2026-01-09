@@ -92,7 +92,7 @@ async function runScaffold(opts = {}, deps = {}) {
 
   // Mandatory seed files (excluding agents which are handled separately)
   const mandatorySeedFiles = [
-    '.github/templates/retro.md',
+    'rnd/templates/retro.md',
     '.github/workflows/06-retro-ready.yml'
   ];
 
@@ -136,7 +136,7 @@ async function runScaffold(opts = {}, deps = {}) {
     }
 
     // Copy templates
-    await copyTemplates(cwd, tree, githubClient, specDirName, { nonInteractive });
+    await copyTemplates(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
 
     // Ensure spec directories exist
     await ensureSpecDirectories(cwd, specDirName);

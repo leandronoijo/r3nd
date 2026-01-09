@@ -26,7 +26,7 @@ Review all PR discussion (review comments, review threads, and issue comments) a
 | PR discussion | PR conversation, reviews, and review threads | Source of issues and evidence |
 | PR files | PR file list | Map feedback to directories and process assets |
 | Agent profiles | `rnd/agents/*.md` | Update guidance for agents |
-| Templates | `.github/templates/*.md` | Update doc templates |
+| Templates | `rnd/templates/*.md` | Update doc templates |
 | Instructions | `.github/instructions/*.instructions.md` | Update execution rules |
 
 ---
@@ -34,7 +34,7 @@ Review all PR discussion (review comments, review threads, and issue comments) a
 ## Output
 
 - Retro report: `rnd/retros/pr-<number>-retro.md`
-- Use template: `.github/templates/retro.md`
+- Use template: `rnd/templates/retro.md`
 
 Spec directory resolution:
 - If `r3nd.yaml` contains `spec-dir-name`, use that value as `rnd`.
@@ -48,16 +48,16 @@ Use the file path referenced in the comment to determine which process artifact 
 
 | Commented Path Prefix | Improve |
 |-----------------------|---------|
-| `rnd/product_specs/` | `product-manager` agent + `.github/templates/product_spec.md` |
-| `rnd/tech_specs/` | `architect` agent + `.github/templates/tech_spec.md` |
-| `rnd/build_plans/` | `team-lead` agent + `.github/templates/build_plan.md` |
-| `rnd/test_cases/` | `qa-team-lead` agent + `.github/templates/test_cases.md` |
-| E2E artifacts in the current codebase or `rnd/e2e-results/` | `e2e-engineer` agent + `.github/instructions/e2e-testing.instructions.md` + `.github/templates/e2e-result.md` |
+| `rnd/product_specs/` | `product-manager` agent + `rnd/templates/product_spec.md` |
+| `rnd/tech_specs/` | `architect` agent + `rnd/templates/tech_spec.md` |
+| `rnd/build_plans/` | `team-lead` agent + `rnd/templates/build_plan.md` |
+| `rnd/test_cases/` | `qa-team-lead` agent + `rnd/templates/test_cases.md` |
+| E2E artifacts in the current codebase or `rnd/e2e-results/` | `e2e-engineer` agent + `.github/instructions/e2e-testing.instructions.md` + `rnd/templates/e2e-result.md` |
 | Backend application code paths in the current codebase | `developer` agent + `.github/instructions/backend.instructions.md` |
 | Frontend application code paths in the current codebase | `developer` agent + `.github/instructions/frontend.instructions.md` |
 | Automated test paths in the current codebase | `developer` agent + `.github/instructions/testing.instructions.md` |
 | `rnd/agents/` | The referenced agent profile |
-| `.github/templates/` | The referenced template |
+| `rnd/templates/` | The referenced template |
 | `.github/instructions/` | The referenced instruction file |
 
 If a comment does not reference a file path, use the PR scope and discussion context to choose the most relevant artifact and state the assumption in the retro.
@@ -70,7 +70,7 @@ If a comment does not reference a file path, use the PR scope and discussion con
 2. **Extract issues** — List mistakes, confusion, or rework noted by reviewers.
 3. **Map to process** — Use the directory mapping to determine which agent, template, or instruction should improve.
 4. **Propose updates** — Write specific, minimal changes with file paths.
-5. **Write the retro** — Use `.github/templates/retro.md` and include evidence links to comments.
+5. **Write the retro** — Use `rnd/templates/retro.md` and include evidence links to comments.
 
 ---
 

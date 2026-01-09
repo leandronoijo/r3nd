@@ -253,7 +253,7 @@ jobs:
               '',
               '> **Agent profile:** `.github/agents/e2e-engineer.agent.md`',
               '> **E2E Instructions:** `.github/instructions/e2e-testing.instructions.md`',
-              '> **Result Template:** `.github/templates/e2e-result.md`',
+              '> **Result Template:** `rnd/templates/e2e-result.md`',
               '',
               '### Instructions',
               '',

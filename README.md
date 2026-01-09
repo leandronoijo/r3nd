@@ -272,14 +272,14 @@ When running `init`, `scaffold`, or `update` commands, if no seed repository is 
 	- run `git init` if the current directory is not already a git repository
 	- copy a minimal set of seed files from the r3nd seed repository into the current directory:
 		- `.github/agents/**`
-		- `.github/templates/**`
+		- `rnd/templates/**`
 		- `.github/workflows/**`
 		- `.github/instructions/e2e-testing.instructions.md`
 		- `.gitignore`
 
 - `update`: update r3nd components from the seed repository to get the latest versions:
 	- Presents an interactive checklist to select which components to update:
-		- Templates (`.github/templates/`)
+		- Templates (`rnd/templates/`)
 		- Agents (`.github/agents/`)
 		- GitHub workflows (`.github/workflows/`)
 		- Cursor commands (`.cursor/commands/`)

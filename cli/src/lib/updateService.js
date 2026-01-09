@@ -96,8 +96,9 @@ async function runUpdate(opts = {}, deps = {}) {
 async function updateTemplates(cwd, tree, githubClient, specDirName, seedSpecDirName = 'rnd') {
   logger.info('\n📋 Updating templates...');
   
+  const seedTemplatesPath = `${seedSpecDirName}/templates/`;
   const templateFiles = tree.filter(item => 
-    item.type === 'blob' && item.path.startsWith('.github/templates/')
+    item.type === 'blob' && item.path.startsWith(seedTemplatesPath)
   );
 
   if (templateFiles.length === 0) {
@@ -108,9 +109,13 @@ async function updateTemplates(cwd, tree, githubClient, specDirName, seedSpecDir
   for (const file of templateFiles) {
     try {
       const buffer = await githubClient.fetchRaw(file.path);
+      // Map from seed repo path to local path
+      const relativePath = file.path.substring(seedTemplatesPath.length);
+      const localPath = `${specDirName}/templates/${relativePath}`;
+      
       const rewritten = rewriteSpecDirBuffer(buffer, file.path, ['rnd', 'r3nd', seedSpecDirName], specDirName);
-      await writeBuffer(cwd, file.path, rewritten.buffer, { overwrite: true });
-      logger.info(`  Updated: ${file.path}`);
+      await writeBuffer(cwd, localPath, rewritten.buffer, { overwrite: true });
+      logger.info(`  Updated: ${localPath}`);
     } catch (err) {
       logger.error(`  Failed to update ${file.path}:`, err && err.message ? err.message : err);
     }

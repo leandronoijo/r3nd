@@ -10,7 +10,7 @@ tools: ["*"]
 When using VSCode Copilot Chat to create test cases:
 
 - Use `#file` to review product specs, tech specs, and build plans
-- Reference `#file:.github/templates/test_cases.md` for structure
+- Reference `#file:rnd/templates/test_cases.md` for structure
 - Use `#codebase` to identify touched modules and components
 - Ask about data flows and integration points
 - Request Gherkin-style test case generation

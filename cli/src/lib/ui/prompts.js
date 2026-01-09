@@ -242,7 +242,7 @@ async function askUpdateOptions(nonInteractive = false) {
   if (nonInteractive) return defaultOptions;
   
   const choices = [
-    { name: 'Templates → Update .github/templates/', value: 'templates', checked: true },
+    { name: 'Templates → Update spec-dir-name/templates/', value: 'templates', checked: true },
     { name: 'Agents → Update spec-dir-name/agents/ (personas)', value: 'agents', checked: true },
     { name: 'GitHub → Update GitHub workflows (.github/workflows/)', value: 'github', checked: true },
     { name: 'Cursor → Update .cursor commands for each agent', value: 'cursor', checked: true },
