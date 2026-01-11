@@ -6,6 +6,7 @@ const { buildOverviewPrompt, buildAppPrompt, buildTargetedAppPrompt } = require(
 const { confirmRunNow, askSelectApps } = require('./ui/prompts');
 const { ConfigManager } = require('./config/configManager');
 const { findFirstSpecDirectory } = require('./fs/treeSearch');
+const { copyInstructionsToGitHub } = require('./fs/seedCopier');
 const YAML = require('yaml');
 
 // Regex patterns for parsing fenced code blocks
@@ -83,9 +84,6 @@ async function parseAppNameFromMetadata(content) {
 }
 
 async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = process.cwd(), targetDir = null } = {}) {
-  const instructionsDir = path.join(destRoot, '.github', 'instructions');
-  await ensureDir(instructionsDir);
-
   // Get configured spec directory name
   const configManager = new ConfigManager(destRoot);
   const specDirName = await configManager.getSpecDirName();
@@ -95,6 +93,10 @@ async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = 
   if (!specDir) {
     throw new Error(`No ${specDirName} directory found in repository`);
   }
+
+  // Save instructions in spec directory instead of .github
+  const instructionsDir = path.join(destRoot, specDirName, 'instructions');
+  await ensureDir(instructionsDir);
 
   // If targetDir is specified, run targeted app analysis
   if (targetDir) {
@@ -208,6 +210,12 @@ async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = 
     console.error('Agent run failed:', err && err.message ? err.message : err);
     throw err;
   }
+
+  // If .github directory exists, copy instructions there for GitHub agents/VSCode
+  const githubDirExists = await fs.access(path.join(destRoot, '.github')).then(() => true).catch(() => false);
+  if (githubDirExists) {
+    await copyInstructionsToGitHub(destRoot, specDirName, { nonInteractive: true });
+  }
 }
 
 async function runTargetedAnalyse({ agent, nonInteractive, destRoot, targetDir, instructionsDir, specDir }) {
@@ -291,6 +299,14 @@ async function runTargetedAnalyse({ agent, nonInteractive, destRoot, targetDir, 
   } catch (err) {
     console.error('Agent run failed:', err && err.message ? err.message : err);
     throw err;
+  }
+
+  // If .github directory exists, copy instructions there for GitHub agents/VSCode
+  const githubDirExists = await fs.access(path.join(destRoot, '.github')).then(() => true).catch(() => false);
+  if (githubDirExists) {
+    const configManager = new ConfigManager(destRoot);
+    const specDirName = await configManager.getSpecDirName();
+    await copyInstructionsToGitHub(destRoot, specDirName, { nonInteractive: true });
   }
 }
 

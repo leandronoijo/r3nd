@@ -269,8 +269,6 @@ async function copyTemplates(cwd, tree, githubClient, specDirName, seedSpecDirNa
 async function copyCommonFiles(cwd, tree, githubClient, specDirName, { nonInteractive = false } = {}) {
   const commonFiles = [
     '.gitignore',
-    '.github/instructions/e2e-testing.instructions.md',
-    '.github/instructions/testing.instructions.md',
   ];
 
   for (const remotePath of commonFiles) {
@@ -290,12 +288,98 @@ async function copyCommonFiles(cwd, tree, githubClient, specDirName, { nonIntera
   }
 }
 
+/**
+ * Copy testing instruction files from seed repo to spec-dir/instructions
+ * @param {string} cwd - Current working directory
+ * @param {Array} tree - GitHub tree
+ * @param {Object} githubClient - GitHub client instance
+ * @param {string} specDirName - Spec directory name for local references
+ * @param {string} seedSpecDirName - Seed repo's spec directory name
+ * @param {Object} options - Options
+ * @param {boolean} options.nonInteractive - If true, skip files that exist
+ */
+async function copyTestingInstructions(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive = false } = {}) {
+  logger.info('\n📋 Copying testing instructions to spec directory...');
+  
+  const testingFiles = [
+    '.github/instructions/e2e-testing.instructions.md',
+    '.github/instructions/testing.instructions.md',
+  ];
+
+  for (const remotePath of testingFiles) {
+    const exists = tree.some(item => item.path === remotePath && item.type === 'blob');
+    if (exists) {
+      try {
+        const buffer = await githubClient.fetchRaw(remotePath);
+        const rewritten = rewriteSpecDirBuffer(buffer, remotePath, ['rnd', 'r3nd', seedSpecDirName], specDirName);
+        
+        // Map to spec directory
+        const fileName = path.basename(remotePath);
+        const localPath = path.join(specDirName, 'instructions', fileName);
+        
+        const written = await writeWithOverwritePrompt(cwd, localPath, rewritten.buffer, { nonInteractive });
+        if (written) {
+          logger.info(`  Copied: ${remotePath} -> ${localPath}`);
+        }
+      } catch (err) {
+        logger.error(`  Failed to copy ${remotePath}:`, err && err.message ? err.message : err);
+      }
+    }
+  }
+}
+
+/**
+ * Copy instructions from spec-dir/instructions to .github/instructions
+ * This is needed for GitHub Copilot agents and VSCode
+ * @param {string} cwd - Current working directory
+ * @param {string} specDirName - Spec directory name
+ * @param {Object} options - Options
+ * @param {boolean} options.nonInteractive - If true, skip files that exist
+ */
+async function copyInstructionsToGitHub(cwd, specDirName, { nonInteractive = false } = {}) {
+  logger.info('\n📋 Copying instructions to .github/instructions...');
+  
+  const instructionsDir = path.join(cwd, specDirName, 'instructions');
+  
+  try {
+    await fs.access(instructionsDir);
+  } catch (err) {
+    logger.warn('  No instructions directory found in spec directory.');
+    return;
+  }
+  
+  const files = await fs.readdir(instructionsDir);
+  const instructionFiles = files.filter(f => f.endsWith('.instructions.md') || f.endsWith('.md'));
+  
+  if (instructionFiles.length === 0) {
+    logger.warn('  No instruction files found in spec directory.');
+    return;
+  }
+  
+  for (const fileName of instructionFiles) {
+    try {
+      const sourcePath = path.join(instructionsDir, fileName);
+      const buffer = await fs.readFile(sourcePath);
+      const destPath = path.join('.github', 'instructions', fileName);
+      
+      const written = await writeWithOverwritePrompt(cwd, destPath, buffer, { nonInteractive });
+      if (written) {
+        logger.info(`  Copied: ${specDirName}/instructions/${fileName} -> ${destPath}`);
+      }
+    } catch (err) {
+      logger.error(`  Failed to copy ${fileName}:`, err && err.message ? err.message : err);
+    }
+  }
+}
+
 module.exports = {
   copyAgentPersonas,
   copyGitHubWorkflows,
   composeAgentFiles,
   copyTemplates,
   copyCommonFiles,
+  copyTestingInstructions,
+  copyInstructionsToGitHub,
   writeWithOverwritePrompt,
   fileExists,
 };

@@ -15,10 +15,10 @@ function mapDestination(remotePath, backend, frontend, specDirName = 'r3nd') {
   const backendInstrPrefix = `overlays/backend/${backend}/instructions/`;
   const frontendInstrPrefix = `overlays/frontend/${frontend}/instructions/`;
   if (remotePath.startsWith(backendInstrPrefix)) {
-    return path.join('.github', 'instructions', remotePath.slice(backendInstrPrefix.length));
+    return path.join(specDirName, 'instructions', remotePath.slice(backendInstrPrefix.length));
   }
   if (remotePath.startsWith(frontendInstrPrefix)) {
-    return path.join('.github', 'instructions', remotePath.slice(frontendInstrPrefix.length));
+    return path.join(specDirName, 'instructions', remotePath.slice(frontendInstrPrefix.length));
   }
 
   const backendBuildPrefix = `overlays/backend/${backend}/build_plans/`;

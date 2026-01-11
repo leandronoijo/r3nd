@@ -10,7 +10,8 @@ const {
   copyGitHubWorkflows, 
   composeAgentFiles, 
   copyTemplates, 
-  copyCommonFiles 
+  copyCommonFiles,
+  copyInstructionsToGitHub
 } = require('./fs/seedCopier');
 const { fetchSeedSpecDirName } = require('./overlays/overlaySeedService');
 const { askInitOptions, askSeedRepo, askSpecDirName } = require('./ui/prompts');
@@ -132,7 +133,7 @@ async function runInit(opts = {}, deps = {}) {
   // Fetch seed repo's spec-dir-name configuration
   const seedSpecDirName = await fetchSeedSpecDirName(githubClient);
 
-  // Copy common files (gitignore, instructions)
+  // Copy common files (gitignore)
   await copyCommonFiles(cwd, tree, githubClient, specDirName, { nonInteractive });
 
   // Copy platform-agnostic agent personas from seed repo
@@ -157,6 +158,11 @@ async function runInit(opts = {}, deps = {}) {
 
   // Also copy templates if any option was selected
   await copyTemplates(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
+
+  // If GitHub or VSCode is selected, copy instructions from spec-dir to .github/instructions
+  if (selectedOptions.includes('github') || selectedOptions.includes('vscode')) {
+    await copyInstructionsToGitHub(cwd, specDirName, { nonInteractive });
+  }
 
   logger.info('\nInit complete.');
 }

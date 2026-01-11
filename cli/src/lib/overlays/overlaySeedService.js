@@ -122,12 +122,15 @@ async function ensureMandatorySeedFiles(cwd, githubClient, specDirName, seedSpec
  * Ensure spec directories exist
  * @param {string} cwd - Current working directory
  * @param {string} specDirName - Spec directory name
+ * @param {Object} options - Options
+ * @param {boolean} options.createGitHubInstructions - If true, create .github/instructions directory
  */
-async function ensureSpecDirectories(cwd, specDirName) {
+async function ensureSpecDirectories(cwd, specDirName, { createGitHubInstructions = false } = {}) {
   const specDirs = [
     `${specDirName}/build_plans`,
     `${specDirName}/product_specs`,
-    `${specDirName}/tech_specs`
+    `${specDirName}/tech_specs`,
+    `${specDirName}/instructions`
   ];
   
   for (const r of specDirs) {
@@ -135,8 +138,11 @@ async function ensureSpecDirectories(cwd, specDirName) {
     logger.info(`Ensured directory: ${r}`);
   }
   
-  await ensureDir(path.join(cwd, '.github', 'instructions'));
-  logger.info('Ensured directory: .github/instructions');
+  // Only create .github/instructions if requested (for GitHub/VSCode agents)
+  if (createGitHubInstructions) {
+    await ensureDir(path.join(cwd, '.github', 'instructions'));
+    logger.info('Ensured directory: .github/instructions');
+  }
 }
 
 module.exports = {

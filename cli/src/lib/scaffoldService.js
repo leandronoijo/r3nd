@@ -7,7 +7,9 @@ const {
   copyGitHubWorkflows, 
   composeAgentFiles, 
   copyTemplates, 
-  copyCommonFiles 
+  copyCommonFiles,
+  copyTestingInstructions,
+  copyInstructionsToGitHub
 } = require('./fs/seedCopier');
 const { 
   fetchSeedSpecDirName, 
@@ -58,8 +60,8 @@ async function runScaffold(opts = {}, deps = {}) {
 
   logger.info('r3nd — project scaffolder');
 
-  const backendInstructionsExist = await fs.access(path.join(cwd, '.github', 'instructions', 'backend.instructions.md')).then(() => true).catch(() => false);
-  const frontendInstructionsExist = await fs.access(path.join(cwd, '.github', 'instructions', 'frontend.instructions.md')).then(() => true).catch(() => false);
+  const backendInstructionsExist = await fs.access(path.join(cwd, specDirName, 'instructions', 'backend.instructions.md')).then(() => true).catch(() => false);
+  const frontendInstructionsExist = await fs.access(path.join(cwd, specDirName, 'instructions', 'frontend.instructions.md')).then(() => true).catch(() => false);
 
   let backend = opts.backend;
   let frontend = opts.frontend;
@@ -105,8 +107,11 @@ async function runScaffold(opts = {}, deps = {}) {
     // Fetch seed repo's spec-dir-name configuration
     const seedSpecDirName = await fetchSeedSpecDirName(githubClient);
 
-    // Copy common files (gitignore, instructions)
+    // Copy common files (gitignore)
     await copyCommonFiles(cwd, tree, githubClient, specDirName, { nonInteractive });
+
+    // Copy testing instructions to spec-dir/instructions
+    await copyTestingInstructions(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
 
     // Copy overlay-specific files (instructions, build plans)
     await copyOverlayFiles(cwd, tree, githubClient, specDirName, seedSpecDirName, { 
@@ -138,8 +143,14 @@ async function runScaffold(opts = {}, deps = {}) {
     // Copy templates
     await copyTemplates(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
 
-    // Ensure spec directories exist
-    await ensureSpecDirectories(cwd, specDirName);
+    // Ensure spec directories exist (conditionally create .github/instructions)
+    const createGitHubInstructions = selectedOptions.includes('github') || selectedOptions.includes('vscode');
+    await ensureSpecDirectories(cwd, specDirName, { createGitHubInstructions });
+
+    // If GitHub or VSCode is selected, copy instructions from spec-dir to .github/instructions
+    if (createGitHubInstructions) {
+      await copyInstructionsToGitHub(cwd, specDirName, { nonInteractive });
+    }
 
     // Ensure mandatory seed files exist
     await ensureMandatorySeedFiles(cwd, githubClient, specDirName, seedSpecDirName, mandatorySeedFiles, { 
