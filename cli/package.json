@@ -1,6 +1,6 @@
 {
   "name": "r3nd",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "r3nd project scaffolder CLI",
   "bin": {
     "r3nd": "bin/r3nd"
