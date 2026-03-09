@@ -27,7 +27,7 @@ function register(program) {
     const cmd = agentsCommand
       .command(agent.name)
       .description(agent.description)
-      .option('--agent <type>', 'Agent type to use: codex, gemini, github, or generate')
+      .option('--agent <type>', 'Agent type to use: codex, claude, gemini, github, or generate')
       .option('--non-interactive', 'Run in non-interactive mode with defaults')
       .option('--spec-dir <path>', 'Directory containing the spec folder (e.g., "apps/my-app" for "apps/my-app/r3nd/"). Defaults to root directory.');
     
@@ -142,6 +142,7 @@ async function runAgentCommand(agentConfig, opts = {}) {
       const choices = buildAgentChoices({
         labels: {
           codex: 'Use local codex CLI (run now)',
+          claude: 'Use Claude Code CLI (run now)',
           gemini: 'Use Gemini CLI (run now)',
           github: 'Use GitHub coding agent',
         },
@@ -169,6 +170,9 @@ async function runAgentCommand(agentConfig, opts = {}) {
     // Execute based on agent choice
     if (agentChoice === 'codex') {
       await runCodexAgent(selectedFile, cwd, resolvedAgentConfig.name, resolvedAgentConfig);
+      return;
+    } else if (agentChoice === 'claude') {
+      await runClaudeAgent(selectedFile, cwd, resolvedAgentConfig.name, resolvedAgentConfig);
       return;
     } else if (agentChoice === 'gemini') {
       await runGeminiAgent(selectedFile, cwd, resolvedAgentConfig.name, resolvedAgentConfig);
@@ -220,6 +224,7 @@ async function handleFreeTextAgent(agentConfig, opts, cwd, nonInteractive) {
       const choices = buildAgentChoices({
         labels: {
           codex: 'Use local codex CLI (run now)',
+          claude: 'Use Claude Code CLI (run now)',
           gemini: 'Use Gemini CLI (run now)',
           github: 'Use GitHub coding agent',
         },
@@ -247,6 +252,9 @@ async function handleFreeTextAgent(agentConfig, opts, cwd, nonInteractive) {
     // Execute based on agent choice
     if (agentChoice === 'codex') {
       await runCodexAgent(userInput, cwd, agentConfig.name, agentConfig);
+      return;
+    } else if (agentChoice === 'claude') {
+      await runClaudeAgent(userInput, cwd, agentConfig.name, agentConfig);
       return;
     } else if (agentChoice === 'gemini') {
       await runGeminiAgent(userInput, cwd, agentConfig.name, agentConfig);
@@ -299,6 +307,38 @@ async function runCodexAgent(targetInput, cwd, agentName, agentConfig) {
     }
   } catch (err) {
     logger.error('Error running codex:', err.message || err);
+    process.exit(1);
+  }
+}
+
+/**
+ * Run Claude agent
+ */
+async function runClaudeAgent(targetInput, cwd, agentName, agentConfig) {
+  // Generate timestamp-based done file name
+  const now = new Date();
+  const timestamp = now.toISOString().replace(/[:.]/g, '-').replace('T', '-').substring(0, 19);
+  const doneFileName = `${agentName}-${timestamp}.done`;
+  const doneFilePath = path.join(cwd, doneFileName);
+
+  // Build interactive prompt with completion instructions
+  const interactivePrompt = buildInteractivePrompt(agentConfig, targetInput, doneFileName);
+
+  // Escape double quotes for shell command
+  const escapedPrompt = interactivePrompt.replace(/"/g, '\\"');
+  const command = `claude --dangerously-skip-permissions "${escapedPrompt}"`;
+
+  try {
+    const success = await spawnAgentWithDoneFile(command, cwd, doneFilePath, 'Claude');
+
+    if (success) {
+      logger.info('✓ Claude agent completed successfully.');
+    } else {
+      logger.error('✗ Claude agent did not complete successfully.');
+      process.exit(1);
+    }
+  } catch (err) {
+    logger.error('Error running Claude:', err.message || err);
     process.exit(1);
   }
 }

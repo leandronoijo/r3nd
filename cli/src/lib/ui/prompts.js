@@ -15,6 +15,7 @@ function buildAgentChoices({ labels = {}, extraChoices = [] } = {}) {
   
   const defaultLabels = {
     codex: 'Use local codex CLI (run now)',
+    claude: 'Use Claude Code CLI (run now)',
     gemini: 'Use Gemini CLI (run now)',
     github: 'Use GitHub coding agent',
   };
@@ -24,6 +25,9 @@ function buildAgentChoices({ labels = {}, extraChoices = [] } = {}) {
   // Add available agent options
   if (availableTools.codex) {
     choices.push({ name: finalLabels.codex, value: 'codex' });
+  }
+  if (availableTools.claude) {
+    choices.push({ name: finalLabels.claude, value: 'claude' });
   }
   if (availableTools.gemini) {
     choices.push({ name: finalLabels.gemini, value: 'gemini' });
@@ -37,7 +41,7 @@ function buildAgentChoices({ labels = {}, extraChoices = [] } = {}) {
   
   // Show helpful message if no agents available
   if (!availableTools.hasAnyAgent) {
-    console.log('\nℹ️  No LLM agents detected. Install codex, gemini, or gh CLI to use agents.');
+    console.log('\nℹ️  No LLM agents detected. Install codex, claude, gemini, or gh CLI to use agents.');
   }
   
   return choices;
@@ -120,6 +124,7 @@ async function askBugfixLLMChoice(nonInteractive = false) {
   const choices = buildAgentChoices({
     labels: {
       codex: 'Use local codex CLI',
+      claude: 'Use Claude Code CLI',
       gemini: 'Use Gemini CLI',
       github: 'Use GitHub coding agent',
     },
@@ -151,6 +156,7 @@ async function askAnalyseAgent(defaultAgent = 'codex', nonInteractive = false) {
   const choices = buildAgentChoices({
     labels: {
       codex: 'Local codex CLI',
+      claude: 'Claude Code CLI',
       gemini: 'Gemini CLI',
       github: 'GitHub coding agent',
     },
@@ -162,7 +168,15 @@ async function askAnalyseAgent(defaultAgent = 'codex', nonInteractive = false) {
   // If the default agent is not available, use the first available or 'generate'
   let effectiveDefault = defaultAgent;
   if (defaultAgent !== 'generate' && !availableTools[defaultAgent]) {
-    effectiveDefault = availableTools.codex ? 'codex' : availableTools.gemini ? 'gemini' : availableTools.github ? 'github' : 'generate';
+    effectiveDefault = availableTools.codex
+      ? 'codex'
+      : availableTools.claude
+        ? 'claude'
+        : availableTools.gemini
+          ? 'gemini'
+          : availableTools.github
+            ? 'github'
+            : 'generate';
   }
   
   const res = await prompt([{ 
@@ -213,12 +227,14 @@ async function chooseFile(files, message = 'Select a file:', nonInteractive = fa
  * @returns {Promise<string[]>} Array of selected option values
  */
 async function askInitOptions(nonInteractive = false) {
-  const defaultOptions = ['github', 'cursor', 'vscode'];
+  const defaultOptions = ['github', 'cursor', 'codex', 'claude', 'vscode'];
   if (nonInteractive) return defaultOptions;
   
   const choices = [
     { name: 'GitHub → Copy GitHub workflows (.github/workflows/)', value: 'github', checked: true },
     { name: 'Cursor → Create .cursor commands for each agent', value: 'cursor', checked: true },
+    { name: 'Codex → Create .codex/skills for each agent command', value: 'codex', checked: true },
+    { name: 'Claude → Create .claude/commands for each agent command', value: 'claude', checked: true },
     { name: 'VSCode → Create .github/chatmodes for each agent (Copilot personas)', value: 'vscode', checked: true },
   ];
   
@@ -238,7 +254,7 @@ async function askInitOptions(nonInteractive = false) {
  * @returns {Promise<string[]>} Array of selected option values
  */
 async function askUpdateOptions(nonInteractive = false) {
-  const defaultOptions = ['templates', 'agents', 'github', 'cursor', 'vscode'];
+  const defaultOptions = ['templates', 'agents', 'github', 'cursor', 'codex', 'claude', 'vscode'];
   if (nonInteractive) return defaultOptions;
   
   const choices = [
@@ -246,6 +262,8 @@ async function askUpdateOptions(nonInteractive = false) {
     { name: 'Agents → Update spec-dir-name/agents/ (personas)', value: 'agents', checked: true },
     { name: 'GitHub → Update GitHub workflows (.github/workflows/)', value: 'github', checked: true },
     { name: 'Cursor → Update .cursor commands for each agent', value: 'cursor', checked: true },
+    { name: 'Codex → Update .codex/skills for each agent command', value: 'codex', checked: true },
+    { name: 'Claude → Update .claude/commands for each agent command', value: 'claude', checked: true },
     { name: 'VSCode → Update .github/chatmodes for each agent (Copilot personas)', value: 'vscode', checked: true },
   ];
   

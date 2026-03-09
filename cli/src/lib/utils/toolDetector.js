@@ -34,12 +34,13 @@ function detectAvailableTools(forceRefresh = false) {
 
   const tools = {
     codex: isCommandAvailable('codex'),
+    claude: isCommandAvailable('claude'),
     gemini: isCommandAvailable('gemini'),
     github: isCommandAvailable('gh'),
   };
 
   // Calculate if any agent is available
-  tools.hasAnyAgent = tools.codex || tools.gemini || tools.github;
+  tools.hasAnyAgent = tools.codex || tools.claude || tools.gemini || tools.github;
 
   cachedResults = tools;
   return tools;
@@ -54,6 +55,7 @@ function getAvailableToolNames() {
   const available = [];
   
   if (tools.codex) available.push('codex');
+  if (tools.claude) available.push('claude');
   if (tools.gemini) available.push('gemini');
   if (tools.github) available.push('gh (GitHub CLI)');
   
@@ -69,6 +71,7 @@ function getMissingToolNames() {
   const missing = [];
   
   if (!tools.codex) missing.push('codex');
+  if (!tools.claude) missing.push('claude');
   if (!tools.gemini) missing.push('gemini');
   if (!tools.github) missing.push('gh (GitHub CLI)');
   
@@ -83,6 +86,7 @@ function getMissingToolNames() {
 function getInstallInstructions(toolName) {
   const instructions = {
     codex: 'Install codex CLI: npm install -g @modelcontextprotocol/codex',
+    claude: 'Install Claude Code CLI: https://docs.anthropic.com/en/docs/claude-code',
     gemini: 'Install gemini CLI: Follow instructions at https://github.com/google/generative-ai',
     github: 'Install GitHub CLI: https://cli.github.com/ or use package manager (e.g., sudo apt install gh, brew install gh)',
   };

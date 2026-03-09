@@ -268,7 +268,7 @@ async function runGitHubAgent(promptText, cwd, taskName = 'Task', options = {}) 
 
 /**
  * Validate that the required agent tool is available before running
- * @param {string} agentType - The agent type (codex, gemini, github)
+ * @param {string} agentType - The agent type (codex, claude, gemini, github)
  * @throws {Error} If agent tool is not available
  */
 function validateAgentAvailability(agentType) {
@@ -276,6 +276,9 @@ function validateAgentAvailability(agentType) {
   
   if (agentType === 'codex' && !availableTools.codex) {
     throw new Error(`Codex CLI not found. ${getInstallInstructions('codex')}`);
+  }
+  if (agentType === 'claude' && !availableTools.claude) {
+    throw new Error(`Claude Code CLI not found. ${getInstallInstructions('claude')}`);
   }
   if (agentType === 'gemini' && !availableTools.gemini) {
     throw new Error(`Gemini CLI not found. ${getInstallInstructions('gemini')}`);
@@ -306,7 +309,7 @@ async function runPlansSequential(plans, { cwd = process.cwd(), makePrompt, make
       continue;
     }
     
-    // For codex/gemini: wait for completion file
+    // For local interactive agents (codex/claude/gemini): wait for completion file
     const doneFile = path.join(cwd, `${planName}.done`);
     // Spawn the agent interactively.
     const child = child_process.spawn('sh', ['-lc', cmd], { stdio: 'inherit', cwd });

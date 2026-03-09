@@ -158,6 +158,91 @@ async function runBugfix(opts = {}) {
       logger.error('Failed to implement build plan:', err && err.message ? err.message : err);
     }
 
+  } else if (llmChoice === 'claude') {
+    logger.info('\n=== STEP 1: Creating Build Plan ===');
+    logger.info('Running Claude to create build plan...\n');
+
+    const planDoneFile = `${planName}-plan.done`;
+    const planPromptWithDone = `${planPrompt}\n\nIMPORTANT: Save the build plan to ${planPath}. When you have completely finished creating this build plan, create a file named ${planDoneFile} in the current directory to signal completion.`;
+
+    const claudePlanCommand = ['claude', '--dangerously-skip-permissions', planPromptWithDone];
+
+    try {
+      const childProcess = spawn(claudePlanCommand[0], claudePlanCommand.slice(1), { cwd, stdio: 'inherit' });
+
+      logger.info(`\nWaiting for build plan creation to complete (looking for ${planDoneFile})...`);
+      const maxWait = opts.agentTimeout || 3600000;
+      const startTime = Date.now();
+      let found = false;
+
+      while (Date.now() - startTime < maxWait) {
+        const exists = await fs.access(path.join(cwd, planDoneFile)).then(() => true).catch(() => false);
+        if (exists) {
+          found = true;
+          logger.info('✓ Build plan creation completed');
+          childProcess.kill('SIGTERM');
+          await fs.unlink(path.join(cwd, planDoneFile)).catch(() => {});
+          break;
+        }
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+
+      if (!found) {
+        childProcess.kill('SIGTERM');
+        throw new Error('Timeout waiting for build plan creation to complete');
+      }
+    } catch (err) {
+      logger.error('Failed to create build plan:', err && err.message ? err.message : err);
+      return;
+    }
+
+    process.stdout.write('\x1Bc');
+
+    logger.info(`\nPlease review the build plan at: ${planPath}`);
+    const approved = await confirmBuildPlan(nonInteractive);
+
+    if (!approved) {
+      logger.info('Build plan not approved. Bugfix workflow cancelled.');
+      return;
+    }
+
+    logger.info('\n=== STEP 2: Implementing Build Plan ===');
+    logger.info('Running Claude to implement the build plan...\n');
+
+    const implDoneFile = `${planName}-impl.done`;
+    const implPromptWithDone = `${implementPrompt}\n\nIMPORTANT: When you have completely finished implementing this build plan, create a file named ${implDoneFile} in the current directory to signal completion.`;
+
+    const claudeImplCommand = ['claude', '--dangerously-skip-permissions', implPromptWithDone];
+
+    try {
+      const childProcess = spawn(claudeImplCommand[0], claudeImplCommand.slice(1), { cwd, stdio: 'inherit' });
+
+      logger.info(`\nWaiting for implementation to complete (looking for ${implDoneFile})...`);
+      const maxWait = opts.agentTimeout || 3600000;
+      const startTime = Date.now();
+      let found = false;
+
+      while (Date.now() - startTime < maxWait) {
+        const exists = await fs.access(path.join(cwd, implDoneFile)).then(() => true).catch(() => false);
+        if (exists) {
+          found = true;
+          logger.info('✓ Implementation completed');
+          childProcess.kill('SIGTERM');
+          await fs.unlink(path.join(cwd, implDoneFile)).catch(() => {});
+          break;
+        }
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+
+      if (!found) {
+        childProcess.kill('SIGTERM');
+        throw new Error('Timeout waiting for implementation to complete');
+      }
+
+      logger.info('\n✓ Bugfix workflow completed successfully!');
+    } catch (err) {
+      logger.error('Failed to implement build plan:', err && err.message ? err.message : err);
+    }
   } else if (llmChoice === 'gemini') {
     // Run gemini for build plan creation
     logger.info('\n=== STEP 1: Creating Build Plan ===');

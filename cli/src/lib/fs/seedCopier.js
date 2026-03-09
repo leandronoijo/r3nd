@@ -140,7 +140,9 @@ async function copyGitHubWorkflows(cwd, tree, githubClient, specDirName, seedSpe
  */
 async function composeAgentFiles(cwd, tree, githubClient, wrapperDir, extension, specDirName, seedSpecDirName, { nonInteractive = false } = {}) {
   const platformName = wrapperDir === '.github/agents' ? 'GitHub Copilot' : 
-                       wrapperDir === '.cursor/commands' ? 'Cursor' : 'VSCode';
+                       wrapperDir === '.cursor/commands' ? 'Cursor' :
+                       wrapperDir === '.codex/skills' ? 'Codex' :
+                       wrapperDir === '.claude/commands' ? 'Claude' : 'VSCode';
   logger.info(`\n📝 Composing ${platformName} agent files...`);
   
   // Find all wrapper template files

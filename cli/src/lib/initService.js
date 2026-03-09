@@ -151,6 +151,16 @@ async function runInit(opts = {}, deps = {}) {
     await composeAgentFiles(cwd, tree, githubClient, '.cursor/commands', '.md', specDirName, seedSpecDirName, { nonInteractive });
   }
 
+  if (selectedOptions.includes('codex')) {
+    // Compose Codex skill files from wrappers + personas
+    await composeAgentFiles(cwd, tree, githubClient, '.codex/skills', 'SKILL.md', specDirName, seedSpecDirName, { nonInteractive });
+  }
+
+  if (selectedOptions.includes('claude')) {
+    // Compose Claude command files from wrappers + personas
+    await composeAgentFiles(cwd, tree, githubClient, '.claude/commands', '.md', specDirName, seedSpecDirName, { nonInteractive });
+  }
+
   if (selectedOptions.includes('vscode')) {
     // Compose VSCode chat mode files from wrappers + personas
     await composeAgentFiles(cwd, tree, githubClient, '.github/chatmodes', '.chatmode.md', specDirName, seedSpecDirName, { nonInteractive });

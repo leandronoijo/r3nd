@@ -6,7 +6,8 @@ const path = require('path');
 jest.mock('fs', () => ({
   promises: {
     readdir: jest.fn(),
-    access: jest.fn()
+    access: jest.fn(),
+    stat: jest.fn()
   }
 }));
 
@@ -25,6 +26,9 @@ describe('agentService', () => {
       ];
 
       fs.readdir.mockResolvedValue(mockEntries);
+      fs.stat.mockImplementation(async (filePath) => ({
+        birthtime: new Date(filePath.includes('file1.md') ? '2026-01-02T00:00:00Z' : '2026-01-01T00:00:00Z')
+      }));
 
       const result = await listMarkdownFiles('/test/cwd', 'specs');
 
@@ -54,13 +58,17 @@ describe('agentService', () => {
       ];
 
       fs.readdir.mockResolvedValue(mockEntries);
+      fs.stat
+        .mockResolvedValueOnce({ birthtime: new Date('2026-01-03T00:00:00Z') }) // zebra
+        .mockResolvedValueOnce({ birthtime: new Date('2026-01-01T00:00:00Z') }) // alpha
+        .mockResolvedValueOnce({ birthtime: new Date('2026-01-02T00:00:00Z') }); // beta
 
       const result = await listMarkdownFiles('/test/cwd', 'specs');
 
       expect(result).toEqual([
-        'specs/alpha.md',
+        'specs/zebra.md',
         'specs/beta.md',
-        'specs/zebra.md'
+        'specs/alpha.md'
       ]);
     });
 

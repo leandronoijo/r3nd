@@ -135,6 +135,16 @@ async function runScaffold(opts = {}, deps = {}) {
       await composeAgentFiles(cwd, tree, githubClient, '.cursor/commands', '.md', specDirName, seedSpecDirName, { nonInteractive });
     }
 
+    if (selectedOptions.includes('codex')) {
+      // Compose Codex skill files from wrappers + personas
+      await composeAgentFiles(cwd, tree, githubClient, '.codex/skills', 'SKILL.md', specDirName, seedSpecDirName, { nonInteractive });
+    }
+
+    if (selectedOptions.includes('claude')) {
+      // Compose Claude command files from wrappers + personas
+      await composeAgentFiles(cwd, tree, githubClient, '.claude/commands', '.md', specDirName, seedSpecDirName, { nonInteractive });
+    }
+
     if (selectedOptions.includes('vscode')) {
       // Compose VSCode chat mode files from wrappers + personas
       await composeAgentFiles(cwd, tree, githubClient, '.github/chatmodes', '.chatmode.md', specDirName, seedSpecDirName, { nonInteractive });
@@ -242,6 +252,40 @@ async function runScaffold(opts = {}, deps = {}) {
       logger.info('Gemini plans completed.');
     } catch (err) {
       logger.error('An error occurred while running Gemini plans:', err && err.message ? err.message : err);
+    }
+  } else if (llmChoice === 'claude') {
+    const allPlansClaude = [
+      `${specDirName}/build_plans/scaffold-backend-bootstrap-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-frontend-bootstrap-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-backend-complete-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-frontend-complete-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-infra-build-plan.md`
+    ];
+
+    const backendDirExistsClaude = await fs.access(path.join(cwd, 'src', 'backend')).then(() => true).catch(() => false);
+    const frontendDirExistsClaude = await fs.access(path.join(cwd, 'src', 'frontend')).then(() => true).catch(() => false);
+    const dockerComposeExistsClaude = await fs.access(path.join(cwd, 'docker-compose.yml')).then(() => true).catch(() => false);
+
+    const plansClaude = [];
+    if (!backendDirExistsClaude) { plansClaude.push(allPlansClaude[0]); plansClaude.push(allPlansClaude[2]); }
+    if (!frontendDirExistsClaude) { plansClaude.push(allPlansClaude[1]); plansClaude.push(allPlansClaude[3]); }
+    if (!dockerComposeExistsClaude) { plansClaude.push(allPlansClaude[4]); }
+
+    if (plansClaude.length === 0) { logger.info('\n✓ All scaffolding appears to be complete. Nothing to do!'); return; }
+
+    function makeClaudePrompt(planPath) {
+      const planName = path.basename(planPath, '.md');
+      const doneFile = `${planName}.done`;
+      return `using the ${specDirName}/agents/developer.md as instructions please implement the following building plan to its completion:\n\n1. ${planPath}\n\nIMPORTANT: When you have completely finished implementing this build plan, create a file named ${doneFile} in the current directory to signal completion.`;
+    }
+    function makeClaudeCommand(promptText) { return `claude --dangerously-skip-permissions "${promptText.replace(/"/g, '\\"')}"`; }
+
+    logger.info('\nRunning Claude Code CLI commands (interactive, sequentially):');
+    try {
+      await runPlansSequential(plansClaude, { cwd, makePrompt: async (p) => makeClaudePrompt(p), makeCommand: (prompt) => makeClaudeCommand(prompt), timeoutMs: opts.agentTimeout || 3600000, agentType: 'claude' });
+      logger.info('Claude plans completed.');
+    } catch (err) {
+      logger.error('An error occurred while running Claude plans:', err && err.message ? err.message : err);
     }
   } else if (llmChoice === 'github') {
     // GitHub: send only first prompt, user continues on GitHub

@@ -9,6 +9,7 @@ The r3nd CLI integrates with several external tools to provide AI-powered code g
 | Tool | Command | Description | Installation |
 |------|---------|-------------|--------------|
 | **Codex CLI** | `codex` | Local AI coding agent for code generation and modifications | `npm install -g @modelcontextprotocol/codex` |
+| **Claude Code** | `claude` | Anthropic's Claude Code CLI for interactive code assistance | See [Claude Code docs](https://docs.anthropic.com/en/docs/claude-code) |
 | **Gemini CLI** | `gemini` | Google's Gemini AI agent for interactive code assistance | Follow instructions at [Google Generative AI](https://github.com/google/generative-ai) |
 | **GitHub CLI** | `gh` | GitHub's official CLI with Copilot integration | Visit [cli.github.com](https://cli.github.com/) or install via package manager:<br/>• Ubuntu/Debian: `sudo apt install gh`<br/>• macOS: `brew install gh`<br/>• Other: See [installation guide](https://github.com/cli/cli#installation) |
 
@@ -43,9 +44,12 @@ Commands:
 - `init`: Initialize the current directory as a git repository (runs `git init` if `.git` is missing) and copy a minimal set of seed files from the r3nd seed repository. Files copied include:
   - `.github/agents/**`
   - `rnd/templates/**`
-  - `.github/workflows/**`
-  - `.github/instructions/e2e-testing.instructions.md`
-  - `.gitignore`
+- `.github/workflows/**`
+- `.cursor/commands/**`
+- `.claude/commands/**`
+- `.codex/skills/**`
+- `.github/instructions/e2e-testing.instructions.md`
+- `.gitignore`
   - (Includes the retro agent/template/workflow via the `.github` folders)
 
   Example:
@@ -57,7 +61,7 @@ Commands:
 
 - `analyse`: Analyse the repository and generate `project.instructions.md` and per-app instruction files using an LLM agent.
   - Options:
-    - `-a, --agent <agent>`: Agent to use (`codex|gemini|github|generate`). Default: `codex` (or first available agent).
+    - `-a, --agent <agent>`: Agent to use (`codex|claude|gemini|github|generate`). Default: `codex` (or first available agent).
     - `-n, --non-interactive`: Run without interactive prompts.
     - `-d, --dir <directory>`: Target a specific app/service directory instead of the whole project. Generates instructions for just that directory.
   - **Note**: Only agents installed on your system will be available as options.
@@ -150,6 +154,9 @@ To use AI agents with r3nd, install one or more of the following tools. **You do
 npm install -g @modelcontextprotocol/codex
 ```
 
+**Claude Code CLI:**
+See: [https://docs.anthropic.com/en/docs/claude-code](https://docs.anthropic.com/en/docs/claude-code)
+
 **Gemini CLI:**
 Follow the installation instructions at [Google Generative AI](https://github.com/google/generative-ai)
 
@@ -166,6 +173,7 @@ After installing GitHub CLI, authenticate with: `gh auth login`
 You can verify which tools are installed by running:
 ```bash
 which codex    # Check if codex is installed
+which claude   # Check if claude is installed
 which gemini   # Check if gemini is installed
 which gh       # Check if GitHub CLI is installed
 ```

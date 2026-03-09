@@ -5,7 +5,7 @@ function register(program) {
   program
     .command('analyse')
     .description('Analyse the repository and generate project/app instruction files using LLM agents')
-    .option('-a, --agent <agent>', 'Agent to use (codex|gemini|github|generate)', 'codex')
+    .option('-a, --agent <agent>', 'Agent to use (codex|claude|gemini|github|generate)', 'codex')
     .option('-n, --non-interactive', 'Run without prompting', false)
     .option('-d, --dir <directory>', 'Target a specific app/service directory instead of the whole project')
     .action(async (opts) => {

@@ -7,8 +7,8 @@ It provides:
 
 - A fully structured, opinionated directory layout  
 - Seven AI personas (Product Manager, Architect, Team Lead, Developer, QA Team Lead, E2E Engineer, Retro)  
-- A CLI that runs agents with **multiple AI backends** (Codex CLI, Gemini CLI, GitHub CLI, or prompt generation)
-- **VS Code and Cursor integrations** (chat modes, commands, and workflows)
+- A CLI that runs agents with **multiple AI backends** (Codex CLI, Claude Code, Gemini CLI, GitHub CLI, or prompt generation)
+- **VS Code, Cursor, Codex, and Claude integrations** (chat modes, commands, and skills)
 - A chained workflow pipeline producing product specs → tech specs → build plans → test cases → code → E2E → retro  
 - Human-controlled PR gates at every stage  
 - Stack overlays for common frameworks (FastAPI, NestJS, Rails, Angular, Vue)
@@ -27,15 +27,20 @@ The r3nd CLI supports **multiple AI backends** — use whatever works best for y
 | Agent | Command | Description |
 |-------|---------|-------------|
 | **Codex CLI** | `codex` | OpenAI's local coding agent |
+| **Claude Code** | `claude` | Anthropic's local coding agent |
 | **Gemini CLI** | `gemini` | Google's Gemini AI agent |
 | **GitHub CLI** | `gh` | GitHub Copilot via GitHub CLI |
 | **VS Code** | `integrated` | Built-in chat modes and agent workflows |
 | **Cursor** | `integrated` | Native AI assistant with persona support |
 | **Generate** | `generate` | Generate prompts to copy/paste into any AI |
 
-The CLI automatically detects which tools are installed and shows only available options. **VS Code and Cursor integrations** work through chat modes, commands, and workflows.
+The CLI automatically detects which tools are installed and shows only available options.
 
-r3nd includes ready-to-run Cursor command files in `.cursor/commands/` that map to agent subcommands (for example `create-product-spec.md`, `create-tech-spec.md`, `implement-build-plan.md`). you can run /<command> in your cursor chat and give it the context file.
+r3nd includes ready-to-run integration wrappers:
+- Cursor commands in `.cursor/commands/`
+- Claude commands in `.claude/commands/`
+- Codex skills in `.codex/skills/<command>/SKILL.md`
+- VS Code chat modes in `.github/chatmodes/`
 
 ### 2. Out-of-the-box personas
 Located in `.github/agents/` and `rnd/agents/`:
@@ -52,7 +57,7 @@ Each persona has a strict role and writes only to their designated output paths.
 
 ### 3. End-to-end multi-stage workflow
 
-**Tech-agnostic pipeline** that works with any AI backend (CLI tools, VS Code, Cursor, or manual prompt usage):
+**Tech-agnostic pipeline** that works with any AI backend (CLI tools, VS Code, Cursor, Claude, Codex skills, or manual prompt usage):
 
 1. 02-product-spec-ready → Creates tech spec issue after product specs change  
 2. 03-tech-spec-ready → Creates build plan issue after tech specs change  
@@ -193,7 +198,7 @@ node src/index.js <command>
 
 ```bash
 # Select AI backend
---agent <type>     # codex | gemini | github | cursor | generate
+--agent <type>     # codex | claude | gemini | github | generate
 
 # Non-interactive mode
 --non-interactive
@@ -361,6 +366,19 @@ All tech constraints live in your `.github/instructions` files.
     05-development-ready.yml
     06-retro-ready.yml
   copilot-instructions.md    # Global Copilot instructions
+.cursor/
+  commands/                  # Cursor slash-commands
+    create-product-spec.md
+    ...
+.claude/
+  commands/                  # Claude command files
+    create-product-spec.md
+    ...
+.codex/
+  skills/                    # Codex skills
+    create-product-spec/
+      SKILL.md
+    ...
 
 cli/                         # r3nd CLI tool
   src/

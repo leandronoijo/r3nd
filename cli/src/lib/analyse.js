@@ -139,6 +139,7 @@ async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = 
     }
 
     function makeCmdForPrompt(promptText) {
+      if (agent === 'claude') return `claude --dangerously-skip-permissions "${promptText.replace(/"/g, '\\"')}"`;
       if (agent === 'gemini') return `gemini --yolo -i "${promptText.replace(/"/g, '\\"')}"`;
       if (agent === 'github') return makeGitHubCommand(promptText);
       return `codex --yolo '${promptText.replace(/'/g, "'\\''")}'`;
@@ -261,6 +262,7 @@ async function runTargetedAnalyse({ agent, nonInteractive, destRoot, targetDir, 
     }
 
     function makeCmdForPrompt(promptText) {
+      if (agent === 'claude') return `claude --dangerously-skip-permissions "${promptText.replace(/"/g, '\\"')}"`;
       if (agent === 'gemini') return `gemini --yolo -i "${promptText.replace(/"/g, '\\"')}"`;
       if (agent === 'github') return makeGitHubCommand(promptText);
       return `codex --yolo '${promptText.replace(/'/g, "'\\''")}'`;

@@ -1,6 +1,6 @@
 // Mock inquirer to avoid ESM import issues
 jest.mock('./ui/prompts', () => ({
-  askUpdateOptions: jest.fn().mockResolvedValue(['templates', 'agents', 'github', 'cursor', 'vscode']),
+  askUpdateOptions: jest.fn().mockResolvedValue(['templates', 'agents', 'github', 'cursor', 'codex', 'claude', 'vscode']),
   askSeedRepo: jest.fn().mockResolvedValue('leandronoijo/r3nd@develop'),
   askSpecDirName: jest.fn().mockResolvedValue('r3nd')
 }));
@@ -30,6 +30,11 @@ jest.mock('./initService', () => ({
 jest.mock('./fs/fileWriter', () => ({
   writeBuffer: jest.fn().mockResolvedValue(undefined),
   ensureDir: jest.fn().mockResolvedValue(undefined)
+}));
+
+// Mock seed copier
+jest.mock('./fs/seedCopier', () => ({
+  copyInstructionsToGitHub: jest.fn().mockResolvedValue(undefined)
 }));
 
 const { runUpdate } = require('./updateService');

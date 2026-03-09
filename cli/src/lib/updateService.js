@@ -84,6 +84,14 @@ async function runUpdate(opts = {}, deps = {}) {
     await updateComposedAgents(cwd, tree, githubClient, '.cursor/commands', '.md', specDirName, seedSpecDirName);
   }
 
+  if (selectedOptions.includes('codex')) {
+    await updateComposedAgents(cwd, tree, githubClient, '.codex/skills', 'SKILL.md', specDirName, seedSpecDirName);
+  }
+
+  if (selectedOptions.includes('claude')) {
+    await updateComposedAgents(cwd, tree, githubClient, '.claude/commands', '.md', specDirName, seedSpecDirName);
+  }
+
   if (selectedOptions.includes('vscode')) {
     await updateComposedAgents(cwd, tree, githubClient, '.github/chatmodes', '.chatmode.md', specDirName, seedSpecDirName);
   }
@@ -207,15 +215,10 @@ async function updateGitHubWorkflows(cwd, tree, githubClient, specDirName, seedS
  */
 async function updateComposedAgents(cwd, tree, githubClient, wrapperDir, extension, specDirName, seedSpecDirName) {
   const platformName = wrapperDir === '.github/agents' ? 'GitHub Copilot' : 
-                       wrapperDir === '.cursor/commands' ? 'Cursor' : 'VSCode';
+                       wrapperDir === '.cursor/commands' ? 'Cursor' :
+                       wrapperDir === '.codex/skills' ? 'Codex' :
+                       wrapperDir === '.claude/commands' ? 'Claude' : 'VSCode';
   logger.info(`\n📝 Updating ${platformName} agent files...`);
-  
-  // Check if the platform directory exists locally
-  const dirExists = await fs.access(path.join(cwd, wrapperDir)).then(() => true).catch(() => false);
-  if (!dirExists) {
-    logger.info(`  ${wrapperDir} directory does not exist locally, skipping.`);
-    return;
-  }
   
   // Find wrapper templates
   const wrapperFiles = tree.filter(item => 
