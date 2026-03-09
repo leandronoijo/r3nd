@@ -190,6 +190,7 @@ node src/index.js <command>
 | `create-tech-spec` | Generate a tech spec from a product spec |
 | `create-build-plan` | Generate a build plan from a tech spec |
 | `implement-build-plan` | Implement a build plan to completion |
+| `implement-feature` | Run coordinated feature implementation with teammate agents |
 | `create-test-cases` | Generate E2E test cases from a build plan |
 | `run-e2e-tests` | Execute E2E tests and generate result reports |
 | `create-retro-report` | Review PR discussions and create a retro report |
@@ -230,6 +231,9 @@ r3nd agents create-tech-spec --file rnd/product_specs/auth.md --agent codex
 
 # Implement a build plan
 r3nd agents implement-build-plan --file rnd/build_plans/auth.md --agent gemini
+
+# Implement a feature with coordinator + teammates
+r3nd agents implement-feature --file rnd/tech_specs/auth.md --agent codex
 
 # Analyse existing codebase
 r3nd analyse --agent codex --non-interactive
@@ -353,6 +357,7 @@ All tech constraints live in your `.github/instructions` files.
     retro.agent.md
   chatmodes/                 # VS Code Copilot chat modes
     product-manager.chatmode.md
+    implement-feature.chatmode.md
     architect.chatmode.md
     ...
   instructions/              # Path-specific coding rules
@@ -369,14 +374,18 @@ All tech constraints live in your `.github/instructions` files.
 .cursor/
   commands/                  # Cursor slash-commands
     create-product-spec.md
+    implement-feature.md
     ...
 .claude/
   commands/                  # Claude command files
     create-product-spec.md
+    implement-feature.md
     ...
 .codex/
   skills/                    # Codex skills
     create-product-spec/
+      SKILL.md
+    implement-feature/
       SKILL.md
     ...
 

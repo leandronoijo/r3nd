@@ -20,12 +20,13 @@ describe('agentRegistry', () => {
       });
     });
 
-    it('should include create-tech-spec, create-build-plan, and implement-build-plan agents', () => {
+    it('should include create-tech-spec, create-build-plan, implement-build-plan, and implement-feature agents', () => {
       const agents = getAgents();
       const names = agents.map(a => a.name);
       expect(names).toContain('create-tech-spec');
       expect(names).toContain('create-build-plan');
       expect(names).toContain('implement-build-plan');
+      expect(names).toContain('implement-feature');
     });
   });
 
@@ -143,6 +144,17 @@ describe('agentRegistry', () => {
       expect(prompt).toContain('implement');
     });
 
+    it('should generate correct prompt for implement-feature agent', () => {
+      const agent = getAgent('implement-feature');
+      const resolved = resolveAgentConfig(agent, 'specs');
+      const prompt = resolved.promptTemplate(resolved.agentFile, 'specs/tech_specs/feature.md', resolved.fullSpecDir);
+      
+      expect(prompt).toContain('specs/agents/implement-feature.md');
+      expect(prompt).toContain('specs/tech_specs/feature.md');
+      expect(prompt).toContain('strict workflow');
+      expect(prompt).toContain('specs/agent_runs/');
+    });
+
     it('should use custom spec directory base', () => {
       const agent = getAgent('create-product-spec');
       const resolved = resolveAgentConfig(agent, 'r3nd', 'apps/my-app');
@@ -163,6 +175,22 @@ describe('agentRegistry', () => {
       
       const prompt = resolved.promptTemplate(resolved.agentFile, 'test input', resolved.fullSpecDir);
       expect(prompt).toContain('r3nd/product_specs/');
+    });
+
+    it('should resolve implement-feature paths with custom spec directory base', () => {
+      const agent = getAgent('implement-feature');
+      const resolved = resolveAgentConfig(agent, 'r3nd', 'apps/my-app');
+
+      expect(resolved.fullSpecDir).toBe('apps/my-app/r3nd');
+      expect(resolved.agentFile).toBe('apps/my-app/r3nd/agents/implement-feature.md');
+      expect(resolved.filesDir).toBe('apps/my-app/r3nd/tech_specs');
+
+      const prompt = resolved.promptTemplate(
+        resolved.agentFile,
+        'apps/my-app/r3nd/tech_specs/feature.md',
+        resolved.fullSpecDir
+      );
+      expect(prompt).toContain('apps/my-app/r3nd/agent_runs/');
     });
   });
 });

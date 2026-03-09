@@ -90,6 +90,7 @@ Commands:
     - `tech-spec`: Generate a technical specification from a product spec
     - `build-plan`: Generate a build plan from a technical specification
     - `develop`: Implement a build plan to completion
+    - `implement-feature`: Run coordinated feature implementation with teammate agents
     - `test-cases`: Generate E2E test cases from a build plan
     - `e2e-tests`: Generate, run, and diagnose E2E tests from test cases
     - `retro`: Review PR discussions and create a retro report
@@ -108,6 +109,7 @@ Commands:
     r3nd agents product-spec --input "Build user auth system" --agent github
     r3nd agents tech-spec --file r3nd/product_specs/auth.md --agent github
     r3nd agents develop --file r3nd/build_plans/feature.md --agent codex
+    r3nd agents implement-feature --file r3nd/tech_specs/feature.md --agent codex
 
     # Using custom spec directory (saves to apps/backend/r3nd/)
     r3nd agents product-spec --spec-dir apps/backend --input "Add OAuth2" --agent github

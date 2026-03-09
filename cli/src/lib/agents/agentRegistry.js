@@ -87,6 +87,16 @@ const AGENT_REGISTRY = [
       `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After implementing each major task or checkpoint, provide a summary of what was completed and any issues encountered.\n2. Ask if there are any concerns about the implementation or if testing reveals problems.\n3. After each of your responses, explicitly ask the user: "Are you satisfied with the current implementation progress? (yes/no)"\n4. If the user responds "yes" or confirms the implementation is complete and satisfactory:\n   a. First, create a summary log of this interaction (see instructions below)\n   b. Then create a file named "${doneFile}" in the current directory to signal completion.\n5. If the user has concerns, requests changes, or identifies bugs, address them and repeat step 3.\n6. Continue this iterative process until the user is satisfied with the complete implementation.\n7. Do NOT start any server or docker foreground processes that require manual termination. Always run services in detached/background mode.${getSummaryLogInstructions('implement-build-plan', doneFile, specDirPath)}`
   },
   {
+    name: 'implement-feature',
+    description: 'Implement a feature with coordinator and teammate agents to completion',
+    filesDir: (specDirPath) => `${specDirPath}/tech_specs`,
+    agentFile: (specDirPath) => `${specDirPath}/agents/implement-feature.md`,
+    promptTemplate: (agentFile, targetFile, specDirPath) =>
+      `Using the ${agentFile} agent profile as instructions, please run coordinated feature implementation for the following input path:\n\n${targetFile}\n\nTreat this input as either:\n- a tech-spec file path, or\n- a feature directory path.\n\nIMPORTANT: Execute the strict workflow in the agent profile, including build-plan assurance, per-task QA gates, and mandatory final E2E QA. Write required run artifacts under ${specDirPath}/agent_runs/.`,
+    interactiveSuffix: (doneFile, specDirPath) =>
+      `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After each major implementation checkpoint, provide a summary of task progress, task-gate status, and blockers.\n2. Ask if there are any concerns about the coordination flow, task QA gates, or final E2E outcomes.\n3. After each of your responses, explicitly ask the user: "Are you satisfied with the current implementation progress? (yes/no)"\n4. If the user responds "yes" or confirms the implementation is complete and satisfactory:\n   a. First, create a summary log of this interaction (see instructions below)\n   b. Then create a file named "${doneFile}" in the current directory to signal completion.\n5. If the user has concerns, requests changes, or identifies failures, address them and repeat step 3.\n6. Continue this iterative process until the user is satisfied with the complete implementation.\n7. Do NOT start any server or docker foreground processes that require manual termination. Always run services in detached/background mode.${getSummaryLogInstructions('implement-feature', doneFile, specDirPath)}`
+  },
+  {
     name: 'create-test-cases',
     description: 'Generate E2E test cases from a build plan',
     filesDir: (specDirPath) => `${specDirPath}/build_plans`,
