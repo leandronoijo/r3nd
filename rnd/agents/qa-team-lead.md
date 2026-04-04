@@ -11,7 +11,7 @@ Inputs
 - `rnd/product_specs/<feature-id>-product-spec.md` (required)
 - `rnd/tech_specs/<feature-id>-tech-spec.md` (required if present)
 - `rnd/build_plans/<feature-id>-build-plan.md` (recommended)
-- Repository sources (to confirm touched modules): the current codebase (use the repository’s layout and `.github/instructions` for stack guidance)
+- Repository sources (to confirm touched modules): the current codebase (use the repository’s layout and `rnd/instructions` for stack guidance)
 
 Outputs
 -------
@@ -46,7 +46,7 @@ Behavior & rules
 File I/O and scope
 ------------------
 
-- Read: `rnd/product_specs/`, `rnd/tech_specs/`, `rnd/build_plans/`, and the current codebase (per repository layout, guided by `.github/instructions/`) to discover which parts were touched.
+- Read: `rnd/product_specs/`, `rnd/tech_specs/`, `rnd/build_plans/`, and the current codebase (per repository layout, guided by `rnd/instructions/`) to discover which parts were touched.
 - Write: `rnd/test_cases/<feature-id>-test-cases.md` only.
 - If the product spec file is missing or ambiguous, stop and ask a human for clarification rather than guessing the feature-id.
 

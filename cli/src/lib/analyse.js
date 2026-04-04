@@ -6,7 +6,7 @@ const { buildOverviewPrompt, buildAppPrompt, buildTargetedAppPrompt } = require(
 const { confirmRunNow, askSelectApps } = require('./ui/prompts');
 const { ConfigManager } = require('./config/configManager');
 const { findFirstSpecDirectory } = require('./fs/treeSearch');
-const { copyInstructionsToGitHub } = require('./fs/seedCopier');
+const { copyInstructionsToRnd } = require('./fs/seedCopier');
 const YAML = require('yaml');
 
 // Regex patterns for parsing fenced code blocks
@@ -212,11 +212,8 @@ async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = 
     throw err;
   }
 
-  // If .github directory exists, copy instructions there for GitHub agents/VSCode
-  const githubDirExists = await fs.access(path.join(destRoot, '.github')).then(() => true).catch(() => false);
-  if (githubDirExists) {
-    await copyInstructionsToGitHub(destRoot, specDirName, { nonInteractive: true });
-  }
+  // Mirror generated instructions to the standard root location.
+  await copyInstructionsToRnd(destRoot, specDirName, { nonInteractive: true });
 }
 
 async function runTargetedAnalyse({ agent, nonInteractive, destRoot, targetDir, instructionsDir, specDir }) {
@@ -303,13 +300,10 @@ async function runTargetedAnalyse({ agent, nonInteractive, destRoot, targetDir, 
     throw err;
   }
 
-  // If .github directory exists, copy instructions there for GitHub agents/VSCode
-  const githubDirExists = await fs.access(path.join(destRoot, '.github')).then(() => true).catch(() => false);
-  if (githubDirExists) {
-    const configManager = new ConfigManager(destRoot);
-    const specDirName = await configManager.getSpecDirName();
-    await copyInstructionsToGitHub(destRoot, specDirName, { nonInteractive: true });
-  }
+  // Mirror generated instructions to the standard root location.
+  const configManager = new ConfigManager(destRoot);
+  const specDirName = await configManager.getSpecDirName();
+  await copyInstructionsToRnd(destRoot, specDirName, { nonInteractive: true });
 }
 
 module.exports = { runAnalyse, parseAppsFromInstructions, parseAppNameFromMetadata };

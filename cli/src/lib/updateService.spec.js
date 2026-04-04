@@ -34,7 +34,7 @@ jest.mock('./fs/fileWriter', () => ({
 
 // Mock seed copier
 jest.mock('./fs/seedCopier', () => ({
-  copyInstructionsToGitHub: jest.fn().mockResolvedValue(undefined)
+  copyInstructionsToRnd: jest.fn().mockResolvedValue(undefined)
 }));
 
 const { runUpdate } = require('./updateService');

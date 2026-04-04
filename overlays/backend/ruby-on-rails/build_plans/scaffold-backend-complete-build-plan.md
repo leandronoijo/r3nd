@@ -9,8 +9,8 @@
 
 ## 0. Pre-Implementation Checklist
 
-- [ ] Read `.github/instructions/backend.instructions.md`
-- [ ] Read `.github/instructions/testing.instructions.md`
+- [ ] Read `rnd/instructions/backend.instructions.md`
+- [ ] Read `rnd/instructions/testing.instructions.md`
 - [ ] Confirm DB will be provided via Docker (PostgreSQL)
 - [ ] List integration points with bootstrap plan: routes and initializers will be extended
 

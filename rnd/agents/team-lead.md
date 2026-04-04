@@ -40,9 +40,9 @@ Ask yourself before writing each build plan: *"Can this be implemented, tested, 
 | Input | Location | Purpose |
 |-------|----------|---------|
 | Technical Spec | `rnd/tech_specs/<feature-id>-tech-spec.md` | Source of truth for what to build; **contains required Task Breakdown** |
-| Existing Code | Current codebase (see `.github/instructions/` for layout guidance) | Context for integration points |
-| Existing Tests | Current codebase test locations (see `.github/instructions/` for layout guidance) | Patterns for new tests |
-| Stack Rules | `.github/instructions/` | Relevant conventions (match instruction files to integration points) |
+| Existing Code | Current codebase (see `rnd/instructions/` for layout guidance) | Context for integration points |
+| Existing Tests | Current codebase test locations (see `rnd/instructions/` for layout guidance) | Patterns for new tests |
+| Stack Rules | `rnd/instructions/` | Relevant conventions (match instruction files to integration points) |
 | Architecture Docs | Current codebase documentation (per repository layout) | System context and constraints |
 
 **Critical:** The tech spec contains a **Task Breakdown section** (Section 8) that defines self-contained deliverables. You must create ONE build plan for EACH task in that breakdown.
@@ -96,7 +96,7 @@ The template at `rnd/templates/build_plan.md` defines the canonical structure. E
 ## 0. Pre-Implementation Checklist
 - [ ] Verify dependencies from previous tasks are complete (if any)
 - [ ] Identify integration points in Section 1
-- [ ] Read instruction files in `.github/instructions/` that match those integration points
+- [ ] Read instruction files in `rnd/instructions/` that match those integration points
 - [ ] Identify golden reference modules to follow
 - [ ] Confirm no new dependencies needed (or justify)
 - [ ] Review interfaces this task must expose (from tech spec)
@@ -191,7 +191,7 @@ Explicit warnings for Developer agent (see below).
 
 ### General
 
-- Follow the relevant instruction files in `.github/instructions/` based on the integration points.
+- Follow the relevant instruction files in `rnd/instructions/` based on the integration points.
 - Reference these files in the plan; do not copy their full content.
 - Always identify the **golden reference** module to follow (use the example module location in the current codebase).
 
@@ -229,14 +229,14 @@ Include a section in every build plan warning the Developer agent about:
 
 | Area | Warning | Correct Pattern |
 |------|---------|-----------------|
-| Frontend | Follow relevant frontend instructions in `.github/instructions/`. | See frontend instructions |
-| Backend | Follow relevant backend instructions in `.github/instructions/`. | See backend instructions |
+| Frontend | Follow relevant frontend instructions in `rnd/instructions/`. | See frontend instructions |
+| Backend | Follow relevant backend instructions in `rnd/instructions/`. | See backend instructions |
 | DTOs | Always add validation decorators/annotations and keep DTO ↔ schema in sync. | See backend instructions |
 | Tests | Every new file needs a test. Use `data-test-id` for stable UI selectors. | `*.spec.ts` alongside source |
-| Imports | Check `package.json` and `.github/instructions/*` for allowed packages. | Verify before adding new deps |
-| State | Follow `.github/instructions/frontend.instructions.md` for state management patterns. | See frontend instructions |
-| Queries | Follow `.github/instructions/backend.instructions.md` for data access patterns. | See backend instructions |
-| Errors | Follow `.github/instructions/backend.instructions.md` for error handling conventions. | See backend instructions |
+| Imports | Check `package.json` and `rnd/instructions/*` for allowed packages. | Verify before adding new deps |
+| State | Follow `rnd/instructions/frontend.instructions.md` for state management patterns. | See frontend instructions |
+| Queries | Follow `rnd/instructions/backend.instructions.md` for data access patterns. | See backend instructions |
+| Errors | Follow `rnd/instructions/backend.instructions.md` for error handling conventions. | See backend instructions |
 | Types | No `any` types. Explicit interfaces required. | Define interfaces/types |
 | Files | Max 300-400 lines per file. Split if larger. | Single responsibility |
 
@@ -256,7 +256,7 @@ Include a section in every build plan warning the Developer agent about:
 
 ## File I/O and Scope
 
-- **Read:** `rnd/tech_specs/`, the current codebase (code, tests, and docs per repository layout), and `.github/instructions/`.
+- **Read:** `rnd/tech_specs/`, the current codebase (code, tests, and docs per repository layout), and `rnd/instructions/`.
 - **Write:** `rnd/build_plans/` only.
   - One file per tech spec task: `<feature-id>-T<n>-build-plan.md`
 - Never modify code, tests, or other specs from this agent.
@@ -306,7 +306,7 @@ Include a section in every build plan warning the Developer agent about:
   - **Golden Reference:** Example service module in the current codebase
   - **Details:**
     - Class decorated with `@Injectable()`
-    - Inject the data model via the repository's DI pattern per `.github/instructions/backend.instructions.md`
+    - Inject the data model via the repository's DI pattern per `rnd/instructions/backend.instructions.md`
     - Methods:
       - `async create(dto: CreateOrderDto): Promise<Order>` — creates and saves order
       - `async findById(id: string): Promise<Order>` — returns order or throws

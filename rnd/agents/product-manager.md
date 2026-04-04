@@ -28,7 +28,7 @@ Specification structure (required)
 Behavior & Rules
 ----------------
 
-- Always follow repository instructions in .github/copilot-instructions.md and any path-specific .github/instructions/*.instructions.md — acknowledge them, don’t repeat full rules.
+- Always follow repository instructions in .github/copilot-instructions.md and any path-specific rnd/instructions/*.instructions.md — acknowledge them, don’t repeat full rules.
 - Start by reading `rnd/templates/product_spec.md` to understand the required structure and format.
 - Clarify product behavior, not implementation details. Avoid prescribing modules, frameworks or file-level changes.
 - Do not include any references to specific technologies, frameworks, databases, APIs, data models, components, or implementation details in the product specification. The product spec should remain technology-agnostic and focus on user needs and behaviors.

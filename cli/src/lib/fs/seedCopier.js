@@ -304,8 +304,8 @@ async function copyTestingInstructions(cwd, tree, githubClient, specDirName, see
   logger.info('\n📋 Copying testing instructions to spec directory...');
   
   const testingFiles = [
-    '.github/instructions/e2e-testing.instructions.md',
-    '.github/instructions/testing.instructions.md',
+    'rnd/instructions/e2e-testing.instructions.md',
+    'rnd/instructions/testing.instructions.md',
   ];
 
   for (const remotePath of testingFiles) {
@@ -331,17 +331,24 @@ async function copyTestingInstructions(cwd, tree, githubClient, specDirName, see
 }
 
 /**
- * Copy instructions from spec-dir/instructions to .github/instructions
- * This is needed for GitHub Copilot agents and VSCode
+ * Copy instructions from spec-dir/instructions to rnd/instructions
+ * This keeps a standard, tool-agnostic instruction location.
  * @param {string} cwd - Current working directory
  * @param {string} specDirName - Spec directory name
  * @param {Object} options - Options
  * @param {boolean} options.nonInteractive - If true, skip files that exist
  */
-async function copyInstructionsToGitHub(cwd, specDirName, { nonInteractive = false } = {}) {
-  logger.info('\n📋 Copying instructions to .github/instructions...');
+async function copyInstructionsToRnd(cwd, specDirName, { nonInteractive = false } = {}) {
+  logger.info('\n📋 Copying instructions to rnd/instructions...');
   
   const instructionsDir = path.join(cwd, specDirName, 'instructions');
+  const targetDir = path.join(cwd, 'rnd', 'instructions');
+
+  // When specDirName is already "rnd", source and destination are identical.
+  if (path.resolve(instructionsDir) === path.resolve(targetDir)) {
+    logger.info('  Source is already rnd/instructions; skipping copy.');
+    return;
+  }
   
   try {
     await fs.access(instructionsDir);
@@ -362,7 +369,7 @@ async function copyInstructionsToGitHub(cwd, specDirName, { nonInteractive = fal
     try {
       const sourcePath = path.join(instructionsDir, fileName);
       const buffer = await fs.readFile(sourcePath);
-      const destPath = path.join('.github', 'instructions', fileName);
+      const destPath = path.join('rnd', 'instructions', fileName);
       
       const written = await writeWithOverwritePrompt(cwd, destPath, buffer, { nonInteractive });
       if (written) {
@@ -381,7 +388,7 @@ module.exports = {
   copyTemplates,
   copyCommonFiles,
   copyTestingInstructions,
-  copyInstructionsToGitHub,
+  copyInstructionsToRnd,
   writeWithOverwritePrompt,
   fileExists,
 };

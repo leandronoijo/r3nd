@@ -27,7 +27,7 @@ Review all PR discussion (review comments, review threads, and issue comments) a
 | PR files | PR file list | Map feedback to directories and process assets |
 | Agent profiles | `rnd/agents/*.md` | Update guidance for agents |
 | Templates | `rnd/templates/*.md` | Update doc templates |
-| Instructions | `.github/instructions/*.instructions.md` | Update execution rules |
+| Instructions | `rnd/instructions/*.instructions.md` | Update execution rules |
 
 ---
 
@@ -52,13 +52,13 @@ Use the file path referenced in the comment to determine which process artifact 
 | `rnd/tech_specs/` | `architect` agent + `rnd/templates/tech_spec.md` |
 | `rnd/build_plans/` | `team-lead` agent + `rnd/templates/build_plan.md` |
 | `rnd/test_cases/` | `qa-team-lead` agent + `rnd/templates/test_cases.md` |
-| E2E artifacts in the current codebase or `rnd/e2e-results/` | `e2e-engineer` agent + `.github/instructions/e2e-testing.instructions.md` + `rnd/templates/e2e-result.md` |
-| Backend application code paths in the current codebase | `developer` agent + `.github/instructions/backend.instructions.md` |
-| Frontend application code paths in the current codebase | `developer` agent + `.github/instructions/frontend.instructions.md` |
-| Automated test paths in the current codebase | `developer` agent + `.github/instructions/testing.instructions.md` |
+| E2E artifacts in the current codebase or `rnd/e2e-results/` | `e2e-engineer` agent + `rnd/instructions/e2e-testing.instructions.md` + `rnd/templates/e2e-result.md` |
+| Backend application code paths in the current codebase | `developer` agent + `rnd/instructions/backend.instructions.md` |
+| Frontend application code paths in the current codebase | `developer` agent + `rnd/instructions/frontend.instructions.md` |
+| Automated test paths in the current codebase | `developer` agent + `rnd/instructions/testing.instructions.md` |
 | `rnd/agents/` | The referenced agent profile |
 | `rnd/templates/` | The referenced template |
-| `.github/instructions/` | The referenced instruction file |
+| `rnd/instructions/` | The referenced instruction file |
 
 If a comment does not reference a file path, use the PR scope and discussion context to choose the most relevant artifact and state the assumption in the retro.
 

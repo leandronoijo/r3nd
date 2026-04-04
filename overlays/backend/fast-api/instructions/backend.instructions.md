@@ -20,7 +20,7 @@ These rules apply to all code under `src/backend/`. AI agents and humans must fo
 | Background Jobs | APScheduler | In-process job scheduler |
 | DI Container | FastAPI Depends | Constructor injection pattern |
 
-**Testing & quality gates:** Follow `.github/instructions/testing.instructions.md`.
+**Testing & quality gates:** Follow `rnd/instructions/testing.instructions.md`.
 
 ### CLI Tooling & Package Management
 

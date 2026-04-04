@@ -9,8 +9,8 @@
 
 ## 0. Pre-Implementation Checklist
 
-- [ ] Read `.github/instructions/backend.instructions.md`
-- [ ] Read `.github/instructions/testing.instructions.md`
+- [ ] Read `rnd/instructions/backend.instructions.md`
+- [ ] Read `rnd/instructions/testing.instructions.md`
 - [ ] Identify golden reference modules (if present)
 - [ ] Confirm minimal dependencies needed for a working bootstrap
 - [ ] Ensure local tooling: Ruby >= 3.2 and `bundle` available

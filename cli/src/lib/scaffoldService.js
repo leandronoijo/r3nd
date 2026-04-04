@@ -9,7 +9,7 @@ const {
   copyTemplates, 
   copyCommonFiles,
   copyTestingInstructions,
-  copyInstructionsToGitHub
+  copyInstructionsToRnd
 } = require('./fs/seedCopier');
 const { 
   fetchSeedSpecDirName, 
@@ -153,13 +153,13 @@ async function runScaffold(opts = {}, deps = {}) {
     // Copy templates
     await copyTemplates(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
 
-    // Ensure spec directories exist (conditionally create .github/instructions)
-    const createGitHubInstructions = selectedOptions.includes('github') || selectedOptions.includes('vscode');
-    await ensureSpecDirectories(cwd, specDirName, { createGitHubInstructions });
+    // Ensure spec directories exist (conditionally create rnd/instructions)
+    const createRndInstructions = selectedOptions.includes('github') || selectedOptions.includes('vscode');
+    await ensureSpecDirectories(cwd, specDirName, { createRndInstructions });
 
-    // If GitHub or VSCode is selected, copy instructions from spec-dir to .github/instructions
-    if (createGitHubInstructions) {
-      await copyInstructionsToGitHub(cwd, specDirName, { nonInteractive });
+    // If GitHub or VSCode is selected, copy instructions from spec-dir to rnd/instructions
+    if (createRndInstructions) {
+      await copyInstructionsToRnd(cwd, specDirName, { nonInteractive });
     }
 
     // Ensure mandatory seed files exist

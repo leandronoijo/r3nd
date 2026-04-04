@@ -9,8 +9,8 @@
 
 ## 0. Pre-Implementation Checklist
 
-- [ ] Read `.github/instructions/frontend.instructions.md`
-- [ ] Read `.github/instructions/testing.instructions.md`
+- [ ] Read `rnd/instructions/frontend.instructions.md`
+- [ ] Read `rnd/instructions/testing.instructions.md`
 - [ ] Identify golden reference components (if present)
 - [ ] Ensure local tooling: Node >= 18 and `npm` or `npx` available
 
