@@ -8,7 +8,7 @@ const { askUpdateOptions, askSeedRepo, askSpecDirName } = require('./ui/prompts'
 const { resolveTemplate, createGitHubFileReader } = require('./templateResolver');
 const { ConfigManager } = require('./config/configManager');
 const { rewriteSpecDirBuffer, rewriteSpecDirContent } = require('./utils/specDirRewrite');
-const { copyInstructionsToGitHub } = require('./fs/seedCopier');
+const { copyInstructionsToRnd } = require('./fs/seedCopier');
 const logger = require('./utils/logger');
 
 async function runUpdate(opts = {}, deps = {}) {
@@ -96,9 +96,9 @@ async function runUpdate(opts = {}, deps = {}) {
     await updateComposedAgents(cwd, tree, githubClient, '.github/chatmodes', '.chatmode.md', specDirName, seedSpecDirName);
   }
 
-  // If GitHub or VSCode is selected, copy instructions from spec-dir to .github/instructions
+  // If GitHub or VSCode is selected, copy instructions from spec-dir to rnd/instructions
   if (selectedOptions.includes('github') || selectedOptions.includes('vscode')) {
-    await copyInstructionsToGitHub(cwd, specDirName, { nonInteractive });
+    await copyInstructionsToRnd(cwd, specDirName, { nonInteractive });
   }
 
   logger.info('\nUpdate complete.');

@@ -14,7 +14,7 @@ It provides:
 - Stack overlays for common frameworks (FastAPI, NestJS, Rails, Angular, Vue)
 - Strict separation between R&D artifacts, documentation, and actual application code  
 
-This repo serves as a `seed`: clone it, customize it, and apply your own technology stack through the `.github/instructions` files.
+This repo serves as a `seed`: clone it, customize it, and apply your own technology stack through the `rnd/instructions` files.
 
 ---
 
@@ -115,7 +115,7 @@ Primary, agnostic instructions live under the `rnd/` directory so they apply reg
 Use `.github/` only for Copilot-specific overrides:
 
 - `.github/copilot-instructions.md` — optional, include only if you enable GitHub Copilot and need Copilot-specific behavior
-- `.github/instructions/*.instructions.md` — for path-specific Copilot overrides when required
+- `rnd/instructions/*.instructions.md` — for path-specific Copilot overrides when required
 
 This is where you define stack-specific rules (Node.js, Python, Go, AWS, React, etc.) without modifying persona profiles. Keep agnostic rules in `rnd/` and add `.github/` files only when you require Copilot-specific customizations.
 
@@ -283,7 +283,7 @@ r3nd scaffold
 Update files under:
 
 - `.github/copilot-instructions.md`
-- `.github/instructions/*.instructions.md`
+- `rnd/instructions/*.instructions.md`
 
 Here you define:
 
@@ -339,7 +339,7 @@ Product Spec → Tech Spec → Build Plan → Code.
 
 ### ✔ Technology independence
 The template does not assume any specific language or framework.  
-All tech constraints live in your `.github/instructions` files.
+All tech constraints live in your `rnd/instructions` files.
 
 ---
 
@@ -463,7 +463,7 @@ To extend or adapt the system:
 - Add new personas under `.github/agents` and `rnd/agents`
 - Add new workflow stages under `.github/workflows`
 - Expand repo instructions for new stacks
-- Use `.github/instructions/*.instructions.md` to enforce path-level rules
+- Use `rnd/instructions/*.instructions.md` to enforce path-level rules
 - Add new overlays under `overlays/backend` or `overlays/frontend`
 - Add architecture notes or diagrams under `docs/`
 

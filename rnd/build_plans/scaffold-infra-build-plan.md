@@ -10,10 +10,10 @@
 
 Complete these items **before** starting any implementation tasks.
 
-- [ ] Read `.github/instructions/backend.instructions.md`
-- [ ] Read `.github/instructions/frontend.instructions.md`
-- [ ] Read `.github/instructions/infrastructure.instructions.md`
-- [ ] Read `.github/instructions/testing.instructions.md`
+- [ ] Read `rnd/instructions/backend.instructions.md`
+- [ ] Read `rnd/instructions/frontend.instructions.md`
+- [ ] Read `rnd/instructions/infrastructure.instructions.md`
+- [ ] Read `rnd/instructions/testing.instructions.md`
 - [ ] Confirm service names/ports do not conflict with local defaults
 - [ ] Confirm no new dependencies needed (or justify additions below)
 
@@ -33,7 +33,7 @@ Complete these items **before** starting any implementation tasks.
 - Use multi-stage builds for both services (build → runtime) to keep images small.
 - Use environment variables for ports and database connection; defaults for local dev.
 - Map backend to `/api` and frontend to `/` with CORS enabled server-side.
-- Framework-specific build commands, database configuration, and runtime commands are defined in `.github/instructions/infrastructure.instructions.md`).
+- Framework-specific build commands, database configuration, and runtime commands are defined in `rnd/instructions/infrastructure.instructions.md`).
 
 **Integration Points:**
 | Service | Integration Type | Notes |
@@ -258,8 +258,8 @@ docker compose -f src/docker-compose.yml logs -f frontend backend
 - **Framework-specific configuration is defined in instruction files not in this plan.**
 - Align Dockerfile commands with framework conventions.
 - Adjust ports and environment variable names based on framework requirements.
-- For specific examples, refer to: `.github/instructions/infrastructure.instructions.md`
-  - frontend: `.github/instructions/frontend.instructions.md`
+- For specific examples, refer to: `rnd/instructions/infrastructure.instructions.md`
+  - frontend: `rnd/instructions/frontend.instructions.md`
 - Align Dockerfile commands with existing `package.json` scripts (adjust build/start commands to actual script names in repo).
 - If backend build output differs (e.g., `dist/src/main.js`), update CMD accordingly.
 - If frontend uses a different preview port, update compose and Dockerfile to match.

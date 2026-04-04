@@ -404,7 +404,7 @@ Test artifacts (failed tests only):
 
 ### E. Artifact Retention Policy
 
-Per `.github/instructions/e2e-testing.instructions.md`:
+Per `rnd/instructions/e2e-testing.instructions.md`:
 - **Screenshots:** Saved only for failed tests
 - **Videos:** Saved only for failed tests (retain-on-failure)
 - **Traces:** Saved only on first retry

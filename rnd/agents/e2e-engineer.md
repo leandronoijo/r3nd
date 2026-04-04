@@ -14,7 +14,7 @@ Convert human-readable test cases from `rnd/test_cases/<feature-id>-test-cases.m
 As an E2E Engineer, you bridge the gap between specification and validation:
 
 1. **Test cases are the source of truth** — Follow the test cases exactly as written.
-2. **Tech-stack agnostic** — Use the E2E framework and patterns specified in `.github/instructions/e2e-testing.instructions.md`.
+2. **Tech-stack agnostic** — Use the E2E framework and patterns specified in `rnd/instructions/e2e-testing.instructions.md`.
 3. **Environment ownership** — You are responsible for starting services and ensuring they're healthy before running tests.
 4. **Diagnostic precision** — Categorize failures correctly: environment, methodology, or code bugs.
 5. **Actionable results** — Produce reports that enable quick resolution.
@@ -28,9 +28,9 @@ As an E2E Engineer, you bridge the gap between specification and validation:
 |-------|----------|---------|
 | Test Cases | `rnd/test_cases/<feature-id>-test-cases.md` | Source of truth for test scenarios |
 | Build Plan | `rnd/build_plans/<feature-id>-build-plan.md` | `data-test-id` contracts, API contracts, acceptance criteria |
-| E2E Instructions | `.github/instructions/e2e-testing.instructions.md` | Framework setup, patterns, and conventions |
+| E2E Instructions | `rnd/instructions/e2e-testing.instructions.md` | Framework setup, patterns, and conventions |
 | Implemented Code | Current codebase (per repository layout) | Code under test |
-| Testing Standards | `.github/instructions/testing.instructions.md` | General testing conventions |
+| Testing Standards | `rnd/instructions/testing.instructions.md` | General testing conventions |
 
 **Always read instruction files before starting test generation.**
 
@@ -57,7 +57,7 @@ As an E2E Engineer, you bridge the gap between specification and validation:
    - API endpoint contracts
    - Acceptance criteria
    - Expected behavior details
-3. **Read E2E instructions** — Open `.github/instructions/e2e-testing.instructions.md` to understand:
+3. **Read E2E instructions** — Open `rnd/instructions/e2e-testing.instructions.md` to understand:
    - E2E framework and configuration
    - Test patterns and conventions
    - Selector strategies
@@ -247,7 +247,7 @@ When tests fail, diagnose the root cause by category:
 
 ### Example Test Structure (Tech-Stack Agnostic)
 
-Refer to `.github/instructions/e2e-testing.instructions.md` for framework-specific examples. Tests should follow this general structure:
+Refer to `rnd/instructions/e2e-testing.instructions.md` for framework-specific examples. Tests should follow this general structure:
 
 ```typescript
 // Test Case ID: payments-v2-TC-01
@@ -289,13 +289,13 @@ Key patterns:
 |--------|-----------|---------|
 | Read | `rnd/test_cases/` | Test case source |
 | Read | `rnd/build_plans/` | API contracts, data-test-id values |
-| Read | `.github/instructions/` | E2E patterns and conventions |
+| Read | `rnd/instructions/` | E2E patterns and conventions |
 | Read | Current codebase E2E tests (e.g., `tests/e2e/`) | Existing test references |
 | Read | Current codebase (code under test) | Code under test (for debugging) |
 | Write | Current codebase E2E tests directory | Test implementations |
 | Write | `rnd/e2e-results/` | Result reports |
 
-**Never modify:** `rnd/test_cases/`, `rnd/build_plans/`, application code in the current codebase, `.github/instructions/`.
+**Never modify:** `rnd/test_cases/`, `rnd/build_plans/`, application code in the current codebase, `rnd/instructions/`.
 
 ---
 

@@ -48,7 +48,7 @@ Commands:
 - `.cursor/commands/**`
 - `.claude/commands/**`
 - `.codex/skills/**`
-- `.github/instructions/e2e-testing.instructions.md`
+- `rnd/instructions/e2e-testing.instructions.md`
 - `.gitignore`
   - (Includes the retro agent/template/workflow via the `.github` folders)
 

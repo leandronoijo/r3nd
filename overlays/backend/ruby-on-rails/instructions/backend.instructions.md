@@ -18,7 +18,7 @@ These rules apply to all code under `src/backend/`. AI agents and humans must fo
 | Database | PostgreSQL via Active Record | Strict schema, migrations required |
 | Background Jobs | Solid Queue | Native Rails 8+ job processor |
 
-**Testing & quality gates:** Follow `.github/instructions/testing.instructions.md`.
+**Testing & quality gates:** Follow `rnd/instructions/testing.instructions.md`.
 
 ### CLI Tooling & Code Generation
 

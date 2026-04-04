@@ -18,7 +18,7 @@ These rules apply to all code under `src/frontend/`. AI agents and humans must f
 | UI Library | PrimeNG | The **only** allowed component library |
 | Build Tool | Angular CLI | Webpack-based builds with Angular optimizations |
 
-**Testing & quality gates:** Follow `.github/instructions/testing.instructions.md`.
+**Testing & quality gates:** Follow `rnd/instructions/testing.instructions.md`.
 
 ### CLI Tooling & Package Management
 

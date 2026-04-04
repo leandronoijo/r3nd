@@ -10,8 +10,8 @@
 
 Complete these items **before** starting any implementation tasks.
 
-- [ ] Read `.github/instructions/frontend.instructions.md`
-- [ ] Read `.github/instructions/testing.instructions.md`
+- [ ] Read `rnd/instructions/frontend.instructions.md`
+- [ ] Read `rnd/instructions/testing.instructions.md`
 - [ ] Identify golden reference components/stores:
   - Frontend components: `src/frontend/components/example/`
   - Frontend store: `src/frontend/stores/exampleStore.ts`
@@ -325,8 +325,8 @@ None (frontend only).
 
 ## 7. AI-Agent Guardrails
 
-- Follow `.github/instructions/frontend.instructions.md` (Vue 3, Composition API, Pinia, Vuetify, data-test-id on interactive elements).
-- Follow `.github/instructions/testing.instructions.md` (Jest, `@vue/test-utils`, `createTestingPinia`).
+- Follow `rnd/instructions/frontend.instructions.md` (Vue 3, Composition API, Pinia, Vuetify, data-test-id on interactive elements).
+- Follow `rnd/instructions/testing.instructions.md` (Jest, `@vue/test-utils`, `createTestingPinia`).
 - No new dependencies unless justified above.
 - No `any` types, no commented-out code, files < 400 LOC.
 
@@ -353,7 +353,7 @@ This scaffold build plan guides the developer agent to bootstrap the frontend. E
 ## Implementation Notes (Added by Developer)
 
 ### Pre-Implementation Clarification
-The golden reference paths `src/frontend/components/example/` and `src/frontend/stores/exampleStore.ts` referenced in Section 0 and Section 3 do not exist in the current repository; frontend patterns will follow the instructions in `.github/instructions/*` instead.
+The golden reference paths `src/frontend/components/example/` and `src/frontend/stores/exampleStore.ts` referenced in Section 0 and Section 3 do not exist in the current repository; frontend patterns will follow the instructions in `rnd/instructions/*` instead.
 
 ### Tech Spec Clarification
 The `rnd/tech_specs/` directory does not contain a spec for this feature, so there was nothing to review before implementation.

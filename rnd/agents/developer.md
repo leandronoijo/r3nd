@@ -3,7 +3,7 @@
 Purpose
 -------
 
-Implement the tasks described in `rnd/build_plans/<feature-id>-build-plan.md`. Make focused, standards-compliant code and test changes within the current codebase (follow the repository layout and `.github/instructions/`).
+Implement the tasks described in `rnd/build_plans/<feature-id>-build-plan.md`. Make focused, standards-compliant code and test changes within the current codebase (follow the repository layout and `rnd/instructions/`).
 
 **Critical context:** You are an AI agent. 95% of this codebase is written by AI. Follow these rules exactly to avoid architectural drift.
 
@@ -37,10 +37,10 @@ Ask yourself before writing each line: *"Does this follow the patterns establish
 | Input | Location | Purpose |
 |-------|----------|---------|
 | Build Plan | `rnd/build_plans/<feature-id>-build-plan.md` | Source of truth — follow exactly |
-| Backend Rules | `.github/instructions/backend.instructions.md` | Backend stack and conventions (see instructions file) |
-| Frontend Rules | `.github/instructions/frontend.instructions.md` | Frontend stack and conventions (see instructions file) |
-| Existing Code | Current codebase (see `.github/instructions/` for layout guidance) | Context and integration points |
-| Existing Tests | Current codebase test locations (see `.github/instructions/` for layout guidance) | Test patterns to follow |
+| Backend Rules | `rnd/instructions/backend.instructions.md` | Backend stack and conventions (see instructions file) |
+| Frontend Rules | `rnd/instructions/frontend.instructions.md` | Frontend stack and conventions (see instructions file) |
+| Existing Code | Current codebase (see `rnd/instructions/` for layout guidance) | Context and integration points |
+| Existing Tests | Current codebase test locations (see `rnd/instructions/` for layout guidance) | Test patterns to follow |
 | Golden References | As specified in build plan | Canonical examples to copy |
 
 **Always read instruction files before starting implementation.**
@@ -60,12 +60,12 @@ Ask yourself before writing each line: *"Does this follow the patterns establish
 
 ### Frontend
 
-Follow the frontend-specific instructions in `.github/instructions/frontend.instructions.md` for framework, UI library, state management, and test conventions.
-Keep changes small, component-focused, and rely on the repository's golden references in the current codebase (see `.github/instructions/` for stack-specific pointers).
+Follow the frontend-specific instructions in `rnd/instructions/frontend.instructions.md` for framework, UI library, state management, and test conventions.
+Keep changes small, component-focused, and rely on the repository's golden references in the current codebase (see `rnd/instructions/` for stack-specific pointers).
 
 ### Backend
 
-Follow backend-specific rules in `.github/instructions/backend.instructions.md` (module patterns, DTOs, schema rules, and service/controller hygiene).
+Follow backend-specific rules in `rnd/instructions/backend.instructions.md` (module patterns, DTOs, schema rules, and service/controller hygiene).
 Do not guess; rely on golden references in the current codebase and instruction file guidance for framework-specific code patterns.
 
 
@@ -80,7 +80,7 @@ Do not guess; rely on golden references in the current codebase and instruction 
 | No files >400 lines | Split into smaller modules at 300 lines. | Maintainability |
 | No unused imports | Remove before committing. | Clean code |
 | No commented-out code | Delete, don't comment. | Code hygiene |
-| Lint and format must pass | Follow repository linting and formatting scripts (see `.github/instructions/`) before marking task complete. | Consistency |
+| Lint and format must pass | Follow repository linting and formatting scripts (see `rnd/instructions/`) before marking task complete. | Consistency |
 | No `any` types | Explicit types or interfaces required. | Type safety |
 | Async/await over .then | Consistent async patterns. | Readability |
 | Single responsibility | One function = one purpose. | Testability |
@@ -95,7 +95,7 @@ Do not guess; rely on golden references in the current codebase and instruction 
 ### Before Starting
 
 1. **Read the entire build plan** — understand all tasks, dependencies, and context.
-2. **Read instruction files** — `.github/instructions/backend.instructions.md` or `frontend.instructions.md`.
+2. **Read instruction files** — `rnd/instructions/backend.instructions.md` or `frontend.instructions.md`.
 3. **Identify golden references** — find the example modules to copy patterns from.
 4. **Check task dependencies** — ensure prerequisite tasks are complete.
 
@@ -126,11 +126,11 @@ Do not guess; rely on golden references in the current codebase and instruction 
 
 ### Golden References
 
-Refer to the repository's golden references for backend and frontend implementation examples in the current codebase. Use `.github/instructions/` to find where this repository keeps its example modules; if locations are not specified, identify the example module in the current codebase before proceeding.
+Refer to the repository's golden references for backend and frontend implementation examples in the current codebase. Use `rnd/instructions/` to find where this repository keeps its example modules; if locations are not specified, identify the example module in the current codebase before proceeding.
 
 Refer to DTOs in the backend example module within the current codebase for canonical examples and validation rules. Use the backend instructions file for precise decorators and validation patterns.
 
-Frontend component and store patterns live in the frontend golden references within the current codebase (see `.github/instructions/` for pointers to the example module and store).
+Frontend component and store patterns live in the frontend golden references within the current codebase (see `rnd/instructions/` for pointers to the example module and store).
 
 Refer to frontend golden references for example stores and composables.
 
@@ -143,12 +143,12 @@ Refer to frontend golden references for example stores and composables.
 | Read | `rnd/build_plans/` | Source of truth for tasks |
 | Read | Current codebase (code and tests per repository layout) | Existing code context |
 | Read | Current codebase documentation (per repository layout) | Architecture documentation |
-| Read | `.github/instructions/` | Stack rules and patterns |
+| Read | `rnd/instructions/` | Stack rules and patterns |
 | Write | Current codebase application code locations (per repository layout) | Implementation code |
 | Write | Current codebase test locations (per repository layout) | Test code |
 | Write | `rnd/build_plans/` | Checkbox updates and clarifications |
 
-**Never modify:** documentation directories in the current codebase, `rnd/product_specs/`, `rnd/tech_specs/`, `.github/workflows/`, `.github/instructions/`.
+**Never modify:** documentation directories in the current codebase, `rnd/product_specs/`, `rnd/tech_specs/`, `.github/workflows/`, `rnd/instructions/`.
 
 ---
 
@@ -158,10 +158,10 @@ Refer to frontend golden references for example stores and composables.
 
 | Mistake | Correct Approach | Detection |
 |---------|------------------|-----------|
-| Using unauthorized frontend patterns (`useState`, JSX) | Follow `.github/instructions/frontend.instructions.md` for allowed frontend patterns and frameworks. | See frontend instructions |
-| Importing unauthorized UI libraries | Follow `.github/instructions/frontend.instructions.md` for allowed UI libraries. | See frontend instructions |
+| Using unauthorized frontend patterns (`useState`, JSX) | Follow `rnd/instructions/frontend.instructions.md` for allowed frontend patterns and frameworks. | See frontend instructions |
+| Importing unauthorized UI libraries | Follow `rnd/instructions/frontend.instructions.md` for allowed UI libraries. | See frontend instructions |
 | Forgetting `data-test-id` | Add to every interactive element. | Missing in template |
-| Inline fetch in component | Follow `.github/instructions/frontend.instructions.md` for data fetching patterns (store or composable). | See frontend instructions |
+| Inline fetch in component | Follow `rnd/instructions/frontend.instructions.md` for data fetching patterns (store or composable). | See frontend instructions |
 | Large monolithic component | Split at 200 lines. | Line count |
 | Options API usage | Always `<script setup>`. | `data()`, `methods` keywords |
 | Direct store mutation | Use store actions only. | `store.state = x` |
@@ -183,14 +183,14 @@ Refer to frontend golden references for example stores and composables.
 | Mistake | Correct Approach | Detection |
 |---------|------------------|-----------|
 | Logic in controllers | Move to service. | More than 3 lines in handler |
-| Skipping DTO validation | Follow `.github/instructions/backend.instructions.md` for DTO and validation patterns. | See backend instructions |
-| Raw DB queries | Follow `.github/instructions/backend.instructions.md` for data access patterns and repositories. | See backend instructions |
-| Missing DI registration (service/provider) | Follow `.github/instructions/backend.instructions.md` for DI patterns and service registration. | See backend instructions |
+| Skipping DTO validation | Follow `rnd/instructions/backend.instructions.md` for DTO and validation patterns. | See backend instructions |
+| Raw DB queries | Follow `rnd/instructions/backend.instructions.md` for data access patterns and repositories. | See backend instructions |
+| Missing DI registration (service/provider) | Follow `rnd/instructions/backend.instructions.md` for DI patterns and service registration. | See backend instructions |
 | Circular module imports | Use `forwardRef` sparingly, prefer refactor. | Build errors |
 | Adding schema fields without DTO | Update both simultaneously. | Field mismatch |
 | Large services (>300 lines) | Split into focused services. | Line count |
 | Hardcoded config | Use `ConfigService`. | String literals |
-| Swallowing errors | Follow `.github/instructions/backend.instructions.md` for error handling and exception patterns. | See backend instructions |
+| Swallowing errors | Follow `rnd/instructions/backend.instructions.md` for error handling and exception patterns. | See backend instructions |
 | Using `any` type | Define explicit interfaces. | Type system / type-checker warnings |
 | Not validating data from external sources (DB, files, APIs, user input) | Validate and sanitize incoming data, assert shapes and types, and throw controlled exceptions; include tests for malformed inputs. | Runtime type errors or unhandled exceptions |
 
@@ -241,19 +241,19 @@ Before marking a task complete, verify:
 
 - [ ] Service registered per backend DI conventions
 - [ ] Controller only calls service methods
-- [ ] DTOs validated per `.github/instructions/backend.instructions.md`
+- [ ] DTOs validated per `rnd/instructions/backend.instructions.md`
 - [ ] Schema and DTO fields match
-- [ ] Errors handled per `.github/instructions/backend.instructions.md`
+- [ ] Errors handled per `rnd/instructions/backend.instructions.md`
  - [ ] External I/O validated and tested (DB queries, external APIs, file reads, user input)
 - [ ] No hardcoded config values
  - [ ] Build artifact paths, runtime packaging copies, and lockfile (if present) sync verified; build and runtime smoke tests pass
 
 ### For frontend code:
 
-- [ ] Frontend components follow `.github/instructions/frontend.instructions.md` conventions
-- [ ] Frontend uses allowed UI libraries per `.github/instructions/frontend.instructions.md`
+- [ ] Frontend components follow `rnd/instructions/frontend.instructions.md` conventions
+- [ ] Frontend uses allowed UI libraries per `rnd/instructions/frontend.instructions.md`
 - [ ] All interactive elements have `data-test-id`
-- [ ] State changes follow patterns in `.github/instructions/frontend.instructions.md`
+- [ ] State changes follow patterns in `rnd/instructions/frontend.instructions.md`
 - [ ] No inline fetch calls — use store/composable patterns per frontend instructions
 - [ ] Uses component-scoped styles as per frontend instructions
  - [ ] Runtime package includes an explicit entrypoint and required runtime metadata (e.g., lockfile, manifest). Ensure the build artifact output paths align with packaging expectations and that runtime config/env var defaults are set to enable service-to-service resolution in the deployment environment.
@@ -274,16 +274,16 @@ Always refer to these as canonical examples:
 
 | Type | Location | Use For |
 |------|----------|---------|
-| Backend Module | Backend example module in the current codebase (see `.github/instructions/` for pointers) | Module structure, DI patterns |
-| Backend Service | Backend example service in the current codebase (see `.github/instructions/` for pointers) | Service methods, error handling |
-| Backend Controller | Backend example controller in the current codebase (see `.github/instructions/` for pointers) | Route handlers, DTO usage |
-| Backend DTO | Backend example DTOs in the current codebase (see `.github/instructions/` for pointers) | Validation decorators |
-| Backend Schema | Backend example schemas in the current codebase (see `.github/instructions/` for pointers) | Data model definition examples (follow backend instructions) |
-| Frontend Component | Frontend example component in the current codebase (see `.github/instructions/` for pointers) | Frontend component structure (follow frontend instructions) |
-| Frontend Store | Frontend example store in the current codebase (see `.github/instructions/` for pointers) | Store patterns (follow frontend instructions) |
-| Backend Tests | Backend test examples in the current codebase (see `.github/instructions/` for pointers) | Backend test patterns |
-| Frontend Tests | Frontend test examples in the current codebase (see `.github/instructions/` for pointers) | Frontend test patterns |
-| E2E Tests | E2E test examples in the current codebase (see `.github/instructions/` for pointers) | E2E test patterns and selector contracts |
+| Backend Module | Backend example module in the current codebase (see `rnd/instructions/` for pointers) | Module structure, DI patterns |
+| Backend Service | Backend example service in the current codebase (see `rnd/instructions/` for pointers) | Service methods, error handling |
+| Backend Controller | Backend example controller in the current codebase (see `rnd/instructions/` for pointers) | Route handlers, DTO usage |
+| Backend DTO | Backend example DTOs in the current codebase (see `rnd/instructions/` for pointers) | Validation decorators |
+| Backend Schema | Backend example schemas in the current codebase (see `rnd/instructions/` for pointers) | Data model definition examples (follow backend instructions) |
+| Frontend Component | Frontend example component in the current codebase (see `rnd/instructions/` for pointers) | Frontend component structure (follow frontend instructions) |
+| Frontend Store | Frontend example store in the current codebase (see `rnd/instructions/` for pointers) | Store patterns (follow frontend instructions) |
+| Backend Tests | Backend test examples in the current codebase (see `rnd/instructions/` for pointers) | Backend test patterns |
+| Frontend Tests | Frontend test examples in the current codebase (see `rnd/instructions/` for pointers) | Frontend test patterns |
+| E2E Tests | E2E test examples in the current codebase (see `rnd/instructions/` for pointers) | E2E test patterns and selector contracts |
 
 **Copy their structure for new features. Do not invent new patterns.**
 

@@ -10,8 +10,8 @@
 
 Complete these items **before** starting any implementation tasks.
 
-- [x] Read `.github/instructions/backend.instructions.md`
-- [x] Read `.github/instructions/testing.instructions.md`
+- [x] Read `rnd/instructions/backend.instructions.md`
+- [x] Read `rnd/instructions/testing.instructions.md`
 - [x] Identify golden reference modules:
   - Backend: `src/backend/modules/example/`
 - [x] Confirm no new dependencies needed (or justify additions below)
@@ -394,7 +394,7 @@ No migrations needed (fresh schema).
 
 ## 7. AI-Agent Guardrails
 
-Follow `.github/instructions/backend.instructions.md` and `.github/instructions/testing.instructions.md`.
+Follow `rnd/instructions/backend.instructions.md` and `rnd/instructions/testing.instructions.md`.
 
 ---
 

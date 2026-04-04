@@ -9,8 +9,8 @@
 
 ## 0. Pre-Implementation Checklist
 
-- [ ] Read `.github/instructions/frontend.instructions.md`
-- [ ] Read `.github/instructions/testing.instructions.md`
+- [ ] Read `rnd/instructions/frontend.instructions.md`
+- [ ] Read `rnd/instructions/testing.instructions.md`
 - [ ] Confirm dev backend or proxy is available for integration testing (optional for unit tests)
 
 ### New Dependencies (for this phase)
