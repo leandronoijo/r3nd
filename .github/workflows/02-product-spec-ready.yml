@@ -1,7 +1,7 @@
 # Tech Spec Generation Workflow
 #
 # Triggered when a PR is merged to develop with changes to product specs.
-# Creates a GitHub issue and assigns it to Copilot with the Architect agent
+# Creates a GitHub issue and assigns it to Copilot with the create-tech-spec skill
 # to convert product specs into technical specifications.
 #
 # Required Secrets:
@@ -130,9 +130,9 @@ jobs:
             
             const issueTitle = 'Tech Spec: ' + specName;
             const issueBody = [
-              '## Task for: Architect Agent',
+              '## Task: Create Tech Spec',
               '',
-              '> **Agent Profile:** `.github/agents/architect.agent.md`',
+              '> **Task Skill:** `.github/skills/create-tech-spec/SKILL.md`',
               '',
               'A product specification has been added or updated. Please create the corresponding technical specification.',
               '',
@@ -140,15 +140,13 @@ jobs:
               fileList,
               '',
               '### Instructions',
-              '1. Read and follow the architect agent profile at `.github/agents/architect.agent.md`',
+              '1. Read and follow the task skill at `.github/skills/create-tech-spec/SKILL.md`',
               '2. Read the product specification(s) listed above',
               '3. Use the template at `rnd/templates/tech_spec.md` as the base for the tech spec',
               '4. Output the tech spec to `' + specDir + '/tech_specs/` following the naming convention',
               '',
               '### Context',
-              'This task was automatically created by the Tech Spec workflow when changes were detected in the product specs directory.',
-              '',
-              '**Note:** This issue should be assigned to the `architect` custom agent. If using the GitHub web interface, please select the `architect` agent from the agent dropdown when assigning to Copilot.'
+              'This task was automatically created by the Tech Spec workflow when changes were detected in the product specs directory.'
             ].join('\n');
 
             const issue = await github.rest.issues.create({
@@ -168,11 +166,8 @@ jobs:
     needs: create-tech-spec-task
     runs-on: ubuntu-latest
     steps:
-      # Note: Currently, the GitHub API does not support assigning a specific
-      # custom agent (like 'architect') programmatically. The issue is assigned
-      # to the default Copilot agent, but includes explicit instructions to
-      # follow the architect agent profile. When GitHub adds API support for
-      # custom agent assignment, this step should be updated.
+      # The issue is assigned to Copilot and steered by the task skill
+      # referenced in the issue body.
       - name: Assign issue to Copilot
         uses: otto-de/assign_issue_toCopilot_action@v1.0.1
         with:

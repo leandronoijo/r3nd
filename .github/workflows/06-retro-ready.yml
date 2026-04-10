@@ -1,7 +1,7 @@
 # Retro Workflow
 #
 # Triggered when a PR review is approved.
-# Creates a GitHub issue and assigns it to Copilot with the Retro agent
+# Creates a GitHub issue and assigns it to Copilot with the create-retro-report skill
 # to review PR discussions and propose process improvements.
 #
 # Required Secrets:
@@ -107,9 +107,9 @@ jobs:
 
             const issueTitle = `Retro: PR #${pr.number} - ${pr.title}`;
             const issueBody = [
-              '## Task for: Retro Agent',
+              '## Task: Create Retro Report',
               '',
-              '> **Agent Profile:** `.github/agents/retro.agent.md`',
+              '> **Task Skill:** `.github/skills/create-retro-report/SKILL.md`',
               '> **Template:** `rnd/templates/retro.md`',
               '',
               'Review the full PR discussion and propose improvements to agents, templates, or instructions.',
@@ -127,7 +127,7 @@ jobs:
               '',
               '### Instructions',
               '1. Read the PR conversation, review comments, and review threads.',
-              '2. Map feedback to the correct agent/template/instruction using the directory mapping in the retro agent profile.',
+              '2. Map feedback to the correct task, template, or instruction using the directory mapping in the retro guidance.',
               '3. Use the retro template and write the report to `r3nd/retros/pr-' + pr.number + '-retro.md` (or `rnd/retros/` if the repository uses the legacy directory name).',
               '4. Include evidence links for each recommendation.'
             ].join('\n');

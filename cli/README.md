@@ -42,14 +42,14 @@ If you haven't installed any of the CLI tools yet, you can still use r3nd! Selec
 Commands:
 
 - `init`: Initialize the current directory as a git repository (runs `git init` if `.git` is missing) and copy a minimal set of seed files from the r3nd seed repository. Files copied include:
-  - `.github/agents/**`
+  - `.github/skills/**`
   - `rnd/templates/**`
-- `.github/workflows/**`
-- `.cursor/commands/**`
-- `.claude/commands/**`
-- `.codex/skills/**`
-- `rnd/instructions/e2e-testing.instructions.md`
-- `.gitignore`
+  - `.github/workflows/**`
+  - `.cursor/commands/**`
+  - `.claude/commands/**`
+  - `.codex/skills/**`
+  - `rnd/instructions/e2e-testing.instructions.md`
+  - `.gitignore`
   - (Includes the retro agent/template/workflow via the `.github` folders)
 
   Example:
@@ -57,7 +57,7 @@ Commands:
   - From the project root: `node src/index.js init`
   - If installed globally: `r3nd init` (see installation section)
 
-- `scaffold`: Full project scaffolding (existing behaviour) — prompts for backend/frontend overlays and copies matching overlays and rnd build plans. Ensures the retro agent/template/workflow are present even when resuming from an existing setup.
+- `scaffold`: Full project scaffolding (existing behaviour) — prompts for backend/frontend overlays and copies matching overlays and rnd build plans. Ensures the retro skill/template/workflow are present even when resuming from an existing setup.
 
 - `analyse`: Analyse the repository and generate `project.instructions.md` and per-app instruction files using an LLM agent.
   - Options:

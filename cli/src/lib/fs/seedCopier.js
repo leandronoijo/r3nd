@@ -127,23 +127,23 @@ async function copyGitHubWorkflows(cwd, tree, githubClient, specDirName, seedSpe
 }
 
 /**
- * Compose agent files from platform-specific wrappers and agent personas from seed repo
+ * Compose platform files from platform-specific wrappers and shared task content from seed repo
  * @param {string} cwd - Current working directory
  * @param {Array} tree - GitHub tree
  * @param {Object} githubClient - GitHub client instance
- * @param {string} wrapperDir - Directory containing wrapper templates (e.g., '.github/agents')
- * @param {string} extension - File extension to filter (e.g., '.agent.md')
+ * @param {string} wrapperDir - Directory containing wrapper templates (e.g., '.github/skills')
+ * @param {string} extension - File extension to filter (e.g., 'SKILL.md')
  * @param {string} specDirName - Spec directory name for local references (e.g., 'r3nd', 'rnd')
  * @param {string} seedSpecDirName - Seed repo's spec directory name (e.g., 'r3nd', 'rnd')
  * @param {Object} options - Options
  * @param {boolean} options.nonInteractive - If true, skip files that exist
  */
 async function composeAgentFiles(cwd, tree, githubClient, wrapperDir, extension, specDirName, seedSpecDirName, { nonInteractive = false } = {}) {
-  const platformName = wrapperDir === '.github/agents' ? 'GitHub Copilot' : 
+  const platformName = wrapperDir === '.github/skills' ? 'GitHub Copilot' : 
                        wrapperDir === '.cursor/commands' ? 'Cursor' :
                        wrapperDir === '.codex/skills' ? 'Codex' :
-                       wrapperDir === '.claude/commands' ? 'Claude' : 'VSCode';
-  logger.info(`\n📝 Composing ${platformName} agent files...`);
+                       wrapperDir === '.claude/commands' ? 'Claude' : 'Unknown';
+  logger.info(`\n📝 Composing ${platformName} platform files...`);
   
   // Find all wrapper template files
   const wrapperFiles = tree.filter(item => 

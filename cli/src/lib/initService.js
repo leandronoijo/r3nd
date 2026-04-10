@@ -124,7 +124,7 @@ async function runInit(opts = {}, deps = {}) {
   logger.info('r3nd — repository initializer\n');
   const selectedOptions = await askInitOptions(nonInteractive);
 
-  logger.info(`\nSelected: ${selectedOptions.join(', ') || 'None (agents only)'}\n`);
+  logger.info(`\nSelected: ${selectedOptions.join(', ') || 'None'}\n`);
 
   // Fetch file tree from GitHub
   logger.info('Fetching file list from GitHub (seed repo)...');
@@ -142,8 +142,8 @@ async function runInit(opts = {}, deps = {}) {
   // Process selected options (these are optional)
   if (selectedOptions.includes('github')) {
     await copyGitHubWorkflows(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
-    // Compose GitHub Copilot agent files from wrappers + personas
-    await composeAgentFiles(cwd, tree, githubClient, '.github/agents', '.agent.md', specDirName, seedSpecDirName, { nonInteractive });
+    // Compose GitHub Copilot skill files from wrappers + shared task content
+    await composeAgentFiles(cwd, tree, githubClient, '.github/skills', 'SKILL.md', specDirName, seedSpecDirName, { nonInteractive });
   }
 
   if (selectedOptions.includes('cursor')) {
@@ -161,16 +161,11 @@ async function runInit(opts = {}, deps = {}) {
     await composeAgentFiles(cwd, tree, githubClient, '.claude/commands', '.md', specDirName, seedSpecDirName, { nonInteractive });
   }
 
-  if (selectedOptions.includes('vscode')) {
-    // Compose VSCode chat mode files from wrappers + personas
-    await composeAgentFiles(cwd, tree, githubClient, '.github/chatmodes', '.chatmode.md', specDirName, seedSpecDirName, { nonInteractive });
-  }
-
   // Also copy templates if any option was selected
   await copyTemplates(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
 
-  // If GitHub or VSCode is selected, copy instructions from spec-dir to rnd/instructions
-  if (selectedOptions.includes('github') || selectedOptions.includes('vscode')) {
+  // If GitHub skills are selected, copy instructions from spec-dir to rnd/instructions
+  if (selectedOptions.includes('github')) {
     await copyInstructionsToRnd(cwd, specDirName, { nonInteractive });
   }
 

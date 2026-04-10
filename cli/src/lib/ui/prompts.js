@@ -227,15 +227,14 @@ async function chooseFile(files, message = 'Select a file:', nonInteractive = fa
  * @returns {Promise<string[]>} Array of selected option values
  */
 async function askInitOptions(nonInteractive = false) {
-  const defaultOptions = ['github', 'cursor', 'codex', 'claude', 'vscode'];
+  const defaultOptions = ['github', 'cursor', 'codex', 'claude'];
   if (nonInteractive) return defaultOptions;
   
   const choices = [
-    { name: 'GitHub → Copy GitHub workflows (.github/workflows/)', value: 'github', checked: true },
-    { name: 'Cursor → Create .cursor commands for each agent', value: 'cursor', checked: true },
-    { name: 'Codex → Create .codex/skills for each agent command', value: 'codex', checked: true },
-    { name: 'Claude → Create .claude/commands for each agent command', value: 'claude', checked: true },
-    { name: 'VSCode → Create .github/chatmodes for each agent (Copilot personas)', value: 'vscode', checked: true },
+    { name: 'GitHub → Copy workflows and create .github/skills', value: 'github', checked: true },
+    { name: 'Cursor → Create .cursor/commands for each task', value: 'cursor', checked: true },
+    { name: 'Codex → Create .codex/skills for each task', value: 'codex', checked: true },
+    { name: 'Claude → Create .claude/commands for each task', value: 'claude', checked: true },
   ];
   
   const res = await prompt([{
@@ -254,17 +253,16 @@ async function askInitOptions(nonInteractive = false) {
  * @returns {Promise<string[]>} Array of selected option values
  */
 async function askUpdateOptions(nonInteractive = false) {
-  const defaultOptions = ['templates', 'agents', 'github', 'cursor', 'codex', 'claude', 'vscode'];
+  const defaultOptions = ['templates', 'agents', 'github', 'cursor', 'codex', 'claude'];
   if (nonInteractive) return defaultOptions;
   
   const choices = [
     { name: 'Templates → Update spec-dir-name/templates/', value: 'templates', checked: true },
-    { name: 'Agents → Update spec-dir-name/agents/ (personas)', value: 'agents', checked: true },
+    { name: 'Agents → Update spec-dir-name/agents/ (shared task content)', value: 'agents', checked: true },
     { name: 'GitHub → Update GitHub workflows (.github/workflows/)', value: 'github', checked: true },
-    { name: 'Cursor → Update .cursor commands for each agent', value: 'cursor', checked: true },
-    { name: 'Codex → Update .codex/skills for each agent command', value: 'codex', checked: true },
-    { name: 'Claude → Update .claude/commands for each agent command', value: 'claude', checked: true },
-    { name: 'VSCode → Update .github/chatmodes for each agent (Copilot personas)', value: 'vscode', checked: true },
+    { name: 'Cursor → Update .cursor/commands for each task', value: 'cursor', checked: true },
+    { name: 'Codex → Update .codex/skills for each task', value: 'codex', checked: true },
+    { name: 'Claude → Update .claude/commands for each task', value: 'claude', checked: true },
   ];
   
   const res = await prompt([{

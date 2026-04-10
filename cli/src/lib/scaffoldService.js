@@ -89,7 +89,7 @@ async function runScaffold(opts = {}, deps = {}) {
   if (!backendInstructionsExist || !frontendInstructionsExist) {
     logger.info('\nr3nd — component initializer\n');
     selectedOptions = await askInitOptions(nonInteractive);
-    logger.info(`\nSelected: ${selectedOptions.join(', ') || 'None (agents only)'}\n`);
+    logger.info(`\nSelected: ${selectedOptions.join(', ') || 'None'}\n`);
   }
 
   // Mandatory seed files (excluding agents which are handled separately)
@@ -126,8 +126,8 @@ async function runScaffold(opts = {}, deps = {}) {
     // Process selected options (these are optional)
     if (selectedOptions.includes('github')) {
       await copyGitHubWorkflows(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
-      // Compose GitHub Copilot agent files from wrappers + personas
-      await composeAgentFiles(cwd, tree, githubClient, '.github/agents', '.agent.md', specDirName, seedSpecDirName, { nonInteractive });
+      // Compose GitHub Copilot skill files from wrappers + shared task content
+      await composeAgentFiles(cwd, tree, githubClient, '.github/skills', 'SKILL.md', specDirName, seedSpecDirName, { nonInteractive });
     }
 
     if (selectedOptions.includes('cursor')) {
@@ -145,19 +145,14 @@ async function runScaffold(opts = {}, deps = {}) {
       await composeAgentFiles(cwd, tree, githubClient, '.claude/commands', '.md', specDirName, seedSpecDirName, { nonInteractive });
     }
 
-    if (selectedOptions.includes('vscode')) {
-      // Compose VSCode chat mode files from wrappers + personas
-      await composeAgentFiles(cwd, tree, githubClient, '.github/chatmodes', '.chatmode.md', specDirName, seedSpecDirName, { nonInteractive });
-    }
-
     // Copy templates
     await copyTemplates(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
 
     // Ensure spec directories exist (conditionally create rnd/instructions)
-    const createRndInstructions = selectedOptions.includes('github') || selectedOptions.includes('vscode');
+    const createRndInstructions = selectedOptions.includes('github');
     await ensureSpecDirectories(cwd, specDirName, { createRndInstructions });
 
-    // If GitHub or VSCode is selected, copy instructions from spec-dir to rnd/instructions
+    // If GitHub skills are selected, copy instructions from spec-dir to rnd/instructions
     if (createRndInstructions) {
       await copyInstructionsToRnd(cwd, specDirName, { nonInteractive });
     }

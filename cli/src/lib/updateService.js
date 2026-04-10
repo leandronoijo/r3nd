@@ -76,8 +76,8 @@ async function runUpdate(opts = {}, deps = {}) {
 
   if (selectedOptions.includes('github')) {
     await updateGitHubWorkflows(cwd, tree, githubClient, specDirName, seedSpecDirName);
-    // Also update composed GitHub Copilot agent files
-    await updateComposedAgents(cwd, tree, githubClient, '.github/agents', '.agent.md', specDirName, seedSpecDirName);
+    // Also update composed GitHub Copilot skill files
+    await updateComposedAgents(cwd, tree, githubClient, '.github/skills', 'SKILL.md', specDirName, seedSpecDirName);
   }
 
   if (selectedOptions.includes('cursor')) {
@@ -92,12 +92,8 @@ async function runUpdate(opts = {}, deps = {}) {
     await updateComposedAgents(cwd, tree, githubClient, '.claude/commands', '.md', specDirName, seedSpecDirName);
   }
 
-  if (selectedOptions.includes('vscode')) {
-    await updateComposedAgents(cwd, tree, githubClient, '.github/chatmodes', '.chatmode.md', specDirName, seedSpecDirName);
-  }
-
-  // If GitHub or VSCode is selected, copy instructions from spec-dir to rnd/instructions
-  if (selectedOptions.includes('github') || selectedOptions.includes('vscode')) {
+  // If GitHub skills are selected, copy instructions from spec-dir to rnd/instructions
+  if (selectedOptions.includes('github')) {
     await copyInstructionsToRnd(cwd, specDirName, { nonInteractive });
   }
 
@@ -204,7 +200,7 @@ async function updateGitHubWorkflows(cwd, tree, githubClient, specDirName, seedS
 }
 
 /**
- * Update composed agent files from wrappers + personas
+ * Update composed platform files from wrappers + shared task content
  * @param {string} cwd - Current working directory
  * @param {Array} tree - GitHub tree
  * @param {GitHubClient} githubClient - GitHub client instance
@@ -214,11 +210,11 @@ async function updateGitHubWorkflows(cwd, tree, githubClient, specDirName, seedS
  * @param {string} seedSpecDirName - Seed repo's spec directory name (e.g., 'r3nd', 'rnd')
  */
 async function updateComposedAgents(cwd, tree, githubClient, wrapperDir, extension, specDirName, seedSpecDirName) {
-  const platformName = wrapperDir === '.github/agents' ? 'GitHub Copilot' : 
+  const platformName = wrapperDir === '.github/skills' ? 'GitHub Copilot' : 
                        wrapperDir === '.cursor/commands' ? 'Cursor' :
                        wrapperDir === '.codex/skills' ? 'Codex' :
-                       wrapperDir === '.claude/commands' ? 'Claude' : 'VSCode';
-  logger.info(`\n📝 Updating ${platformName} agent files...`);
+                       wrapperDir === '.claude/commands' ? 'Claude' : 'Unknown';
+  logger.info(`\n📝 Updating ${platformName} platform files...`);
   
   // Find wrapper templates
   const wrapperFiles = tree.filter(item => 

@@ -14,9 +14,9 @@ describe('templateResolver', () => {
     });
 
     it('should extract multiple placeholders', () => {
-      const content = 'Agent: {{rnd/agents/developer.md}}\n\nPlatform: {{.github/agents/wrapper.md}}';
+      const content = 'Agent: {{rnd/agents/developer.md}}\n\nPlatform: {{.github/skills/wrapper/SKILL.md}}';
       const placeholders = parseTemplate(content);
-      expect(placeholders).toEqual(['rnd/agents/developer.md', '.github/agents/wrapper.md']);
+      expect(placeholders).toEqual(['rnd/agents/developer.md', '.github/skills/wrapper/SKILL.md']);
     });
 
     it('should handle placeholders with whitespace', () => {

@@ -1,6 +1,6 @@
 // Mock inquirer to avoid ESM import issues
 jest.mock('./ui/prompts', () => ({
-  askUpdateOptions: jest.fn().mockResolvedValue(['templates', 'agents', 'github', 'cursor', 'codex', 'claude', 'vscode']),
+  askUpdateOptions: jest.fn().mockResolvedValue(['templates', 'agents', 'github', 'cursor', 'codex', 'claude']),
   askSeedRepo: jest.fn().mockResolvedValue('leandronoijo/r3nd@develop'),
   askSpecDirName: jest.fn().mockResolvedValue('r3nd')
 }));
@@ -55,7 +55,7 @@ describe('updateService', () => {
     mockGithubClient = {
       getTree: jest.fn().mockResolvedValue([
         { type: 'blob', path: 'rnd/templates/build_plan.md' },
-        { type: 'blob', path: '.github/agents/developer.agent.md' },
+        { type: 'blob', path: '.github/skills/implement-build-plan/SKILL.md' },
         { type: 'blob', path: '.github/workflows/02-product-spec-ready.yml' },
       ]),
       fetchRaw: jest.fn().mockResolvedValue(Buffer.from('mock content'))

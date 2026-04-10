@@ -1,8 +1,8 @@
 # Development Workflow
 #
 # Triggered when a PR is merged to develop with changes to build plans.
-# Creates a GitHub issue and assigns it to Copilot with the Developer agent
-# to implement the build plan.
+# Creates GitHub issues and assigns them to Copilot with task skills
+# to implement the build plan and generate test cases.
 #
 # Required Secrets:
 #   COPILOT_PAT - Personal Access Token with the following permissions:
@@ -132,9 +132,9 @@ jobs:
               '### Changed file(s)',
               fileList,
               '',
-              '> **Agent profile:** `.github/agents/developer.agent.md`',
+              '> **Task skill:** `.github/skills/implement-build-plan/SKILL.md`',
               '',
-              '_No additional instructions are included here; follow the referenced agent profile._'
+              '_No additional instructions are included here; follow the referenced task skill._'
             ].join('\n');
 
             const issue = await github.rest.issues.create({
@@ -201,10 +201,10 @@ jobs:
               '### Changed file(s)',
               fileList,
               '',
-              '> **Agent profile:** `.github/agents/qa-team-lead.agent.md`',
+              '> **Task skill:** `.github/skills/create-test-cases/SKILL.md`',
               '> **Canonical template:** `rnd/templates/test_cases.md`',
               '',
-              '_No additional instructions are included here; follow the referenced agent profile and template._'
+              '_No additional instructions are included here; follow the referenced task skill and template._'
             ].join('\n');
 
             const issue = await github.rest.issues.create({
@@ -224,11 +224,8 @@ jobs:
     needs: create-development-task
     runs-on: ubuntu-latest
     steps:
-      # Note: Currently, the GitHub API does not support assigning a specific
-      # custom agent (like 'developer') programmatically. The issue is assigned
-      # to the default Copilot agent, but includes explicit instructions to
-      # follow the developer agent profile. When GitHub adds API support for
-      # custom agent assignment, this step should be updated.
+      # The issue is assigned to Copilot and steered by the task skill
+      # referenced in the issue body.
       - name: Assign issue to Copilot
         uses: otto-de/assign_issue_toCopilot_action@v1.0.1
         with:

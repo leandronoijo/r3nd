@@ -1,7 +1,7 @@
 # E2E Testing Workflow
 #
 # Triggered when a PR is merged to develop with changes to src/.
-# Creates a GitHub issue and assigns it to Copilot with the E2E Engineer agent
+# Creates a GitHub issue and assigns it to Copilot with the run-e2e-tests skill
 # to generate and run E2E tests for the implemented feature.
 # The issue includes the original PR description to provide context about which
 # feature was implemented.
@@ -251,13 +251,13 @@ jobs:
               '',
               '---',
               '',
-              '> **Agent profile:** `.github/agents/e2e-engineer.agent.md`',
+              '> **Task skill:** `.github/skills/run-e2e-tests/SKILL.md`',
               '> **E2E Instructions:** `.github/instructions/e2e-testing.instructions.md`',
               '> **Result Template:** `rnd/templates/e2e-result.md`',
               '',
               '### Instructions',
               '',
-              'As the E2E Engineer agent:',
+              'Follow the `run-e2e-tests` task skill:',
               '',
               '1. **Identify the feature-id** from the PR description above and the changed files',
               '2. **Read test cases** from `rnd/test_cases/<feature-id>-test-cases.md`',
@@ -270,7 +270,7 @@ jobs:
               '',
               '**Output:** Create PR with test files and result report.',
               '',
-              '_Follow the agent profile exactly. No additional instructions._'
+              '_Follow the task skill exactly. No additional instructions._'
             ].join('\n');
 
             const issue = await github.rest.issues.create({
@@ -290,11 +290,8 @@ jobs:
     needs: create-e2e-task
     runs-on: ubuntu-latest
     steps:
-      # Note: Currently, the GitHub API does not support assigning a specific
-      # custom agent (like 'e2e-engineer') programmatically. The issue is assigned
-      # to the default Copilot agent, but includes explicit instructions to
-      # follow the e2e-engineer agent profile. When GitHub adds API support for
-      # custom agent assignment, this step should be updated.
+      # The issue is assigned to Copilot and steered by the task skill
+      # referenced in the issue body.
       - name: Assign issue to Copilot
         uses: otto-de/assign_issue_toCopilot_action@v1.0.1
         with:
