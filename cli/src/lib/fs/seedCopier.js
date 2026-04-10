@@ -7,6 +7,34 @@ const { rewriteSpecDirBuffer, rewriteSpecDirContent } = require('../utils/specDi
 const { askOverwriteFile } = require('../ui/prompts');
 const logger = require('../utils/logger');
 
+function matchesPlatformFile(item, sourcePath, extension) {
+  const normalizedPrefix = sourcePath.endsWith('/') ? sourcePath : `${sourcePath}/`;
+  return item.type === 'blob' && item.path.startsWith(normalizedPrefix) && item.path.endsWith(extension);
+}
+
+async function buildAgentFileCache(tree, githubClient, specDirName, seedSpecDirName) {
+  const fileCache = new Map();
+  const seedAgentsPath = `${seedSpecDirName}/agents/`;
+  const personaFiles = tree.filter(item =>
+    item.type === 'blob' && item.path.startsWith(seedAgentsPath) && item.path.endsWith('.md')
+  );
+
+  for (const file of personaFiles) {
+    try {
+      const buffer = await githubClient.fetchRaw(file.path);
+      fileCache.set(file.path, buffer);
+
+      const relativePath = file.path.substring(seedAgentsPath.length);
+      const localPath = `${specDirName}/agents/${relativePath}`;
+      fileCache.set(localPath, buffer);
+    } catch (err) {
+      logger.error(`  Failed to cache ${file.path}:`, err && err.message ? err.message : err);
+    }
+  }
+
+  return fileCache;
+}
+
 /**
  * Check if a file exists at the given path
  * @param {string} filePath - Absolute path to check
@@ -30,11 +58,15 @@ async function fileExists(filePath) {
  * @param {boolean} options.nonInteractive - If true, skip files that exist
  * @returns {Promise<boolean>} True if file was written, false if skipped
  */
-async function writeWithOverwritePrompt(cwd, relativePath, buffer, { nonInteractive = false } = {}) {
+async function writeWithOverwritePrompt(cwd, relativePath, buffer, { nonInteractive = false, overwriteExisting = false } = {}) {
   const destPath = path.join(cwd, relativePath);
   const exists = await fileExists(destPath);
   
   if (exists) {
+    if (overwriteExisting) {
+      await writeBuffer(cwd, relativePath, buffer, { overwrite: true });
+      return true;
+    }
     const shouldOverwrite = await askOverwriteFile(relativePath, nonInteractive);
     if (!shouldOverwrite) {
       logger.info(`  Skipped (exists): ${relativePath}`);
@@ -56,7 +88,7 @@ async function writeWithOverwritePrompt(cwd, relativePath, buffer, { nonInteract
  * @param {Object} options - Options
  * @param {boolean} options.nonInteractive - If true, skip files that exist
  */
-async function copyAgentPersonas(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive = false } = {}) {
+async function copyAgentPersonas(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive = false, overwriteExisting = false } = {}) {
   logger.info('\n🤖 Copying agent personas...');
   
   // Read from seed repo's configured spec directory
@@ -79,7 +111,7 @@ async function copyAgentPersonas(cwd, tree, githubClient, specDirName, seedSpecD
 
       // Rewrite any spec-dir references from the seed repo to the local spec dir
       const rewritten = rewriteSpecDirBuffer(buffer, file.path, [seedSpecDirName], specDirName);
-      const written = await writeWithOverwritePrompt(cwd, localPath, rewritten.buffer, { nonInteractive });
+      const written = await writeWithOverwritePrompt(cwd, localPath, rewritten.buffer, { nonInteractive, overwriteExisting });
       if (written) {
         logger.info(`  Copied: ${localPath}`);
       }
@@ -99,7 +131,7 @@ async function copyAgentPersonas(cwd, tree, githubClient, specDirName, seedSpecD
  * @param {Object} options - Options
  * @param {boolean} options.nonInteractive - If true, skip files that exist
  */
-async function copyGitHubWorkflows(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive = false } = {}) {
+async function copyGitHubWorkflows(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive = false, overwriteExisting = false } = {}) {
   logger.info('\n📦 Copying GitHub workflows...');
   
   const workflowFiles = tree.filter(item => 
@@ -116,7 +148,7 @@ async function copyGitHubWorkflows(cwd, tree, githubClient, specDirName, seedSpe
       const buffer = await githubClient.fetchRaw(file.path);
       // Rewrite spec directory references
       const rewritten = rewriteSpecDirBuffer(buffer, file.path, ['rnd', 'r3nd'], specDirName);
-      const written = await writeWithOverwritePrompt(cwd, file.path, rewritten.buffer, { nonInteractive });
+      const written = await writeWithOverwritePrompt(cwd, file.path, rewritten.buffer, { nonInteractive, overwriteExisting });
       if (written) {
         logger.info(`  Copied: ${file.path}`);
       }
@@ -138,7 +170,7 @@ async function copyGitHubWorkflows(cwd, tree, githubClient, specDirName, seedSpe
  * @param {Object} options - Options
  * @param {boolean} options.nonInteractive - If true, skip files that exist
  */
-async function composeAgentFiles(cwd, tree, githubClient, wrapperDir, extension, specDirName, seedSpecDirName, { nonInteractive = false } = {}) {
+async function composeAgentFiles(cwd, tree, githubClient, wrapperDir, extension, specDirName, seedSpecDirName, { nonInteractive = false, overwriteExisting = false } = {}) {
   const platformName = wrapperDir === '.github/skills' ? 'GitHub Copilot' : 
                        wrapperDir === '.cursor/commands' ? 'Cursor' :
                        wrapperDir === '.codex/skills' ? 'Codex' :
@@ -208,12 +240,64 @@ async function composeAgentFiles(cwd, tree, githubClient, wrapperDir, extension,
       }
       
       // Write composed file with overwrite prompt
-      const written = await writeWithOverwritePrompt(cwd, file.path, Buffer.from(finalContent, 'utf-8'), { nonInteractive });
+      const written = await writeWithOverwritePrompt(cwd, file.path, Buffer.from(finalContent, 'utf-8'), { nonInteractive, overwriteExisting });
       if (written) {
         logger.info(`  Composed: ${file.path}`);
       }
     } catch (err) {
       logger.error(`  Failed to compose ${file.path}:`, err && err.message ? err.message : err);
+    }
+  }
+}
+
+async function syncPlatformAsset(cwd, tree, githubClient, asset, specDirName, seedSpecDirName, { nonInteractive = false, overwriteExisting = false } = {}) {
+  const platformName = asset.label || asset.sourcePath;
+  logger.info(`\n📝 ${overwriteExisting ? 'Updating' : 'Composing'} ${platformName}...`);
+
+  const platformFiles = tree.filter(item => matchesPlatformFile(item, asset.sourcePath, asset.fileExtension));
+  if (platformFiles.length === 0) {
+    logger.warn(`  No files found in ${asset.sourcePath}`);
+    return;
+  }
+
+  await ensureDir(path.join(cwd, asset.sourcePath));
+
+  if (!asset.compose) {
+    for (const file of platformFiles) {
+      try {
+        const buffer = await githubClient.fetchRaw(file.path);
+        const rewritten = rewriteSpecDirBuffer(buffer, file.path, ['rnd', 'r3nd', seedSpecDirName], specDirName);
+        const written = await writeWithOverwritePrompt(cwd, file.path, rewritten.buffer, { nonInteractive, overwriteExisting });
+        if (written) {
+          logger.info(`  ${overwriteExisting ? 'Updated' : 'Copied'}: ${file.path}`);
+        }
+      } catch (err) {
+        logger.error(`  Failed to sync ${file.path}:`, err && err.message ? err.message : err);
+      }
+    }
+    return;
+  }
+
+  const fileCache = await buildAgentFileCache(tree, githubClient, specDirName, seedSpecDirName);
+  const fileReader = createGitHubFileReader(fileCache);
+
+  for (const file of platformFiles) {
+    try {
+      const wrapperBuffer = await githubClient.fetchRaw(file.path);
+      const wrapperContent = wrapperBuffer.toString('utf-8');
+      const composedContent = await resolveTemplate(wrapperContent, fileReader);
+      const rewritten = rewriteSpecDirContent(composedContent, ['rnd', 'r3nd', seedSpecDirName], specDirName);
+      const written = await writeWithOverwritePrompt(
+        cwd,
+        file.path,
+        Buffer.from(rewritten.content, 'utf-8'),
+        { nonInteractive, overwriteExisting }
+      );
+      if (written) {
+        logger.info(`  ${overwriteExisting ? 'Updated' : 'Composed'}: ${file.path}`);
+      }
+    } catch (err) {
+      logger.error(`  Failed to sync ${file.path}:`, err && err.message ? err.message : err);
     }
   }
 }
@@ -228,7 +312,7 @@ async function composeAgentFiles(cwd, tree, githubClient, wrapperDir, extension,
  * @param {Object} options - Options
  * @param {boolean} options.nonInteractive - If true, skip files that exist
  */
-async function copyTemplates(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive = false } = {}) {
+async function copyTemplates(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive = false, overwriteExisting = false } = {}) {
   logger.info('\n📋 Copying templates...');
   
   const seedTemplatesPath = `${seedSpecDirName}/templates/`;
@@ -249,7 +333,7 @@ async function copyTemplates(cwd, tree, githubClient, specDirName, seedSpecDirNa
       const localPath = `${specDirName}/templates/${relativePath}`;
       
       const rewritten = rewriteSpecDirBuffer(buffer, file.path, [seedSpecDirName], specDirName);
-      const written = await writeWithOverwritePrompt(cwd, localPath, rewritten.buffer, { nonInteractive });
+      const written = await writeWithOverwritePrompt(cwd, localPath, rewritten.buffer, { nonInteractive, overwriteExisting });
       if (written) {
         logger.info(`  Copied: ${localPath}`);
       }
@@ -300,12 +384,12 @@ async function copyCommonFiles(cwd, tree, githubClient, specDirName, { nonIntera
  * @param {Object} options - Options
  * @param {boolean} options.nonInteractive - If true, skip files that exist
  */
-async function copyTestingInstructions(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive = false } = {}) {
+async function copyTestingInstructions(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive = false, overwriteExisting = false } = {}) {
   logger.info('\n📋 Copying testing instructions to spec directory...');
   
   const testingFiles = [
-    'rnd/instructions/e2e-testing.instructions.md',
-    'rnd/instructions/testing.instructions.md',
+    `${seedSpecDirName}/instructions/e2e-testing.instructions.md`,
+    `${seedSpecDirName}/instructions/testing.instructions.md`,
   ];
 
   for (const remotePath of testingFiles) {
@@ -319,7 +403,7 @@ async function copyTestingInstructions(cwd, tree, githubClient, specDirName, see
         const fileName = path.basename(remotePath);
         const localPath = path.join(specDirName, 'instructions', fileName);
         
-        const written = await writeWithOverwritePrompt(cwd, localPath, rewritten.buffer, { nonInteractive });
+        const written = await writeWithOverwritePrompt(cwd, localPath, rewritten.buffer, { nonInteractive, overwriteExisting });
         if (written) {
           logger.info(`  Copied: ${remotePath} -> ${localPath}`);
         }
@@ -338,7 +422,7 @@ async function copyTestingInstructions(cwd, tree, githubClient, specDirName, see
  * @param {Object} options - Options
  * @param {boolean} options.nonInteractive - If true, skip files that exist
  */
-async function copyInstructionsToRnd(cwd, specDirName, { nonInteractive = false } = {}) {
+async function copyInstructionsToRnd(cwd, specDirName, { nonInteractive = false, overwriteExisting = false } = {}) {
   logger.info('\n📋 Copying instructions to rnd/instructions...');
   
   const instructionsDir = path.join(cwd, specDirName, 'instructions');
@@ -371,7 +455,7 @@ async function copyInstructionsToRnd(cwd, specDirName, { nonInteractive = false 
       const buffer = await fs.readFile(sourcePath);
       const destPath = path.join('rnd', 'instructions', fileName);
       
-      const written = await writeWithOverwritePrompt(cwd, destPath, buffer, { nonInteractive });
+      const written = await writeWithOverwritePrompt(cwd, destPath, buffer, { nonInteractive, overwriteExisting });
       if (written) {
         logger.info(`  Copied: ${specDirName}/instructions/${fileName} -> ${destPath}`);
       }
@@ -385,6 +469,7 @@ module.exports = {
   copyAgentPersonas,
   copyGitHubWorkflows,
   composeAgentFiles,
+  syncPlatformAsset,
   copyTemplates,
   copyCommonFiles,
   copyTestingInstructions,

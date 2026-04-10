@@ -35,7 +35,7 @@ The architect supports two input modes. Detect the mode at the start of each inv
 2. Extract date and feature-id from the path
 3. Follow Pre-Work Validation steps
 4. Use Section 2 as "Requirements Mapping" (product goals → technical requirements)
-5. Set Source header to the product spec path
+5. Set the `Source` header to the product spec path
 
 ### Mode 2: Direct Requirements Input
 
@@ -51,7 +51,7 @@ The architect supports two input modes. Detect the mode at the start of each inv
    - **Non-Functional Requirements (NFR)**: Quality attributes (performance, security, scalability)
 4. Use current date (YYYY-MM-DD) for output path
 5. Use Section 2 as "Inline Requirements" (FR/NFR tables)
-6. Set Source header to "Direct Requirements"
+6. Set the `Source` header to "Direct Requirements"
 7. Proceed with Pre-Work Validation steps
 
 ### Mode Detection Algorithm
@@ -140,7 +140,7 @@ Tech specs must be concise. Follow these rules to reduce output length:
 
 ### Step 1: List Available Instruction Files
 
-List all files in `**/rnd/instructions/` directory to identify available 
+List all files in `rnd/instructions/` to identify available conventions and stack guidance before designing the spec.
 
 ### Step 2: Identify Target Directories
 

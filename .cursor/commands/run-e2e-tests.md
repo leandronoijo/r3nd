@@ -3,17 +3,17 @@
 Generate, run, and diagnose E2E tests from test cases; output structured results to rnd/e2e-results.
 
 {{rnd/agents/e2e-engineer.md}}
-{{rnd/agents/summary.md}}
+{{rnd/agents/shared/command-hygiene.md}}
 
 ## Cursor-Specific Instructions
 
 When using Cursor to implement and run E2E tests:
 
-- Read `.github/instructions/e2e-testing.instructions.md` using Cmd+K
-- Use Cursor's terminal integration to start services and run tests
-- Search for existing E2E tests with Cmd+P to follow patterns
-- Use composer mode to generate test files in `tests/e2e/<feature-id>/`
-- Leverage inline suggestions for test assertions and selectors
-- Run tests in integrated terminal and capture output
-- Use Cmd+K to query about `data-test-id` attributes in the codebase
-- Write result reports to `rnd/e2e-results/` using Apply
+- Read `rnd/instructions/e2e-testing.instructions.md` and nearby tests before generating new coverage.
+- Use Cursor's terminal integration to start services, run tests, and capture failures.
+- Search for existing E2E tests with Cmd+P to follow established patterns.
+- Use Composer to generate or refine test files in the appropriate E2E directory.
+- Use Cmd+K to inspect selectors and `data-test-id` usage in the codebase.
+- Use Apply to write the result report under `rnd/e2e-results/`.
+
+{{rnd/agents/summary.md}}

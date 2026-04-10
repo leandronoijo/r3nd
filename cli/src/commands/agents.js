@@ -144,7 +144,7 @@ async function runAgentCommand(agentConfig, opts = {}) {
           codex: 'Use local codex CLI (run now)',
           claude: 'Use Claude Code CLI (run now)',
           gemini: 'Use Gemini CLI (run now)',
-          github: 'Use GitHub coding agent',
+          github: 'Use GitHub agent via gh CLI',
         },
         extraChoices: [
           { name: 'Generate prompt to copy & paste', value: 'generate' },
@@ -226,7 +226,7 @@ async function handleFreeTextAgent(agentConfig, opts, cwd, nonInteractive) {
           codex: 'Use local codex CLI (run now)',
           claude: 'Use Claude Code CLI (run now)',
           gemini: 'Use Gemini CLI (run now)',
-          github: 'Use GitHub coding agent',
+          github: 'Use GitHub agent via gh CLI',
         },
         extraChoices: [
           { name: 'Generate prompt to copy & paste', value: 'generate' },

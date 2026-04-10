@@ -66,11 +66,13 @@ If a comment does not reference a file path, use the PR scope and discussion con
 
 ## Workflow
 
-1. **Collect context** — Read the PR description, review comments, review threads, and issue comments.
-2. **Extract issues** — List mistakes, confusion, or rework noted by reviewers.
-3. **Map to process** — Use the directory mapping to determine which agent, template, or instruction should improve.
-4. **Propose updates** — Write specific, minimal changes with file paths.
-5. **Write the retro** — Use `rnd/templates/retro.md` and include evidence links to comments.
+1. **Read shared summaries first** — If `rnd/agent_summaries/` exists, read all summaries to understand what happened during the run.
+2. **Collect context** — Read the PR description, review comments, review threads, and issue comments.
+3. **Extract issues** — List mistakes, confusion, or rework noted by reviewers.
+4. **Map to process** — Use the directory mapping to determine which agent, template, or instruction should improve.
+5. **Propose updates** — Write specific, minimal changes with file paths.
+6. **Write the retro** — Use `rnd/templates/retro.md` and include evidence links to comments.
+7. **After approval** — This workflow consumes shared summaries but does not create a new summary log for itself. After the user confirms the retro is satisfactory, delete files in `rnd/agent_summaries/` to clean up for the next cycle.
 
 ---
 
@@ -80,3 +82,4 @@ If a comment does not reference a file path, use the PR scope and discussion con
 - Do not propose new tooling or frameworks.
 - If no improvements are warranted, state "No updates recommended" and explain why.
 - Always include evidence links for each recommendation.
+- Do not create a new agent summary log for the retro workflow.

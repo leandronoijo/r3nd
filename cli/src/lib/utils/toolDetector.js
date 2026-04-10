@@ -57,7 +57,7 @@ function getAvailableToolNames() {
   if (tools.codex) available.push('codex');
   if (tools.claude) available.push('claude');
   if (tools.gemini) available.push('gemini');
-  if (tools.github) available.push('gh (GitHub CLI)');
+  if (tools.github) available.push('gh (GitHub agent CLI)');
   
   return available;
 }
@@ -73,7 +73,7 @@ function getMissingToolNames() {
   if (!tools.codex) missing.push('codex');
   if (!tools.claude) missing.push('claude');
   if (!tools.gemini) missing.push('gemini');
-  if (!tools.github) missing.push('gh (GitHub CLI)');
+  if (!tools.github) missing.push('gh (GitHub agent CLI)');
   
   return missing;
 }

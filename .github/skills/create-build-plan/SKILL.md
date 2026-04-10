@@ -8,14 +8,13 @@ description: Turn a technical spec into a concrete implementation and test plan 
 Turn a technical spec into a concrete implementation and test plan formed of small, traceable tasks.
 
 {{rnd/agents/team-lead.md}}
+{{rnd/agents/shared/command-hygiene.md}}
 
 ## GitHub-Specific Instructions
 
 When using GitHub Copilot for this skill:
 
-- Start in the repository root and read any referenced instructions and templates before writing output.
-- Keep changes scoped strictly to the expected output path for this task.
-- Validate file names, paths, and markdown structure before finalizing.
-- Summarize what was created or changed and any assumptions that affect follow-up work.
+- Use GitHub Copilot's repository context and linked issue or PR materials to gather inputs before drafting the artifact.
+- Write the final artifact directly to the expected output path for this task.
 
 {{rnd/agents/summary.md}}

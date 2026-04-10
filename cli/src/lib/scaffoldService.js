@@ -4,12 +4,10 @@ const { GitHubClient } = require('./github/githubClient');
 const { ensureDir } = require('./fs/fileWriter');
 const { 
   copyAgentPersonas, 
-  copyGitHubWorkflows, 
-  composeAgentFiles, 
+  syncPlatformAsset,
   copyTemplates, 
   copyCommonFiles,
-  copyTestingInstructions,
-  copyInstructionsToRnd
+  copyTestingInstructions
 } = require('./fs/seedCopier');
 const { 
   fetchSeedSpecDirName, 
@@ -20,6 +18,11 @@ const {
 const { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askSeedRepo, askInitOptions } = require('./ui/prompts');
 const { runPlansSequential, waitForCompletionFile, runCodexCommand, makeGitHubCommand } = require('./llm/agentRunner');
 const { ConfigManager } = require('./config/configManager');
+const {
+  getPlatformAsset,
+  normalizePlatformAssetSelection,
+  shouldMirrorInstructionsToRnd
+} = require('./platformAssetRegistry');
 const logger = require('./utils/logger');
 const fs = require('fs').promises;
 const { execSync } = require('child_process');
@@ -88,15 +91,9 @@ async function runScaffold(opts = {}, deps = {}) {
   let selectedOptions = [];
   if (!backendInstructionsExist || !frontendInstructionsExist) {
     logger.info('\nr3nd — component initializer\n');
-    selectedOptions = await askInitOptions(nonInteractive);
+    selectedOptions = normalizePlatformAssetSelection(await askInitOptions(nonInteractive));
     logger.info(`\nSelected: ${selectedOptions.join(', ') || 'None'}\n`);
   }
-
-  // Mandatory seed files (excluding agents which are handled separately)
-  const mandatorySeedFiles = [
-    'rnd/templates/retro.md',
-    '.github/workflows/06-retro-ready.yml'
-  ];
 
   if (backendInstructionsExist && frontendInstructionsExist) {
     logger.info('✓ Resuming from existing setup, skipping file download');
@@ -123,41 +120,26 @@ async function runScaffold(opts = {}, deps = {}) {
     // Copy platform-agnostic agent personas from seed repo
     await copyAgentPersonas(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
 
-    // Process selected options (these are optional)
-    if (selectedOptions.includes('github')) {
-      await copyGitHubWorkflows(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
-      // Compose GitHub Copilot skill files from wrappers + shared task content
-      await composeAgentFiles(cwd, tree, githubClient, '.github/skills', 'SKILL.md', specDirName, seedSpecDirName, { nonInteractive });
-    }
-
-    if (selectedOptions.includes('cursor')) {
-      // Compose Cursor command files from wrappers + personas
-      await composeAgentFiles(cwd, tree, githubClient, '.cursor/commands', '.md', specDirName, seedSpecDirName, { nonInteractive });
-    }
-
-    if (selectedOptions.includes('codex')) {
-      // Compose Codex skill files from wrappers + personas
-      await composeAgentFiles(cwd, tree, githubClient, '.codex/skills', 'SKILL.md', specDirName, seedSpecDirName, { nonInteractive });
-    }
-
-    if (selectedOptions.includes('claude')) {
-      // Compose Claude command files from wrappers + personas
-      await composeAgentFiles(cwd, tree, githubClient, '.claude/commands', '.md', specDirName, seedSpecDirName, { nonInteractive });
+    for (const assetKey of selectedOptions) {
+      const asset = getPlatformAsset(assetKey);
+      if (!asset) {
+        continue;
+      }
+      await syncPlatformAsset(cwd, tree, githubClient, asset, specDirName, seedSpecDirName, { nonInteractive });
     }
 
     // Copy templates
     await copyTemplates(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
 
     // Ensure spec directories exist (conditionally create rnd/instructions)
-    const createRndInstructions = selectedOptions.includes('github');
+    const createRndInstructions = shouldMirrorInstructionsToRnd(selectedOptions);
     await ensureSpecDirectories(cwd, specDirName, { createRndInstructions });
 
-    // If GitHub skills are selected, copy instructions from spec-dir to rnd/instructions
-    if (createRndInstructions) {
-      await copyInstructionsToRnd(cwd, specDirName, { nonInteractive });
-    }
-
     // Ensure mandatory seed files exist
+    const mandatorySeedFiles = [];
+    if (selectedOptions.includes('github-workflows')) {
+      mandatorySeedFiles.push(`${seedSpecDirName}/templates/retro.md`, '.github/workflows/06-retro-ready.yml');
+    }
     await ensureMandatorySeedFiles(cwd, githubClient, specDirName, seedSpecDirName, mandatorySeedFiles, { 
       backend, 
       frontend, 

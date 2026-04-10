@@ -1,5 +1,9 @@
 const inquirer = require('inquirer');
 const { detectAvailableTools } = require('../utils/toolDetector');
+const {
+  getDefaultPlatformAssetKeys,
+  getPlatformAssetPromptChoices
+} = require('../platformAssetRegistry');
 const prompt = inquirer.createPromptModule();
 
 /**
@@ -17,7 +21,7 @@ function buildAgentChoices({ labels = {}, extraChoices = [] } = {}) {
     codex: 'Use local codex CLI (run now)',
     claude: 'Use Claude Code CLI (run now)',
     gemini: 'Use Gemini CLI (run now)',
-    github: 'Use GitHub coding agent',
+    github: 'Use GitHub agent via gh CLI',
   };
   
   const finalLabels = { ...defaultLabels, ...labels };
@@ -126,7 +130,7 @@ async function askBugfixLLMChoice(nonInteractive = false) {
       codex: 'Use local codex CLI',
       claude: 'Use Claude Code CLI',
       gemini: 'Use Gemini CLI',
-      github: 'Use GitHub coding agent',
+      github: 'Use GitHub agent via gh CLI',
     },
     extraChoices: [
       { name: 'Generate prompts to copy & paste', value: 'generate' },
@@ -158,7 +162,7 @@ async function askAnalyseAgent(defaultAgent = 'codex', nonInteractive = false) {
       codex: 'Local codex CLI',
       claude: 'Claude Code CLI',
       gemini: 'Gemini CLI',
-      github: 'GitHub coding agent',
+      github: 'GitHub agent via gh CLI',
     },
     extraChoices: [
       { name: 'Generate prompts only (no agent)', value: 'generate' },
@@ -227,15 +231,10 @@ async function chooseFile(files, message = 'Select a file:', nonInteractive = fa
  * @returns {Promise<string[]>} Array of selected option values
  */
 async function askInitOptions(nonInteractive = false) {
-  const defaultOptions = ['github', 'cursor', 'codex', 'claude'];
+  const defaultOptions = getDefaultPlatformAssetKeys();
   if (nonInteractive) return defaultOptions;
-  
-  const choices = [
-    { name: 'GitHub → Copy workflows and create .github/skills', value: 'github', checked: true },
-    { name: 'Cursor → Create .cursor/commands for each task', value: 'cursor', checked: true },
-    { name: 'Codex → Create .codex/skills for each task', value: 'codex', checked: true },
-    { name: 'Claude → Create .claude/commands for each task', value: 'claude', checked: true },
-  ];
+
+  const choices = getPlatformAssetPromptChoices('init');
   
   const res = await prompt([{
     type: 'checkbox',
@@ -253,16 +252,13 @@ async function askInitOptions(nonInteractive = false) {
  * @returns {Promise<string[]>} Array of selected option values
  */
 async function askUpdateOptions(nonInteractive = false) {
-  const defaultOptions = ['templates', 'agents', 'github', 'cursor', 'codex', 'claude'];
+  const defaultOptions = ['templates', 'agents', ...getDefaultPlatformAssetKeys()];
   if (nonInteractive) return defaultOptions;
-  
+
   const choices = [
     { name: 'Templates → Update spec-dir-name/templates/', value: 'templates', checked: true },
     { name: 'Agents → Update spec-dir-name/agents/ (shared task content)', value: 'agents', checked: true },
-    { name: 'GitHub → Update GitHub workflows (.github/workflows/)', value: 'github', checked: true },
-    { name: 'Cursor → Update .cursor/commands for each task', value: 'cursor', checked: true },
-    { name: 'Codex → Update .codex/skills for each task', value: 'codex', checked: true },
-    { name: 'Claude → Update .claude/commands for each task', value: 'claude', checked: true },
+    ...getPlatformAssetPromptChoices('update'),
   ];
   
   const res = await prompt([{

@@ -1,7 +1,7 @@
 # Technical Specification – <Feature Name>
 
 **Feature ID:** <feature-id>  
-**Product Spec:** `rnd/product_specs/<feature-id>-product-spec.md`  
+**Source:** `rnd/product_specs/<feature-id>-product-spec.md` or `Direct Requirements`  
 **Author:** Architect  
 **Date:** <yyyy-mm-dd>
 
@@ -45,12 +45,12 @@ Map each product goal to concrete technical requirements.
 ### 3.1 High-Level Architecture
 
 Describe the overall approach and how components interact.  
-Use text-based diagrams (ASCII or Mermaid) if helpful.
+Use Mermaid diagrams if helpful.
 
-```
-┌─────────────┐      ┌─────────────┐      ┌─────────────┐
-│   Frontend  │ ──▶  │   Backend   │ ──▶  │  Database   │
-└─────────────┘      └─────────────┘      └─────────────┘
+```mermaid
+flowchart LR
+  frontend[Frontend] --> backend[Backend]
+  backend --> database[Database]
 ```
 
 ### 3.2 Backend Design

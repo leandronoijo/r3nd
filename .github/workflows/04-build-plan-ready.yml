@@ -122,6 +122,8 @@ jobs:
             const fileList = changedFiles.map(file => '- `' + file + '`').join('\n');
             const firstFile = changedFiles[0] || 'rnd/build_plans/';
             const planName = firstFile.split('/').pop().replace('.md', '');
+            const specDirMatch = firstFile.match(/(?:^|\/)(rnd|r3nd)\//);
+            const specDir = specDirMatch ? specDirMatch[1] : 'r3nd';
             
             const issueTitle = 'Development: ' + planName;
             const issueBody = [
@@ -191,6 +193,8 @@ jobs:
             const fileList = changedFiles.map(file => '- `' + file + '`').join('\n');
             const firstFile = changedFiles[0] || 'rnd/build_plans/';
             const planName = firstFile.split('/').pop().replace('.md', '');
+            const specDirMatch = firstFile.match(/(?:^|\/)(rnd|r3nd)\//);
+            const specDir = specDirMatch ? specDirMatch[1] : 'r3nd';
 
             const issueTitle = 'Generate Test Cases: ' + planName;
             const issueBody = [
@@ -202,7 +206,7 @@ jobs:
               fileList,
               '',
               '> **Task skill:** `.github/skills/create-test-cases/SKILL.md`',
-              '> **Canonical template:** `rnd/templates/test_cases.md`',
+              '> **Canonical template:** `' + specDir + '/templates/test_cases.md`',
               '',
               '_No additional instructions are included here; follow the referenced task skill and template._'
             ].join('\n');

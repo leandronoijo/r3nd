@@ -13,11 +13,7 @@ Run coordinated feature implementation with a team-lead coordinator, developer w
 
 When using Codex CLI for this command:
 
-- Act as the coordinator and delegate to sub-agents/teammates whenever practical
-- Use Codex multi-agent capabilities (for example teammate/child-agent patterns) when available
-- Run dependency-independent tasks in parallel only; preserve strict dependency order otherwise
-- Enforce task-level QA gates before unblocking dependents
-- Never skip final E2E QA from written test cases
-- Persist required run artifacts after each task and QA cycle before continuing
+- Use Codex multi-agent capabilities when the environment supports them.
+- Keep coordinator state explicit between delegation cycles so task ordering and QA status remain visible.
 
 {{rnd/agents/summary.md}}

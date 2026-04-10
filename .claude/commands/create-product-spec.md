@@ -3,14 +3,13 @@
 Create clear, concise product specifications from short feature descriptions or issue text.
 
 {{rnd/agents/product-manager.md}}
+{{rnd/agents/shared/command-hygiene.md}}
 
 ## Claude-Specific Instructions
 
 When using Claude Code for this command:
 
-- Start in the repository root and read any referenced instructions/templates before writing output.
-- Keep edits focused on the files required for this command and avoid unrelated modifications.
-- Verify output formatting, file path targets, and completion criteria before finalizing.
-- Summarize results and call out blockers or assumptions that require user confirmation.
+- Use Claude Code's terminal-first repo tools to inspect referenced files before drafting the artifact.
+- Write the final artifact directly to the expected output path for this task.
 
 {{rnd/agents/summary.md}}

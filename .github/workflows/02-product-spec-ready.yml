@@ -126,7 +126,8 @@ jobs:
             const specName = firstFile.split('/').pop().replace('.md', '');
             
             // Determine the spec directory (rnd or r3nd) from the file path
-            const specDir = firstFile.match(/\/(rnd|r3nd)\//) ? firstFile.match(/\/(rnd|r3nd)\//)[1] : 'r3nd';
+            const specDirMatch = firstFile.match(/(?:^|\/)(rnd|r3nd)\//);
+            const specDir = specDirMatch ? specDirMatch[1] : 'r3nd';
             
             const issueTitle = 'Tech Spec: ' + specName;
             const issueBody = [
@@ -142,7 +143,7 @@ jobs:
               '### Instructions',
               '1. Read and follow the task skill at `.github/skills/create-tech-spec/SKILL.md`',
               '2. Read the product specification(s) listed above',
-              '3. Use the template at `rnd/templates/tech_spec.md` as the base for the tech spec',
+              '3. Use the template at `' + specDir + '/templates/tech_spec.md` as the base for the tech spec',
               '4. Output the tech spec to `' + specDir + '/tech_specs/` following the naming convention',
               '',
               '### Context',

@@ -4,20 +4,19 @@ const { execSync } = require('child_process');
 const YAML = require('yaml');
 
 const { GitHubClient } = require('./github/githubClient');
-const { writeBuffer, ensureDir } = require('./fs/fileWriter');
 const { 
   copyAgentPersonas, 
-  copyGitHubWorkflows, 
-  composeAgentFiles, 
+  syncPlatformAsset,
   copyTemplates, 
-  copyCommonFiles,
-  copyInstructionsToRnd
+  copyCommonFiles
 } = require('./fs/seedCopier');
 const { fetchSeedSpecDirName } = require('./overlays/overlaySeedService');
 const { askInitOptions, askSeedRepo, askSpecDirName } = require('./ui/prompts');
 const { ConfigManager } = require('./config/configManager');
-const { resolveTemplate, createGitHubFileReader } = require('./templateResolver');
-const { rewriteSpecDirBuffer, rewriteSpecDirContent } = require('./utils/specDirRewrite');
+const {
+  getPlatformAsset,
+  normalizePlatformAssetSelection
+} = require('./platformAssetRegistry');
 const logger = require('./utils/logger');
 
 /**
@@ -122,7 +121,7 @@ async function runInit(opts = {}, deps = {}) {
 
   // Ask user which components to initialize
   logger.info('r3nd — repository initializer\n');
-  const selectedOptions = await askInitOptions(nonInteractive);
+  const selectedOptions = normalizePlatformAssetSelection(await askInitOptions(nonInteractive));
 
   logger.info(`\nSelected: ${selectedOptions.join(', ') || 'None'}\n`);
 
@@ -139,35 +138,16 @@ async function runInit(opts = {}, deps = {}) {
   // Copy platform-agnostic agent personas from seed repo
   await copyAgentPersonas(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
 
-  // Process selected options (these are optional)
-  if (selectedOptions.includes('github')) {
-    await copyGitHubWorkflows(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
-    // Compose GitHub Copilot skill files from wrappers + shared task content
-    await composeAgentFiles(cwd, tree, githubClient, '.github/skills', 'SKILL.md', specDirName, seedSpecDirName, { nonInteractive });
-  }
-
-  if (selectedOptions.includes('cursor')) {
-    // Compose Cursor command files from wrappers + personas
-    await composeAgentFiles(cwd, tree, githubClient, '.cursor/commands', '.md', specDirName, seedSpecDirName, { nonInteractive });
-  }
-
-  if (selectedOptions.includes('codex')) {
-    // Compose Codex skill files from wrappers + personas
-    await composeAgentFiles(cwd, tree, githubClient, '.codex/skills', 'SKILL.md', specDirName, seedSpecDirName, { nonInteractive });
-  }
-
-  if (selectedOptions.includes('claude')) {
-    // Compose Claude command files from wrappers + personas
-    await composeAgentFiles(cwd, tree, githubClient, '.claude/commands', '.md', specDirName, seedSpecDirName, { nonInteractive });
+  for (const assetKey of selectedOptions) {
+    const asset = getPlatformAsset(assetKey);
+    if (!asset) {
+      continue;
+    }
+    await syncPlatformAsset(cwd, tree, githubClient, asset, specDirName, seedSpecDirName, { nonInteractive });
   }
 
   // Also copy templates if any option was selected
   await copyTemplates(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
-
-  // If GitHub skills are selected, copy instructions from spec-dir to rnd/instructions
-  if (selectedOptions.includes('github')) {
-    await copyInstructionsToRnd(cwd, specDirName, { nonInteractive });
-  }
 
   logger.info('\nInit complete.');
 }

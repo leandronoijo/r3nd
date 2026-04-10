@@ -83,7 +83,7 @@ const AGENT_REGISTRY = [
     filesDir: (specDirPath) => `${specDirPath}/test_cases`,
     agentFile: (specDirPath) => `${specDirPath}/agents/e2e-engineer.md`,
     promptTemplate: (agentFile, targetFile, specDirPath) =>
-      `Using the ${agentFile} agent profile as instructions, please implement and execute E2E tests for the following test cases:\n\n${targetFile}\n\nIMPORTANT: Follow all rules in the agent profile. Read rnd/instructions/e2e-testing.instructions.md before starting. Start required services, run tests sequentially, diagnose failures, and generate a comprehensive result report.\n\nTest results should be saved to: ${specDirPath}/e2e_results/`,
+      `Using the ${agentFile} agent profile as instructions, please implement and execute E2E tests for the following test cases:\n\n${targetFile}\n\nIMPORTANT: Follow all rules in the agent profile. Read ${specDirPath}/instructions/e2e-testing.instructions.md before starting. Start required services, run tests sequentially, diagnose failures, and generate a comprehensive result report.\n\nTest results should be saved to: ${specDirPath}/e2e-results/`,
     interactiveSuffix: (doneFile, specDirPath) =>
       `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After executing tests and generating the result report, provide a summary of test outcomes and failure categories.\n2. Ask if any failures need deeper investigation or if test methodology needs adjustment.\n3. Do NOT start any server or docker foreground processes that require manual termination. Always run services in detached/background mode.\n4. Then follow the shared summary workflow below.${getSharedSummaryWorkflow(doneFile, specDirPath)}`
   },

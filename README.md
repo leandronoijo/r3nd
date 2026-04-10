@@ -80,7 +80,7 @@ By default, located under `rnd/` (configurable via `r3nd.yaml`):
 - `tech_specs/`
 - `build_plans/`
 - `test_cases/`
-- `e2e_results/`
+- `e2e-results/`
 - `retros/`
 - `agent_summaries/`
 - `templates/`

@@ -11,7 +11,7 @@ The r3nd CLI integrates with several external tools to provide AI-powered code g
 | **Codex CLI** | `codex` | Local AI coding agent for code generation and modifications | `npm install -g @modelcontextprotocol/codex` |
 | **Claude Code** | `claude` | Anthropic's Claude Code CLI for interactive code assistance | See [Claude Code docs](https://docs.anthropic.com/en/docs/claude-code) |
 | **Gemini CLI** | `gemini` | Google's Gemini AI agent for interactive code assistance | Follow instructions at [Google Generative AI](https://github.com/google/generative-ai) |
-| **GitHub CLI** | `gh` | GitHub's official CLI with Copilot integration | Visit [cli.github.com](https://cli.github.com/) or install via package manager:<br/>• Ubuntu/Debian: `sudo apt install gh`<br/>• macOS: `brew install gh`<br/>• Other: See [installation guide](https://github.com/cli/cli#installation) |
+| **GitHub CLI** | `gh` | GitHub agent runner used for remote `gh agent-task` execution | Visit [cli.github.com](https://cli.github.com/) or install via package manager:<br/>• Ubuntu/Debian: `sudo apt install gh`<br/>• macOS: `brew install gh`<br/>• Other: See [installation guide](https://github.com/cli/cli#installation) |
 
 ### How Tool Detection Works
 
@@ -42,15 +42,15 @@ If you haven't installed any of the CLI tools yet, you can still use r3nd! Selec
 Commands:
 
 - `init`: Initialize the current directory as a git repository (runs `git init` if `.git` is missing) and copy a minimal set of seed files from the r3nd seed repository. Files copied include:
-  - `.github/skills/**`
-  - `rnd/templates/**`
   - `.github/workflows/**`
+  - `.github/skills/**`
   - `.cursor/commands/**`
   - `.claude/commands/**`
   - `.codex/skills/**`
+  - `rnd/templates/**`
   - `rnd/instructions/e2e-testing.instructions.md`
   - `.gitignore`
-  - (Includes the retro agent/template/workflow via the `.github` folders)
+  - (GitHub workflows and GitHub skills are managed as separate generated asset families)
 
   Example:
 
@@ -61,7 +61,7 @@ Commands:
 
 - `analyse`: Analyse the repository and generate `project.instructions.md` and per-app instruction files using an LLM agent.
   - Options:
-    - `-a, --agent <agent>`: Agent to use (`codex|claude|gemini|github|generate`). Default: `codex` (or first available agent).
+    - `-a, --agent <agent>`: Agent to use (`codex|claude|gemini|github|generate`). `github` runs the remote GitHub agent via `gh agent-task`. Default: `codex` (or first available agent).
     - `-n, --non-interactive`: Run without interactive prompts.
     - `-d, --dir <directory>`: Target a specific app/service directory instead of the whole project. Generates instructions for just that directory.
   - **Note**: Only agents installed on your system will be available as options.
@@ -86,39 +86,39 @@ Commands:
 
 - `agents`: Run AI agents for generating specs, plans, and implementing features. See [Agents Command Documentation](docs/agents-command.md) for details.
   - Subcommands:
-    - `product-spec`: Generate a product specification from a feature description (free text input)
-    - `tech-spec`: Generate a technical specification from a product spec
-    - `build-plan`: Generate a build plan from a technical specification
-    - `develop`: Implement a build plan to completion
+    - `create-product-spec`: Generate a product specification from a feature description (free text input)
+    - `create-tech-spec`: Generate a technical specification from a product spec
+    - `create-build-plan`: Generate a build plan from a technical specification
+    - `implement-build-plan`: Implement a build plan to completion
     - `implement-feature`: Run coordinated feature implementation with teammate agents
-    - `test-cases`: Generate E2E test cases from a build plan
-    - `e2e-tests`: Generate, run, and diagnose E2E tests from test cases
-    - `retro`: Review PR discussions and create a retro report
+    - `create-test-cases`: Generate E2E test cases from a build plan
+    - `run-e2e-tests`: Generate, run, and diagnose E2E tests from test cases
+    - `create-retro-report`: Review PR discussions and create a retro report
   - **Note**: Only agents installed on your system will be available as options.
   - **Spec Directory Option**: Use `--spec-dir <path>` to specify where spec files should be saved (e.g., `apps/my-app`, `services/auth`). Files will be saved in `<spec-dir>/<spec-dir-name>/` where `spec-dir-name` comes from your r3nd.yaml config (defaults to `r3nd`).
   - Examples:
 
     ```bash
     # Interactive mode (saves to root r3nd/ directory by default)
-    r3nd agents product-spec
-    r3nd agents tech-spec
-    r3nd agents build-plan
-    r3nd agents develop
+    r3nd agents create-product-spec
+    r3nd agents create-tech-spec
+    r3nd agents create-build-plan
+    r3nd agents implement-build-plan
 
     # With options
-    r3nd agents product-spec --input "Build user auth system" --agent github
-    r3nd agents tech-spec --file r3nd/product_specs/auth.md --agent github
-    r3nd agents develop --file r3nd/build_plans/feature.md --agent codex
+    r3nd agents create-product-spec --input "Build user auth system" --agent github
+    r3nd agents create-tech-spec --file r3nd/product_specs/auth.md --agent github
+    r3nd agents implement-build-plan --file r3nd/build_plans/feature.md --agent codex
     r3nd agents implement-feature --file r3nd/tech_specs/feature.md --agent codex
 
     # Using custom spec directory (saves to apps/backend/r3nd/)
-    r3nd agents product-spec --spec-dir apps/backend --input "Add OAuth2" --agent github
-    r3nd agents tech-spec --spec-dir services/auth --file services/auth/r3nd/product_specs/feature.md --agent codex
+    r3nd agents create-product-spec --spec-dir apps/backend --input "Add OAuth2" --agent github
+    r3nd agents create-tech-spec --spec-dir services/auth --file services/auth/r3nd/product_specs/feature.md --agent codex
     
     # Example for monorepo with multiple apps
-    r3nd agents product-spec --spec-dir apps/mobile --agent github    # → apps/mobile/r3nd/product_specs/
-    r3nd agents product-spec --spec-dir apps/web --agent github       # → apps/web/r3nd/product_specs/
-    r3nd agents tech-spec --spec-dir workspaces/shared --agent codex  # → workspaces/shared/r3nd/tech_specs/
+    r3nd agents create-product-spec --spec-dir apps/mobile --agent github    # → apps/mobile/r3nd/product_specs/
+    r3nd agents create-product-spec --spec-dir apps/web --agent github       # → apps/web/r3nd/product_specs/
+    r3nd agents create-tech-spec --spec-dir workspaces/shared --agent codex  # → workspaces/shared/r3nd/tech_specs/
     ```
 
 - `tools`: Show which AI tools are available on your system.

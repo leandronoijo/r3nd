@@ -127,7 +127,8 @@ jobs:
             const specName = firstFile.split('/').pop().replace('.md', '');
             
             // Determine the spec directory (rnd or r3nd) from the file path
-            const specDir = firstFile.match(/\/(rnd|r3nd)\//) ? firstFile.match(/\/(rnd|r3nd)\//)[1] : 'r3nd';
+            const specDirMatch = firstFile.match(/(?:^|\/)(rnd|r3nd)\//);
+            const specDir = specDirMatch ? specDirMatch[1] : 'r3nd';
             
             const issueTitle = 'Build Plan: ' + specName;
             const issueBody = [
@@ -143,7 +144,7 @@ jobs:
               '### Instructions',
               '1. Read and follow the task skill at `.github/skills/create-build-plan/SKILL.md`',
               '2. Read the technical specification(s) listed above',
-              '3. Use the template at `rnd/templates/build_plan.md` as the base for the build plan',
+              '3. Use the template at `' + specDir + '/templates/build_plan.md` as the base for the build plan',
               '4. Output the build plan to `' + specDir + '/build_plans/` following the naming convention',
               '',
               '### Context',

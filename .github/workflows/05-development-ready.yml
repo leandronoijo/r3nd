@@ -207,6 +207,25 @@ jobs:
             const prTitle = '${{ needs.get-pr-context.outputs.pr_title }}';
             const prBody = `${{ needs.get-pr-context.outputs.pr_body }}`;
             const prAuthor = '${{ needs.get-pr-context.outputs.pr_author }}';
+
+            let specDir = 'r3nd';
+            try {
+              const configResponse = await github.rest.repos.getContent({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path: 'r3nd.yaml',
+                ref: context.sha
+              });
+              if (!Array.isArray(configResponse.data) && configResponse.data.content) {
+                const configText = Buffer.from(configResponse.data.content, 'base64').toString('utf8');
+                const match = configText.match(/^\s*spec-dir-name:\s*["']?([A-Za-z0-9_.-]+)["']?\s*$/m);
+                if (match) {
+                  specDir = match[1];
+                }
+              }
+            } catch (err) {
+              // Fall back to the default spec dir name when config is absent.
+            }
             
             // Build file list
             const fileList = changedFiles.map(file => '- `' + file + '`').join('\n');
@@ -252,7 +271,7 @@ jobs:
               '---',
               '',
               '> **Task skill:** `.github/skills/run-e2e-tests/SKILL.md`',
-              '> **E2E Instructions:** `.github/instructions/e2e-testing.instructions.md`',
+              '> **E2E Instructions:** `' + specDir + '/instructions/e2e-testing.instructions.md`',
               '> **Result Template:** `rnd/templates/e2e-result.md`',
               '',
               '### Instructions',
@@ -263,10 +282,10 @@ jobs:
               '2. **Read test cases** from `rnd/test_cases/<feature-id>-test-cases.md`',
               '3. **Read build plan** from `rnd/build_plans/<feature-id>-build-plan.md` for contracts and acceptance criteria',
               '4. **Start services** (backend, frontend, database) per environment setup protocol',
-              '5. **Generate E2E tests** following patterns in `.github/instructions/e2e-testing.instructions.md`',
+              '5. **Generate E2E tests** following patterns in `' + specDir + '/instructions/e2e-testing.instructions.md`',
               '6. **Run tests sequentially** and capture results',
               '7. **Diagnose failures** (environment/methodology/code) per decision tree',
-              '8. **Generate result report** in `rnd/e2e-results/<feature-id>-e2e-result.md`',
+              '8. **Generate result report** in `' + specDir + '/e2e-results/<feature-id>-e2e-result.md`',
               '',
               '**Output:** Create PR with test files and result report.',
               '',

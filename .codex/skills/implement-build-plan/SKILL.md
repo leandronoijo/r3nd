@@ -8,14 +8,13 @@ description: Implement features and tests based on a build plan; follow reposito
 Implement features and tests based on a build plan; follow repository standards and keep diffs small and test-driven.
 
 {{rnd/agents/developer.md}}
+{{rnd/agents/shared/command-hygiene.md}}
 
 ## Codex-Specific Instructions
 
 When using Codex CLI for this command:
 
-- Start in the repository root and read any referenced instructions/templates before writing output.
-- Keep changes scoped strictly to the expected output path for this command.
-- Validate file names, paths, and markdown structure before finalizing.
-- Summarize what was created or changed and any assumptions that affect follow-up work.
+- Use Codex CLI repo tools to inspect touched code, tests, and instruction files before editing.
+- Keep implementation and verification close together so the repository is left in a tested state.
 
 {{rnd/agents/summary.md}}

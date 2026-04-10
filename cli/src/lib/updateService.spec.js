@@ -1,6 +1,6 @@
 // Mock inquirer to avoid ESM import issues
 jest.mock('./ui/prompts', () => ({
-  askUpdateOptions: jest.fn().mockResolvedValue(['templates', 'agents', 'github', 'cursor', 'codex', 'claude']),
+  askUpdateOptions: jest.fn().mockResolvedValue(['templates', 'agents', 'github-skills', 'github-workflows', 'cursor', 'codex', 'claude']),
   askSeedRepo: jest.fn().mockResolvedValue('leandronoijo/r3nd@develop'),
   askSpecDirName: jest.fn().mockResolvedValue('r3nd')
 }));
@@ -14,32 +14,20 @@ jest.mock('./config/configManager', () => ({
   }))
 }));
 
-// Mock initService functions
-jest.mock('./initService', () => ({
-  parseAgentFile: jest.fn((content) => ({
-    name: 'test-agent',
-    description: 'Test description',
-    tools: ['*'],
-    content: 'Test content'
-  })),
-  generateCursorCommand: jest.fn((agent) => `# ${agent.name}\n\n${agent.content}`),
-  generateVSCodeChatMode: jest.fn((agent) => `---\ndescription: "${agent.description}"\n---\n\n${agent.content}`)
-}));
-
-// Mock fileWriter
-jest.mock('./fs/fileWriter', () => ({
-  writeBuffer: jest.fn().mockResolvedValue(undefined),
-  ensureDir: jest.fn().mockResolvedValue(undefined)
-}));
-
 // Mock seed copier
 jest.mock('./fs/seedCopier', () => ({
-  copyInstructionsToRnd: jest.fn().mockResolvedValue(undefined)
+  copyTemplates: jest.fn().mockResolvedValue(undefined),
+  copyAgentPersonas: jest.fn().mockResolvedValue(undefined),
+  syncPlatformAsset: jest.fn().mockResolvedValue(undefined)
+}));
+
+jest.mock('./overlays/overlaySeedService', () => ({
+  fetchSeedSpecDirName: jest.fn().mockResolvedValue('rnd')
 }));
 
 const { runUpdate } = require('./updateService');
 const { askUpdateOptions } = require('./ui/prompts');
-const { writeBuffer } = require('./fs/fileWriter');
+const { copyTemplates, copyAgentPersonas, syncPlatformAsset } = require('./fs/seedCopier');
 const logger = require('./utils/logger');
 
 describe('updateService', () => {
@@ -83,12 +71,11 @@ describe('updateService', () => {
       // Verify askUpdateOptions was called with nonInteractive flag
       expect(askUpdateOptions).toHaveBeenCalledWith(true);
       
-      // Verify GitHubClient methods were called
       expect(mockGithubClient.getTree).toHaveBeenCalled();
-      expect(mockGithubClient.fetchRaw).toHaveBeenCalled();
       
-      // Verify files were written
-      expect(writeBuffer).toHaveBeenCalled();
+      expect(copyTemplates).toHaveBeenCalled();
+      expect(copyAgentPersonas).toHaveBeenCalled();
+      expect(syncPlatformAsset).toHaveBeenCalled();
     });
 
     it('should handle empty selection', async () => {
@@ -101,20 +88,18 @@ describe('updateService', () => {
 
       // Should return early without calling getTree
       expect(mockGithubClient.getTree).not.toHaveBeenCalled();
-      expect(mockGithubClient.fetchRaw).not.toHaveBeenCalled();
     });
 
     it('should handle GitHub option only', async () => {
-      askUpdateOptions.mockResolvedValueOnce(['github']);
+      askUpdateOptions.mockResolvedValueOnce(['github-skills']);
       
       const opts = { cwd: '/test/dir', nonInteractive: false };
       const deps = { githubClient: mockGithubClient };
 
       await runUpdate(opts, deps);
 
-      // Verify tree was fetched
       expect(mockGithubClient.getTree).toHaveBeenCalled();
-      expect(mockGithubClient.fetchRaw).toHaveBeenCalled();
+      expect(syncPlatformAsset).toHaveBeenCalledTimes(1);
     });
 
     it('should warn when not in a git repository', async () => {
