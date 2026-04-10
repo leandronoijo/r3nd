@@ -4,6 +4,7 @@ tools: ["*"]
 ---
 
 {{rnd/agents/e2e-engineer.md}}
+{{rnd/agents/summary.md}}
 
 ## VSCode Copilot Chat Instructions
 

@@ -4,6 +4,7 @@ tools: ["*"]
 ---
 
 {{rnd/agents/implement-feature.md}}
+{{rnd/agents/summary.md}}
 
 ## VSCode Copilot Chat Instructions
 

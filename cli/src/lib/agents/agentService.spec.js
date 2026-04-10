@@ -1,4 +1,4 @@
-const { listMarkdownFiles, buildPrompt, validateAgentSetup, getFileDisplayName } = require('./agentService');
+const { listMarkdownFiles, buildPrompt, buildInteractivePrompt, validateAgentSetup, getFileDisplayName } = require('./agentService');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -7,7 +7,8 @@ jest.mock('fs', () => ({
   promises: {
     readdir: jest.fn(),
     access: jest.fn(),
-    stat: jest.fn()
+    stat: jest.fn(),
+    readFile: jest.fn()
   }
 }));
 
@@ -101,6 +102,27 @@ describe('agentService', () => {
       };
 
       expect(() => buildPrompt(agent, 'test.md')).toThrow('promptTemplate must be a function');
+    });
+  });
+
+  describe('buildInteractivePrompt', () => {
+    it('should resolve shared summary workflow placeholders from disk', async () => {
+      fs.readFile.mockResolvedValue('# Summary Workflow\nShared summary instructions');
+
+      const agent = {
+        name: 'test-agent',
+        agentFile: 'specs/agents/test.md',
+        specDirName: 'specs',
+        promptTemplate: () => 'Base prompt',
+        interactiveSuffix: () => '\n\n{{specs/agents/summary.md}}'
+      };
+
+      const result = await buildInteractivePrompt(agent, 'target.md', 'done.file', '/repo');
+
+      expect(result).toContain('Base prompt');
+      expect(result).toContain('Shared summary instructions');
+      expect(result).not.toContain('{{specs/agents/summary.md}}');
+      expect(fs.readFile).toHaveBeenCalledWith('/repo/specs/agents/summary.md', 'utf-8');
     });
   });
 

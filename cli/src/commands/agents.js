@@ -290,7 +290,7 @@ async function runCodexAgent(targetInput, cwd, agentName, agentConfig) {
   const doneFilePath = path.join(cwd, doneFileName);
   
   // Build interactive prompt with completion instructions
-  const interactivePrompt = buildInteractivePrompt(agentConfig, targetInput, doneFileName);
+  const interactivePrompt = await buildInteractivePrompt(agentConfig, targetInput, doneFileName, cwd);
   
   // Escape single quotes for shell command
   const escapedPrompt = interactivePrompt.replace(/'/g, "'\\\\''");
@@ -322,7 +322,7 @@ async function runClaudeAgent(targetInput, cwd, agentName, agentConfig) {
   const doneFilePath = path.join(cwd, doneFileName);
 
   // Build interactive prompt with completion instructions
-  const interactivePrompt = buildInteractivePrompt(agentConfig, targetInput, doneFileName);
+  const interactivePrompt = await buildInteractivePrompt(agentConfig, targetInput, doneFileName, cwd);
 
   // Escape double quotes for shell command
   const escapedPrompt = interactivePrompt.replace(/"/g, '\\"');
@@ -354,7 +354,7 @@ async function runGeminiAgent(targetInput, cwd, agentName, agentConfig) {
   const doneFilePath = path.join(cwd, doneFileName);
   
   // Build interactive prompt with completion instructions
-  const interactivePrompt = buildInteractivePrompt(agentConfig, targetInput, doneFileName);
+  const interactivePrompt = await buildInteractivePrompt(agentConfig, targetInput, doneFileName, cwd);
   
   // Escape double quotes for shell command
   const escapedPrompt = interactivePrompt.replace(/"/g, '\\"');

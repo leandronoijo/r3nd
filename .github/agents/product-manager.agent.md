@@ -4,6 +4,7 @@ tools: ["*"]
 ---
 
 {{rnd/agents/product-manager.md}}
+{{rnd/agents/summary.md}}
 
 ## GitHub Copilot Platform Instructions
 

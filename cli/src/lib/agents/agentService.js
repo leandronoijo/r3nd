@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs').promises;
 const logger = require('../utils/logger');
+const { resolveTemplate, createLocalFileReader } = require('../templateResolver');
 
 /**
  * List all markdown files in a directory, sorted by creation time (newest first)
@@ -71,9 +72,10 @@ function buildPrompt(agent, targetFile) {
  * @param {Object} agent - Agent configuration from registry (resolved)
  * @param {string} targetFile - The selected file to process or user input
  * @param {string} doneFileName - Name of the done file to create when complete
- * @returns {string} Formatted prompt text with interactive suffix
+ * @param {string} cwd - Current working directory for resolving {{...}} references
+ * @returns {Promise<string>} Formatted prompt text with interactive suffix
  */
-function buildInteractivePrompt(agent, targetFile, doneFileName) {
+async function buildInteractivePrompt(agent, targetFile, doneFileName, cwd) {
   const basePrompt = buildPrompt(agent, targetFile);
   
   if (typeof agent.interactiveSuffix !== 'function') {
@@ -84,7 +86,13 @@ function buildInteractivePrompt(agent, targetFile, doneFileName) {
   // Use fullSpecDir if available, otherwise fall back to specDirName
   const specDirPath = agent.fullSpecDir || agent.specDirName;
   const suffix = agent.interactiveSuffix(doneFileName, specDirPath);
-  return `${basePrompt}${suffix}`;
+  const unresolvedPrompt = `${basePrompt}${suffix}`;
+
+  if (!cwd) {
+    return unresolvedPrompt;
+  }
+
+  return resolveTemplate(unresolvedPrompt, createLocalFileReader(cwd));
 }
 
 /**

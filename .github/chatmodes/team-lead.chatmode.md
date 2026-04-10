@@ -4,6 +4,7 @@ tools: ["*"]
 ---
 
 {{rnd/agents/team-lead.md}}
+{{rnd/agents/summary.md}}
 
 ## VSCode Copilot Chat Instructions
 
