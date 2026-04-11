@@ -187,6 +187,8 @@ describe('ConfigManager', () => {
     it('should return true for valid keys', () => {
       expect(ConfigManager.isValidKey('seed-repo')).toBe(true);
       expect(ConfigManager.isValidKey('spec-dir-name')).toBe(true);
+      expect(ConfigManager.isValidKey('worktree-copy-files')).toBe(true);
+      expect(ConfigManager.isValidKey('worktree-open-command')).toBe(true);
     });
 
     it('should return false for invalid keys', () => {
@@ -200,7 +202,9 @@ describe('ConfigManager', () => {
       const defaults = ConfigManager.getDefaults();
       expect(defaults).toEqual({
         'seed-repo': 'leandronoijo/r3nd@develop',
-        'spec-dir-name': 'r3nd'
+        'spec-dir-name': 'r3nd',
+        'worktree-copy-files': ['*.env', '**/*.env'],
+        'worktree-open-command': ['code', '{worktreeDir}']
       });
     });
   });
@@ -221,6 +225,36 @@ describe('ConfigManager', () => {
       await configManager.save({ 'seed-repo': 'owner/repo@branch' });
       const dirName = await configManager.getSpecDirName();
       expect(dirName).toBe('r3nd');
+    });
+  });
+
+  describe('worktree config helpers', () => {
+    it('should return default worktree copy patterns when not configured', async () => {
+      const patterns = await configManager.getWorktreeCopyFiles();
+      expect(patterns).toEqual(['*.env', '**/*.env']);
+    });
+
+    it('should normalize a configured string worktree copy pattern into an array', async () => {
+      await configManager.set('worktree-copy-files', '*.local');
+      const patterns = await configManager.getWorktreeCopyFiles();
+      expect(patterns).toEqual(['*.local']);
+    });
+
+    it('should return default worktree open command when not configured', async () => {
+      const command = await configManager.getWorktreeOpenCommand();
+      expect(command).toEqual(['code', '{worktreeDir}']);
+    });
+
+    it('should preserve array worktree open command values', async () => {
+      await configManager.set('worktree-open-command', ['cursor', '{worktreeDir}']);
+      const command = await configManager.getWorktreeOpenCommand();
+      expect(command).toEqual(['cursor', '{worktreeDir}']);
+    });
+
+    it('should preserve string worktree open command values', async () => {
+      await configManager.set('worktree-open-command', 'code {worktreeDir}');
+      const command = await configManager.getWorktreeOpenCommand();
+      expect(command).toBe('code {worktreeDir}');
     });
   });
 

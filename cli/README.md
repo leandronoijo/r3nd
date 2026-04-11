@@ -128,6 +128,32 @@ Commands:
     r3nd tools
     ```
 
+- `worktree`: Create a repo-scoped git worktree under `~/.r3nd/worktrees/` and copy local r3nd files into it.
+  - Options:
+    - `-br, --branch <name>`: Use a specific branch name instead of generating one automatically.
+  - Behavior:
+    - Copies every directory named as your configured `spec-dir-name`.
+    - Copies root vendor directories when present: `.claude`, `.codex`, `.github`, and `.cursor`.
+    - Copies additional files from `worktree-copy-files` in `r3nd.yaml` (defaults to `*.env` and `**/*.env`).
+    - Runs the configured `worktree-open-command` after creation.
+  - Example:
+
+    ```bash
+    r3nd worktree
+    r3nd worktree --branch auth-investigation
+    ```
+
+- `worktree clean`: Delete clean r3nd-managed worktrees for the current repository.
+  - Behavior:
+    - Uses plain `git status --porcelain` to determine if a worktree is clean.
+    - Ignored-file changes do not block cleanup.
+    - Keeps local branches after removing the worktree directory.
+  - Example:
+
+    ```bash
+    r3nd worktree clean
+    ```
+
 ## Installation
 
 ### r3nd CLI Installation

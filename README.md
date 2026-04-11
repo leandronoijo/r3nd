@@ -246,6 +246,17 @@ r3nd tools
 
 # Update components
 r3nd update --yes
+
+# Create a repo-scoped worktree and open it
+r3nd worktree
+
+# Create a worktree on a specific branch
+r3nd worktree --branch auth-investigation
+
+# New worktrees also copy .claude, .codex, .github, and .cursor when present
+
+# Delete clean r3nd-managed worktrees
+r3nd worktree clean
 ```
 
 ### Configuration
@@ -259,6 +270,10 @@ r3nd config list
 # Get/set the seed repository
 r3nd config get seed-repo
 r3nd config set seed-repo myorganization/custom-r3nd@main
+
+# Inspect worktree-specific settings
+r3nd config get worktree-copy-files
+r3nd config get worktree-open-command
 ```
 
 ---

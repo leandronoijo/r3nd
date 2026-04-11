@@ -1,6 +1,32 @@
-const { ConfigManager } = require('../lib/config/configManager');
+const YAML = require('yaml');
+
+const { ConfigManager, VALID_CONFIG_KEYS } = require('../lib/config/configManager');
 const { rewriteSpecDirInRepo } = require('../lib/utils/specDirRewrite');
 const logger = require('../lib/utils/logger');
+
+function parseConfigValue(key, value) {
+  if (key !== 'worktree-copy-files' && key !== 'worktree-open-command') {
+    return value;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return trimmed;
+  }
+
+  try {
+    return YAML.parse(trimmed);
+  } catch {
+    return value;
+  }
+}
+
+function formatConfigValue(value) {
+  if (Array.isArray(value) || (value && typeof value === 'object')) {
+    return YAML.stringify(value).trimEnd();
+  }
+  return String(value);
+}
 
 function register(program) {
   const config = program
@@ -16,13 +42,19 @@ function register(program) {
         
         if (!ConfigManager.isValidKey(key)) {
           logger.error(`Invalid config key: ${key}`);
-          logger.info(`Valid keys: seed-repo, spec-dir-name`);
+          logger.info(`Valid keys: ${VALID_CONFIG_KEYS.join(', ')}`);
           process.exit(1);
         }
 
         const value = await configManager.get(key);
         if (value !== undefined) {
-          console.log(`${key}: ${value}`);
+          const formatted = formatConfigValue(value);
+          if (formatted.includes('\n')) {
+            console.log(`${key}:`);
+            console.log(formatted);
+          } else {
+            console.log(`${key}: ${formatted}`);
+          }
         } else {
           logger.warn(`No value set for '${key}'`);
           const defaults = ConfigManager.getDefaults();
@@ -45,7 +77,7 @@ function register(program) {
         
         if (!ConfigManager.isValidKey(key)) {
           logger.error(`Invalid config key: ${key}`);
-          logger.info(`Valid keys: seed-repo, spec-dir-name`);
+          logger.info(`Valid keys: ${VALID_CONFIG_KEYS.join(', ')}`);
           process.exit(1);
         }
 
@@ -61,8 +93,17 @@ function register(program) {
         }
 
         const previousSpecDirName = key === 'spec-dir-name' ? await configManager.getSpecDirName() : null;
-        await configManager.set(key, value);
-        logger.info(`✓ Set ${key} = ${value}`);
+        const parsedValue = parseConfigValue(key, value);
+        await configManager.set(key, parsedValue);
+
+        const savedValue = await configManager.get(key);
+        const formatted = formatConfigValue(savedValue);
+        if (formatted.includes('\n')) {
+          logger.info(`✓ Set ${key}:`);
+          console.log(formatted);
+        } else {
+          logger.info(`✓ Set ${key} = ${formatted}`);
+        }
 
         if (key === 'spec-dir-name' && previousSpecDirName && previousSpecDirName !== value) {
           const fromNames = ['rnd', 'r3nd', previousSpecDirName];
@@ -88,12 +129,25 @@ function register(program) {
           logger.info('No configuration values set.');
           logger.info('\nDefault values:');
           for (const [key, value] of Object.entries(defaults)) {
-            console.log(`  ${key}: ${value} (default)`);
+            const formatted = formatConfigValue(value);
+            if (formatted.includes('\n')) {
+              console.log(`  ${key}:`);
+              console.log(formatted);
+              console.log('  (default)');
+            } else {
+              console.log(`  ${key}: ${formatted} (default)`);
+            }
           }
         } else {
           logger.info('Configuration values:');
           for (const [key, value] of Object.entries(allConfig)) {
-            console.log(`  ${key}: ${value}`);
+            const formatted = formatConfigValue(value);
+            if (formatted.includes('\n')) {
+              console.log(`  ${key}:`);
+              console.log(formatted);
+            } else {
+              console.log(`  ${key}: ${formatted}`);
+            }
           }
           
           // Show defaults for missing keys
@@ -101,7 +155,14 @@ function register(program) {
           if (missingKeys.length > 0) {
             logger.info('\nDefault values (not set):');
             for (const key of missingKeys) {
-              console.log(`  ${key}: ${defaults[key]} (default)`);
+              const formatted = formatConfigValue(defaults[key]);
+              if (formatted.includes('\n')) {
+                console.log(`  ${key}:`);
+                console.log(formatted);
+                console.log('  (default)');
+              } else {
+                console.log(`  ${key}: ${formatted} (default)`);
+              }
             }
           }
         }

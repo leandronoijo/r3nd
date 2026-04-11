@@ -390,4 +390,84 @@ async function askOverwriteFile(filePath, nonInteractive = false) {
   return res.overwrite;
 }
 
-module.exports = { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askBugDescription, askFeatureDescription, askBugfixLLMChoice, confirmBuildPlan, askAnalyseAgent, buildAgentChoices, chooseFile, askInitOptions, askUpdateOptions, askSeedRepo, askSpecDirName, askOverwriteFile, askSelectApps };
+async function askWorktreeIDE(nonInteractive = false) {
+  if (nonInteractive) return 'vscode';
+
+  const res = await prompt([{
+    type: 'list',
+    name: 'ide',
+    message: 'Choose the default editor to open new worktrees:',
+    choices: [
+      { name: 'VSCode', value: 'vscode' },
+      { name: 'Cursor', value: 'cursor' },
+      { name: 'Neovim', value: 'neovim' }
+    ],
+    default: 'vscode'
+  }]);
+
+  return res.ide;
+}
+
+async function confirmWorktreeCopyWarning(patterns, nonInteractive = false) {
+  if (nonInteractive) return true;
+
+  const formattedPatterns = patterns.map(pattern => `  - ${pattern}`).join('\n');
+  const res = await prompt([{
+    type: 'confirm',
+    name: 'confirmed',
+    message: `New worktrees will also copy files matched by these patterns:\n${formattedPatterns}\n\nThese files can include secrets such as .env files. Continue?`,
+    default: true
+  }]);
+
+  return res.confirmed;
+}
+
+async function askWorktreeCleanSelection(worktrees, nonInteractive = false) {
+  if (!worktrees || worktrees.length === 0) {
+    return [];
+  }
+
+  if (nonInteractive) {
+    return worktrees.map(worktree => worktree.path);
+  }
+
+  const choices = worktrees.map(worktree => ({
+    name: `${worktree.branch} — ${worktree.path}`,
+    value: worktree.path
+  }));
+
+  const res = await prompt([{
+    type: 'checkbox',
+    name: 'selectedWorktrees',
+    message: 'Select clean worktrees to delete:',
+    choices,
+    pageSize: 15
+  }]);
+
+  return res.selectedWorktrees;
+}
+
+module.exports = {
+  chooseBackend,
+  chooseFrontend,
+  askLLMChoice,
+  confirmRunNow,
+  confirmSavePrompts,
+  askRemoteOrigin,
+  askBugDescription,
+  askFeatureDescription,
+  askBugfixLLMChoice,
+  confirmBuildPlan,
+  askAnalyseAgent,
+  buildAgentChoices,
+  chooseFile,
+  askInitOptions,
+  askUpdateOptions,
+  askSeedRepo,
+  askSpecDirName,
+  askOverwriteFile,
+  askSelectApps,
+  askWorktreeIDE,
+  confirmWorktreeCopyWarning,
+  askWorktreeCleanSelection
+};
