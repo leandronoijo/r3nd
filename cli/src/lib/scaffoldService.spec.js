@@ -18,9 +18,7 @@ jest.mock('./config/configManager', () => ({
 }));
 
 jest.mock('./fs/seedCopier', () => ({
-  copyAgentPersonas: jest.fn().mockResolvedValue(undefined),
   copyTaskSkills: jest.fn().mockResolvedValue(undefined),
-  copyVendorSkillAddons: jest.fn().mockResolvedValue(undefined),
   syncPlatformAsset: jest.fn().mockResolvedValue(undefined),
   copyTemplates: jest.fn().mockResolvedValue(undefined),
   copyCommonFiles: jest.fn().mockResolvedValue(undefined),
@@ -36,7 +34,7 @@ jest.mock('./overlays/overlaySeedService', () => ({
 
 const { runScaffold } = require('./scaffoldService');
 const { askInitOptions } = require('./ui/prompts');
-const { copyTaskSkills, copyVendorSkillAddons, copyAgentPersonas, syncPlatformAsset } = require('./fs/seedCopier');
+const { copyTaskSkills, syncPlatformAsset } = require('./fs/seedCopier');
 
 describe('scaffoldService', () => {
   let mockGithubClient;
@@ -68,8 +66,6 @@ describe('scaffoldService', () => {
 
     expect(askInitOptions).toHaveBeenCalledWith(false);
     expect(copyTaskSkills).toHaveBeenCalled();
-    expect(copyVendorSkillAddons).toHaveBeenCalled();
-    expect(copyAgentPersonas).toHaveBeenCalled();
     expect(syncPlatformAsset).toHaveBeenCalledTimes(2);
   });
 });

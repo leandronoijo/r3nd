@@ -85,8 +85,6 @@ By default, located under `rnd/` (configurable via `r3nd.yaml`):
 - `agent_summaries/`
 - `templates/`
 - `skills/`
-- `vendor/skills/`
-- `agents/`
 
 This ensures complete traceability from idea → architecture → plan → code.
 
@@ -113,9 +111,8 @@ Primary, agnostic instructions live under the `rnd/` directory so they apply reg
 
 - `rnd/instructions/*.instructions.md` — project- and path-specific rules (preferred location)
 - `rnd/templates/` contains canonical document templates
-- `rnd/skills/` contains canonical task skills
-- `rnd/vendor/skills/` contains vendor-specific skill add-ons
-- `rnd/agents/` contains shared internal fragments consumed by task skills
+- `rnd/skills/` contains local task skills used by CLI agent runs
+- In the seed repo itself, `rnd/vendor/skills/` and `rnd/agents/` remain internal composition sources and are not copied into downstream repos
 
 Use `.github/` only for Copilot-specific overrides:
 

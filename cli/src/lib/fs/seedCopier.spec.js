@@ -6,7 +6,7 @@ jest.mock('../ui/prompts', () => ({
   askOverwriteFile: jest.fn().mockResolvedValue(true)
 }));
 
-const { syncPlatformAsset } = require('./seedCopier');
+const { copyTaskSkills, syncPlatformAsset } = require('./seedCopier');
 
 describe('seedCopier', () => {
   let tempDir;
@@ -19,6 +19,56 @@ describe('seedCopier', () => {
     if (tempDir) {
       await fs.rm(tempDir, { recursive: true, force: true });
     }
+  });
+
+  it('copies local rnd skills as fully composed files without leaving template placeholders', async () => {
+    const tree = [
+      { type: 'blob', path: 'rnd/skills/implement-build-plan/SKILL.md' },
+      { type: 'blob', path: 'rnd/agents/developer.md' },
+      { type: 'blob', path: 'rnd/agents/shared/command-hygiene.md' },
+      { type: 'blob', path: 'rnd/agents/summary.md' },
+    ];
+
+    const fileMap = new Map([
+      ['rnd/skills/implement-build-plan/SKILL.md', Buffer.from(`---
+name: implement-build-plan
+description: Implement features and tests based on a build plan; follow repository standards and keep diffs small and test-driven.
+---
+
+# implement-build-plan
+
+{{rnd/agents/developer.md}}
+{{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/summary.md}}
+`)],
+      ['rnd/agents/developer.md', Buffer.from('# Developer Agent')],
+      ['rnd/agents/shared/command-hygiene.md', Buffer.from('Keep commands focused.')],
+      ['rnd/agents/summary.md', Buffer.from('# Summary Workflow')],
+    ]);
+
+    const githubClient = {
+      fetchRaw: jest.fn(async (filePath) => {
+        if (!fileMap.has(filePath)) {
+          throw new Error(`Unexpected fetch: ${filePath}`);
+        }
+        return fileMap.get(filePath);
+      })
+    };
+
+    await copyTaskSkills(tempDir, tree, githubClient, 'specs', 'rnd', {
+      nonInteractive: true,
+      overwriteExisting: true
+    });
+
+    const localSkill = await fs.readFile(
+      path.join(tempDir, 'specs', 'skills', 'implement-build-plan', 'SKILL.md'),
+      'utf-8'
+    );
+
+    expect(localSkill).toContain('# Developer Agent');
+    expect(localSkill).toContain('Keep commands focused.');
+    expect(localSkill).toContain('# Summary Workflow');
+    expect(localSkill).not.toContain('{{');
   });
 
   it('generates vendor skill outputs from canonical skills, resolves nested placeholders, rewrites spec-dir paths, and removes legacy outputs', async () => {

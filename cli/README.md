@@ -48,7 +48,6 @@ Commands:
   - `.claude/skills/**`
   - `.codex/skills/**`
   - `rnd/skills/**`
-  - `rnd/vendor/skills/**`
   - `rnd/templates/**`
   - `rnd/instructions/e2e-testing.instructions.md`
   - `.gitignore`

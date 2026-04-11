@@ -5,9 +5,7 @@ const { GitHubClient } = require('./github/githubClient');
 const { askUpdateOptions, askSeedRepo } = require('./ui/prompts');
 const { ConfigManager } = require('./config/configManager');
 const {
-  copyAgentPersonas,
   copyTaskSkills,
-  copyVendorSkillAddons,
   copyTemplates,
   syncPlatformAsset
 } = require('./fs/seedCopier');
@@ -61,8 +59,6 @@ async function runUpdate(opts = {}, deps = {}) {
 
   if (selectedOptions.includes('skills')) {
     await copyTaskSkills(cwd, tree, githubClient, specDirName, seedSpecDirName, { overwriteExisting: true });
-    await copyVendorSkillAddons(cwd, tree, githubClient, specDirName, seedSpecDirName, { overwriteExisting: true });
-    await copyAgentPersonas(cwd, tree, githubClient, specDirName, seedSpecDirName, { overwriteExisting: true });
   }
 
   for (const assetKey of selectedPlatformAssets) {

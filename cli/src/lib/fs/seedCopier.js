@@ -124,17 +124,37 @@ async function copyAgentPersonas(cwd, tree, githubClient, specDirName, seedSpecD
 }
 
 async function copyTaskSkills(cwd, tree, githubClient, specDirName, seedSpecDirName, options = {}) {
-  return copySpecDirectory(
-    cwd,
-    tree,
-    githubClient,
-    `${seedSpecDirName}/skills/`,
-    `${specDirName}/skills/`,
-    specDirName,
-    seedSpecDirName,
-    '🧠 Copying canonical task skills...',
-    options
-  );
+  logger.info('\n🧠 Copying canonical task skills...');
+
+  const canonicalSkillFiles = listCanonicalSkillFiles(tree, seedSpecDirName);
+  if (canonicalSkillFiles.length === 0) {
+    logger.warn(`No canonical skill files found in ${seedSpecDirName}/skills`);
+    return;
+  }
+
+  const fileCache = await buildSkillFileCache(tree, githubClient, specDirName, seedSpecDirName);
+  const fileReader = createGitHubFileReader(fileCache);
+
+  for (const skillFile of canonicalSkillFiles) {
+    try {
+      const taskName = getTaskNameFromSkillPath(skillFile.path, seedSpecDirName);
+      const canonicalBuffer = await githubClient.fetchRaw(skillFile.path);
+      const composedContent = await resolveTemplate(canonicalBuffer.toString('utf-8'), fileReader);
+      const rewritten = rewriteSpecDirContent(composedContent, ['rnd', 'r3nd', seedSpecDirName], specDirName);
+      const localPath = `${specDirName}/skills/${taskName}/SKILL.md`;
+      const written = await writeWithOverwritePrompt(
+        cwd,
+        localPath,
+        Buffer.from(rewritten.content, 'utf-8'),
+        options
+      );
+      if (written) {
+        logger.info(`  Copied: ${localPath}`);
+      }
+    } catch (err) {
+      logger.error(`  Failed to copy ${skillFile.path}:`, err && err.message ? err.message : err);
+    }
+  }
 }
 
 async function copyVendorSkillAddons(cwd, tree, githubClient, specDirName, seedSpecDirName, options = {}) {

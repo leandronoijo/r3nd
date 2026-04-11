@@ -257,7 +257,7 @@ async function askUpdateOptions(nonInteractive = false) {
 
   const choices = [
     { name: 'Templates → Update spec-dir-name/templates/', value: 'templates', checked: true },
-    { name: 'Skills → Update spec-dir-name/skills/, spec-dir-name/vendor/skills/, and spec-dir-name/agents/', value: 'skills', checked: true },
+    { name: 'Skills → Update spec-dir-name/skills/ (fully composed task skills)', value: 'skills', checked: true },
     ...getPlatformAssetPromptChoices('update'),
   ];
   

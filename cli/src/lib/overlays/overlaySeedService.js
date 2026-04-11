@@ -132,7 +132,6 @@ async function ensureSpecDirectories(cwd, specDirName, { createRndInstructions =
     `${specDirName}/tech_specs`,
     `${specDirName}/instructions`,
     `${specDirName}/skills`,
-    `${specDirName}/vendor/skills`,
     `${specDirName}/agent_runs`,
     `${specDirName}/agent_summaries`
   ];

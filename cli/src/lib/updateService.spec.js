@@ -18,8 +18,6 @@ jest.mock('./config/configManager', () => ({
 jest.mock('./fs/seedCopier', () => ({
   copyTemplates: jest.fn().mockResolvedValue(undefined),
   copyTaskSkills: jest.fn().mockResolvedValue(undefined),
-  copyVendorSkillAddons: jest.fn().mockResolvedValue(undefined),
-  copyAgentPersonas: jest.fn().mockResolvedValue(undefined),
   syncPlatformAsset: jest.fn().mockResolvedValue(undefined)
 }));
 
@@ -29,7 +27,7 @@ jest.mock('./overlays/overlaySeedService', () => ({
 
 const { runUpdate } = require('./updateService');
 const { askUpdateOptions } = require('./ui/prompts');
-const { copyTemplates, copyTaskSkills, copyVendorSkillAddons, copyAgentPersonas, syncPlatformAsset } = require('./fs/seedCopier');
+const { copyTemplates, copyTaskSkills, syncPlatformAsset } = require('./fs/seedCopier');
 const logger = require('./utils/logger');
 
 describe('updateService', () => {
@@ -77,8 +75,6 @@ describe('updateService', () => {
       
       expect(copyTemplates).toHaveBeenCalled();
       expect(copyTaskSkills).toHaveBeenCalled();
-      expect(copyVendorSkillAddons).toHaveBeenCalled();
-      expect(copyAgentPersonas).toHaveBeenCalled();
       expect(syncPlatformAsset).toHaveBeenCalled();
     });
 
