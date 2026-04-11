@@ -67,7 +67,7 @@ async function runAgentCommand(agentConfig, opts = {}) {
   const resolvedAgentConfig = resolveAgentConfig(agentConfig, specDirName, specDirBase);
 
   logger.info(`\nr3nd agents ${resolvedAgentConfig.name}`);
-  logger.info(`Using agent: ${resolvedAgentConfig.agentFile}`);
+  logger.info(`Using task skill: ${resolvedAgentConfig.agentFile}`);
   if (specDirBase) {
     logger.info(`Spec directory: ${fullSpecDir}`);
   }
@@ -76,7 +76,7 @@ async function runAgentCommand(agentConfig, opts = {}) {
   const validation = await validateAgentSetup(cwd, resolvedAgentConfig);
   
   if (!validation.agentExists) {
-    logger.error(`Agent file not found: ${validation.agentPath}`);
+    logger.error(`Task skill file not found: ${validation.agentPath}`);
     logger.info('Make sure you have run "r3nd scaffold" or "r3nd init" first.');
     process.exit(1);
   }

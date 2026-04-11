@@ -86,13 +86,13 @@ describe('agentService', () => {
     it('should build prompt using agent promptTemplate function', () => {
       const agent = {
         name: 'test-agent',
-        agentFile: 'specs/agents/test.md',
+        agentFile: 'specs/skills/test-agent/SKILL.md',
         promptTemplate: (agentFile, targetFile) => `Process ${targetFile} with ${agentFile}`
       };
 
       const result = buildPrompt(agent, 'path/to/spec.md');
 
-      expect(result).toBe('Process path/to/spec.md with specs/agents/test.md');
+      expect(result).toBe('Process path/to/spec.md with specs/skills/test-agent/SKILL.md');
     });
 
     it('should throw error if promptTemplate is not a function', () => {
@@ -106,23 +106,20 @@ describe('agentService', () => {
   });
 
   describe('buildInteractivePrompt', () => {
-    it('should resolve shared summary workflow placeholders from disk', async () => {
-      fs.readFile.mockResolvedValue('# Summary Workflow\nShared summary instructions');
-
+    it('should return inline shared summary workflow text without disk placeholders', async () => {
       const agent = {
         name: 'test-agent',
-        agentFile: 'specs/agents/test.md',
+        agentFile: 'specs/skills/test-agent/SKILL.md',
         specDirName: 'specs',
         promptTemplate: () => 'Base prompt',
-        interactiveSuffix: () => '\n\n{{specs/agents/summary.md}}'
+        interactiveSuffix: () => '\n\n# Summary Workflow\nShared summary instructions'
       };
 
       const result = await buildInteractivePrompt(agent, 'target.md', 'done.file', '/repo');
 
       expect(result).toContain('Base prompt');
       expect(result).toContain('Shared summary instructions');
-      expect(result).not.toContain('{{specs/agents/summary.md}}');
-      expect(fs.readFile).toHaveBeenCalledWith('/repo/specs/agents/summary.md', 'utf-8');
+      expect(fs.readFile).not.toHaveBeenCalled();
     });
   });
 
@@ -131,7 +128,7 @@ describe('agentService', () => {
       fs.access.mockResolvedValue(undefined);
 
       const agent = {
-        agentFile: 'specs/agents/test.md',
+        agentFile: 'specs/skills/test-agent/SKILL.md',
         filesDir: 'specs'
       };
 
@@ -139,7 +136,7 @@ describe('agentService', () => {
 
       expect(result).toEqual({
         agentExists: true,
-        agentPath: 'specs/agents/test.md',
+        agentPath: 'specs/skills/test-agent/SKILL.md',
         targetDirExists: true,
         targetDir: 'specs'
       });
@@ -151,7 +148,7 @@ describe('agentService', () => {
         .mockResolvedValueOnce(undefined); // Target dir
 
       const agent = {
-        agentFile: 'specs/agents/missing.md',
+        agentFile: 'specs/skills/missing/SKILL.md',
         filesDir: 'specs'
       };
 
@@ -167,7 +164,7 @@ describe('agentService', () => {
         .mockRejectedValueOnce(new Error('Not found')); // Target dir
 
       const agent = {
-        agentFile: 'specs/agents/test.md',
+        agentFile: 'specs/skills/test-agent/SKILL.md',
         filesDir: 'specs/missing'
       };
 

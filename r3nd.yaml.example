@@ -7,6 +7,8 @@
 #   r3nd config list              - List all configuration values
 #   r3nd config get <key>         - Get a specific configuration value
 #   r3nd config set <key> <value> - Set a configuration value
+# Example array input:
+#   r3nd config set worktree-copy-files '["*.env", "**/*.env", "**/*.local"]'
 
 # Seed Repository
 # The GitHub repository from which r3nd fetches seed files, overlays,
@@ -37,3 +39,34 @@ seed-repo: leandronoijo/r3nd@develop
 #   ├── apps/backend/r3nd/       # Backend-specific specs
 #   └── services/auth/r3nd/      # Service-specific specs
 spec-dir-name: r3nd
+
+# Worktree Copy Patterns
+# Additional files to copy into every new r3nd worktree.
+# These patterns use glob semantics similar to VSCode search.
+# Default: copies root and nested .env files.
+#
+# Warning: matched files can include secrets and other local-only files.
+worktree-copy-files:
+  - '*.env'
+  - '**/*.env'
+
+# Worktree Open Command
+# Command run after a new worktree is created and files are copied.
+# Use {worktreeDir} as the placeholder for the created worktree path.
+# Store this as an argv-style array for cross-platform behavior.
+#
+# Examples:
+# worktree-open-command:
+#   - code
+#   - '{worktreeDir}'
+#
+# worktree-open-command:
+#   - cursor
+#   - '{worktreeDir}'
+#
+# worktree-open-command:
+#   - nvim
+#   - '{worktreeDir}'
+worktree-open-command:
+  - code
+  - '{worktreeDir}'

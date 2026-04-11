@@ -5,7 +5,7 @@ const { GitHubClient } = require('./github/githubClient');
 const { askUpdateOptions, askSeedRepo } = require('./ui/prompts');
 const { ConfigManager } = require('./config/configManager');
 const {
-  copyAgentPersonas,
+  copyTaskSkills,
   copyTemplates,
   syncPlatformAsset
 } = require('./fs/seedCopier');
@@ -57,8 +57,8 @@ async function runUpdate(opts = {}, deps = {}) {
     await copyTemplates(cwd, tree, githubClient, specDirName, seedSpecDirName, { overwriteExisting: true });
   }
 
-  if (selectedOptions.includes('agents')) {
-    await copyAgentPersonas(cwd, tree, githubClient, specDirName, seedSpecDirName, { overwriteExisting: true });
+  if (selectedOptions.includes('skills')) {
+    await copyTaskSkills(cwd, tree, githubClient, specDirName, seedSpecDirName, { overwriteExisting: true });
   }
 
   for (const assetKey of selectedPlatformAssets) {

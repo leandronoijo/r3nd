@@ -96,7 +96,7 @@ async function buildInteractivePrompt(agent, targetFile, doneFileName, cwd) {
 }
 
 /**
- * Verify that required agent files exist
+ * Verify that required task skill files exist
  * @param {string} cwd - Current working directory
  * @param {Object} agent - Agent configuration
  * @returns {Promise<{agentExists: boolean, targetDir: string}>}

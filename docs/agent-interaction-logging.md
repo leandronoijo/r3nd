@@ -50,7 +50,7 @@ r3nd agents develop --file rnd/build_plans/auth-build-plan.md
 
 ### Running Agents via Cursor Commands
 
-When using Cursor commands (`.cursor/commands/`), agents will follow the shared summary workflow from `rnd/agents/summary.md`:
+When using Cursor skills (`.cursor/skills/<task>/SKILL.md`), agents will follow the shared summary workflow from `rnd/agents/summary.md`:
 1. Complete their primary task
 2. Ask the user: "Are you satisfied with the current result? (yes/no)"
 3. Iterate based on user feedback until satisfied
@@ -132,7 +132,7 @@ Example: `rnd/agent_summaries/product-manager-2026-01-03-14-30-45.md`
 3. Create summary log file
 4. Create `.done` file to signal completion
 
-**Cursor commands** are instructed (via `{{rnd/agents/summary.md}}` plus retro-specific cleanup notes) to:
+**Cursor skills** are instructed (via `{{rnd/agents/summary.md}}` plus retro-specific cleanup notes) to:
 1. Complete their primary task
 2. Ask user: "Are you satisfied with the current result? (yes/no)"
 3. Iterate until satisfied
@@ -145,6 +145,6 @@ The retro agent is instructed to delete all files in `<spec-dir>/agent_summaries
 ## See Also
 
 - [r3nd CLI Documentation](../cli/README.md)
-- [GitHub Skills](../.github/skills/)
-- [Cursor Commands](../.cursor/commands/)
+- [Canonical Skills](../rnd/skills/)
+- [Vendor Skill Add-ons](../rnd/vendor/skills/)
 - [Retro Template](../rnd/templates/retro.md)

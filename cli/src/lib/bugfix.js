@@ -25,12 +25,12 @@ async function runBugfix(opts = {}) {
   // Find spec directory (backward compatible - supports both rnd and r3nd)
   const specDir = await findFirstSpecDirectory(cwd, specDirName);
   const specDirExists = specDir !== null;
-  const agentsDirExists = specDir
-    ? await fs.access(path.join(cwd, specDir, 'agents')).then(() => true).catch(() => false)
+  const skillsDirExists = specDir
+    ? await fs.access(path.join(cwd, specDir, 'skills')).then(() => true).catch(() => false)
     : false;
 
-  if (!specDirExists || !srcDirExists || !agentsDirExists) {
-    logger.error(`Error: Not in a project root directory. Required directories (${specDirName}/agents, ${specDirName}/, src/) not found.`);
+  if (!specDirExists || !srcDirExists || !skillsDirExists) {
+    logger.error(`Error: Not in a project root directory. Required directories (${specDirName}/skills, ${specDirName}/, src/) not found.`);
     logger.error('Please run this command from the root of your r3nd project.');
     process.exit(1);
   }
@@ -57,10 +57,10 @@ async function runBugfix(opts = {}) {
   await ensureDir(path.dirname(fullPlanPath));
 
   // Step 3: Create prompts based on LLM choice
-  const teamLeadAgentPath = path.join(specDir, 'agents', 'team-lead.md');
-  const developerAgentPath = path.join(specDir, 'agents', 'developer.md');
-  const planPrompt = `using the instructions in ${teamLeadAgentPath} please create a build plan to fix the following problem: ${problemDescription}`;
-  const implementPrompt = `using the instructions in ${developerAgentPath} implement the following plan to completion: ${planPath}`;
+  const buildPlanSkillPath = path.join(specDir, 'skills', 'create-build-plan', 'SKILL.md');
+  const implementPlanSkillPath = path.join(specDir, 'skills', 'implement-build-plan', 'SKILL.md');
+  const planPrompt = `Using the task skill at ${buildPlanSkillPath} as instructions, please create a build plan to fix the following problem:\n\n${problemDescription}`;
+  const implementPrompt = `Using the task skill at ${implementPlanSkillPath} as instructions, please implement the following plan to completion:\n\n${planPath}`;
 
   if (llmChoice === 'codex') {
     // Run codex for build plan creation

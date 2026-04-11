@@ -4,6 +4,9 @@ const YAML = require('yaml');
 const logger = require('../utils/logger');
 
 const CONFIG_FILE_NAME = 'r3nd.yaml';
+const DEFAULT_WORKTREE_COPY_FILES = ['*.env', '**/*.env'];
+const DEFAULT_WORKTREE_OPEN_COMMAND = ['code', '{worktreeDir}'];
+const VALID_CONFIG_KEYS = ['seed-repo', 'spec-dir-name', 'worktree-copy-files', 'worktree-open-command'];
 
 /**
  * ConfigManager - Manages r3nd.yaml configuration file at repo level
@@ -74,11 +77,12 @@ class ConfigManager {
    */
   async set(key, value) {
     const config = await this.load();
+    const normalizedValue = ConfigManager.normalizeValue(key, value);
 
     // If changing the spec dir name, attempt to rename the directory in the working tree
     if (key === 'spec-dir-name') {
       const oldName = config['spec-dir-name'] || 'r3nd';
-      const newName = value;
+      const newName = normalizedValue;
 
       // Only attempt rename when the name actually changes
       if (oldName !== newName) {
@@ -112,7 +116,7 @@ class ConfigManager {
       }
     }
 
-    config[key] = value;
+    config[key] = normalizedValue;
     await this.save(config);
   }
 
@@ -188,13 +192,30 @@ class ConfigManager {
   }
 
   /**
+   * Get normalized worktree copy file patterns
+   * @returns {Promise<string[]>} Array of glob patterns
+   */
+  async getWorktreeCopyFiles() {
+    const config = await this.load();
+    return ConfigManager.normalizeWorktreeCopyFiles(config['worktree-copy-files']);
+  }
+
+  /**
+   * Get normalized worktree open command
+   * @returns {Promise<string[]|string>} Array or string command
+   */
+  async getWorktreeOpenCommand() {
+    const config = await this.load();
+    return ConfigManager.normalizeWorktreeOpenCommand(config['worktree-open-command']);
+  }
+
+  /**
    * Validate a configuration key
    * @param {string} key - Configuration key
    * @returns {boolean} True if key is valid
    */
   static isValidKey(key) {
-    const validKeys = ['seed-repo', 'spec-dir-name'];
-    return validKeys.includes(key);
+    return VALID_CONFIG_KEYS.includes(key);
   }
 
   /**
@@ -204,9 +225,82 @@ class ConfigManager {
   static getDefaults() {
     return {
       'seed-repo': 'leandronoijo/r3nd@develop',
-      'spec-dir-name': 'r3nd'
+      'spec-dir-name': 'r3nd',
+      'worktree-copy-files': [...DEFAULT_WORKTREE_COPY_FILES],
+      'worktree-open-command': [...DEFAULT_WORKTREE_OPEN_COMMAND]
     };
+  }
+
+  /**
+   * Normalize a config value by key
+   * @param {string} key
+   * @param {any} value
+   * @returns {any}
+   */
+  static normalizeValue(key, value) {
+    if (key === 'worktree-copy-files') {
+      return ConfigManager.normalizeWorktreeCopyFiles(value);
+    }
+    if (key === 'worktree-open-command') {
+      return ConfigManager.normalizeWorktreeOpenCommand(value);
+    }
+    return value;
+  }
+
+  /**
+   * Normalize worktree copy file patterns to a string array
+   * @param {any} value
+   * @returns {string[]}
+   */
+  static normalizeWorktreeCopyFiles(value) {
+    const input = value == null ? DEFAULT_WORKTREE_COPY_FILES : value;
+    const patterns = Array.isArray(input) ? input : [input];
+    const normalized = patterns
+      .map(pattern => (typeof pattern === 'string' ? pattern.trim() : ''))
+      .filter(Boolean);
+
+    if (normalized.length === 0) {
+      throw new Error('worktree-copy-files must contain at least one glob pattern');
+    }
+
+    return normalized;
+  }
+
+  /**
+   * Normalize worktree open command to string or string array
+   * @param {any} value
+   * @returns {string[]|string}
+   */
+  static normalizeWorktreeOpenCommand(value) {
+    const input = value == null ? DEFAULT_WORKTREE_OPEN_COMMAND : value;
+
+    if (typeof input === 'string') {
+      const normalized = input.trim();
+      if (!normalized) {
+        throw new Error('worktree-open-command must not be empty');
+      }
+      return normalized;
+    }
+
+    if (!Array.isArray(input)) {
+      throw new Error('worktree-open-command must be a string or an array of strings');
+    }
+
+    const normalized = input
+      .map(token => (typeof token === 'string' ? token.trim() : ''))
+      .filter(Boolean);
+
+    if (normalized.length === 0) {
+      throw new Error('worktree-open-command must contain at least one command token');
+    }
+
+    return normalized;
   }
 }
 
-module.exports = { ConfigManager };
+module.exports = {
+  ConfigManager,
+  DEFAULT_WORKTREE_COPY_FILES,
+  DEFAULT_WORKTREE_OPEN_COMMAND,
+  VALID_CONFIG_KEYS
+};

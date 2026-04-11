@@ -2,10 +2,9 @@ const PLATFORM_ASSETS = [
   {
     key: 'github-skills',
     label: 'GitHub Skills',
-    assetType: 'wrapper',
-    sourcePath: '.github/skills',
-    fileExtension: 'SKILL.md',
-    compose: true,
+    assetType: 'generated-skill',
+    vendor: 'github',
+    outputPath: '.github/skills',
     mirrorInstructionsToRnd: false,
     initAction: 'Create .github/skills for each task',
     updateAction: 'Update .github/skills for each task'
@@ -23,36 +22,35 @@ const PLATFORM_ASSETS = [
   },
   {
     key: 'cursor',
-    label: 'Cursor Commands',
-    assetType: 'wrapper',
-    sourcePath: '.cursor/commands',
-    fileExtension: '.md',
-    compose: true,
+    label: 'Cursor Skills',
+    assetType: 'generated-skill',
+    vendor: 'cursor',
+    outputPath: '.cursor/skills',
     mirrorInstructionsToRnd: false,
-    initAction: 'Create .cursor/commands for each task',
-    updateAction: 'Update .cursor/commands for each task'
+    initAction: 'Create .cursor/skills for each task',
+    updateAction: 'Update .cursor/skills for each task',
+    legacyPathForTask: (taskName) => `.cursor/commands/${taskName}.md`
   },
   {
     key: 'codex',
     label: 'Codex Skills',
-    assetType: 'wrapper',
-    sourcePath: '.codex/skills',
-    fileExtension: 'SKILL.md',
-    compose: true,
+    assetType: 'generated-skill',
+    vendor: 'codex',
+    outputPath: '.codex/skills',
     mirrorInstructionsToRnd: false,
     initAction: 'Create .codex/skills for each task',
     updateAction: 'Update .codex/skills for each task'
   },
   {
     key: 'claude',
-    label: 'Claude Commands',
-    assetType: 'wrapper',
-    sourcePath: '.claude/commands',
-    fileExtension: '.md',
-    compose: true,
+    label: 'Claude Skills',
+    assetType: 'generated-skill',
+    vendor: 'claude',
+    outputPath: '.claude/skills',
     mirrorInstructionsToRnd: false,
-    initAction: 'Create .claude/commands for each task',
-    updateAction: 'Update .claude/commands for each task'
+    initAction: 'Create .claude/skills for each task',
+    updateAction: 'Update .claude/skills for each task',
+    legacyPathForTask: (taskName) => `.claude/commands/${taskName}.md`
   }
 ];
 

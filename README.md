@@ -8,7 +8,7 @@ It provides:
 - A fully structured, opinionated directory layout  
 - Seven AI personas (Product Manager, Architect, Team Lead, Developer, QA Team Lead, E2E Engineer, Retro)  
 - A CLI that runs agents with **multiple AI backends** (Codex CLI, Claude Code, Gemini CLI, GitHub CLI, or prompt generation)
-- **VS Code, Cursor, Codex, and Claude integrations** (chat modes, commands, and skills)
+- **VS Code, Cursor, Codex, and Claude integrations** (chat modes and generated skills)
 - A chained workflow pipeline producing product specs → tech specs → build plans → test cases → code → E2E → retro  
 - Human-controlled PR gates at every stage  
 - Stack overlays for common frameworks (FastAPI, NestJS, Rails, Angular, Vue)
@@ -36,14 +36,14 @@ The r3nd CLI supports **multiple AI backends** — use whatever works best for y
 
 The CLI automatically detects which tools are installed and shows only available options.
 
-r3nd includes ready-to-run integration wrappers:
-- Cursor commands in `.cursor/commands/`
-- Claude commands in `.claude/commands/`
-- Codex skills in `.codex/skills/<command>/SKILL.md`
+r3nd includes ready-to-run generated skill outputs:
+- Cursor skills in `.cursor/skills/<task>/SKILL.md`
+- Claude skills in `.claude/skills/<task>/SKILL.md`
+- Codex skills in `.codex/skills/<task>/SKILL.md`
 - VS Code chat modes in `.github/chatmodes/`
 
 ### 2. Out-of-the-box personas
-Located in `.github/agents/` and `rnd/agents/`:
+Shared persona fragments live in `rnd/agents/` and are composed into task skills:
 
 - `product-manager.agent.md` / `product-manager.md`
 - `architect.agent.md` / `architect.md`
@@ -84,7 +84,7 @@ By default, located under `rnd/` (configurable via `r3nd.yaml`):
 - `retros/`
 - `agent_summaries/`
 - `templates/`
-- `agents/`
+- `skills/`
 
 This ensures complete traceability from idea → architecture → plan → code.
 
@@ -110,7 +110,9 @@ project/
 Primary, agnostic instructions live under the `rnd/` directory so they apply regardless of which AI tooling you use:
 
 - `rnd/instructions/*.instructions.md` — project- and path-specific rules (preferred location)
-- `rnd/templates/` and `rnd/agents/` contain templates and persona profiles consumed by agents
+- `rnd/templates/` contains canonical document templates
+- `rnd/skills/` contains local task skills used by CLI agent runs
+- In the seed repo itself, `rnd/vendor/skills/` and `rnd/agents/` remain internal composition sources and are not copied into downstream repos
 
 Use `.github/` only for Copilot-specific overrides:
 
@@ -246,6 +248,17 @@ r3nd tools
 
 # Update components
 r3nd update --yes
+
+# Create a repo-scoped worktree and open it
+r3nd worktree
+
+# Create a worktree on a specific branch
+r3nd worktree --branch auth-investigation
+
+# New worktrees also copy .claude, .codex, .github, and .cursor when present
+
+# Delete clean r3nd-managed worktrees
+r3nd worktree clean
 ```
 
 ### Configuration
@@ -259,6 +272,10 @@ r3nd config list
 # Get/set the seed repository
 r3nd config get seed-repo
 r3nd config set seed-repo myorganization/custom-r3nd@main
+
+# Inspect worktree-specific settings
+r3nd config get worktree-copy-files
+r3nd config get worktree-open-command
 ```
 
 ---
@@ -460,7 +477,9 @@ See the `docs/` directory for additional documentation:
 
 To extend or adapt the system:
 
-- Add new personas under `.github/agents` and `rnd/agents`
+- Add new task skills under `rnd/skills/`
+- Add or refine shared fragments under `rnd/agents/`
+- Add vendor-specific guidance under `rnd/vendor/skills/`
 - Add new workflow stages under `.github/workflows`
 - Expand repo instructions for new stacks
 - Use `rnd/instructions/*.instructions.md` to enforce path-level rules

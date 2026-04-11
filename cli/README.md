@@ -44,9 +44,10 @@ Commands:
 - `init`: Initialize the current directory as a git repository (runs `git init` if `.git` is missing) and copy a minimal set of seed files from the r3nd seed repository. Files copied include:
   - `.github/workflows/**`
   - `.github/skills/**`
-  - `.cursor/commands/**`
-  - `.claude/commands/**`
+  - `.cursor/skills/**`
+  - `.claude/skills/**`
   - `.codex/skills/**`
+  - `rnd/skills/**`
   - `rnd/templates/**`
   - `rnd/instructions/e2e-testing.instructions.md`
   - `.gitignore`
@@ -76,7 +77,7 @@ Commands:
     r3nd analyse --dir cli/src --agent generate --non-interactive
     ```
 
-- `bugfix`: Create and execute a bugfix plan using r3nd agents.
+- `bugfix`: Create and execute a bugfix plan using r3nd task skills.
   - **Note**: Only agents installed on your system will be available as options.
   - Example:
 
@@ -96,6 +97,7 @@ Commands:
     - `create-retro-report`: Review PR discussions and create a retro report
   - **Note**: Only agents installed on your system will be available as options.
   - **Spec Directory Option**: Use `--spec-dir <path>` to specify where spec files should be saved (e.g., `apps/my-app`, `services/auth`). Files will be saved in `<spec-dir>/<spec-dir-name>/` where `spec-dir-name` comes from your r3nd.yaml config (defaults to `r3nd`).
+  - **Instruction Source**: These commands read task instructions from `<spec-dir>/<spec-dir-name>/skills/<task>/SKILL.md`.
   - Examples:
 
     ```bash
@@ -126,6 +128,32 @@ Commands:
 
     ```bash
     r3nd tools
+    ```
+
+- `worktree`: Create a repo-scoped git worktree under `~/.r3nd/worktrees/` and copy local r3nd files into it.
+  - Options:
+    - `-br, --branch <name>`: Use a specific branch name instead of generating one automatically.
+  - Behavior:
+    - Copies every directory named as your configured `spec-dir-name`.
+    - Copies root vendor directories when present: `.claude`, `.codex`, `.github`, and `.cursor`.
+    - Copies additional files from `worktree-copy-files` in `r3nd.yaml` (defaults to `*.env` and `**/*.env`).
+    - Runs the configured `worktree-open-command` after creation.
+  - Example:
+
+    ```bash
+    r3nd worktree
+    r3nd worktree --branch auth-investigation
+    ```
+
+- `worktree clean`: Delete clean r3nd-managed worktrees for the current repository.
+  - Behavior:
+    - Uses plain `git status --porcelain` to determine if a worktree is clean.
+    - Ignored-file changes do not block cleanup.
+    - Keeps local branches after removing the worktree directory.
+  - Example:
+
+    ```bash
+    r3nd worktree clean
     ```
 
 ## Installation

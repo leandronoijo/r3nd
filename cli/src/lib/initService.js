@@ -5,7 +5,7 @@ const YAML = require('yaml');
 
 const { GitHubClient } = require('./github/githubClient');
 const { 
-  copyAgentPersonas, 
+  copyTaskSkills,
   syncPlatformAsset,
   copyTemplates, 
   copyCommonFiles
@@ -135,8 +135,8 @@ async function runInit(opts = {}, deps = {}) {
   // Copy common files (gitignore)
   await copyCommonFiles(cwd, tree, githubClient, specDirName, { nonInteractive });
 
-  // Copy platform-agnostic agent personas from seed repo
-  await copyAgentPersonas(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
+  // Copy canonical task skills from seed repo as fully composed local files
+  await copyTaskSkills(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
 
   for (const assetKey of selectedOptions) {
     const asset = getPlatformAsset(assetKey);
