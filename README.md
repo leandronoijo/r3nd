@@ -177,7 +177,6 @@ node src/index.js <command>
 | `scaffold` | Full interactive scaffolding with backend/frontend overlays (for new projects starting from zero — do not use on repos with existing application code) |
 | `update` | Update r3nd components from the seed repository |
 | `analyse` | Generate instruction files from existing codebase using AI |
-| `bugfix` | Create and execute a bugfix plan using agents |
 | `agents` | Run AI agents for specs, plans, and development |
 | `tools` | Show available and missing AI agent tools |
 | `config` | Manage r3nd.yaml configuration |
@@ -394,7 +393,6 @@ cli/                         # r3nd CLI tool
     commands/                # CLI commands
       agents.js
       analyse.js
-      bugfix.js
       config.js
       init.js
       scaffold.js

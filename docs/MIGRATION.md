@@ -193,7 +193,6 @@ r3nd scaffold
 r3nd agents product-spec
 r3nd agents tech-spec
 r3nd agents build-plan
-r3nd bugfix
 r3nd analyse
 ```
 

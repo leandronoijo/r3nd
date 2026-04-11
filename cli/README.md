@@ -15,7 +15,7 @@ The r3nd CLI integrates with several external tools to provide AI-powered code g
 
 ### How Tool Detection Works
 
-When you run any r3nd command that offers agent options (`scaffold`, `analyse`, `bugfix`), the CLI will:
+When you run any r3nd command that offers agent options (`scaffold`, `analyse`), the CLI will:
 
 1. **Automatically check** which tools are installed on your system
 2. **Only display** the agents you can actually use
@@ -74,14 +74,6 @@ Commands:
     # Analyse a specific directory
     node src/index.js analyse --dir src/backend --agent codex
     r3nd analyse --dir cli/src --agent generate --non-interactive
-    ```
-
-- `bugfix`: Create and execute a bugfix plan using r3nd agents.
-  - **Note**: Only agents installed on your system will be available as options.
-  - Example:
-
-    ```bash
-    node src/index.js bugfix
     ```
 
 - `agents`: Run AI agents for generating specs, plans, and implementing features. See [Agents Command Documentation](docs/agents-command.md) for details.
