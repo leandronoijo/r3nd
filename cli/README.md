@@ -15,7 +15,7 @@ The r3nd CLI integrates with several external tools to provide AI-powered code g
 
 ### How Tool Detection Works
 
-When you run any r3nd command that offers agent options (`scaffold`, `analyse`), the CLI will:
+When you run any r3nd command that offers agent options, the CLI will:
 
 1. **Automatically check** which tools are installed on your system
 2. **Only display** the agents you can actually use
