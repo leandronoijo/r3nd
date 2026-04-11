@@ -23,8 +23,8 @@ describe('platformAssetRegistry', () => {
   it('returns a platform asset by key', () => {
     expect(getPlatformAsset('github-skills')).toMatchObject({
       key: 'github-skills',
-      assetType: 'wrapper',
-      compose: true
+      assetType: 'generated-skill',
+      outputPath: '.github/skills'
     });
   });
 

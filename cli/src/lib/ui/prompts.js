@@ -252,12 +252,12 @@ async function askInitOptions(nonInteractive = false) {
  * @returns {Promise<string[]>} Array of selected option values
  */
 async function askUpdateOptions(nonInteractive = false) {
-  const defaultOptions = ['templates', 'agents', ...getDefaultPlatformAssetKeys()];
+  const defaultOptions = ['templates', 'skills', ...getDefaultPlatformAssetKeys()];
   if (nonInteractive) return defaultOptions;
 
   const choices = [
     { name: 'Templates → Update spec-dir-name/templates/', value: 'templates', checked: true },
-    { name: 'Agents → Update spec-dir-name/agents/ (shared task content)', value: 'agents', checked: true },
+    { name: 'Skills → Update spec-dir-name/skills/, spec-dir-name/vendor/skills/, and spec-dir-name/agents/', value: 'skills', checked: true },
     ...getPlatformAssetPromptChoices('update'),
   ];
   
@@ -316,7 +316,7 @@ async function askSpecDirName(currentValue = null, nonInteractive = false) {
   const res = await prompt([{
     type: 'input',
     name: 'specDirName',
-    message: 'Enter spec directory name (where agents and specs will be stored):',
+    message: 'Enter spec directory name (where skills and specs will be stored):',
     default: defaultValue,
     validate: (input) => {
       const trimmed = input.trim();

@@ -44,9 +44,11 @@ Commands:
 - `init`: Initialize the current directory as a git repository (runs `git init` if `.git` is missing) and copy a minimal set of seed files from the r3nd seed repository. Files copied include:
   - `.github/workflows/**`
   - `.github/skills/**`
-  - `.cursor/commands/**`
-  - `.claude/commands/**`
+  - `.cursor/skills/**`
+  - `.claude/skills/**`
   - `.codex/skills/**`
+  - `rnd/skills/**`
+  - `rnd/vendor/skills/**`
   - `rnd/templates/**`
   - `rnd/instructions/e2e-testing.instructions.md`
   - `.gitignore`
@@ -76,7 +78,7 @@ Commands:
     r3nd analyse --dir cli/src --agent generate --non-interactive
     ```
 
-- `bugfix`: Create and execute a bugfix plan using r3nd agents.
+- `bugfix`: Create and execute a bugfix plan using r3nd task skills.
   - **Note**: Only agents installed on your system will be available as options.
   - Example:
 
@@ -96,6 +98,7 @@ Commands:
     - `create-retro-report`: Review PR discussions and create a retro report
   - **Note**: Only agents installed on your system will be available as options.
   - **Spec Directory Option**: Use `--spec-dir <path>` to specify where spec files should be saved (e.g., `apps/my-app`, `services/auth`). Files will be saved in `<spec-dir>/<spec-dir-name>/` where `spec-dir-name` comes from your r3nd.yaml config (defaults to `r3nd`).
+  - **Instruction Source**: These commands read task instructions from `<spec-dir>/<spec-dir-name>/skills/<task>/SKILL.md`.
   - Examples:
 
     ```bash

@@ -65,7 +65,7 @@ describe('agentRegistry', () => {
         name: 'test-agent',
         description: 'Test agent',
         filesDir: 'test/dir',
-        agentFile: 'specs/agents/test.md',
+        agentFile: 'specs/skills/test-agent/SKILL.md',
         promptTemplate: (agentFile, targetFile) => `Test prompt for ${targetFile}`
       };
 
@@ -117,7 +117,7 @@ describe('agentRegistry', () => {
       const resolved = resolveAgentConfig(agent, 'specs');
       const prompt = resolved.promptTemplate(resolved.agentFile, 'specs/product_specs/feature.md', resolved.fullSpecDir);
       
-      expect(prompt).toContain('specs/agents/architect.md');
+      expect(prompt).toContain('specs/skills/create-tech-spec/SKILL.md');
       expect(prompt).toContain('specs/product_specs/feature.md');
       expect(prompt).toContain('technical specification');
       expect(prompt).toContain('specs/tech_specs/');
@@ -128,7 +128,7 @@ describe('agentRegistry', () => {
       const resolved = resolveAgentConfig(agent, 'specs');
       const prompt = resolved.promptTemplate(resolved.agentFile, 'specs/tech_specs/feature.md', resolved.fullSpecDir);
       
-      expect(prompt).toContain('specs/agents/team-lead.md');
+      expect(prompt).toContain('specs/skills/create-build-plan/SKILL.md');
       expect(prompt).toContain('specs/tech_specs/feature.md');
       expect(prompt).toContain('build plan');
       expect(prompt).toContain('specs/build_plans/');
@@ -139,7 +139,7 @@ describe('agentRegistry', () => {
       const resolved = resolveAgentConfig(agent, 'specs');
       const prompt = resolved.promptTemplate(resolved.agentFile, 'specs/build_plans/feature.md', resolved.fullSpecDir);
       
-      expect(prompt).toContain('specs/agents/developer.md');
+      expect(prompt).toContain('specs/skills/implement-build-plan/SKILL.md');
       expect(prompt).toContain('specs/build_plans/feature.md');
       expect(prompt).toContain('implement');
     });
@@ -149,7 +149,7 @@ describe('agentRegistry', () => {
       const resolved = resolveAgentConfig(agent, 'specs');
       const prompt = resolved.promptTemplate(resolved.agentFile, 'specs/tech_specs/feature.md', resolved.fullSpecDir);
       
-      expect(prompt).toContain('specs/agents/implement-feature.md');
+      expect(prompt).toContain('specs/skills/implement-feature/SKILL.md');
       expect(prompt).toContain('specs/tech_specs/feature.md');
       expect(prompt).toContain('strict workflow');
       expect(prompt).toContain('specs/agent_runs/');
@@ -160,7 +160,7 @@ describe('agentRegistry', () => {
       const resolved = resolveAgentConfig(agent, 'r3nd', 'apps/my-app');
       
       expect(resolved.fullSpecDir).toBe('apps/my-app/r3nd');
-      expect(resolved.agentFile).toBe('apps/my-app/r3nd/agents/product-manager.md');
+      expect(resolved.agentFile).toBe('apps/my-app/r3nd/skills/create-product-spec/SKILL.md');
       
       const prompt = resolved.promptTemplate(resolved.agentFile, 'test input', resolved.fullSpecDir);
       expect(prompt).toContain('apps/my-app/r3nd/product_specs/');
@@ -171,7 +171,7 @@ describe('agentRegistry', () => {
       const resolved = resolveAgentConfig(agent, 'r3nd');
       
       expect(resolved.fullSpecDir).toBe('r3nd');
-      expect(resolved.agentFile).toBe('r3nd/agents/product-manager.md');
+      expect(resolved.agentFile).toBe('r3nd/skills/create-product-spec/SKILL.md');
       
       const prompt = resolved.promptTemplate(resolved.agentFile, 'test input', resolved.fullSpecDir);
       expect(prompt).toContain('r3nd/product_specs/');
@@ -182,7 +182,7 @@ describe('agentRegistry', () => {
       const resolved = resolveAgentConfig(agent, 'r3nd', 'apps/my-app');
 
       expect(resolved.fullSpecDir).toBe('apps/my-app/r3nd');
-      expect(resolved.agentFile).toBe('apps/my-app/r3nd/agents/implement-feature.md');
+      expect(resolved.agentFile).toBe('apps/my-app/r3nd/skills/implement-feature/SKILL.md');
       expect(resolved.filesDir).toBe('apps/my-app/r3nd/tech_specs');
 
       const prompt = resolved.promptTemplate(

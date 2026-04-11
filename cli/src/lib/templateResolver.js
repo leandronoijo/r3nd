@@ -2,10 +2,9 @@ const path = require('path');
 const fs = require('fs').promises;
 
 /**
- * Template resolver for composing agent files from platform-agnostic personas
- * and platform-specific wrappers.
- * 
- * Supports simple {{file-path}} placeholder syntax without nesting.
+ * Template resolver for composing skill files from shared fragments.
+ *
+ * Supports recursive {{file-path}} placeholder expansion with cycle detection.
  */
 
 /**
@@ -30,41 +29,70 @@ function parseTemplate(content) {
  * Resolve template by replacing {{file-path}} placeholders with actual file content
  * @param {string} templateContent - Template file content with {{...}} placeholders
  * @param {Function} fileReader - Async function(filePath) => string to read referenced files
+ * @param {Object} options - Internal options for recursive resolution
  * @returns {Promise<string>} Resolved content with placeholders replaced
  */
-async function resolveTemplate(templateContent, fileReader) {
+async function resolveTemplate(templateContent, fileReader, options = {}) {
   if (typeof fileReader !== 'function') {
     throw new Error('fileReader must be a function that accepts a file path and returns content');
   }
-  
+
   const placeholders = parseTemplate(templateContent);
-  
+
   if (placeholders.length === 0) {
     return templateContent;
   }
-  
-  // Build a map of placeholder => content
+
+  const cache = options.cache || new Map();
+  const stack = Array.isArray(options.stack) ? options.stack : [];
   const resolutions = new Map();
-  
+
   for (const placeholder of placeholders) {
     if (!resolutions.has(placeholder)) {
-      try {
-        const content = await fileReader(placeholder);
-        resolutions.set(placeholder, content);
-      } catch (err) {
-        throw new Error(`Failed to resolve placeholder {{${placeholder}}}: ${err.message}`);
-      }
+      resolutions.set(placeholder, await resolvePlaceholder(placeholder, fileReader, cache, stack));
     }
   }
-  
-  // Replace all placeholders with their resolved content
+
   let resolved = templateContent;
   for (const [placeholder, content] of resolutions.entries()) {
     const regex = new RegExp(`\\{\\{\\s*${escapeRegExp(placeholder)}\\s*\\}\\}`, 'g');
     resolved = resolved.replace(regex, content);
   }
-  
+
   return resolved;
+}
+
+async function resolvePlaceholder(placeholder, fileReader, cache, stack) {
+  if (stack.includes(placeholder)) {
+    throw new Error(`Circular template reference detected: ${[...stack, placeholder].join(' -> ')}`);
+  }
+
+  if (cache.has(placeholder)) {
+    return cache.get(placeholder);
+  }
+
+  const resolutionPromise = (async () => {
+    try {
+      const content = await fileReader(placeholder);
+      return await resolveTemplate(content, fileReader, {
+        cache,
+        stack: [...stack, placeholder]
+      });
+    } catch (err) {
+      throw new Error(`Failed to resolve placeholder {{${placeholder}}}: ${err.message}`);
+    }
+  })();
+
+  cache.set(placeholder, resolutionPromise);
+
+  try {
+    const resolved = await resolutionPromise;
+    cache.set(placeholder, Promise.resolve(resolved));
+    return resolved;
+  } catch (err) {
+    cache.delete(placeholder);
+    throw err;
+  }
 }
 
 /**

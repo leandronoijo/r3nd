@@ -14,15 +14,15 @@ describe('templateResolver', () => {
     });
 
     it('should extract multiple placeholders', () => {
-      const content = 'Agent: {{rnd/agents/developer.md}}\n\nPlatform: {{.github/skills/wrapper/SKILL.md}}';
+      const content = 'Skill: {{rnd/skills/implement-build-plan/SKILL.md}}\n\nVendor: {{rnd/vendor/skills/github.md}}';
       const placeholders = parseTemplate(content);
-      expect(placeholders).toEqual(['rnd/agents/developer.md', '.github/skills/wrapper/SKILL.md']);
+      expect(placeholders).toEqual(['rnd/skills/implement-build-plan/SKILL.md', 'rnd/vendor/skills/github.md']);
     });
 
     it('should handle placeholders with whitespace', () => {
-      const content = 'Content: {{ rnd/agents/developer.md }}';
+      const content = 'Content: {{ rnd/skills/implement-build-plan/SKILL.md }}';
       const placeholders = parseTemplate(content);
-      expect(placeholders).toEqual(['rnd/agents/developer.md']);
+      expect(placeholders).toEqual(['rnd/skills/implement-build-plan/SKILL.md']);
     });
 
     it('should return empty array when no placeholders', () => {
@@ -49,12 +49,12 @@ describe('templateResolver', () => {
 description: "Developer agent"
 ---
 
-{{rnd/agents/developer.md}}
+{{rnd/skills/implement-build-plan/SKILL.md}}
 
 Platform-specific instructions here.
 `;
       const placeholders = parseTemplate(content);
-      expect(placeholders).toEqual(['rnd/agents/developer.md']);
+      expect(placeholders).toEqual(['rnd/skills/implement-build-plan/SKILL.md']);
     });
   });
 
@@ -144,24 +144,26 @@ description: "Implement features based on build plans"
 tools: ["*"]
 ---
 
-{{rnd/agents/developer.md}}
-
-## Platform-specific instructions for GitHub Copilot
-
-- Use GitHub Copilot tools effectively
-- Follow repository conventions
+{{rnd/skills/implement-build-plan/SKILL.md}}
 `;
       
       const fileReader = async (path) => {
+        if (path === 'rnd/skills/implement-build-plan/SKILL.md') {
+          return `# implement-build-plan
+
+{{rnd/agents/developer.md}}
+{{rnd/vendor/skills/github.md}}`;
+        }
         if (path === 'rnd/agents/developer.md') {
           return `# Developer Agent
 
-You are a developer responsible for implementing features according to build plans.
+You are a developer responsible for implementing features according to build plans.`;
+        }
+        if (path === 'rnd/vendor/skills/github.md') {
+          return `## GitHub-Specific Instructions
 
-## Rules
-- Write tests first
-- Keep changes small
-- Follow coding standards`;
+- Use GitHub Copilot tools effectively
+- Follow repository conventions`;
         }
         throw new Error('File not found');
       };
@@ -170,19 +172,53 @@ You are a developer responsible for implementing features according to build pla
       
       expect(resolved).toContain('description: "Implement features based on build plans"');
       expect(resolved).toContain('# Developer Agent');
-      expect(resolved).toContain('Platform-specific instructions for GitHub Copilot');
-      expect(resolved).not.toContain('{{rnd/agents/developer.md}}');
+      expect(resolved).toContain('GitHub-Specific Instructions');
+      expect(resolved).not.toContain('{{rnd/skills/implement-build-plan/SKILL.md}}');
     });
 
     it('should handle path-like placeholders correctly', async () => {
-      const template = '{{rnd/agents/team-lead.md}}';
+      const template = '{{rnd/skills/create-build-plan/SKILL.md}}';
       const fileReader = async (path) => {
-        if (path === 'rnd/agents/team-lead.md') return 'Team Lead Persona';
+        if (path === 'rnd/skills/create-build-plan/SKILL.md') return 'Build Plan Skill';
         throw new Error('File not found');
       };
 
       const resolved = await resolveTemplate(template, fileReader);
-      expect(resolved).toBe('Team Lead Persona');
+      expect(resolved).toBe('Build Plan Skill');
+    });
+
+    it('should resolve nested placeholders recursively', async () => {
+      const template = '{{rnd/skills/create-tech-spec/SKILL.md}}';
+      const fileReader = async (path) => {
+        if (path === 'rnd/skills/create-tech-spec/SKILL.md') {
+          return '# create-tech-spec\n\n{{rnd/agents/architect.md}}\n\n{{rnd/vendor/skills/codex.md}}';
+        }
+        if (path === 'rnd/agents/architect.md') {
+          return '# Architect Agent';
+        }
+        if (path === 'rnd/vendor/skills/codex.md') {
+          return '## Codex-Specific Instructions';
+        }
+        throw new Error('File not found');
+      };
+
+      const resolved = await resolveTemplate(template, fileReader);
+      expect(resolved).toContain('# create-tech-spec');
+      expect(resolved).toContain('# Architect Agent');
+      expect(resolved).toContain('## Codex-Specific Instructions');
+    });
+
+    it('should detect circular references', async () => {
+      const template = '{{a.md}}';
+      const fileReader = async (path) => {
+        if (path === 'a.md') return '{{b.md}}';
+        if (path === 'b.md') return '{{a.md}}';
+        throw new Error('File not found');
+      };
+
+      await expect(resolveTemplate(template, fileReader))
+        .rejects
+        .toThrow('Circular template reference detected');
     });
 
     it('should handle special regex characters in placeholders', async () => {
@@ -261,23 +297,23 @@ You are a developer responsible for implementing features according to build pla
       // Simulate GitHub file cache
       const fileCache = new Map();
       
+      fileCache.set('rnd/skills/implement-build-plan/SKILL.md', Buffer.from(`# implement-build-plan
+
+{{rnd/agents/developer.md}}
+
+{{rnd/vendor/skills/github.md}}`, 'utf-8'));
+
       // Add persona file
       fileCache.set('rnd/agents/developer.md', Buffer.from(`# Developer Agent
 
-You are responsible for implementing features based on build plans.
+You are responsible for implementing features based on build plans.`, 'utf-8'));
 
-## Core Responsibilities
-- Read and understand build plans thoroughly
-- Write tests before implementation
-- Keep diffs small and focused
-- Follow repository coding standards
+      fileCache.set('rnd/vendor/skills/github.md', Buffer.from(`## GitHub Copilot Platform Instructions
 
-## Workflow
-1. Read the build plan
-2. Write failing tests
-3. Implement minimal code to pass tests
-4. Refactor if needed
-5. Commit changes`, 'utf-8'));
+When using GitHub Copilot:
+- Utilize the full suite of Copilot tools
+- Reference instruction files before making changes
+- Run tests frequently to validate changes`, 'utf-8'));
       
       // Create wrapper template
       const wrapperTemplate = `---
@@ -285,14 +321,7 @@ description: "Implement features and tests based on a build plan"
 tools: ["*"]
 ---
 
-{{rnd/agents/developer.md}}
-
-## GitHub Copilot Platform Instructions
-
-When using GitHub Copilot:
-- Utilize the full suite of Copilot tools
-- Reference instruction files before making changes
-- Run tests frequently to validate changes
+{{rnd/skills/implement-build-plan/SKILL.md}}
 `;
 
       const fileReader = createGitHubFileReader(fileCache);
@@ -301,9 +330,8 @@ When using GitHub Copilot:
       // Verify composition
       expect(composed).toContain('description: "Implement features and tests based on a build plan"');
       expect(composed).toContain('# Developer Agent');
-      expect(composed).toContain('## Core Responsibilities');
       expect(composed).toContain('## GitHub Copilot Platform Instructions');
-      expect(composed).not.toContain('{{rnd/agents/developer.md}}');
+      expect(composed).not.toContain('{{rnd/skills/implement-build-plan/SKILL.md}}');
     });
   });
 });

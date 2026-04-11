@@ -86,13 +86,13 @@ describe('agentService', () => {
     it('should build prompt using agent promptTemplate function', () => {
       const agent = {
         name: 'test-agent',
-        agentFile: 'specs/agents/test.md',
+        agentFile: 'specs/skills/test-agent/SKILL.md',
         promptTemplate: (agentFile, targetFile) => `Process ${targetFile} with ${agentFile}`
       };
 
       const result = buildPrompt(agent, 'path/to/spec.md');
 
-      expect(result).toBe('Process path/to/spec.md with specs/agents/test.md');
+      expect(result).toBe('Process path/to/spec.md with specs/skills/test-agent/SKILL.md');
     });
 
     it('should throw error if promptTemplate is not a function', () => {
@@ -111,7 +111,7 @@ describe('agentService', () => {
 
       const agent = {
         name: 'test-agent',
-        agentFile: 'specs/agents/test.md',
+        agentFile: 'specs/skills/test-agent/SKILL.md',
         specDirName: 'specs',
         promptTemplate: () => 'Base prompt',
         interactiveSuffix: () => '\n\n{{specs/agents/summary.md}}'
@@ -131,7 +131,7 @@ describe('agentService', () => {
       fs.access.mockResolvedValue(undefined);
 
       const agent = {
-        agentFile: 'specs/agents/test.md',
+        agentFile: 'specs/skills/test-agent/SKILL.md',
         filesDir: 'specs'
       };
 
@@ -139,7 +139,7 @@ describe('agentService', () => {
 
       expect(result).toEqual({
         agentExists: true,
-        agentPath: 'specs/agents/test.md',
+        agentPath: 'specs/skills/test-agent/SKILL.md',
         targetDirExists: true,
         targetDir: 'specs'
       });
@@ -151,7 +151,7 @@ describe('agentService', () => {
         .mockResolvedValueOnce(undefined); // Target dir
 
       const agent = {
-        agentFile: 'specs/agents/missing.md',
+        agentFile: 'specs/skills/missing/SKILL.md',
         filesDir: 'specs'
       };
 
@@ -167,7 +167,7 @@ describe('agentService', () => {
         .mockRejectedValueOnce(new Error('Not found')); // Target dir
 
       const agent = {
-        agentFile: 'specs/agents/test.md',
+        agentFile: 'specs/skills/test-agent/SKILL.md',
         filesDir: 'specs/missing'
       };
 
