@@ -3,7 +3,7 @@ const { runUpdate } = require('../lib/update');
 function register(program) {
   program
     .command('update')
-    .description('Update r3nd components (workflows, agents, templates) from the seed repository')
+    .description('Update r3nd components (workflows, skills, templates) from the seed repository')
     .option('-y, --yes', 'Non-interactive mode, update all components')
     .action(async (options) => {
       try {
