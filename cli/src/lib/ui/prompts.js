@@ -164,14 +164,12 @@ async function askAnalyseAgent(defaultAgent = 'codex', nonInteractive = false) {
       gemini: 'Gemini CLI',
       github: 'GitHub agent via gh CLI',
     },
-    extraChoices: [
-      { name: 'Generate prompts only (no agent)', value: 'generate' },
-    ],
+    extraChoices: [],
   });
   
-  // If the default agent is not available, use the first available or 'generate'
+  // If the default agent is not available, use the first available installed agent.
   let effectiveDefault = defaultAgent;
-  if (defaultAgent !== 'generate' && !availableTools[defaultAgent]) {
+  if (!availableTools[defaultAgent]) {
     effectiveDefault = availableTools.codex
       ? 'codex'
       : availableTools.claude
@@ -180,7 +178,7 @@ async function askAnalyseAgent(defaultAgent = 'codex', nonInteractive = false) {
           ? 'gemini'
           : availableTools.github
             ? 'github'
-            : 'generate';
+            : defaultAgent;
   }
   
   const res = await prompt([{ 

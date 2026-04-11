@@ -20,13 +20,16 @@ describe('agentRegistry', () => {
       });
     });
 
-    it('should include create-tech-spec, create-build-plan, implement-build-plan, and implement-feature agents', () => {
+    it('should include core planning/implementation and analysis agents', () => {
       const agents = getAgents();
       const names = agents.map(a => a.name);
       expect(names).toContain('create-tech-spec');
       expect(names).toContain('create-build-plan');
       expect(names).toContain('implement-build-plan');
       expect(names).toContain('implement-feature');
+      expect(names).toContain('analyze-repo-context');
+      expect(names).toContain('analyze-app-context');
+      expect(names).toContain('analyze-module-context');
     });
   });
 
@@ -175,6 +178,16 @@ describe('agentRegistry', () => {
       
       const prompt = resolved.promptTemplate(resolved.agentFile, 'test input', resolved.fullSpecDir);
       expect(prompt).toContain('r3nd/product_specs/');
+    });
+
+    it('should generate path-validation prompt for analyze-repo-context agent', () => {
+      const agent = getAgent('analyze-repo-context');
+      const resolved = resolveAgentConfig(agent, 'specs');
+      const prompt = resolved.promptTemplate(resolved.agentFile, '.', resolved.fullSpecDir);
+
+      expect(prompt).toContain('specs/skills/analyze-repo-context/SKILL.md');
+      expect(prompt).toContain('repository-level scope path');
+      expect(prompt).toContain('If it is missing or invalid');
     });
 
     it('should resolve implement-feature paths with custom spec directory base', () => {

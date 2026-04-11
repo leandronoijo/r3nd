@@ -132,6 +132,39 @@ const AGENT_REGISTRY = [
       `Using the task skill at ${agentFile} as instructions, analyze the following PR identifier or URL:\n\n${userInput}\n\nFollow the template at ${specDirPath}/templates/retro.md and ensure all sections are properly filled out. Analyze review comments, review threads, and issue comments to identify improvements to agents, templates, or instructions.\n\nIMPORTANT: Before analyzing the PR, read all agent summary logs from ${specDirPath}/agent_summaries/ to understand what happened during the development process. These logs contain summaries of agent interactions and will provide context about the workflow that led to this PR.\n\nSave the retro report in: ${specDirPath}/retros/`,
     interactiveSuffix: (doneFile, specDirPath) =>
       `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. First, read all files in ${specDirPath}/agent_summaries/ to understand the development process.\n2. Then review the PR discussion and comments.\n3. After completing the retro report, provide a summary of the key findings and recommendations.\n4. Ask if any areas need further analysis or if additional recommendations should be included.\n5. Then follow the shared summary workflow below.\n6. Do not create an agent summary log for the retro workflow.\n7. After the user confirms satisfaction, create the file named "${doneFile}" in the current directory.\n8. After creating the done file, delete all files in ${specDirPath}/agent_summaries/ to clean up for the next development cycle.${getSharedSummaryWorkflow(doneFile)}`
+  },
+  {
+    name: 'analyze-repo-context',
+    description: 'Analyze a repository root and generate AGENTS.md/CLAUDE.md context files',
+    filesDir: null,
+    agentFile: (specDirPath) => `${specDirPath}/skills/analyze-repo-context/SKILL.md`,
+    useFreeTextInput: true,
+    promptTemplate: (agentFile, userInput) =>
+      `Using the task skill at ${agentFile} as instructions, analyze this repository-level scope path:\n\n${userInput}\n\nIMPORTANT: Validate the path first. If it is missing or invalid for this level, explain why and refuse to proceed.`,
+    interactiveSuffix: (doneFile) =>
+      `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After completing the repository analysis, summarize what was generated and where.\n2. Ask whether any app-level paths should be analyzed next.\n3. Then follow the shared summary workflow below.${getSharedSummaryWorkflow(doneFile)}`
+  },
+  {
+    name: 'analyze-app-context',
+    description: 'Analyze an app scope and generate AGENTS.md/CLAUDE.md context files',
+    filesDir: null,
+    agentFile: (specDirPath) => `${specDirPath}/skills/analyze-app-context/SKILL.md`,
+    useFreeTextInput: true,
+    promptTemplate: (agentFile, userInput) =>
+      `Using the task skill at ${agentFile} as instructions, analyze this app-level scope path:\n\n${userInput}\n\nIMPORTANT: Validate the path first. If it is missing or invalid for this level, explain why and refuse to proceed.`,
+    interactiveSuffix: (doneFile) =>
+      `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After completing the app analysis, summarize what was generated and where.\n2. Ask whether any module-level paths should be analyzed next.\n3. Then follow the shared summary workflow below.${getSharedSummaryWorkflow(doneFile)}`
+  },
+  {
+    name: 'analyze-module-context',
+    description: 'Analyze a module scope and generate AGENTS.md/CLAUDE.md context files',
+    filesDir: null,
+    agentFile: (specDirPath) => `${specDirPath}/skills/analyze-module-context/SKILL.md`,
+    useFreeTextInput: true,
+    promptTemplate: (agentFile, userInput) =>
+      `Using the task skill at ${agentFile} as instructions, analyze this module-level scope path:\n\n${userInput}\n\nIMPORTANT: Validate the path first. If it is missing or invalid for this level, explain why and refuse to proceed.`,
+    interactiveSuffix: (doneFile) =>
+      `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After completing the module analysis, summarize what was generated and where.\n2. Ask whether additional modules should be analyzed.\n3. Then follow the shared summary workflow below.${getSharedSummaryWorkflow(doneFile)}`
   }
 ];
 

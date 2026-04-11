@@ -1,29 +1,28 @@
 const path = require('path');
 const fs = require('fs').promises;
-const { runCodexCommand, runPlansSequential, makeGitHubCommand } = require('./llm/agentRunner');
-const { writeBuffer, ensureDir } = require('./fs/fileWriter');
-const { buildOverviewPrompt, buildAppPrompt, buildTargetedAppPrompt } = require('./analyse/prompts');
+const { runPlansSequential, makeGitHubCommand } = require('./llm/agentRunner');
 const { confirmRunNow, askSelectApps } = require('./ui/prompts');
 const { ConfigManager } = require('./config/configManager');
 const { findFirstSpecDirectory } = require('./fs/treeSearch');
-const { copyInstructionsToRnd } = require('./fs/seedCopier');
 const YAML = require('yaml');
 
-// Regex patterns for parsing fenced code blocks
 const YAML_FENCED_BLOCK_REGEX = /```(?:yaml|yml)\s*([\s\S]*?)```/i;
 const JSON_FENCED_BLOCK_REGEX = /```json\s*([\s\S]*?)```/i;
 
-function normalizeAppEntry(a) {
-  return { 
-    name: a.name || a.app || 'unknown', 
-    path: a.path || '.', 
-    purpose: a.purpose || '', 
-    stack: a.stack || '' 
+const AGENTS_MD = 'AGENTS.md';
+const CLAUDE_MD = 'CLAUDE.md';
+
+function normalizeAppEntry(appEntry = {}) {
+  return {
+    name: appEntry.name || appEntry.app || 'unknown',
+    path: appEntry.path || appEntry.applyTo || '.',
+    applyTo: appEntry.applyTo || appEntry.path || '.',
+    purpose: appEntry.purpose || '',
+    stack: appEntry.stack || ''
   };
 }
 
 async function parseAppsFromInstructions(content) {
-  // Try YAML fenced block first (preferred format)
   const yamlMatch = content.match(YAML_FENCED_BLOCK_REGEX);
   if (yamlMatch) {
     try {
@@ -31,93 +30,179 @@ async function parseAppsFromInstructions(content) {
       if (parsed && Array.isArray(parsed.apps)) {
         return parsed.apps.map(normalizeAppEntry);
       }
-    } catch (e) {
-      console.warn('Failed to parse YAML fenced block for apps:', e && e.message ? e.message : e);
-      // fall through to JSON parser
+    } catch (err) {
+      console.warn('Failed to parse YAML fenced block for apps:', err && err.message ? err.message : err);
     }
   }
 
-  // Fallback to JSON fenced block for backwards compatibility
   const jsonMatch = content.match(JSON_FENCED_BLOCK_REGEX);
   if (jsonMatch) {
     try {
-      const raw = jsonMatch[1].trim();
-      const parsed = JSON.parse(raw);
-      // If the JSON block is directly an array of apps
-      if (Array.isArray(parsed)) return parsed.map(normalizeAppEntry);
-      // If it's an object with `apps` property
-      if (Array.isArray(parsed.apps)) return parsed.apps.map(normalizeAppEntry);
-    } catch (e) {
-      console.warn('Failed to parse JSON fenced block for apps:', e && e.message ? e.message : e);
-      // fall through to empty
+      const parsed = JSON.parse(jsonMatch[1].trim());
+      if (Array.isArray(parsed)) {
+        return parsed.map(normalizeAppEntry);
+      }
+      if (parsed && Array.isArray(parsed.apps)) {
+        return parsed.apps.map(normalizeAppEntry);
+      }
+    } catch (err) {
+      console.warn('Failed to parse JSON fenced block for apps:', err && err.message ? err.message : err);
     }
   }
 
   return [];
 }
 
-async function parseAppNameFromMetadata(content) {
-  // Try YAML fenced block first
-  const yamlMatch = content.match(YAML_FENCED_BLOCK_REGEX);
-  if (yamlMatch) {
-    try {
-      const parsed = YAML.parse(yamlMatch[1]);
-      if (parsed && parsed.name) return parsed.name;
-    } catch (e) {
-      // fall through to JSON
-    }
-  }
-
-  // Try JSON fenced block
-  const jsonMatch = content.match(JSON_FENCED_BLOCK_REGEX);
-  if (jsonMatch) {
-    try {
-      const raw = jsonMatch[1].trim();
-      const parsed = JSON.parse(raw);
-      if (parsed && parsed.name) return parsed.name;
-    } catch (e) {
-      // fall through
-    }
-  }
-
-  return null;
+function escapeSingleQuotes(value) {
+  return value.replace(/'/g, "'\\''");
 }
 
-async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = process.cwd(), targetDir = null } = {}) {
-  // Get configured spec directory name
+function escapeDoubleQuotes(value) {
+  return value.replace(/"/g, '\\"');
+}
+
+async function exists(filePath) {
+  try {
+    await fs.access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function detectRequiredAnalysisFiles(repoRoot) {
+  const hasClaudeVendor = await exists(path.join(repoRoot, '.claude'));
+  const hasAgentsVendor =
+    await exists(path.join(repoRoot, '.codex')) ||
+    await exists(path.join(repoRoot, '.cursor')) ||
+    await exists(path.join(repoRoot, '.github'));
+
+  const requiredFiles = [];
+  if (hasAgentsVendor || !hasClaudeVendor) {
+    requiredFiles.push(AGENTS_MD);
+  }
+  if (hasClaudeVendor) {
+    requiredFiles.push(CLAUDE_MD);
+  }
+
+  return {
+    hasClaudeVendor,
+    hasAgentsVendor,
+    requiredFiles
+  };
+}
+
+async function ensureRequiredScopeFiles(scopePath, requiredFiles) {
+  const agentsPath = path.join(scopePath, AGENTS_MD);
+  const claudePath = path.join(scopePath, CLAUDE_MD);
+  const agentsExists = await exists(agentsPath);
+  const claudeExists = await exists(claudePath);
+
+  if (requiredFiles.includes(AGENTS_MD) && !agentsExists && claudeExists) {
+    const source = await fs.readFile(claudePath);
+    await fs.writeFile(agentsPath, source);
+  }
+
+  if (requiredFiles.includes(CLAUDE_MD) && !claudeExists && agentsExists) {
+    const source = await fs.readFile(agentsPath);
+    await fs.writeFile(claudePath, source);
+  }
+
+  const missing = [];
+  for (const requiredFile of requiredFiles) {
+    const requiredPath = path.join(scopePath, requiredFile);
+    if (!(await exists(requiredPath))) {
+      missing.push(requiredFile);
+    }
+  }
+
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing required analysis files in ${scopePath}: ${missing.join(', ')}. ` +
+      'Ensure the analysis skill generated the expected files.'
+    );
+  }
+}
+
+async function readAnalysisSource(scopePath, requiredFiles) {
+  const orderedCandidates = [AGENTS_MD, CLAUDE_MD, ...requiredFiles.filter(f => f !== AGENTS_MD && f !== CLAUDE_MD)];
+
+  for (const candidate of orderedCandidates) {
+    const candidatePath = path.join(scopePath, candidate);
+    if (await exists(candidatePath)) {
+      return fs.readFile(candidatePath, 'utf8');
+    }
+  }
+
+  throw new Error(`No analysis output file found in ${scopePath}`);
+}
+
+function makeCommandForAgent(agent, promptText) {
+  if (agent === 'claude') {
+    return `claude --dangerously-skip-permissions \"${escapeDoubleQuotes(promptText)}\"`;
+  }
+  if (agent === 'gemini') {
+    return `gemini --yolo -i \"${escapeDoubleQuotes(promptText)}\"`;
+  }
+  if (agent === 'github') {
+    return makeGitHubCommand(promptText);
+  }
+  return `codex --yolo '${escapeSingleQuotes(promptText)}'`;
+}
+
+function buildSkillExecutionPrompt({ skillPath, scopePath, scopeKind }) {
+  return [
+    `Using the task skill at ${skillPath} as instructions, analyze this ${scopeKind} path:`,
+    '',
+    scopePath,
+    '',
+    'Follow the skill instructions exactly. If the path is invalid or missing, explain the issue and refuse to continue.',
+    'When complete, ensure output files are saved at that scope root.'
+  ].join('\n');
+}
+
+async function runScopeAnalysis({
+  agent,
+  destRoot,
+  specDir,
+  skillName,
+  scopePath,
+  scopeKind
+}) {
+  const absoluteSkillPath = path.join(destRoot, specDir, 'skills', skillName, 'SKILL.md');
+  if (!(await exists(absoluteSkillPath))) {
+    throw new Error(`Required skill file not found: ${absoluteSkillPath}`);
+  }
+
+  const scopeRelative = path.isAbsolute(scopePath) ? path.relative(destRoot, scopePath) : scopePath;
+  const normalizedScope = scopeRelative && scopeRelative !== '' ? scopeRelative : '.';
+  const prompt = buildSkillExecutionPrompt({
+    skillPath: path.relative(destRoot, absoluteSkillPath),
+    scopePath: normalizedScope,
+    scopeKind
+  });
+
+  const pseudoPlanPath = path.join(specDir, 'build_plans', `${skillName}-${normalizedScope.replace(/[\\/]/g, '-') || 'root'}.md`);
+  const timeoutMs = parseInt(process.env.R3ND_AGENT_TIMEOUT || '3600000', 10);
+
+  await runPlansSequential([pseudoPlanPath], {
+    cwd: destRoot,
+    makePrompt: async () => prompt,
+    makeCommand: (builtPrompt) => makeCommandForAgent(agent, builtPrompt),
+    timeoutMs,
+    agentType: agent
+  });
+}
+
+async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = process.cwd() } = {}) {
   const configManager = new ConfigManager(destRoot);
   const specDirName = await configManager.getSpecDirName();
-  
-  // Find spec directory
   const specDir = await findFirstSpecDirectory(destRoot, specDirName);
+
   if (!specDir) {
     throw new Error(`No ${specDirName} directory found in repository`);
   }
 
-  // Save instructions in spec directory instead of .github
-  const instructionsDir = path.join(destRoot, specDirName, 'instructions');
-  await ensureDir(instructionsDir);
-
-  // If targetDir is specified, run targeted app analysis
-  if (targetDir) {
-    return runTargetedAnalyse({ agent, nonInteractive, destRoot, targetDir, instructionsDir, specDir });
-  }
-
-  // Original full-project analysis flow
-  // Phase 1: build overview prompt
-  const overviewPrompt = buildOverviewPrompt(destRoot);
-
-  // If agent is 'generate', write the prompt to a file and exit
-  const projectInstructionsPath = path.join(instructionsDir, 'project.instructions.md');
-
-  if (agent === 'generate') {
-    const content = `<!-- GENERATED PROMPT -->\n\n${overviewPrompt}\n`;
-    await writeBuffer(destRoot, path.relative(destRoot, projectInstructionsPath), Buffer.from(content));
-    console.log(`Generated prompt written to ${projectInstructionsPath}`);
-    return;
-  }
-
-  // For codex/gemini/github: run the agent and require a .done file for each step
   if (!nonInteractive) {
     const proceed = await confirmRunNow(nonInteractive);
     if (!proceed) {
@@ -126,184 +211,59 @@ async function runAnalyse({ agent = 'codex', nonInteractive = false, destRoot = 
     }
   }
 
+  const vendorRequirements = await detectRequiredAnalysisFiles(destRoot);
+
   try {
-    // Phase 1: require the agent to write project.instructions.md and create a .done file
-    const projectPlanPath = path.join(specDir, 'build_plans', 'project-overview.md');
-    function makeOverviewPlanPrompt(planPath) {
-      const planName = path.basename(planPath, '.md');
-      if (agent === 'github') {
-        return `${overviewPrompt}\n\nIMPORTANT: Save the project-level instructions to ${path.relative(destRoot, projectInstructionsPath)}.`;
-      }
-      const doneFile = `${planName}.done`;
-      return `${overviewPrompt}\n\nIMPORTANT: Save the project-level instructions to ${path.relative(destRoot, projectInstructionsPath)}. When you have completely finished creating this file, create a file named ${doneFile} in the current directory to signal completion.`;
-    }
+    await runScopeAnalysis({
+      agent,
+      destRoot,
+      specDir,
+      skillName: 'analyze-repo-context',
+      scopePath: '.',
+      scopeKind: 'repository'
+    });
 
-    function makeCmdForPrompt(promptText) {
-      if (agent === 'claude') return `claude --dangerously-skip-permissions "${promptText.replace(/"/g, '\\"')}"`;
-      if (agent === 'gemini') return `gemini --yolo -i "${promptText.replace(/"/g, '\\"')}"`;
-      if (agent === 'github') return makeGitHubCommand(promptText);
-      return `codex --yolo '${promptText.replace(/'/g, "'\\''")}'`;
-    }
+    await ensureRequiredScopeFiles(destRoot, vendorRequirements.requiredFiles);
 
-    const timeoutMs = parseInt(process.env.R3ND_AGENT_TIMEOUT || '3600000', 10);
-    await runPlansSequential([projectPlanPath], { cwd: destRoot, makePrompt: async (p) => makeOverviewPlanPrompt(p), makeCommand: (prompt) => makeCmdForPrompt(prompt), timeoutMs, agentType: agent });
+    const repoContent = await readAnalysisSource(destRoot, vendorRequirements.requiredFiles);
+    const apps = await parseAppsFromInstructions(repoContent);
 
-    // After agent signals completion, read project.instructions.md (or write placeholder)
-    let fileContent = '';
-    try {
-      fileContent = await fs.readFile(projectInstructionsPath, 'utf8');
-    } catch (e) {
-      console.warn('Agent completed but did not produce project.instructions.md. Writing prompt as placeholder.');
-      await writeBuffer(destRoot, path.relative(destRoot, projectInstructionsPath), Buffer.from(overviewPrompt), { overwrite: true });
-      fileContent = overviewPrompt;
-    }
-
-    // Parse apps list
-    const apps = await parseAppsFromInstructions(fileContent);
     if (!apps || apps.length === 0) {
-      console.log('No apps detected in project.instructions.md. Nothing to generate.');
+      console.log('No apps detected in repository analysis output. Nothing else to analyze.');
       return;
     }
 
-    // Let user select which apps to analyze
     const selectedApps = await askSelectApps(apps, nonInteractive);
     if (!selectedApps || selectedApps.length === 0) {
       console.log('No apps selected for analysis.');
       return;
     }
 
-    console.log(`Selected ${selectedApps.length} app(s) for analysis: ${selectedApps.map(a => a.name).join(', ')}`);
+    console.log(`Selected ${selectedApps.length} app(s) for analysis: ${selectedApps.map(app => app.name).join(', ')}`);
 
-    // Phase 2: create per-app plans and require .done files for each
-    const appPlans = selectedApps.map(a => path.join(specDir, 'build_plans', `${a.name}.md`));
-
-    await runPlansSequential(appPlans, {
-      cwd: destRoot,
-      makePrompt: async (planPath) => {
-        const idx = appPlans.indexOf(planPath);
-        const app = selectedApps[idx];
-        const planName = path.basename(planPath, '.md');
-        const prompt = buildAppPrompt(app);
-        if (agent === 'github') {
-          return `${prompt}\n\nIMPORTANT: Save the instructions to ${path.relative(destRoot, path.join(instructionsDir, `${app.name}.instructions.md`))}.`;
-        }
-        const doneFile = `${planName}.done`;
-        return `${prompt}\n\nIMPORTANT: Save the instructions to ${path.relative(destRoot, path.join(instructionsDir, `${app.name}.instructions.md`))}. When you have completely finished creating this file, create a file named ${doneFile} in the current directory to signal completion.`;
-      },
-      makeCommand: (prompt) => makeCmdForPrompt(prompt),
-      timeoutMs,
-      agentType: agent
-    });
-
-    // Ensure any missing per-app files get placeholder content
     for (const app of selectedApps) {
-      const targetPath = path.join(instructionsDir, `${app.name}.instructions.md`);
-      try {
-        await fs.access(targetPath);
-        console.log(`Agent produced ${targetPath}`);
-      } catch (_) {
-        const appPrompt = buildAppPrompt(app);
-        await writeBuffer(destRoot, path.relative(destRoot, targetPath), Buffer.from(appPrompt), { overwrite: true });
-        console.log(`Wrote placeholder instructions to ${targetPath}`);
-      }
+      const appScopePath = app.path || app.applyTo || '.';
+      await runScopeAnalysis({
+        agent,
+        destRoot,
+        specDir,
+        skillName: 'analyze-app-context',
+        scopePath: appScopePath,
+        scopeKind: 'application'
+      });
+
+      const absoluteScopePath = path.resolve(destRoot, appScopePath);
+      await ensureRequiredScopeFiles(absoluteScopePath, vendorRequirements.requiredFiles);
     }
   } catch (err) {
-    console.error('Agent run failed:', err && err.message ? err.message : err);
+    console.error('Analyse failed:', err && err.message ? err.message : err);
     throw err;
   }
-
-  // Mirror generated instructions to the standard root location.
-  await copyInstructionsToRnd(destRoot, specDirName, { nonInteractive: true });
 }
 
-async function runTargetedAnalyse({ agent, nonInteractive, destRoot, targetDir, instructionsDir, specDir }) {
-  // Normalize targetDir to be relative to destRoot
-  const normalizedDir = path.isAbsolute(targetDir) 
-    ? path.relative(destRoot, targetDir) 
-    : targetDir;
-
-  console.log(`Analysing specific directory: ${normalizedDir}`);
-
-  const targetedPrompt = buildTargetedAppPrompt(normalizedDir);
-
-  if (agent === 'generate') {
-    // Generate a placeholder filename based on the directory
-    const dirName = path.basename(normalizedDir) || 'app';
-    const outputPath = path.join(instructionsDir, `${dirName}.instructions.md`);
-    const content = `<!-- GENERATED PROMPT -->\n\n${targetedPrompt}\n`;
-    await writeBuffer(destRoot, path.relative(destRoot, outputPath), Buffer.from(content));
-    console.log(`Generated prompt written to ${outputPath}`);
-    return;
-  }
-
-  if (!nonInteractive) {
-    const proceed = await confirmRunNow(nonInteractive);
-    if (!proceed) {
-      console.log('Aborted by user');
-      return;
-    }
-  }
-
-  try {
-    const dirName = path.basename(normalizedDir) || 'app';
-    const appPlanPath = path.join(specDir, 'build_plans', `${dirName}.md`);
-
-    function makeTargetedPlanPrompt(planPath) {
-      const planName = path.basename(planPath, '.md');
-      const outputPath = path.join(instructionsDir, `${dirName}.instructions.md`);
-      if (agent === 'github') {
-        return `${targetedPrompt}\n\nIMPORTANT: Save the instructions to ${path.relative(destRoot, outputPath)}.`;
-      }
-      const doneFile = `${planName}.done`;
-      return `${targetedPrompt}\n\nIMPORTANT: Save the instructions to ${path.relative(destRoot, outputPath)}. When you have completely finished creating this file, create a file named ${doneFile} in the current directory to signal completion.`;
-    }
-
-    function makeCmdForPrompt(promptText) {
-      if (agent === 'claude') return `claude --dangerously-skip-permissions "${promptText.replace(/"/g, '\\"')}"`;
-      if (agent === 'gemini') return `gemini --yolo -i "${promptText.replace(/"/g, '\\"')}"`;
-      if (agent === 'github') return makeGitHubCommand(promptText);
-      return `codex --yolo '${promptText.replace(/'/g, "'\\''")}'`;
-    }
-
-    const timeoutMs = parseInt(process.env.R3ND_AGENT_TIMEOUT || '3600000', 10);
-    await runPlansSequential([appPlanPath], { 
-      cwd: destRoot, 
-      makePrompt: async (p) => makeTargetedPlanPrompt(p), 
-      makeCommand: (prompt) => makeCmdForPrompt(prompt), 
-      timeoutMs, 
-      agentType: agent 
-    });
-
-    // Try to read the generated file to extract the app name
-    const outputPath = path.join(instructionsDir, `${dirName}.instructions.md`);
-    let fileContent = '';
-    try {
-      fileContent = await fs.readFile(outputPath, 'utf8');
-      
-      // Try to parse the app name from the metadata
-      const parsedName = await parseAppNameFromMetadata(fileContent);
-      if (parsedName && parsedName !== dirName) {
-        // Rename the file to match the parsed app name
-        const newOutputPath = path.join(instructionsDir, `${parsedName}.instructions.md`);
-        await fs.rename(outputPath, newOutputPath);
-        console.log(`Agent produced ${newOutputPath}`);
-      } else {
-        console.log(`Agent produced ${outputPath}`);
-      }
-    } catch (e) {
-      console.warn('Agent completed but did not produce the instruction file. Writing prompt as placeholder.');
-      await writeBuffer(destRoot, path.relative(destRoot, outputPath), Buffer.from(targetedPrompt), { overwrite: true });
-      console.log(`Wrote placeholder instructions to ${outputPath}`);
-    }
-  } catch (err) {
-    console.error('Agent run failed:', err && err.message ? err.message : err);
-    throw err;
-  }
-
-  // Mirror generated instructions to the standard root location.
-  const configManager = new ConfigManager(destRoot);
-  const specDirName = await configManager.getSpecDirName();
-  await copyInstructionsToRnd(destRoot, specDirName, { nonInteractive: true });
-}
-
-module.exports = { runAnalyse, parseAppsFromInstructions, parseAppNameFromMetadata };
+module.exports = {
+  runAnalyse,
+  parseAppsFromInstructions,
+  detectRequiredAnalysisFiles,
+  ensureRequiredScopeFiles
+};

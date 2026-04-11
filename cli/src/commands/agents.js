@@ -209,7 +209,11 @@ async function handleFreeTextAgent(agentConfig, opts, cwd, nonInteractive) {
   let userInput = opts.input;
   
   if (!userInput) {
-    logger.info('\nThis agent requires a feature description as input.');
+    if (nonInteractive) {
+      logger.error(`--input is required for "r3nd agents ${agentConfig.name}" in non-interactive mode.`);
+      process.exit(1);
+    }
+    logger.info('\nThis agent requires text input.');
     userInput = await askFeatureDescription(nonInteractive);
   }
 

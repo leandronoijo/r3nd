@@ -143,4 +143,60 @@ Use rnd/templates/tech_spec.md as the canonical template.
     expect(generated).toContain('specs/templates/tech_spec.md');
     expect(githubClient.fetchRaw).toHaveBeenCalledWith('rnd/skills/create-tech-spec/SKILL.md');
   });
+
+  it('generates vendor outputs for new analysis skills', async () => {
+    const tree = [
+      { type: 'blob', path: 'rnd/skills/analyze-repo-context/SKILL.md' },
+      { type: 'blob', path: 'rnd/vendor/skills/codex.md' },
+      { type: 'blob', path: 'rnd/agents/architect.md' },
+      { type: 'blob', path: 'rnd/agents/summary.md' },
+    ];
+
+    const fileMap = new Map([
+      ['rnd/skills/analyze-repo-context/SKILL.md', Buffer.from(`---
+name: analyze-repo-context
+description: Analyze repository context
+---
+
+# analyze-repo-context
+
+{{rnd/agents/architect.md}}
+
+{{rnd/agents/summary.md}}
+`)],
+      ['rnd/vendor/skills/codex.md', Buffer.from('## Codex-Specific Instructions')],
+      ['rnd/agents/architect.md', Buffer.from('# Architect Agent')],
+      ['rnd/agents/summary.md', Buffer.from('# Summary Workflow')],
+    ]);
+
+    const githubClient = {
+      fetchRaw: jest.fn(async (filePath) => {
+        if (!fileMap.has(filePath)) {
+          throw new Error(`Unexpected fetch: ${filePath}`);
+        }
+        return fileMap.get(filePath);
+      })
+    };
+
+    await syncPlatformAsset(
+      tempDir,
+      tree,
+      githubClient,
+      {
+        key: 'codex',
+        label: 'Codex Skills',
+        assetType: 'generated-skill',
+        vendor: 'codex',
+        outputPath: '.codex/skills',
+      },
+      'specs',
+      'rnd',
+      { nonInteractive: true, overwriteExisting: true }
+    );
+
+    const generated = await fs.readFile(path.join(tempDir, '.codex', 'skills', 'analyze-repo-context', 'SKILL.md'), 'utf-8');
+    expect(generated).toContain('# analyze-repo-context');
+    expect(generated).toContain('# Architect Agent');
+    expect(generated).toContain('## Codex-Specific Instructions');
+  });
 });

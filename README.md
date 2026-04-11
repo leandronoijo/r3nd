@@ -178,7 +178,7 @@ node src/index.js <command>
 | `init` | Initialize current directory with minimal r3nd seed files |
 | `scaffold` | Full interactive scaffolding with backend/frontend overlays (for new projects starting from zero — do not use on repos with existing application code) |
 | `update` | Update r3nd components from the seed repository |
-| `analyse` | Generate instruction files from existing codebase using AI |
+| `analyse` | Generate `AGENTS.md` / `CLAUDE.md` context files from existing codebase using AI |
 | `agents` | Run AI agents for specs, plans, and development |
 | `tools` | Show available and missing AI agent tools |
 | `config` | Manage r3nd.yaml configuration |
@@ -195,6 +195,9 @@ node src/index.js <command>
 | `create-test-cases` | Generate E2E test cases from a build plan |
 | `run-e2e-tests` | Execute E2E tests and generate result reports |
 | `create-retro-report` | Review PR discussions and create a retro report |
+| `analyze-repo-context` | Analyze a repo root and generate repo-level context files |
+| `analyze-app-context` | Analyze an app path and generate app-level context files |
+| `analyze-module-context` | Analyze a module path and generate module-level context files |
 
 ### Agent Options
 
@@ -239,8 +242,10 @@ r3nd agents implement-feature --file rnd/tech_specs/auth.md --agent codex
 # Analyse existing codebase
 r3nd analyse --agent codex --non-interactive
 
-# Analyse specific directory
-r3nd analyse --dir apps/backend --agent github
+# Analyze repo/app/module scopes directly via agent subcommands
+r3nd agents analyze-repo-context --input . --agent codex
+r3nd agents analyze-app-context --input apps/backend --agent codex
+r3nd agents analyze-module-context --input apps/backend/src/modules/auth --agent claude
 
 # Check which AI tools are installed
 r3nd tools

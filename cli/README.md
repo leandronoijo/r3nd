@@ -60,21 +60,16 @@ Commands:
 
 - `scaffold`: Full project scaffolding (existing behaviour) — prompts for backend/frontend overlays and copies matching overlays and rnd build plans. Ensures the retro skill/template/workflow are present even when resuming from an existing setup.
 
-- `analyse`: Analyse the repository and generate `project.instructions.md` and per-app instruction files using an LLM agent.
+- `analyse`: Analyze repository and app scopes and generate `AGENTS.md` / `CLAUDE.md` files using an LLM agent.
   - Options:
-    - `-a, --agent <agent>`: Agent to use (`codex|claude|gemini|github|generate`). `github` runs the remote GitHub agent via `gh agent-task`. Default: `codex` (or first available agent).
+    - `-a, --agent <agent>`: Agent to use (`codex|claude|gemini|github`). `github` runs the remote GitHub agent via `gh agent-task`. Default: `codex` (or first available agent).
     - `-n, --non-interactive`: Run without interactive prompts.
-    - `-d, --dir <directory>`: Target a specific app/service directory instead of the whole project. Generates instructions for just that directory.
   - **Note**: Only agents installed on your system will be available as options.
   - Examples:
 
     ```bash
-    # Analyse entire project
+    # Analyze entire project (repo-level + selected app-level scopes)
     node src/index.js analyse --non-interactive --agent codex
-    
-    # Analyse a specific directory
-    node src/index.js analyse --dir src/backend --agent codex
-    r3nd analyse --dir cli/src --agent generate --non-interactive
     ```
 
 - `agents`: Run AI agents for generating specs, plans, and implementing features. See [Agents Command Documentation](docs/agents-command.md) for details.
@@ -87,6 +82,9 @@ Commands:
     - `create-test-cases`: Generate E2E test cases from a build plan
     - `run-e2e-tests`: Generate, run, and diagnose E2E tests from test cases
     - `create-retro-report`: Review PR discussions and create a retro report
+    - `analyze-repo-context`: Analyze repo root and generate repo-level `AGENTS.md` / `CLAUDE.md`
+    - `analyze-app-context`: Analyze app path and generate app-level `AGENTS.md` / `CLAUDE.md`
+    - `analyze-module-context`: Analyze module path and generate module-level `AGENTS.md` / `CLAUDE.md`
   - **Note**: Only agents installed on your system will be available as options.
   - **Spec Directory Option**: Use `--spec-dir <path>` to specify where spec files should be saved (e.g., `apps/my-app`, `services/auth`). Files will be saved in `<spec-dir>/<spec-dir-name>/` where `spec-dir-name` comes from your r3nd.yaml config (defaults to `r3nd`).
   - **Instruction Source**: These commands read task instructions from `<spec-dir>/<spec-dir-name>/skills/<task>/SKILL.md`.
@@ -113,6 +111,11 @@ Commands:
     r3nd agents create-product-spec --spec-dir apps/mobile --agent github    # → apps/mobile/r3nd/product_specs/
     r3nd agents create-product-spec --spec-dir apps/web --agent github       # → apps/web/r3nd/product_specs/
     r3nd agents create-tech-spec --spec-dir workspaces/shared --agent codex  # → workspaces/shared/r3nd/tech_specs/
+
+    # Context-analysis skills (path provided via --input)
+    r3nd agents analyze-repo-context --input . --agent codex
+    r3nd agents analyze-app-context --input apps/backend --agent codex
+    r3nd agents analyze-module-context --input apps/backend/src/modules/auth --agent claude
     ```
 
 - `tools`: Show which AI tools are available on your system.
