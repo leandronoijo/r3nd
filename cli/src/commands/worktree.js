@@ -1,4 +1,4 @@
-const { runWorktreeCreate, runWorktreeClean } = require('../lib/worktreeService');
+const { runWorktree, runWorktreeCreate, runWorktreeClean } = require('../lib/worktreeService');
 
 function register(program) {
   const worktree = program
@@ -9,9 +9,14 @@ function register(program) {
     .option('-br, --branch <name>', 'Branch name for the new worktree')
     .action(async (options) => {
       try {
-        await runWorktreeCreate({ branch: options.branch });
+        if (options.branch) {
+          await runWorktreeCreate({ branch: options.branch });
+          return;
+        }
+
+        await runWorktree();
       } catch (err) {
-        console.error('Worktree creation failed:', err && err.message ? err.message : err);
+        console.error('Worktree command failed:', err && err.message ? err.message : err);
         process.exit(1);
       }
     });

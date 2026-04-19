@@ -6,11 +6,15 @@ const { execFileSync, spawnSync } = require('child_process');
 jest.mock('./ui/prompts', () => ({
   askWorktreeIDE: jest.fn().mockResolvedValue('cursor'),
   confirmWorktreeCopyWarning: jest.fn().mockResolvedValue(true),
-  askWorktreeCleanSelection: jest.fn().mockResolvedValue([])
+  askWorktreeCleanSelection: jest.fn().mockResolvedValue([]),
+  askWorktreeSelection: jest.fn(),
+  askWorktreeBranchName: jest.fn(),
+  NEW_WORKTREE_OPTION_VALUE: '__new_worktree__'
 }));
 
 const { ConfigManager } = require('./config/configManager');
 const {
+  runWorktree,
   runWorktreeCreate,
   runWorktreeClean,
   getRepoScopeName,
@@ -79,6 +83,8 @@ describe('worktreeService', () => {
     askWorktreeIDE: jest.fn().mockResolvedValue('cursor'),
     confirmWorktreeCopyWarning: jest.fn().mockResolvedValue(true),
     askWorktreeCleanSelection: jest.fn(),
+    askWorktreeSelection: jest.fn(),
+    askWorktreeBranchName: jest.fn(),
     spawnRunner: jest.fn().mockResolvedValue(undefined)
   };
 
@@ -128,6 +134,55 @@ describe('worktreeService', () => {
 
     await runWorktreeCreate({ cwd: repoDir, branch: 'second-branch' }, deps);
     expect(deps.confirmWorktreeCopyWarning).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens a selected existing worktree when run without a branch', async () => {
+    const existingWorktree = await runWorktreeCreate({ cwd: repoDir, branch: 'existing-branch' }, deps);
+
+    deps.spawnRunner.mockClear();
+    deps.askWorktreeSelection.mockResolvedValueOnce(existingWorktree.path);
+
+    const result = await runWorktree({ cwd: repoDir }, deps);
+
+    expect(result).toEqual({ path: existingWorktree.path });
+    expect(deps.askWorktreeSelection).toHaveBeenCalledWith(expect.arrayContaining([
+      expect.objectContaining({
+        path: repoDir,
+        branch: 'develop',
+        current: true
+      }),
+      expect.objectContaining({
+        path: existingWorktree.path,
+        branch: 'existing-branch',
+        current: false
+      })
+    ]), false);
+    expect(deps.askWorktreeBranchName).not.toHaveBeenCalled();
+    expect(deps.spawnRunner).toHaveBeenCalledWith('cursor', [existingWorktree.path], expect.objectContaining({
+      cwd: existingWorktree.path,
+      stdio: 'inherit'
+    }));
+  });
+
+  it('creates a new worktree from the chooser and auto-generates the branch name when left blank', async () => {
+    deps.askWorktreeSelection.mockResolvedValueOnce('__new_worktree__');
+    deps.askWorktreeBranchName.mockResolvedValueOnce('');
+
+    const result = await runWorktree({ cwd: repoDir }, {
+      ...deps,
+      fakerInstance: {
+        animal: { type: () => 'Otter' },
+        vehicle: {
+          color: () => 'Blue',
+          vehicle: () => 'Bike'
+        }
+      }
+    });
+
+    expect(result.branch).toBe('otter-on-a-blue-bike');
+    expect(result.path).toBe(path.join(worktreeScopeRoot, 'otter-on-a-blue-bike'));
+    expect(deps.askWorktreeBranchName).toHaveBeenCalledWith(false);
+    await expect(fs.access(result.path)).resolves.toBeUndefined();
   });
 
   it('cleans only worktrees with empty plain porcelain status and keeps their branches', async () => {

@@ -10,7 +10,10 @@ const { ConfigManager } = require('./config/configManager');
 const {
   askWorktreeIDE,
   confirmWorktreeCopyWarning,
-  askWorktreeCleanSelection
+  askWorktreeCleanSelection,
+  askWorktreeSelection,
+  askWorktreeBranchName,
+  NEW_WORKTREE_OPTION_VALUE
 } = require('./ui/prompts');
 const { findSpecDirectories } = require('./fs/treeSearch');
 const logger = require('./utils/logger');
@@ -131,6 +134,10 @@ function isPathInside(parentPath, childPath) {
 
 function pathExists(targetPath) {
   return fs.access(targetPath).then(() => true).catch(() => false);
+}
+
+function getDisplayBranchName(worktree) {
+  return worktree.branch ? worktree.branch.replace(/^refs\/heads\//, '') : '(detached)';
 }
 
 function createExecFileRunner(execFileImpl = execFile) {
@@ -410,6 +417,41 @@ async function runWorktreeCreate(opts = {}, deps = {}) {
   };
 }
 
+async function runWorktree(opts = {}, deps = {}) {
+  const cwd = opts.cwd || process.cwd();
+  const nonInteractive = !!opts.nonInteractive;
+
+  if (opts.branch || nonInteractive) {
+    return runWorktreeCreate(opts, deps);
+  }
+
+  const configManager = deps.configManager || new ConfigManager(cwd);
+  const openCommand = await configManager.getWorktreeOpenCommand();
+  const { repoRoot, worktrees } = await getRepoContext(cwd, deps);
+  const selectableWorktrees = worktrees.map(worktree => ({
+    path: worktree.path,
+    branch: getDisplayBranchName(worktree),
+    current: normalizePathForCompare(worktree.path) === normalizePathForCompare(repoRoot)
+  }));
+
+  const selectedPath = await (deps.askWorktreeSelection || askWorktreeSelection)(selectableWorktrees, nonInteractive);
+  if (selectedPath === NEW_WORKTREE_OPTION_VALUE) {
+    const branchName = await (deps.askWorktreeBranchName || askWorktreeBranchName)(nonInteractive);
+    return runWorktreeCreate({
+      ...opts,
+      cwd,
+      branch: branchName || undefined
+    }, deps);
+  }
+
+  await openWorktree(selectedPath, openCommand, deps);
+  logger.info(`✓ Opened worktree ${selectedPath}`);
+
+  return {
+    path: selectedPath
+  };
+}
+
 async function runWorktreeClean(opts = {}, deps = {}) {
   const cwd = opts.cwd || process.cwd();
   const nonInteractive = !!opts.nonInteractive;
@@ -429,7 +471,7 @@ async function runWorktreeClean(opts = {}, deps = {}) {
 
     cleanWorktrees.push({
       path: worktree.path,
-      branch: worktree.branch ? worktree.branch.replace(/^refs\/heads\//, '') : '(detached)'
+      branch: getDisplayBranchName(worktree)
     });
   }
 
@@ -462,6 +504,7 @@ module.exports = {
   tokenizeCommand,
   getRepoScopeName,
   WORKTREE_VENDOR_DIRS,
+  runWorktree,
   runWorktreeCreate,
   runWorktreeClean
 };

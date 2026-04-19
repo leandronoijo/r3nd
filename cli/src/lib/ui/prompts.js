@@ -5,6 +5,7 @@ const {
   getPlatformAssetPromptChoices
 } = require('../platformAssetRegistry');
 const prompt = inquirer.createPromptModule();
+const NEW_WORKTREE_OPTION_VALUE = '__new_worktree__';
 
 /**
  * Build agent choices based on available tools
@@ -445,6 +446,44 @@ async function askWorktreeCleanSelection(worktrees, nonInteractive = false) {
   return res.selectedWorktrees;
 }
 
+async function askWorktreeSelection(worktrees, nonInteractive = false) {
+  if (nonInteractive) {
+    return NEW_WORKTREE_OPTION_VALUE;
+  }
+
+  const choices = (worktrees || []).map(worktree => ({
+    name: `${worktree.branch} — ${worktree.path}${worktree.current ? ' (current)' : ''}`,
+    value: worktree.path
+  }));
+
+  choices.push({ name: 'New worktree', value: NEW_WORKTREE_OPTION_VALUE });
+
+  const res = await prompt([{
+    type: 'list',
+    name: 'selectedWorktree',
+    message: 'Select a worktree to open:',
+    choices,
+    pageSize: 15
+  }]);
+
+  return res.selectedWorktree;
+}
+
+async function askWorktreeBranchName(nonInteractive = false) {
+  if (nonInteractive) {
+    return '';
+  }
+
+  const res = await prompt([{
+    type: 'input',
+    name: 'branchName',
+    message: 'Enter a branch name for the new worktree (leave empty for an automatic name):',
+    default: ''
+  }]);
+
+  return res.branchName.trim();
+}
+
 module.exports = {
   chooseBackend,
   chooseFrontend,
@@ -467,5 +506,8 @@ module.exports = {
   askSelectApps,
   askWorktreeIDE,
   confirmWorktreeCopyWarning,
-  askWorktreeCleanSelection
+  askWorktreeCleanSelection,
+  askWorktreeSelection,
+  askWorktreeBranchName,
+  NEW_WORKTREE_OPTION_VALUE
 };

@@ -125,10 +125,13 @@ Commands:
     r3nd tools
     ```
 
-- `worktree`: Create a repo-scoped git worktree under `~/.r3nd/worktrees/` and copy local r3nd files into it.
+- `worktree`: Open an existing repo worktree or create a new repo-scoped git worktree under `~/.r3nd/worktrees/`.
   - Options:
     - `-br, --branch <name>`: Use a specific branch name instead of generating one automatically.
   - Behavior:
+    - Without `--branch`, shows all git worktrees for the current repository and lets you choose one to open with the configured `worktree-open-command`.
+    - Appends a `New worktree` option to that list.
+    - Choosing `New worktree` prompts for a branch name; leaving it empty uses an automatic faker-based branch name.
     - Copies every directory named as your configured `spec-dir-name`.
     - Copies root vendor directories when present: `.claude`, `.codex`, `.github`, and `.cursor`.
     - Copies additional files from `worktree-copy-files` in `r3nd.yaml` (defaults to `*.env` and `**/*.env`).
