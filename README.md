@@ -11,7 +11,7 @@ It provides:
 - **VS Code, Cursor, Codex, and Claude integrations** (chat modes and generated skills)
 - A chained workflow pipeline producing product specs → tech specs → build plans → test cases → code → E2E → retro  
 - Human-controlled PR gates at every stage  
-- Stack overlays for common frameworks (FastAPI, NestJS, Rails, Angular, Vue)
+- Ordered overlays for stack- and repo-specific agents, skills, templates, build plans, and root-level instructions
 - Strict separation between R&D artifacts, documentation, and actual application code  
 
 This repo serves as a `seed`: clone it, customize it, and apply your own technology stack through the `rnd/instructions` files.
@@ -176,7 +176,7 @@ node src/index.js <command>
 | Command | Description |
 |---------|-------------|
 | `init` | Initialize current directory with minimal r3nd seed files |
-| `scaffold` | Full interactive scaffolding with backend/frontend overlays (for new projects starting from zero — do not use on repos with existing application code) |
+| `scaffold` | Full interactive scaffolding with ordered overlays loaded from the seed repo (for new projects starting from zero — do not use on repos with existing application code) |
 | `update` | Update r3nd components from the seed repository |
 | `analyse` | Generate `AGENTS.md` / `CLAUDE.md` context files from existing codebase using AI |
 | `agents` | Run AI agents for specs, plans, and development |
@@ -277,6 +277,10 @@ r3nd config list
 r3nd config get seed-repo
 r3nd config set seed-repo myorganization/custom-r3nd@main
 
+# Choose and reorder overlays
+r3nd config overlays
+r3nd config get overlays
+
 # Inspect worktree-specific settings
 r3nd config get worktree-copy-files
 r3nd config get worktree-open-command
@@ -296,7 +300,7 @@ git clone https://github.com/leandronoijo/r3nd.git
 # Minimal setup (agents, templates, workflows)
 r3nd init
 
-# Full setup with backend/frontend overlays
+# Full setup with overlays from the seed repo
 r3nd scaffold
 ```
 
@@ -450,14 +454,13 @@ rnd/                         # R&D artifacts (configurable name)
   tech_specs/                # Technical specifications
   build_plans/               # Build plans
 
-overlays/                    # Stack-specific templates
-  backend/
-    fast-api/
-    nestjs/
-    ruby-on-rails/
-  frontend/
-    angular/
-    vue/
+overlays/                    # Ordered overlay packs
+  api/
+    agents/
+    skills/
+    templates/
+    build_plans/
+    instructions/
 
 src/                         # Application code
 tests/                       # Project tests
@@ -486,7 +489,7 @@ To extend or adapt the system:
 - Add new workflow stages under `.github/workflows`
 - Expand repo instructions for new stacks
 - Use `rnd/instructions/*.instructions.md` to enforce path-level rules
-- Add new overlays under `overlays/backend` or `overlays/frontend`
+- Add new overlays as top-level directories under `overlays/`
 - Add architecture notes or diagrams under `docs/`
 
 ---

@@ -1,6 +1,5 @@
 jest.mock('./ui/prompts', () => ({
-  chooseBackend: jest.fn().mockResolvedValue('nestjs'),
-  chooseFrontend: jest.fn().mockResolvedValue('vue'),
+  askOverlays: jest.fn().mockResolvedValue(['api', 'vue']),
   askLLMChoice: jest.fn().mockResolvedValue('naa'),
   confirmRunNow: jest.fn().mockResolvedValue(false),
   confirmSavePrompts: jest.fn().mockResolvedValue(true),
@@ -13,11 +12,14 @@ jest.mock('./config/configManager', () => ({
   ConfigManager: jest.fn().mockImplementation(() => ({
     get: jest.fn().mockResolvedValue('leandronoijo/r3nd@develop'),
     set: jest.fn().mockResolvedValue(undefined),
-    getSpecDirName: jest.fn().mockResolvedValue('r3nd')
+    getSpecDirName: jest.fn().mockResolvedValue('r3nd'),
+    getOverlays: jest.fn().mockResolvedValue([])
   }))
 }));
 
 jest.mock('./fs/seedCopier', () => ({
+  copyAgentPersonas: jest.fn().mockResolvedValue(undefined),
+  copyBuildPlans: jest.fn().mockResolvedValue(undefined),
   copyTaskSkills: jest.fn().mockResolvedValue(undefined),
   syncPlatformAsset: jest.fn().mockResolvedValue(undefined),
   copyTemplates: jest.fn().mockResolvedValue(undefined),
@@ -27,13 +29,14 @@ jest.mock('./fs/seedCopier', () => ({
 
 jest.mock('./overlays/overlaySeedService', () => ({
   fetchSeedSpecDirName: jest.fn().mockResolvedValue('rnd'),
-  copyOverlayFiles: jest.fn().mockResolvedValue(undefined),
+  discoverAvailableOverlays: jest.fn().mockReturnValue(['api', 'vue']),
+  applySelectedOverlays: jest.fn().mockResolvedValue(undefined),
   ensureMandatorySeedFiles: jest.fn().mockResolvedValue(undefined),
   ensureSpecDirectories: jest.fn().mockResolvedValue(undefined)
 }));
 
 const { runScaffold } = require('./scaffoldService');
-const { askInitOptions } = require('./ui/prompts');
+const { askInitOptions, askOverlays } = require('./ui/prompts');
 const { copyTaskSkills, syncPlatformAsset } = require('./fs/seedCopier');
 
 describe('scaffoldService', () => {
@@ -50,8 +53,6 @@ describe('scaffoldService', () => {
     originalAccess = fs.access;
     fs.access = jest.fn((targetPath) => {
       if (String(targetPath).includes('.git')) return Promise.resolve();
-      if (String(targetPath).includes('backend.instructions.md')) return Promise.resolve();
-      if (String(targetPath).includes('frontend.instructions.md')) return Promise.resolve();
       return Promise.reject(Object.assign(new Error('missing'), { code: 'ENOENT' }));
     });
   });
@@ -65,6 +66,7 @@ describe('scaffoldService', () => {
     await runScaffold({ cwd: '/test/repo', nonInteractive: false }, { githubClient: mockGithubClient });
 
     expect(askInitOptions).toHaveBeenCalledWith(false);
+    expect(askOverlays).toHaveBeenCalledWith([], ['api', 'vue'], false);
     expect(copyTaskSkills).toHaveBeenCalled();
     expect(syncPlatformAsset).toHaveBeenCalledTimes(2);
   });

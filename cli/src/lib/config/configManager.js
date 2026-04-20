@@ -6,7 +6,7 @@ const logger = require('../utils/logger');
 const CONFIG_FILE_NAME = 'r3nd.yaml';
 const DEFAULT_WORKTREE_COPY_FILES = ['*.env', '**/*.env'];
 const DEFAULT_WORKTREE_OPEN_COMMAND = ['code', '{worktreeDir}'];
-const VALID_CONFIG_KEYS = ['seed-repo', 'spec-dir-name', 'worktree-copy-files', 'worktree-open-command'];
+const VALID_CONFIG_KEYS = ['seed-repo', 'spec-dir-name', 'overlays', 'worktree-copy-files', 'worktree-open-command'];
 
 /**
  * ConfigManager - Manages r3nd.yaml configuration file at repo level
@@ -192,6 +192,15 @@ class ConfigManager {
   }
 
   /**
+   * Get normalized overlays in precedence order
+   * @returns {Promise<string[]>} Ordered overlay names
+   */
+  async getOverlays() {
+    const config = await this.load();
+    return ConfigManager.normalizeOverlays(config.overlays);
+  }
+
+  /**
    * Get normalized worktree copy file patterns
    * @returns {Promise<string[]>} Array of glob patterns
    */
@@ -226,6 +235,7 @@ class ConfigManager {
     return {
       'seed-repo': 'leandronoijo/r3nd@develop',
       'spec-dir-name': 'r3nd',
+      overlays: [],
       'worktree-copy-files': [...DEFAULT_WORKTREE_COPY_FILES],
       'worktree-open-command': [...DEFAULT_WORKTREE_OPEN_COMMAND]
     };
@@ -238,6 +248,9 @@ class ConfigManager {
    * @returns {any}
    */
   static normalizeValue(key, value) {
+    if (key === 'overlays') {
+      return ConfigManager.normalizeOverlays(value);
+    }
     if (key === 'worktree-copy-files') {
       return ConfigManager.normalizeWorktreeCopyFiles(value);
     }
@@ -261,6 +274,43 @@ class ConfigManager {
 
     if (normalized.length === 0) {
       throw new Error('worktree-copy-files must contain at least one glob pattern');
+    }
+
+    return normalized;
+  }
+
+  /**
+   * Normalize overlays to a unique ordered string array
+   * @param {any} value
+   * @returns {string[]}
+   */
+  static normalizeOverlays(value) {
+    if (value == null) {
+      return [];
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim();
+      return normalized ? [normalized] : [];
+    }
+
+    if (!Array.isArray(value)) {
+      throw new Error('overlays must be a string or an array of strings');
+    }
+
+    const seen = new Set();
+    const normalized = [];
+
+    for (const item of value) {
+      if (typeof item !== 'string') {
+        continue;
+      }
+      const overlay = item.trim();
+      if (!overlay || seen.has(overlay)) {
+        continue;
+      }
+      seen.add(overlay);
+      normalized.push(overlay);
     }
 
     return normalized;

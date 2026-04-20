@@ -123,6 +123,20 @@ async function copyAgentPersonas(cwd, tree, githubClient, specDirName, seedSpecD
   );
 }
 
+async function copyBuildPlans(cwd, tree, githubClient, specDirName, seedSpecDirName, options = {}) {
+  return copySpecDirectory(
+    cwd,
+    tree,
+    githubClient,
+    `${seedSpecDirName}/build_plans/`,
+    `${specDirName}/build_plans/`,
+    specDirName,
+    seedSpecDirName,
+    '🗺️ Copying build plans...',
+    options
+  );
+}
+
 async function copyTaskSkills(cwd, tree, githubClient, specDirName, seedSpecDirName, options = {}) {
   logger.info('\n🧠 Copying canonical task skills...');
 
@@ -425,6 +439,7 @@ async function copyInstructionsToRnd(cwd, specDirName, { nonInteractive = false,
 
 module.exports = {
   copyAgentPersonas,
+  copyBuildPlans,
   copyTaskSkills,
   copyVendorSkillAddons,
   copyGitHubWorkflows,

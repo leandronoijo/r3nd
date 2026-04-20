@@ -5,11 +5,16 @@ const { GitHubClient } = require('./github/githubClient');
 const { askUpdateOptions, askSeedRepo } = require('./ui/prompts');
 const { ConfigManager } = require('./config/configManager');
 const {
+  copyAgentPersonas,
+  copyBuildPlans,
   copyTaskSkills,
   copyTemplates,
   syncPlatformAsset
 } = require('./fs/seedCopier');
-const { fetchSeedSpecDirName } = require('./overlays/overlaySeedService');
+const {
+  fetchSeedSpecDirName,
+  applySelectedOverlays
+} = require('./overlays/overlaySeedService');
 const {
   getPlatformAsset,
   normalizePlatformAssetSelection
@@ -52,6 +57,10 @@ async function runUpdate(opts = {}, deps = {}) {
   const tree = await githubClient.getTree();
   const seedSpecDirName = await fetchSeedSpecDirName(githubClient);
   const selectedPlatformAssets = normalizePlatformAssetSelection(selectedOptions);
+  const selectedOverlays = await configManager.getOverlays();
+
+  await copyAgentPersonas(cwd, tree, githubClient, specDirName, seedSpecDirName, { overwriteExisting: true });
+  await copyBuildPlans(cwd, tree, githubClient, specDirName, seedSpecDirName, { overwriteExisting: true });
 
   if (selectedOptions.includes('templates')) {
     await copyTemplates(cwd, tree, githubClient, specDirName, seedSpecDirName, { overwriteExisting: true });
@@ -68,6 +77,10 @@ async function runUpdate(opts = {}, deps = {}) {
     }
     await syncPlatformAsset(cwd, tree, githubClient, asset, specDirName, seedSpecDirName, { overwriteExisting: true });
   }
+
+  await applySelectedOverlays(cwd, tree, githubClient, specDirName, seedSpecDirName, selectedOverlays, {
+    overwriteExisting: true
+  });
 
   logger.info('\nUpdate complete.');
 }
