@@ -1,5 +1,6 @@
 // Mock inquirer to avoid ESM import issues
 jest.mock('./ui/prompts', () => ({
+  askOverlays: jest.fn().mockResolvedValue(['api', 'vue']),
   askInitOptions: jest.fn().mockResolvedValue(['github', 'cursor', 'codex', 'claude']),
   askSeedRepo: jest.fn().mockResolvedValue('leandronoijo/r3nd@develop'),
   askSpecDirName: jest.fn().mockResolvedValue('r3nd')
@@ -9,13 +10,68 @@ jest.mock('./ui/prompts', () => ({
 jest.mock('./config/configManager', () => ({
   ConfigManager: jest.fn().mockImplementation(() => ({
     get: jest.fn().mockResolvedValue('leandronoijo/r3nd@develop'),
-    set: jest.fn().mockResolvedValue(undefined)
+    set: jest.fn().mockResolvedValue(undefined),
+    getOverlays: jest.fn().mockResolvedValue([])
   }))
 }));
 
-const { parseAgentFile, migrateLegacyAgent } = require('./initService');
+jest.mock('./fs/seedCopier', () => ({
+  copyAgentPersonas: jest.fn().mockResolvedValue(undefined),
+  copyBuildPlans: jest.fn().mockResolvedValue(undefined),
+  copyTaskSkills: jest.fn().mockResolvedValue(undefined),
+  syncPlatformAsset: jest.fn().mockResolvedValue(undefined),
+  copyTemplates: jest.fn().mockResolvedValue(undefined),
+  copyCommonFiles: jest.fn().mockResolvedValue(undefined)
+}));
+
+jest.mock('./overlays/overlaySeedService', () => ({
+  fetchSeedSpecDirName: jest.fn().mockResolvedValue('rnd'),
+  discoverAvailableOverlays: jest.fn().mockReturnValue(['api', 'vue']),
+  applySelectedOverlays: jest.fn().mockResolvedValue(undefined)
+}));
+
+const { parseAgentFile, migrateLegacyAgent, runInit } = require('./initService');
+const { askOverlays } = require('./ui/prompts');
+const { applySelectedOverlays } = require('./overlays/overlaySeedService');
 
 describe('initService', () => {
+  describe('runInit', () => {
+    let originalAccess;
+
+    beforeEach(() => {
+      const fs = require('fs').promises;
+      originalAccess = fs.access;
+      fs.access = jest.fn((targetPath) => {
+        if (String(targetPath).includes('.git')) return Promise.resolve();
+        return Promise.reject(Object.assign(new Error('missing'), { code: 'ENOENT' }));
+      });
+    });
+
+    afterEach(() => {
+      const fs = require('fs').promises;
+      fs.access = originalAccess;
+    });
+
+    it('selects and applies overlays during init', async () => {
+      const mockGithubClient = {
+        getTree: jest.fn().mockResolvedValue([{ type: 'blob', path: 'rnd/templates/build_plan.md' }])
+      };
+
+      await runInit({ cwd: '/test/repo', nonInteractive: false }, { githubClient: mockGithubClient });
+
+      expect(askOverlays).toHaveBeenCalledWith([], ['api', 'vue'], false);
+      expect(applySelectedOverlays).toHaveBeenCalledWith(
+        '/test/repo',
+        expect.any(Array),
+        mockGithubClient,
+        'r3nd',
+        'rnd',
+        ['api', 'vue'],
+        { nonInteractive: false, overwriteExisting: true }
+      );
+    });
+  });
+
   describe('parseAgentFile', () => {
     it('should parse agent file with frontmatter correctly', () => {
       const content = `---

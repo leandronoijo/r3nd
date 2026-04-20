@@ -3,6 +3,8 @@ const path = require('path');
 const { GitHubClient } = require('./github/githubClient');
 const { ensureDir } = require('./fs/fileWriter');
 const { 
+  copyAgentPersonas,
+  copyBuildPlans,
   copyTaskSkills,
   syncPlatformAsset,
   copyTemplates, 
@@ -11,11 +13,12 @@ const {
 } = require('./fs/seedCopier');
 const { 
   fetchSeedSpecDirName, 
-  copyOverlayFiles, 
+  discoverAvailableOverlays,
+  applySelectedOverlays,
   ensureMandatorySeedFiles, 
   ensureSpecDirectories 
 } = require('./overlays/overlaySeedService');
-const { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askSeedRepo, askInitOptions } = require('./ui/prompts');
+const { askLLMChoice, askOverlays, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askSeedRepo, askInitOptions } = require('./ui/prompts');
 const { runPlansSequential, waitForCompletionFile, runCodexCommand, makeGitHubCommand } = require('./llm/agentRunner');
 const { ConfigManager } = require('./config/configManager');
 const {
@@ -63,60 +66,35 @@ async function runScaffold(opts = {}, deps = {}) {
 
   logger.info('r3nd — project scaffolder');
 
-  const backendInstructionsExist = await fs.access(path.join(cwd, specDirName, 'instructions', 'backend.instructions.md')).then(() => true).catch(() => false);
-  const frontendInstructionsExist = await fs.access(path.join(cwd, specDirName, 'instructions', 'frontend.instructions.md')).then(() => true).catch(() => false);
-
-  let backend = opts.backend;
-  let frontend = opts.frontend;
-
-  if (!backend) {
-    if (backendInstructionsExist) {
-      logger.info('✓ Backend instructions already exist, skipping backend selection');
-      backend = 'nestjs';
-    } else {
-      backend = await chooseBackend(nonInteractive);
-    }
-  }
-
-  if (!frontend) {
-    if (frontendInstructionsExist) {
-      logger.info('✓ Frontend instructions already exist, skipping frontend selection');
-      frontend = 'vue';
-    } else {
-      frontend = await chooseFrontend(nonInteractive);
-    }
-  }
-
   // Ask user which components to initialize (similar to init command)
   logger.info('\nr3nd — component initializer\n');
   const selectedOptions = normalizePlatformAssetSelection(await askInitOptions(nonInteractive));
   logger.info(`\nSelected: ${selectedOptions.join(', ') || 'None'}\n`);
-
-  if (backendInstructionsExist && frontendInstructionsExist) {
-    logger.info('✓ Resuming from existing setup, refreshing shared skills and selected generated assets');
-  }
 
   logger.info('Fetching file list from GitHub...');
   const tree = await githubClient.getTree();
 
   // Fetch seed repo's spec-dir-name configuration
   const seedSpecDirName = await fetchSeedSpecDirName(githubClient);
+  const availableOverlays = discoverAvailableOverlays(tree);
+  const currentOverlays = await configManager.getOverlays();
+  const selectedOverlays = await askOverlays(currentOverlays, availableOverlays, nonInteractive);
+  await configManager.set('overlays', selectedOverlays);
 
   // Copy common files (gitignore)
   await copyCommonFiles(cwd, tree, githubClient, specDirName, { nonInteractive });
 
+  // Copy shared agents
+  await copyAgentPersonas(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
+
   // Copy testing instructions to spec-dir/instructions
   await copyTestingInstructions(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
 
-  // Copy overlay-specific files (instructions, build plans)
-  await copyOverlayFiles(cwd, tree, githubClient, specDirName, seedSpecDirName, {
-    backend: !backendInstructionsExist ? backend : null,
-    frontend: !frontendInstructionsExist ? frontend : null,
-    nonInteractive
-  });
-
   // Copy canonical task skills from seed repo as fully composed local files
   await copyTaskSkills(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
+
+  // Copy base build plans from seed repo
+  await copyBuildPlans(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
 
   for (const assetKey of selectedOptions) {
     const asset = getPlatformAsset(assetKey);
@@ -129,6 +107,11 @@ async function runScaffold(opts = {}, deps = {}) {
   // Copy templates
   await copyTemplates(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
 
+  await applySelectedOverlays(cwd, tree, githubClient, specDirName, seedSpecDirName, selectedOverlays, {
+    nonInteractive,
+    overwriteExisting: true
+  });
+
   // Ensure spec directories exist (conditionally create rnd/instructions)
   const createRndInstructions = shouldMirrorInstructionsToRnd(selectedOptions);
   await ensureSpecDirectories(cwd, specDirName, { createRndInstructions });
@@ -138,11 +121,7 @@ async function runScaffold(opts = {}, deps = {}) {
   if (selectedOptions.includes('github-workflows')) {
     mandatorySeedFiles.push(`${seedSpecDirName}/templates/retro.md`, '.github/workflows/06-retro-ready.yml');
   }
-  await ensureMandatorySeedFiles(cwd, githubClient, specDirName, seedSpecDirName, mandatorySeedFiles, {
-    backend,
-    frontend,
-    nonInteractive
-  });
+  await ensureMandatorySeedFiles(cwd, githubClient, specDirName, seedSpecDirName, mandatorySeedFiles, { nonInteractive });
 
   logger.info('Scaffolding complete.');
 

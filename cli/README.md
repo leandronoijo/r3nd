@@ -58,7 +58,7 @@ Commands:
   - From the project root: `node src/index.js init`
   - If installed globally: `r3nd init` (see installation section)
 
-- `scaffold`: Full project scaffolding (existing behaviour) — prompts for backend/frontend overlays and copies matching overlays and rnd build plans. Ensures the retro skill/template/workflow are present even when resuming from an existing setup.
+- `scaffold`: Full project scaffolding — prompts for ordered overlays discovered from the seed repo, copies base seed content plus selected overlay files, and keeps the existing scaffold build plan filenames for LLM execution.
 
 - `analyse`: Analyze repository and app scopes and generate `AGENTS.md` / `CLAUDE.md` files using an LLM agent.
   - Options:
@@ -210,4 +210,4 @@ The r3nd CLI will automatically detect available tools and adjust its options ac
 
 ---
 
-This CLI is intended to be used as a scaffolder and helper for generating project overlays and instructions using the r3nd overlays and optional LLM-driven plans.
+This CLI is intended to be used as a scaffolder and helper for generating project overlays and instructions using ordered overlay packs from the seed repo and optional LLM-driven plans.

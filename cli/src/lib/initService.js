@@ -5,13 +5,19 @@ const YAML = require('yaml');
 
 const { GitHubClient } = require('./github/githubClient');
 const { 
+  copyAgentPersonas,
+  copyBuildPlans,
   copyTaskSkills,
   syncPlatformAsset,
   copyTemplates, 
   copyCommonFiles
 } = require('./fs/seedCopier');
-const { fetchSeedSpecDirName } = require('./overlays/overlaySeedService');
-const { askInitOptions, askSeedRepo, askSpecDirName } = require('./ui/prompts');
+const {
+  fetchSeedSpecDirName,
+  discoverAvailableOverlays,
+  applySelectedOverlays
+} = require('./overlays/overlaySeedService');
+const { askInitOptions, askOverlays, askSeedRepo, askSpecDirName } = require('./ui/prompts');
 const { ConfigManager } = require('./config/configManager');
 const {
   getPlatformAsset,
@@ -131,12 +137,22 @@ async function runInit(opts = {}, deps = {}) {
   
   // Fetch seed repo's spec-dir-name configuration
   const seedSpecDirName = await fetchSeedSpecDirName(githubClient);
+  const availableOverlays = discoverAvailableOverlays(tree);
+  const currentOverlays = await configManager.getOverlays();
+  const selectedOverlays = await askOverlays(currentOverlays, availableOverlays, nonInteractive);
+  await configManager.set('overlays', selectedOverlays);
 
   // Copy common files (gitignore)
   await copyCommonFiles(cwd, tree, githubClient, specDirName, { nonInteractive });
 
+  // Copy shared agents from seed repo
+  await copyAgentPersonas(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
+
   // Copy canonical task skills from seed repo as fully composed local files
   await copyTaskSkills(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
+
+  // Copy base build plans from seed repo
+  await copyBuildPlans(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
 
   for (const assetKey of selectedOptions) {
     const asset = getPlatformAsset(assetKey);
@@ -148,6 +164,11 @@ async function runInit(opts = {}, deps = {}) {
 
   // Also copy templates if any option was selected
   await copyTemplates(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
+
+  await applySelectedOverlays(cwd, tree, githubClient, specDirName, seedSpecDirName, selectedOverlays, {
+    nonInteractive,
+    overwriteExisting: true
+  });
 
   logger.info('\nInit complete.');
 }

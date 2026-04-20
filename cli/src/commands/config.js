@@ -1,11 +1,14 @@
 const YAML = require('yaml');
 
 const { ConfigManager, VALID_CONFIG_KEYS } = require('../lib/config/configManager');
+const { GitHubClient } = require('../lib/github/githubClient');
+const { discoverAvailableOverlays } = require('../lib/overlays/overlaySeedService');
+const { askOverlays, askSeedRepo } = require('../lib/ui/prompts');
 const { rewriteSpecDirInRepo } = require('../lib/utils/specDirRewrite');
 const logger = require('../lib/utils/logger');
 
 function parseConfigValue(key, value) {
-  if (key !== 'worktree-copy-files' && key !== 'worktree-open-command') {
+  if (key !== 'overlays' && key !== 'worktree-copy-files' && key !== 'worktree-open-command') {
     return value;
   }
 
@@ -112,6 +115,42 @@ function register(program) {
         }
       } catch (err) {
         logger.error('Failed to set config:', err && err.message ? err.message : err);
+        process.exit(1);
+      }
+    });
+
+  config
+    .command('overlays')
+    .description('Interactively configure overlays from the seed repository')
+    .action(async () => {
+      try {
+        const configManager = new ConfigManager();
+        let seedRepo = await configManager.get('seed-repo');
+
+        if (!seedRepo) {
+          logger.info('No seed repository configured.');
+          seedRepo = await askSeedRepo(null, false);
+          await configManager.set('seed-repo', seedRepo);
+          logger.info(`✓ Configured seed-repo: ${seedRepo}\n`);
+        }
+
+        const githubClient = new GitHubClient();
+        logger.info('Fetching file list from GitHub (seed repo)...');
+        const tree = await githubClient.getTree();
+        const availableOverlays = discoverAvailableOverlays(tree);
+        const currentOverlays = await configManager.getOverlays();
+        const selectedOverlays = await askOverlays(currentOverlays, availableOverlays, false);
+
+        await configManager.set('overlays', selectedOverlays);
+
+        if (selectedOverlays.length === 0) {
+          logger.info('✓ Cleared overlays.');
+          return;
+        }
+
+        logger.info(`✓ Set overlays = ${selectedOverlays.join(', ')}`);
+      } catch (err) {
+        logger.error('Failed to configure overlays:', err && err.message ? err.message : err);
         process.exit(1);
       }
     });

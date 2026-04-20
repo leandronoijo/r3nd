@@ -187,6 +187,7 @@ describe('ConfigManager', () => {
     it('should return true for valid keys', () => {
       expect(ConfigManager.isValidKey('seed-repo')).toBe(true);
       expect(ConfigManager.isValidKey('spec-dir-name')).toBe(true);
+      expect(ConfigManager.isValidKey('overlays')).toBe(true);
       expect(ConfigManager.isValidKey('worktree-copy-files')).toBe(true);
       expect(ConfigManager.isValidKey('worktree-open-command')).toBe(true);
     });
@@ -203,6 +204,7 @@ describe('ConfigManager', () => {
       expect(defaults).toEqual({
         'seed-repo': 'leandronoijo/r3nd@develop',
         'spec-dir-name': 'r3nd',
+        overlays: [],
         'worktree-copy-files': ['*.env', '**/*.env'],
         'worktree-open-command': ['code', '{worktreeDir}']
       });
@@ -229,6 +231,17 @@ describe('ConfigManager', () => {
   });
 
   describe('worktree config helpers', () => {
+    it('should return default overlays when not configured', async () => {
+      const overlays = await configManager.getOverlays();
+      expect(overlays).toEqual([]);
+    });
+
+    it('should normalize overlays to a unique ordered array', async () => {
+      await configManager.set('overlays', ['api', 'vue', 'api', '', 'docs']);
+      const overlays = await configManager.getOverlays();
+      expect(overlays).toEqual(['api', 'vue', 'docs']);
+    });
+
     it('should return default worktree copy patterns when not configured', async () => {
       const patterns = await configManager.getWorktreeCopyFiles();
       expect(patterns).toEqual(['*.env', '**/*.env']);

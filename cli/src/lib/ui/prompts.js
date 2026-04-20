@@ -64,6 +64,76 @@ async function chooseFrontend(nonInteractive = false) {
   return res.frontend;
 }
 
+function normalizeOverlayChoices(currentOverlays, availableOverlays) {
+  const available = Array.from(new Set((availableOverlays || []).filter(Boolean)));
+  const current = Array.from(new Set((currentOverlays || []).filter(overlay => available.includes(overlay))));
+  return { available, current };
+}
+
+async function askOverlaySelection(currentOverlays = [], availableOverlays = [], nonInteractive = false) {
+  const { available, current } = normalizeOverlayChoices(currentOverlays, availableOverlays);
+
+  if (nonInteractive) {
+    return current;
+  }
+
+  if (available.length === 0) {
+    return [];
+  }
+
+  const choices = available.map(overlay => ({
+    name: overlay,
+    value: overlay,
+    checked: current.includes(overlay)
+  }));
+
+  const res = await prompt([{
+    type: 'checkbox',
+    name: 'selectedOverlays',
+    message: 'Select overlays to apply:',
+    choices,
+    pageSize: 15
+  }]);
+
+  return res.selectedOverlays;
+}
+
+async function askOverlayOrder(selectedOverlays = [], currentOverlays = [], nonInteractive = false) {
+  const selected = Array.from(new Set(selectedOverlays.filter(Boolean)));
+  if (nonInteractive || selected.length <= 1) {
+    return selected;
+  }
+
+  const current = Array.from(new Set((currentOverlays || []).filter(overlay => selected.includes(overlay))));
+  const ordered = [];
+  const remaining = [...selected];
+
+  while (remaining.length > 0) {
+    const defaultValue = current.find(overlay => remaining.includes(overlay)) || remaining[0];
+    const res = await prompt([{
+      type: 'list',
+      name: 'overlay',
+      message: `Choose overlay precedence ${ordered.length + 1}/${selected.length} (lower precedence first):`,
+      choices: remaining.map(overlay => ({ name: overlay, value: overlay })),
+      default: defaultValue,
+      pageSize: 15
+    }]);
+
+    ordered.push(res.overlay);
+    const index = remaining.indexOf(res.overlay);
+    if (index >= 0) {
+      remaining.splice(index, 1);
+    }
+  }
+
+  return ordered;
+}
+
+async function askOverlays(currentOverlays = [], availableOverlays = [], nonInteractive = false) {
+  const selected = await askOverlaySelection(currentOverlays, availableOverlays, nonInteractive);
+  return askOverlayOrder(selected, currentOverlays, nonInteractive);
+}
+
 async function askLLMChoice(nonInteractive = false) {
   if (nonInteractive) return 'naa';
   
@@ -487,6 +557,9 @@ async function askWorktreeBranchName(nonInteractive = false) {
 module.exports = {
   chooseBackend,
   chooseFrontend,
+  askOverlays,
+  askOverlaySelection,
+  askOverlayOrder,
   askLLMChoice,
   confirmRunNow,
   confirmSavePrompts,

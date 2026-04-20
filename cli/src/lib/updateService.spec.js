@@ -10,24 +10,29 @@ jest.mock('./config/configManager', () => ({
   ConfigManager: jest.fn().mockImplementation(() => ({
     get: jest.fn().mockResolvedValue('leandronoijo/r3nd@develop'),
     set: jest.fn().mockResolvedValue(undefined),
-    getSpecDirName: jest.fn().mockResolvedValue('r3nd')
+    getSpecDirName: jest.fn().mockResolvedValue('r3nd'),
+    getOverlays: jest.fn().mockResolvedValue(['api', 'vue'])
   }))
 }));
 
 // Mock seed copier
 jest.mock('./fs/seedCopier', () => ({
+  copyAgentPersonas: jest.fn().mockResolvedValue(undefined),
+  copyBuildPlans: jest.fn().mockResolvedValue(undefined),
   copyTemplates: jest.fn().mockResolvedValue(undefined),
   copyTaskSkills: jest.fn().mockResolvedValue(undefined),
   syncPlatformAsset: jest.fn().mockResolvedValue(undefined)
 }));
 
 jest.mock('./overlays/overlaySeedService', () => ({
-  fetchSeedSpecDirName: jest.fn().mockResolvedValue('rnd')
+  fetchSeedSpecDirName: jest.fn().mockResolvedValue('rnd'),
+  applySelectedOverlays: jest.fn().mockResolvedValue(undefined)
 }));
 
 const { runUpdate } = require('./updateService');
 const { askUpdateOptions } = require('./ui/prompts');
 const { copyTemplates, copyTaskSkills, syncPlatformAsset } = require('./fs/seedCopier');
+const { applySelectedOverlays } = require('./overlays/overlaySeedService');
 const logger = require('./utils/logger');
 
 describe('updateService', () => {
@@ -76,6 +81,15 @@ describe('updateService', () => {
       expect(copyTemplates).toHaveBeenCalled();
       expect(copyTaskSkills).toHaveBeenCalled();
       expect(syncPlatformAsset).toHaveBeenCalled();
+      expect(applySelectedOverlays).toHaveBeenCalledWith(
+        '/test/dir',
+        expect.any(Array),
+        mockGithubClient,
+        'r3nd',
+        'rnd',
+        ['api', 'vue'],
+        { overwriteExisting: true }
+      );
     });
 
     it('should handle empty selection', async () => {
