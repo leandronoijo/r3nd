@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>r3nd | Guide</title>
+    <meta
+      name="description"
+      content="Guide for installing r3nd, scaffolding the seed, generating scoped context, configuring worktrees, and choosing workflows."
+    >
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+      rel="stylesheet"
+    >
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body data-page="guide">
+    <div class="page-progress" aria-hidden="true">
+      <span class="page-progress__bar" id="page-progress-bar"></span>
+    </div>
+
+    <header class="site-header">
+      <div class="site-shell">
+        <a class="brand" href="./index.html" aria-label="r3nd home">
+          <span class="brand__mark">r3nd</span>
+          <span class="brand__meta">guide</span>
+        </a>
+
+        <button
+          class="nav-toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="site-nav"
+          data-nav-toggle
+        >
+          Menu
+        </button>
+
+        <nav class="site-nav" id="site-nav" data-nav>
+          <a href="./index.html">Home</a>
+          <a href="#get-started">Get Started</a>
+          <a href="#context">Context</a>
+          <a href="#config">Config</a>
+          <a href="#worktrees">Worktrees</a>
+          <a href="#workflows">Workflows</a>
+          <a href="#commands">Commands</a>
+          <a class="button button--ghost button--small" href="https://github.com/leandronoijo/r3nd">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero hero--guide section" id="top">
+        <div class="hero__halo hero__halo--cyan"></div>
+        <div class="site-shell guide-hero">
+          <div class="guide-hero__copy reveal">
+            <p class="eyebrow">Guide</p>
+            <h1>Run r3nd in a real repo.</h1>
+            <p class="hero__lede">
+              Install the seed, choose <code>init</code> or <code>scaffold</code>,
+              adapt overlays and markdown, generate local context, and then run
+              the workflow that matches the size of the task.
+            </p>
+            <div class="hero__actions">
+              <a class="button button--primary" href="#get-started">Get Started</a>
+              <a class="button button--ghost" href="#workflows">Workflows</a>
+            </div>
+          </div>
+          <div class="guide-hero__aside reveal">
+            <div class="stat-card">
+              <span>7</span>
+              <p>supported execution backends and integrations across CLI, editors, and generated prompts</p>
+            </div>
+            <div class="stat-card">
+              <span>3</span>
+              <p>context scopes: repo, app, module</p>
+            </div>
+            <div class="stat-card">
+              <span>1</span>
+              <p>repo-defined operating model across every tool</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section--tall" id="get-started">
+        <div class="site-shell">
+          <div class="section-heading reveal">
+            <p class="eyebrow">Get started</p>
+            <h2>Install, fork, scaffold.</h2>
+            <p>Start from the seed, then adapt the markdown and overlays instead of reinventing the workflow from scratch.</p>
+          </div>
+
+          <div class="jump-grid reveal">
+            <a class="jump-card" href="#context">Context</a>
+            <a class="jump-card" href="#scopes">Scopes</a>
+            <a class="jump-card" href="#config">Config</a>
+            <a class="jump-card" href="#worktrees">Worktrees</a>
+            <a class="jump-card" href="#workflows">Workflows</a>
+            <a class="jump-card" href="#commands">Commands</a>
+          </div>
+
+          <div class="content-grid">
+            <article class="content-card reveal">
+              <h3>Install</h3>
+              <pre><code>sudo npm install -g git+https://github.com/leandronoijo/r3nd.git#0.3</code></pre>
+              <p>This matches the current README and keeps onboarding simple.</p>
+            </article>
+
+            <article class="content-card reveal">
+              <h3>Fork the seed</h3>
+              <pre><code>git clone https://github.com/leandronoijo/r3nd.git</code></pre>
+              <p>r3nd is meant to be forked and adapted to your team’s standards.</p>
+            </article>
+
+            <article class="content-card reveal">
+              <h3>Minimal path</h3>
+              <pre><code>r3nd init</code></pre>
+              <p>Creates the essential seed structure for specs, skills, templates, and repo memory.</p>
+            </article>
+
+            <article class="content-card reveal">
+              <h3>Full path</h3>
+              <pre><code># Overlay options:
+# angular, fast-api, nestjs, ruby-on-rails, vue
+r3nd scaffold</code></pre>
+              <p>Use the full scaffold path when you want overlays selected up front.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="context">
+        <div class="site-shell">
+          <div class="section-heading reveal">
+            <p class="eyebrow">Context</p>
+            <h2 id="scopes">Generate local context.</h2>
+            <p>Preferred path: run the generated analysis skills inside your favorite coding tool. Secondary path: use the CLI directly.</p>
+          </div>
+
+          <div class="content-grid">
+            <article class="content-card reveal">
+              <h3>Preferred: generated skills</h3>
+              <ul class="plain-list">
+                <li><code>analyze-repo-context</code>: repo-level map. Input: repo root, usually <code>.</code>.</li>
+                <li><code>analyze-app-context</code>: app-level guidance. Input: app root, for example <code>apps/backend</code>.</li>
+                <li><code>analyze-module-context</code>: module-level guidance. Input: module path, for example <code>apps/backend/src/modules/auth</code>.</li>
+              </ul>
+            </article>
+
+            <article class="content-card reveal">
+              <h3>Secondary: CLI</h3>
+              <pre><code>r3nd analyse
+r3nd agents analyze-repo-context --input . --agent codex
+r3nd agents analyze-app-context --input apps/backend --agent codex
+r3nd agents analyze-module-context --input apps/backend/src/modules/auth --agent claude</code></pre>
+              <p>These commands generate <code>AGENTS.md</code> and <code>CLAUDE.md</code> at the appropriate scope.</p>
+            </article>
+          </div>
+
+          <div class="sales-band reveal">
+            <div>
+              <p class="eyebrow">Scopes</p>
+              <h3>Repo, app, module.</h3>
+            </div>
+            <div class="sales-band__points">
+              <p>Repo scope gives the whole-codebase map.</p>
+              <p>App scope gives one service or app its own local guidance.</p>
+              <p>Module scope sharpens context for a single bounded area.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="config">
+        <div class="site-shell">
+          <div class="section-heading reveal">
+            <p class="eyebrow">Config</p>
+            <h2>Control the framework with <code>r3nd.yaml</code>.</h2>
+            <p>Config is not an afterthought. It controls which seed to pull from, which overlays are active, and how worktrees behave.</p>
+          </div>
+
+          <div class="content-grid">
+            <article class="content-card reveal">
+              <h3>Common keys</h3>
+              <pre><code>seed-repo: leandronoijo/r3nd@develop
+overlays: []
+
+worktree-copy-files:
+  - "*.env"
+  - "**/*.env"
+
+worktree-open-command:
+  - code
+  - "{worktreeDir}"</code></pre>
+            </article>
+
+            <article class="content-card reveal">
+              <h3>What it controls</h3>
+              <ul class="plain-list">
+                <li><strong>Seed repo</strong>: where updates and overlays come from.</li>
+                <li><strong>Ordered overlays</strong>: later overlays can override earlier ones.</li>
+                <li><strong>Worktree behavior</strong>: what gets copied and what opens after creation.</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section--tall" id="worktrees">
+        <div class="site-shell">
+          <div class="section-heading reveal">
+            <p class="eyebrow">Worktrees</p>
+            <h2>Parallel AI work, safer.</h2>
+            <p>Create repo-scoped worktrees, copy the right files, and open them however your team prefers.</p>
+          </div>
+
+          <div class="guide-steps">
+            <article class="guide-step reveal">
+              <span>1</span>
+              <div>
+                <h3>Basic commands</h3>
+                <pre><code>r3nd worktree
+r3nd worktree --branch auth-investigation
+r3nd worktree clean</code></pre>
+              </div>
+            </article>
+
+            <article class="guide-step reveal">
+              <span>2</span>
+              <div>
+                <h3>Defaults</h3>
+                <pre><code>worktree-copy-files:
+  - "*.env"
+  - "**/*.env"
+
+worktree-open-command:
+  - code
+  - "{worktreeDir}"</code></pre>
+              </div>
+            </article>
+
+            <article class="guide-step reveal">
+              <span>3</span>
+              <div>
+                <h3>tmux or VS Code</h3>
+                <pre><code>worktree-copy-files:
+  - "*.env"
+  - "**/*.env"
+  - ".gitignore"
+
+worktree-open-command:
+  - sh
+  - -lc
+  - |
+    worktree_dir=$1
+    branch_name=$(git -C "$worktree_dir" rev-parse --abbrev-ref HEAD 2>/dev/null || basename "$worktree_dir")
+
+    if [ -n "${TMUX:-}" ]; then
+      pane_id=$(tmux split-window -P -F "#{pane_id}" -c "$worktree_dir")
+      tmux select-pane -t "$pane_id" -T "$branch_name"
+    else
+      code "$worktree_dir"
+    fi
+  - sh
+  - "{worktreeDir}"</code></pre>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="workflows">
+        <div class="site-shell">
+          <div class="section-heading reveal">
+            <p class="eyebrow">Workflows</p>
+            <h2>Pick the right path.</h2>
+            <p>The difference between workflows is not just speed. It is which artifacts exist, where humans approve, and how the agent verifies.</p>
+          </div>
+
+          <div class="workflow-grid">
+            <article class="workflow-card reveal">
+              <p class="workflow-card__label">Full control</p>
+              <h3>All stages</h3>
+              <p>Product spec, tech spec, build plan, implementation, test cases, E2E, manual QA, retro. Human approval between stages.</p>
+            </article>
+
+            <article class="workflow-card reveal">
+              <p class="workflow-card__label">Semi-control</p>
+              <h3>Less ceremony</h3>
+              <p><code>create-tech-spec</code> and <code>implement-feature</code> for clearer feature work.</p>
+            </article>
+
+            <article class="workflow-card reveal">
+              <p class="workflow-card__label">Quick feature</p>
+              <h3>Small and bounded</h3>
+              <p><code>quick-feature</code> investigates, writes one plan, waits for approval, implements, and verifies.</p>
+            </article>
+
+            <article class="workflow-card reveal">
+              <p class="workflow-card__label">Bugfix</p>
+              <h3>Focused repair</h3>
+              <p><code>bugfix</code> writes a fix plan first, then applies and verifies the repair.</p>
+            </article>
+          </div>
+
+          <div class="sales-band reveal">
+            <div>
+              <p class="eyebrow">Manual QA</p>
+              <h3>The agent can do it.</h3>
+            </div>
+            <div class="sales-band__points">
+              <p>Final QA can be executed by the LLM agent itself with real tools.</p>
+              <p>Humans review the evidence and approve the result.</p>
+              <p>That keeps approval human while keeping execution with the agent.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="commands">
+        <div class="site-shell">
+          <div class="section-heading reveal">
+            <p class="eyebrow">Commands</p>
+            <h2>CLI map.</h2>
+            <p>The CLI is an operator layer around the framework, not the framework itself.</p>
+          </div>
+
+          <div class="command-table reveal" role="table" aria-label="r3nd command groups">
+            <div class="command-table__row command-table__row--head" role="row">
+              <span role="columnheader">Command</span>
+              <span role="columnheader">Purpose</span>
+            </div>
+            <div class="command-table__row" role="row">
+              <span role="cell"><code>init</code></span>
+              <span role="cell">Initialize the minimal seed structure</span>
+            </div>
+            <div class="command-table__row" role="row">
+              <span role="cell"><code>scaffold</code></span>
+              <span role="cell">Scaffold a project with ordered overlays</span>
+            </div>
+            <div class="command-table__row" role="row">
+              <span role="cell"><code>update</code></span>
+              <span role="cell">Update seed components from the configured seed repo</span>
+            </div>
+            <div class="command-table__row" role="row">
+              <span role="cell"><code>analyse</code></span>
+              <span role="cell">Generate scoped <code>AGENTS.md</code> / <code>CLAUDE.md</code> context</span>
+            </div>
+            <div class="command-table__row" role="row">
+              <span role="cell"><code>agents</code></span>
+              <span role="cell">Run task skills for specs, plans, implementation, QA, and analysis</span>
+            </div>
+            <div class="command-table__row" role="row">
+              <span role="cell"><code>tools</code></span>
+              <span role="cell">Show locally available AI backends</span>
+            </div>
+            <div class="command-table__row" role="row">
+              <span role="cell"><code>config</code></span>
+              <span role="cell">Manage <code>r3nd.yaml</code> values</span>
+            </div>
+            <div class="command-table__row" role="row">
+              <span role="cell"><code>worktree</code></span>
+              <span role="cell">Create, open, and clean repo-scoped worktrees</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-shell site-footer__layout">
+        <div>
+          <a class="brand brand--footer" href="./index.html">r3nd</a>
+          <p>Framework first. Tooling second. Repo memory always.</p>
+        </div>
+        <div class="site-footer__links">
+          <a href="./index.html">Home</a>
+          <a href="https://github.com/leandronoijo/r3nd">GitHub</a>
+          <a href="https://github.com/leandronoijo/r3nd/blob/main/README.md">README</a>
+        </div>
+        <p class="site-footer__meta">Prepared for static hosting. <span data-current-year></span></p>
+      </div>
+    </footer>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

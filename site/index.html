@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>r3nd | Home</title>
+    <meta
+      name="description"
+      content="Spec-driven delivery for AI teams. r3nd keeps the operating model in the repo while execution runs through Codex, Claude, Cursor, Copilot, Gemini, or generated prompts."
+    >
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+      rel="stylesheet"
+    >
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body data-page="home">
+    <div class="page-progress" aria-hidden="true">
+      <span class="page-progress__bar" id="page-progress-bar"></span>
+    </div>
+
+    <header class="site-header">
+      <div class="site-shell">
+        <a class="brand" href="./index.html" aria-label="r3nd home">
+          <span class="brand__mark">r3nd</span>
+          <span class="brand__meta">spec-driven delivery</span>
+        </a>
+
+        <button
+          class="nav-toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="site-nav"
+          data-nav-toggle
+        >
+          Menu
+        </button>
+
+        <nav class="site-nav" id="site-nav" data-nav>
+          <a href="#hero">Home</a>
+          <a href="#benefits">Benefits</a>
+          <a href="#workflows">Workflows</a>
+          <a href="#model">Model</a>
+          <a href="./how-to-use.html">Guide</a>
+          <a class="button button--ghost button--small" href="https://github.com/leandronoijo/r3nd">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero section section--full" id="hero">
+        <div class="hero__halo hero__halo--cyan"></div>
+        <div class="hero__halo hero__halo--violet"></div>
+        <div class="site-shell hero__layout">
+          <div class="hero__copy reveal">
+            <p class="eyebrow">Spec-driven SDLC framework</p>
+            <h1>Ship with AI, keep control.</h1>
+            <p class="hero__lede">
+              The operating model stays in the repo. Execution can run through
+              Codex CLI, Claude Code, Gemini CLI, GitHub CLI, VS Code/Copilot,
+              Cursor, or generated prompts.
+            </p>
+
+            <div class="hero__actions">
+              <a class="button button--primary" href="./how-to-use.html#get-started">Get Started</a>
+              <a class="button button--ghost" href="#workflows">Workflows</a>
+            </div>
+
+            <ul class="signal-list">
+              <li>Human approval gates at every stage</li>
+              <li>Repo memory beats chat memory</li>
+              <li>Overlays adapt the framework to real stacks</li>
+            </ul>
+          </div>
+
+          <aside class="terminal-card workflow-demo reveal" aria-label="Example Claude-style workflow execution">
+            <div class="terminal-card__chrome">
+              <span></span>
+              <span></span>
+              <span></span>
+              <strong>claude-code / create-product-spec</strong>
+            </div>
+            <div class="workflow-demo__body">
+              <div class="demo-message demo-message--user">
+                <p class="demo-role">User</p>
+                <p>Create a product spec for team authentication with approval gates.</p>
+              </div>
+
+              <div class="demo-message demo-message--agent">
+                <p class="demo-role">Skill · create-product-spec</p>
+                <p>Drafting scope, goals, constraints, and expected outcomes from the request.</p>
+              </div>
+
+              <div class="artifact-stack">
+                <div class="artifact-pill">
+                  <span class="artifact-pill__icon">📝</span>
+                  <div>
+                    <strong>Artifact written</strong>
+                    <p><code>rnd/product_specs/auth.md</code></p>
+                  </div>
+                </div>
+                <div class="approval-pill">
+                  <span>👤</span>
+                  <p>Human approves the framing</p>
+                </div>
+              </div>
+
+              <div class="demo-message demo-message--agent">
+                <p class="demo-role">Skill · create-tech-spec</p>
+                <p>Turning the approved product spec into interfaces, boundaries, and implementation decisions.</p>
+              </div>
+
+              <div class="artifact-stack">
+                <div class="artifact-pill">
+                  <span class="artifact-pill__icon">🧩</span>
+                  <div>
+                    <strong>Artifact written</strong>
+                    <p><code>rnd/tech_specs/auth.md</code></p>
+                  </div>
+                </div>
+                <div class="approval-pill">
+                  <span>👤</span>
+                  <p>Human approves the architecture</p>
+                </div>
+              </div>
+
+              <div class="demo-message demo-message--agent">
+                <p class="demo-role">Skill · implement-feature</p>
+                <p>Running implementation, task QA gates, and final manual QA with real tools before handoff.</p>
+              </div>
+
+              <div class="artifact-row">
+                <span class="artifact-chip">rnd/build_plans/</span>
+                <span class="artifact-chip">rnd/test_cases/</span>
+                <span class="artifact-chip">rnd/e2e-results/</span>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section" id="benefits">
+        <div class="site-shell">
+          <div class="section-heading reveal">
+            <p class="eyebrow">Benefits</p>
+            <h2>One model. Many tools.</h2>
+            <p>
+              r3nd turns AI execution into a system the whole team can inspect,
+              approve, and evolve.
+            </p>
+          </div>
+
+          <div class="benefit-grid">
+            <article class="benefit-card reveal">
+              <span class="benefit-icon">↔</span>
+              <h3>One model, many backends</h3>
+              <p>Run the same operating model through Codex, Claude, Cursor, Copilot, Gemini, or generated prompts.</p>
+            </article>
+
+            <article class="benefit-card reveal">
+              <span class="benefit-icon">🧠</span>
+              <h3>Repo memory</h3>
+              <p>Specs, plans, QA artifacts, templates, and skills stay in the repository instead of vanishing in chat.</p>
+            </article>
+
+            <article class="benefit-card reveal">
+              <span class="benefit-icon">🛡</span>
+              <h3>Human approval gates</h3>
+              <p>Humans approve artifacts and direction changes while the agent executes the work.</p>
+            </article>
+
+            <article class="benefit-card reveal">
+              <span class="benefit-icon">🧩</span>
+              <h3>Stack overlays</h3>
+              <p>Ordered overlays inject skills, agents, instructions, templates, and build plans for real stacks.</p>
+            </article>
+
+            <article class="benefit-card reveal">
+              <span class="benefit-icon">🗺</span>
+              <h3>Scoped context</h3>
+              <p>Generate local context at repo, app, or module scope with <code>AGENTS.md</code> and <code>CLAUDE.md</code>.</p>
+            </article>
+
+            <article class="benefit-card reveal">
+              <span class="benefit-icon">🌿</span>
+              <h3>Safer parallel work</h3>
+              <p>Worktrees and config-driven open/copy behavior make multi-branch AI work easier to manage.</p>
+            </article>
+          </div>
+
+          <div class="sales-band reveal">
+            <div>
+              <p class="eyebrow">In practice</p>
+              <h3>Less prompt babysitting. More artifact review.</h3>
+            </div>
+            <div class="sales-band__points">
+              <p>Templates and skills shape the output before the model ever starts typing.</p>
+              <p>Humans review artifacts instead of reconstructing intent from chat history.</p>
+              <p>The same repo can support monorepos, multiple spec directories, and multiple AI tools.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section--tall" id="workflows">
+        <div class="site-shell">
+          <div class="section-heading reveal">
+            <p class="eyebrow">Workflows</p>
+            <h2>Four delivery paths.</h2>
+            <p>Pick the amount of structure you need without changing the operating model.</p>
+          </div>
+
+          <div class="workflow-grid">
+            <article class="workflow-card reveal">
+              <p class="workflow-card__label">01 · Full control</p>
+              <h3>High rigor</h3>
+              <ul class="plain-list actor-lines">
+                <li><strong>🤖 LLM</strong>: product spec, tech spec, build plan, implementation, test cases, E2E, manual QA, retro.</li>
+                <li><strong>👤 Human</strong>: reviews every artifact and decides when the next stage starts.</li>
+                <li><strong>Best for</strong>: important, ambiguous, or architectural work.</li>
+              </ul>
+            </article>
+
+            <article class="workflow-card reveal">
+              <p class="workflow-card__label">02 · Semi-control</p>
+              <h3>Faster feature work</h3>
+              <ul class="plain-list actor-lines">
+                <li><strong>🤖 LLM</strong>: <code>create-tech-spec</code>, then <code>implement-feature</code> with task plans and QA gates.</li>
+                <li><strong>👤 Human</strong>: approves the direction and reviews the final QA evidence.</li>
+                <li><strong>Best for</strong>: clear feature work that still needs discipline.</li>
+              </ul>
+            </article>
+
+            <article class="workflow-card reveal">
+              <p class="workflow-card__label">03 · Quick feature</p>
+              <h3>Tiny scoped change</h3>
+              <ul class="plain-list actor-lines">
+                <li><strong>🤖 LLM</strong>: investigates, gates the scope, writes one plan, implements, and verifies.</li>
+                <li><strong>👤 Human</strong>: approves the single plan before coding starts.</li>
+                <li><strong>Best for</strong>: local work that should stay small.</li>
+              </ul>
+            </article>
+
+            <article class="workflow-card reveal">
+              <p class="workflow-card__label">04 · Bugfix</p>
+              <h3>Focused fix path</h3>
+              <ul class="plain-list actor-lines">
+                <li><strong>🤖 LLM</strong>: turns the issue into a focused fix plan, implements, and verifies.</li>
+                <li><strong>👤 Human</strong>: approves the plan and reviews the evidence.</li>
+                <li><strong>Best for</strong>: defects that need a disciplined repair path.</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="examples">
+        <div class="site-shell">
+          <div class="section-heading reveal">
+            <p class="eyebrow">Examples</p>
+            <h2>Real repo flows.</h2>
+            <p>Short examples tied directly to the current README and repository shape.</p>
+          </div>
+
+          <div class="snippet-layout">
+            <div class="snippet-selector reveal" role="tablist" aria-label="Usage example selector">
+              <button type="button" class="is-active" data-snippet-target="get-started" role="tab" aria-selected="true">
+                Get Started
+              </button>
+              <button type="button" data-snippet-target="backends" role="tab" aria-selected="false">
+                Backends
+              </button>
+              <button type="button" data-snippet-target="scopes" role="tab" aria-selected="false">
+                Scopes
+              </button>
+              <button type="button" data-snippet-target="config" role="tab" aria-selected="false">
+                Config
+              </button>
+            </div>
+
+            <div class="snippet-stack reveal">
+              <article class="snippet-card is-active" data-snippet-panel="get-started" role="tabpanel">
+                <div class="snippet-card__label">Install and scaffold</div>
+                <pre><code>sudo npm install -g git+https://github.com/leandronoijo/r3nd.git#0.3
+
+git clone https://github.com/leandronoijo/r3nd.git
+
+r3nd init
+
+# Overlay options:
+# angular, fast-api, nestjs, ruby-on-rails, vue
+r3nd scaffold</code></pre>
+                <p>The seed is meant to be forked and adapted. The markdown and overlays are the real product surface.</p>
+              </article>
+
+              <article class="snippet-card" data-snippet-panel="backends" role="tabpanel" hidden>
+                <div class="snippet-card__label">Tool-agnostic execution</div>
+                <pre><code>Codex CLI
+Claude Code
+Gemini CLI
+GitHub CLI
+VS Code / Copilot
+Cursor
+Generated prompts
+
+# The workflow stays the same.
+# The backend can change.</code></pre>
+                <p>r3nd keeps the operating model in the repo so tool churn does not rewrite how the team works.</p>
+              </article>
+
+              <article class="snippet-card" data-snippet-panel="scopes" role="tabpanel" hidden>
+                <div class="snippet-card__label">Scopes and multi-spec repos</div>
+                <pre><code># Context analysis
+analyze-repo-context    # input: .
+analyze-app-context     # input: apps/backend
+analyze-module-context  # input: apps/backend/src/modules/auth
+
+# Multi-spec-directory support
+r3nd agents create-tech-spec \
+  --file apps/backend/rnd/product_specs/auth.md \
+  --spec-dir apps/backend/rnd \
+  --agent codex</code></pre>
+                <p>Repo, app, and module context generation works alongside multi-directory spec layouts for monorepos.</p>
+              </article>
+
+              <article class="snippet-card" data-snippet-panel="config" role="tabpanel" hidden>
+                <div class="snippet-card__label">Config and worktrees</div>
+                <pre><code># r3nd.yaml controls:
+seed-repo: leandronoijo/r3nd@develop
+overlays: []
+
+worktree-copy-files:
+  - "*.env"
+  - "**/*.env"
+
+worktree-open-command:
+  - code
+  - "{worktreeDir}"</code></pre>
+                <p><code>r3nd.yaml</code> config covers overlays, seed repo choice, and worktree copy/open behavior.</p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section--full" id="model">
+        <div class="site-shell">
+          <div class="section-heading reveal">
+            <p class="eyebrow">Model</p>
+            <h2>Repo memory, overlays, and durable artifacts.</h2>
+            <p>The repo is the source of truth. Skills, templates, scoped context, and config keep the framework stable while tools stay replaceable.</p>
+          </div>
+
+          <div class="architecture-grid">
+            <article class="architecture-card reveal">
+              <p class="architecture-card__eyebrow">Skills</p>
+              <h3>Workflow logic</h3>
+              <p>Skills define phases, inputs, outputs, approval gates, and durable file paths.</p>
+            </article>
+
+            <article class="architecture-card reveal">
+              <p class="architecture-card__eyebrow">Templates</p>
+              <h3>Artifact shape</h3>
+              <p>Templates make specs, plans, and reports predictable enough for both humans and downstream agents.</p>
+            </article>
+
+            <article class="architecture-card reveal">
+              <p class="architecture-card__eyebrow">Overlays</p>
+              <h3>Stack adaptation</h3>
+              <p>Ordered overlays inject instructions, skills, agents, templates, and build plans for real stacks.</p>
+            </article>
+
+            <article class="architecture-card reveal">
+              <p class="architecture-card__eyebrow">Context</p>
+              <h3>Local guidance</h3>
+              <p><code>AGENTS.md</code> and <code>CLAUDE.md</code> can be generated at repo, app, or module scope.</p>
+            </article>
+          </div>
+
+          <div class="pipeline-panel reveal">
+            <div class="pipeline-panel__header">
+              <p class="eyebrow">Repo memory</p>
+              <h3>Durable team assets</h3>
+            </div>
+            <div class="memory-grid" aria-label="Repository memory items">
+              <span class="memory-item"><code>rnd/product_specs</code></span>
+              <span class="memory-item"><code>rnd/tech_specs</code></span>
+              <span class="memory-item"><code>rnd/build_plans</code></span>
+              <span class="memory-item"><code>rnd/test_cases</code></span>
+              <span class="memory-item"><code>rnd/e2e-results</code></span>
+              <span class="memory-item"><code>rnd/templates</code></span>
+              <span class="memory-item"><code>rnd/skills</code></span>
+              <span class="memory-item"><code>AGENTS.md</code></span>
+              <span class="memory-item"><code>CLAUDE.md</code></span>
+            </div>
+            <div class="pipeline-notes">
+              <p>Knowledge lives in the repo. Overlays add stack-specific behavior. <code>r3nd.yaml</code> controls overlays, seed repo selection, and worktree behavior.</p>
+              <p>The result is a framework that survives IDE changes, backend changes, and parallel delivery work.</p>
+            </div>
+          </div>
+
+          <div class="cta-panel reveal">
+            <div>
+              <p class="eyebrow">Next step</p>
+              <h3>Open the guide.</h3>
+              <p>Install, scaffold, generate local context, configure worktrees, and pick the workflow that matches the change.</p>
+            </div>
+            <a class="button button--primary" href="./how-to-use.html#get-started">Guide</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-shell site-footer__layout">
+        <div>
+          <a class="brand brand--footer" href="./index.html">r3nd</a>
+          <p>AI execution. Human approval. Repo memory.</p>
+        </div>
+        <div class="site-footer__links">
+          <a href="./how-to-use.html">Guide</a>
+          <a href="https://github.com/leandronoijo/r3nd">GitHub</a>
+          <a href="https://github.com/leandronoijo/r3nd/blob/main/README.md">README</a>
+        </div>
+        <p class="site-footer__meta">Static site prepared for GitHub Pages. <span data-current-year></span></p>
+      </div>
+    </footer>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

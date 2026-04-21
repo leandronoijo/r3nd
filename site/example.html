@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>r3nd | The Kinetic SDLC</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface-variant": "#a5aac2",
+                        "on-primary": "#004b56",
+                        "secondary-container": "#5516be",
+                        "on-error-container": "#ffa8a3",
+                        "surface-tint": "#3adffa",
+                        "inverse-primary": "#006977",
+                        "on-primary-container": "#003d46",
+                        "surface-variant": "#1c253e",
+                        "on-surface": "#dfe4fe",
+                        "secondary-fixed-dim": "#ceb9ff",
+                        "primary-container": "#00cbe6",
+                        "error": "#ff716c",
+                        "surface-container-highest": "#1c253e",
+                        "surface-container-lowest": "#000000",
+                        "tertiary-dim": "#619efd",
+                        "primary": "#3adffa",
+                        "on-primary-fixed": "#00363e",
+                        "on-tertiary-fixed-variant": "#003874",
+                        "on-tertiary-fixed": "#001737",
+                        "tertiary-fixed": "#84b1ff",
+                        "background": "#070d1f",
+                        "error-dim": "#d7383b",
+                        "outline-variant": "#41475b",
+                        "on-background": "#dfe4fe",
+                        "on-secondary-container": "#d9c8ff",
+                        "inverse-on-surface": "#4f5469",
+                        "inverse-surface": "#faf8ff",
+                        "surface-dim": "#070d1f",
+                        "surface-container": "#11192e",
+                        "on-secondary-fixed": "#40009b",
+                        "tertiary": "#7aacff",
+                        "tertiary-container": "#619efd",
+                        "secondary-dim": "#8455ef",
+                        "on-tertiary-container": "#001f46",
+                        "on-secondary": "#280067",
+                        "primary-fixed": "#3adffa",
+                        "primary-fixed-dim": "#1ad0eb",
+                        "primary-dim": "#1ad0eb",
+                        "on-error": "#490006",
+                        "surface": "#070d1f",
+                        "on-secondary-fixed-variant": "#5f28c8",
+                        "tertiary-fixed-dim": "#6aa3ff",
+                        "surface-container-low": "#0c1326",
+                        "secondary": "#ac8aff",
+                        "error-container": "#9f0519",
+                        "on-tertiary": "#002b5c",
+                        "outline": "#6f758b",
+                        "secondary-fixed": "#dac9ff",
+                        "on-primary-fixed-variant": "#005561",
+                        "surface-container-high": "#171f36",
+                        "surface-bright": "#222b47"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    backgroundImage: {
+                        'kinetic-gradient': 'linear-gradient(135deg, rgba(58,223,250,0.15) 0%, rgba(172,138,255,0.15) 100%)',
+                    },
+                    boxShadow: {
+                        'neon-primary': '0 0 20px rgba(58,223,250,0.4)',
+                        'ambient': '0 20px 40px rgba(58,223,250,0.04)',
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #070d1f;
+            color: #dfe4fe;
+            overflow-x: hidden;
+        }
+        .ghost-border {
+            border: 1px solid rgba(65, 71, 91, 0.15);
+        }
+        .glass-panel {
+            background-color: rgba(28, 37, 62, 0.6);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+        .text-glow {
+            text-shadow: 0 0 10px rgba(58, 223, 250, 0.5);
+        }
+        
+        /* Typography Scale Utilities */
+        .display-lg { font-size: 3.5rem; line-height: 1.1; letter-spacing: -0.04em; }
+        .display-md { font-size: 2.75rem; line-height: 1.15; letter-spacing: -0.03em; }
+        .body-lg { font-size: 1.125rem; line-height: 1.6; }
+        .body-md { font-size: 1rem; line-height: 1.5; }
+        .label-sm { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+        
+        @media (min-width: 768px) {
+            .display-lg { font-size: 5rem; }
+            .display-md { font-size: 4rem; }
+        }
+    </style>
+</head>
+<body class="font-body selection:bg-primary/30 selection:text-primary">
+<!-- TopNavBar JSON Rendering -->
+<nav class="fixed top-0 left-0 w-full z-50 bg-slate-900/60 backdrop-blur-3xl border-b border-white/5 shadow-[0_20px_40px_rgba(58,223,250,0.04)]">
+<div class="flex justify-between items-center px-8 h-20 w-full max-w-[1440px] mx-auto">
+<!-- Brand -->
+<a class="text-2xl font-black text-cyan-400 tracking-tighter font-['Space_Grotesk']" href="#">r3nd</a>
+<!-- Navigation Links -->
+<div class="hidden md:flex items-center gap-8 font-['Space_Grotesk'] tracking-tighter uppercase font-bold">
+<a class="text-slate-400 hover:text-white transition-all scale-98 active:opacity-80 transition-transform" href="#">Framework</a>
+<a class="text-slate-400 hover:text-white transition-all scale-98 active:opacity-80 transition-transform" href="#">Engine</a>
+<a class="text-slate-400 hover:text-white transition-all scale-98 active:opacity-80 transition-transform" href="#">Docs</a>
+<a class="text-slate-400 hover:text-white transition-all scale-98 active:opacity-80 transition-transform" href="#">Pricing</a>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-4">
+<button class="hidden md:flex items-center justify-center w-10 h-10 text-cyan-400 hover:bg-white/5 rounded-lg transition-all duration-300 scale-98 active:opacity-80 transition-transform">
+<span class="material-symbols-outlined">search</span>
+</button>
+<button class="hidden md:flex items-center justify-center w-10 h-10 text-cyan-400 hover:bg-white/5 rounded-lg transition-all duration-300 scale-98 active:opacity-80 transition-transform">
+<span class="material-symbols-outlined">hub</span>
+</button>
+<a class="bg-gradient-to-r from-primary to-primary-container text-on-primary px-6 py-2 rounded-md font-['Space_Grotesk'] tracking-tighter uppercase font-bold hover:opacity-90 transition-opacity" href="#">Terminal</a>
+</div>
+</div>
+</nav>
+<main class="pt-20">
+<!-- Hero Section -->
+<section class="relative min-h-[921px] flex items-center bg-kinetic-gradient overflow-hidden">
+<!-- Background Elements -->
+<div class="absolute inset-0 z-0 opacity-30 pointer-events-none">
+<div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[100px]"></div>
+<div class="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-secondary/20 rounded-full blur-[120px]"></div>
+</div>
+<div class="max-w-7xl mx-auto px-8 w-full relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+<!-- Hero Copy -->
+<div class="lg:col-span-6 flex flex-col items-start gap-8">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 bg-primary/10">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="label-sm text-primary">v2.0.4 Kinetic Engine Online</span>
+</div>
+<h1 class="font-headline display-lg text-on-surface text-glow">
+                        r3nd: The <br/>
+<span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Kinetic</span> SDLC
+                    </h1>
+<p class="body-lg text-on-surface-variant max-w-xl">
+                        Automate the pipeline from spec to PR. A developer's command center built for high-performance tech frameworks where speed, power, and sophistication are paramount.
+                    </p>
+<div class="flex gap-4 mt-4">
+<button class="bg-gradient-to-r from-primary to-primary-container text-on-primary px-8 py-4 rounded-md font-headline font-bold uppercase tracking-wide hover:shadow-neon-primary transition-shadow">
+                            Deploy Engine
+                        </button>
+<button class="ghost-border text-primary px-8 py-4 rounded-md font-headline font-bold uppercase tracking-wide hover:bg-white/5 transition-colors">
+                            Read Docs
+                        </button>
+</div>
+</div>
+<!-- Terminal Window -->
+<div class="lg:col-span-6 relative">
+<!-- Decorative floatings -->
+<div class="absolute -top-10 -right-10 w-24 h-24 bg-secondary/10 border border-secondary/30 rounded-xl backdrop-blur-md transform rotate-12"></div>
+<div class="absolute -bottom-10 -left-10 w-32 h-32 bg-primary/10 border border-primary/30 rounded-full backdrop-blur-md transform -rotate-12"></div>
+<div class="glass-panel ghost-border rounded-xl overflow-hidden shadow-ambient">
+<!-- Terminal Header -->
+<div class="flex items-center gap-2 px-4 py-3 bg-surface-container border-b border-outline-variant/30">
+<div class="w-3 h-3 rounded-full bg-error/80"></div>
+<div class="w-3 h-3 rounded-full bg-[#f5d90a]/80"></div>
+<div class="w-3 h-3 rounded-full bg-[#2ed841]/80"></div>
+<span class="ml-4 font-mono text-xs text-on-surface-variant">r3nd_agent_logs</span>
+</div>
+<!-- Terminal Content -->
+<div class="p-6 font-mono text-sm h-[400px] overflow-y-auto flex flex-col gap-2 relative">
+<div class="text-on-surface-variant">$ r3nd init --spec ./arch.yaml</div>
+<div class="text-primary">&gt; Parsing specification... <span class="text-emerald-400">[OK]</span></div>
+<div class="text-primary">&gt; Instantiating Persona-Based Agents...</div>
+<div class="text-secondary pl-4">└─ BackendAgent (Rust) <span class="text-emerald-400">Ready</span></div>
+<div class="text-secondary pl-4">└─ FrontendAgent (React/TS) <span class="text-emerald-400">Ready</span></div>
+<div class="text-secondary pl-4">└─ DevOpsAgent (K8s) <span class="text-emerald-400">Ready</span></div>
+<div class="text-primary">&gt; Executing AI-Agnostic Engine layer...</div>
+<div class="text-on-surface-variant">  Synthesizing domain models...</div>
+<div class="text-on-surface-variant">  Generating boilerplate...</div>
+<div class="text-emerald-400 mt-4">&gt; Pipeline complete. 48 files generated. PR #104 ready for review.</div>
+<div class="text-primary animate-pulse inline-block mt-2">_</div>
+<!-- Gradient Fade for Terminal Bottom -->
+<div class="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-[#1c253e] to-transparent pointer-events-none"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Features Section -->
+<section class="py-32 bg-surface-container-low relative">
+<div class="max-w-7xl mx-auto px-8">
+<div class="mb-24 flex flex-col md:flex-row justify-between items-end gap-8">
+<div>
+<h2 class="font-headline display-md text-on-surface">System<br/>Architecture</h2>
+</div>
+<div class="max-w-md">
+<p class="body-md text-on-surface-variant">
+                            Built on a foundation of surface-dim punctuated by high-energy, electric accents. The layout feels like a high-end editorial spread.
+                        </p>
+</div>
+</div>
+<!-- Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Feature 1: Spec-Driven -->
+<div class="md:col-span-8 glass-panel ghost-border rounded-xl p-10 group hover:bg-surface-container-high hover:scale-[1.02] transition-all duration-300">
+<div class="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mb-6 text-primary">
+<span class="material-symbols-outlined">architecture</span>
+</div>
+<h3 class="font-headline text-2xl text-on-surface mb-4">Spec-Driven Architecture</h3>
+<p class="body-md text-on-surface-variant mb-8 max-w-xl">
+                            Define your entire system topology in a single, declarative YAML file. The engine interprets the spec and orchestrates the necessary agents to build the infrastructure.
+                        </p>
+<div class="h-48 rounded-lg border border-outline-variant/30 bg-surface-container-lowest p-4 font-mono text-xs text-on-surface-variant overflow-hidden relative">
+<pre><code>services:
+  api:
+    image: r3nd/node
+    ports:
+      - "3000:3000"
+  db:
+    image: postgres:14
+    volumes:
+      - pgdata:/var/lib/postgresql/data</code></pre>
+<div class="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-surface-container-lowest to-transparent pointer-events-none"></div>
+</div>
+</div>
+<!-- Feature 2: Persona Agents -->
+<div class="md:col-span-4 glass-panel ghost-border rounded-xl p-10 group hover:bg-surface-container-high hover:scale-[1.02] transition-all duration-300 flex flex-col">
+<div class="w-12 h-12 rounded-lg bg-secondary/10 border border-secondary/20 flex items-center justify-center mb-6 text-secondary">
+<span class="material-symbols-outlined">smart_toy</span>
+</div>
+<h3 class="font-headline text-2xl text-on-surface mb-4">Persona-Based Agents</h3>
+<p class="body-md text-on-surface-variant mb-auto">
+                            Deploy specialized AI agents that act as senior engineers in specific domains—from frontend UI/UX to backend infrastructure.
+                        </p>
+</div>
+<!-- Feature 3: AI-Agnostic -->
+<div class="md:col-span-12 glass-panel ghost-border rounded-xl p-10 group hover:bg-surface-container-high hover:scale-[1.02] transition-all duration-300 flex flex-col md:flex-row gap-10 items-center overflow-hidden relative">
+<!-- Decorative glow -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-primary/5 blur-[100px] rounded-full pointer-events-none"></div>
+<div class="flex-1 z-10">
+<div class="w-12 h-12 rounded-lg bg-tertiary-dim/10 border border-tertiary-dim/20 flex items-center justify-center mb-6 text-tertiary-dim">
+<span class="material-symbols-outlined">hub</span>
+</div>
+<h3 class="font-headline text-2xl text-on-surface mb-4">AI-Agnostic Engine</h3>
+<p class="body-md text-on-surface-variant max-w-lg">
+                                Not tied to a single LLM provider. Seamlessly switch between OpenAI, Anthropic, or local open-source models based on task requirements and cost constraints.
+                            </p>
+</div>
+<div class="flex-1 w-full flex justify-end z-10">
+<div class="flex gap-4 items-center">
+<div class="w-16 h-16 rounded-full border border-outline-variant/30 bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary hover:border-primary/50 transition-colors cursor-pointer">
+<span class="font-headline font-bold">GPT</span>
+</div>
+<div class="h-px w-8 bg-outline-variant/30"></div>
+<div class="w-20 h-20 rounded-full border border-primary bg-primary/10 flex items-center justify-center text-primary shadow-neon-primary z-10">
+<span class="font-headline font-bold text-lg">r3nd</span>
+</div>
+<div class="h-px w-8 bg-outline-variant/30"></div>
+<div class="w-16 h-16 rounded-full border border-outline-variant/30 bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-secondary hover:border-secondary/50 transition-colors cursor-pointer">
+<span class="font-headline font-bold">CLA</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer JSON Rendering -->
+<footer class="bg-[#070d1f] border-t border-cyan-500/10 w-full py-16">
+<div class="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-12">
+<!-- Brand & Copyright -->
+<div>
+<a class="text-xl font-bold text-cyan-400 font-['Space_Grotesk'] block mb-2" href="#">r3nd</a>
+<p class="font-['Space_Grotesk'] text-[11px] uppercase tracking-widest text-slate-500">© 2024 r3nd technology. engineering the kinetic void.</p>
+</div>
+<!-- Links -->
+<div class="flex flex-wrap gap-8 font-['Space_Grotesk'] text-[11px] uppercase tracking-widest">
+<a class="text-slate-500 hover:text-cyan-200 transition-colors hover:translate-x-1 transition-transform duration-200 cursor-pointer" href="#">Security</a>
+<a class="text-slate-500 hover:text-cyan-200 transition-colors hover:translate-x-1 transition-transform duration-200 cursor-pointer" href="#">Changelog</a>
+<a class="text-slate-500 hover:text-cyan-200 transition-colors hover:translate-x-1 transition-transform duration-200 cursor-pointer" href="#">Status</a>
+<a class="text-slate-500 hover:text-cyan-200 transition-colors hover:translate-x-1 transition-transform duration-200 cursor-pointer" href="#">Privacy</a>
+</div>
+</div>
+</footer>
+</body></html>
