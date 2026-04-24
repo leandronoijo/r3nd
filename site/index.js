@@ -495,6 +495,9 @@
 
   function renderWorkflowPreviewSection(data) {
     const el = cloneTemplate("tpl-workflow-preview-section");
+    if (data.sectionId) {
+      el.id = data.sectionId;
+    }
     const selectedModeKey = data.activeMode || ((data.modes && data.modes[0] && data.modes[0].key) || "fullControl");
     const selectedWorkflow = (data.workflows && data.workflows[selectedModeKey]) || {};
     const sequence = selectedWorkflow.sequence || data.sequence || {};
@@ -569,6 +572,9 @@
 
   function renderGetStartedSection(data) {
     const el = cloneTemplate("tpl-get-started-section");
+    if (data.sectionId) {
+      el.id = data.sectionId;
+    }
     setText(el, "eyebrow", data.eyebrow);
     setText(el, "title-line-1", data.titleLine1 || "");
     setText(el, "title-line-2", data.titleLine2 || "");
@@ -671,11 +677,13 @@
       if (action.variant === "primary") {
         return renderComponent("PrimaryButton", {
           label: action.label,
+          href: action.href,
           className: "bg-primary text-on-primary font-bold px-10 py-4 rounded-lg shadow-[0_0_40px_rgba(58,223,250,0.2)]"
         });
       }
       return renderComponent("SecondaryButton", {
         label: action.label,
+        href: action.href,
         className: "ghost-border text-on-surface font-bold px-10 py-4 rounded-lg hover:bg-surface-variant transition-colors"
       });
     }));
