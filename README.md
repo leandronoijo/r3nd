@@ -1,4 +1,8 @@
 # r3nd - *Spec-Driven* SDLC Framework
+
+![r3nd logo](site/assets/r3nd-logo.png)
+
+[![Latest Tag](https://img.shields.io/badge/tag-0.3-3adffa)](https://github.com/leandronoijo/r3nd/releases/tag/0.3)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 
 r3nd is a **spec-driven SDLC framework** for building robust systems fast. It gives teams a **shared operating model** built around repo-native skills, explicit artifacts, reusable overlays, and persistent context, and it works across **Cursor, Codex, Copilot, and Claude Code**.
