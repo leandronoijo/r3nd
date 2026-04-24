@@ -23,7 +23,7 @@ const IDE_PRESETS = {
   cursor: ['cursor', '{worktreeDir}'],
   neovim: ['nvim', '{worktreeDir}']
 };
-const WORKTREE_VENDOR_DIRS = ['.claude', '.codex', '.github', '.cursor'];
+const WORKTREE_VENDOR_DIRS = ['.claude', '.codex', '.github', '.cursor', '.gemini', '.antigravity'];
 let cachedFakerInstance = null;
 
 function sanitizeBranchName(name) {

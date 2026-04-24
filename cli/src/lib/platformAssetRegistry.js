@@ -51,6 +51,26 @@ const PLATFORM_ASSETS = [
     initAction: 'Create .claude/skills for each task',
     updateAction: 'Update .claude/skills for each task',
     legacyPathForTask: (taskName) => `.claude/commands/${taskName}.md`
+  },
+  {
+    key: 'gemini',
+    label: 'Gemini Skills',
+    assetType: 'generated-skill',
+    vendor: 'gemini',
+    outputPath: '.gemini/skills',
+    mirrorInstructionsToRnd: false,
+    initAction: 'Create .gemini/skills for each task',
+    updateAction: 'Update .gemini/skills for each task'
+  },
+  {
+    key: 'antigravity',
+    label: 'Antigravity Skills',
+    assetType: 'generated-skill',
+    vendor: 'antigravity',
+    outputPath: '.antigravity/skills',
+    mirrorInstructionsToRnd: false,
+    initAction: 'Create .antigravity/skills for each task',
+    updateAction: 'Update .antigravity/skills for each task'
   }
 ];
 

@@ -16,7 +16,9 @@ describe('platformAssetRegistry', () => {
       'github-workflows',
       'cursor',
       'codex',
-      'claude'
+      'claude',
+      'gemini',
+      'antigravity'
     ]);
   });
 
@@ -34,7 +36,9 @@ describe('platformAssetRegistry', () => {
       'github-workflows',
       'cursor',
       'codex',
-      'claude'
+      'claude',
+      'gemini',
+      'antigravity'
     ]);
   });
 
