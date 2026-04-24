@@ -1,433 +1,571 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>r3nd | Home</title>
-    <meta
-      name="description"
-      content="Spec-driven delivery for AI teams. r3nd keeps the operating model in the repo while execution runs through Codex, Claude, Cursor, Copilot, Gemini, or generated prompts."
-    >
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
-      rel="stylesheet"
-    >
-    <link rel="stylesheet" href="./styles.css">
-  </head>
-  <body data-page="home">
-    <div class="page-progress" aria-hidden="true">
-      <span class="page-progress__bar" id="page-progress-bar"></span>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>r3nd</title>
+  <link href="./assets/r3nd-icon.png" rel="icon" type="image/png" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface": "#070d1f",
+            "on-tertiary-fixed-variant": "#003874",
+            "on-secondary": "#280067",
+            "surface-variant": "#1c253e",
+            "tertiary": "#7aacff",
+            "on-error": "#490006",
+            "primary-fixed": "#3adffa",
+            "on-tertiary-container": "#001f46",
+            "surface-bright": "#222b47",
+            "error-dim": "#d7383b",
+            "secondary-fixed-dim": "#ceb9ff",
+            "surface-tint": "#3adffa",
+            "primary": "#3adffa",
+            "surface-container-highest": "#1c253e",
+            "inverse-on-surface": "#4f5469",
+            "outline-variant": "#41475b",
+            "tertiary-fixed": "#84b1ff",
+            "on-primary-fixed-variant": "#005561",
+            "primary-dim": "#1ad0eb",
+            "on-secondary-fixed": "#40009b",
+            "tertiary-container": "#619efd",
+            "surface-container": "#11192e",
+            "inverse-surface": "#faf8ff",
+            "primary-container": "#00cbe6",
+            "surface-container-high": "#171f36",
+            "on-surface-variant": "#a5aac2",
+            "inverse-primary": "#006977",
+            "secondary": "#ac8aff",
+            "on-primary": "#004b56",
+            "secondary-dim": "#8455ef",
+            "on-tertiary": "#002b5c",
+            "on-error-container": "#ffa8a3",
+            "secondary-container": "#5516be",
+            "on-tertiary-fixed": "#001737",
+            "on-surface": "#dfe4fe",
+            "on-secondary-fixed-variant": "#5f28c8",
+            "on-primary-container": "#003d46",
+            "error-container": "#9f0519",
+            "tertiary-dim": "#619efd",
+            "surface-container-lowest": "#000000",
+            "background": "#070d1f",
+            "secondary-fixed": "#dac9ff",
+            "tertiary-fixed-dim": "#6aa3ff",
+            "surface-dim": "#070d1f",
+            "surface-container-low": "#0c1326",
+            "primary-fixed-dim": "#1ad0eb",
+            "on-primary-fixed": "#00363e",
+            "outline": "#6f758b",
+            "on-background": "#dfe4fe",
+            "error": "#ff716c",
+            "on-secondary-container": "#d9c8ff"
+          },
+          borderRadius: {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          fontFamily: {
+            "headline": ["Space Grotesk"],
+            "display": ["Space Grotesk"],
+            "body": ["Inter"],
+            "label": ["Inter"]
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { background-color: #070d1f; color: #dfe4fe; font-family: "Inter", sans-serif; }
+    .font-headline { font-family: "Space Grotesk", sans-serif; }
+    .material-symbols-outlined { font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24; }
+    .glass-panel { background: rgba(28, 37, 62, 0.6); backdrop-filter: blur(24px); }
+    .ghost-border { outline: 1px solid rgba(111, 117, 139, 0.15); }
+    .gradient-text { background: linear-gradient(135deg, #3adffa 0%, #ac8aff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .kinetic-glow { box-shadow: 0 0 40px -10px rgba(58, 223, 250, 0.15), 0 0 40px -10px rgba(172, 138, 255, 0.1); }
+    .phase-subtitle {
+      min-height: 2.5em;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="selection:bg-primary/30 selection:text-primary">
+  <div id="site-root"></div>
+
+  <!-- Atomic Components -->
+  <template id="tpl-nav-link">
+    <a class="transition-colors duration-200 hover:text-cyan-300" href="#" data-slot="label"></a>
+  </template>
+
+  <template id="tpl-nav-action">
+    <a href="#" data-slot="label"></a>
+  </template>
+
+  <template id="tpl-primary-button">
+    <button class="group relative px-8 py-4 bg-primary text-on-primary font-bold rounded-lg overflow-hidden transition-all hover:shadow-[0_0_30px_rgba(58,223,250,0.3)]" type="button">
+      <span class="relative z-10 flex items-center gap-2">
+        <span data-slot="label"></span>
+        <span class="material-symbols-outlined text-lg transition-transform group-hover:translate-x-1" data-slot="icon">arrow_forward</span>
+      </span>
+    </button>
+  </template>
+
+  <template id="tpl-secondary-button">
+    <button class="px-8 py-4 ghost-border hover:bg-surface-variant transition-colors text-on-surface font-bold rounded-lg" type="button">
+      <span data-slot="label"></span>
+    </button>
+  </template>
+
+  <template id="tpl-hero-feature-item">
+    <div class="flex items-center gap-3">
+      <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;" data-slot="icon">terminal</span>
+      <span class="text-sm font-label tracking-tight text-on-surface-variant" data-slot="label"></span>
     </div>
+  </template>
 
-    <header class="site-header">
-      <div class="site-shell">
-        <a class="brand" href="./index.html" aria-label="r3nd home">
-          <span class="brand__mark">r3nd</span>
-          <span class="brand__meta">spec-driven delivery</span>
-        </a>
-
-        <button
-          class="nav-toggle"
-          type="button"
-          aria-expanded="false"
-          aria-controls="site-nav"
-          data-nav-toggle
-        >
-          Menu
-        </button>
-
-        <nav class="site-nav" id="site-nav" data-nav>
-          <a href="#hero">Home</a>
-          <a href="#benefits">Benefits</a>
-          <a href="#workflows">Workflows</a>
-          <a href="#model">Model</a>
-          <a href="./how-to-use.html">Guide</a>
-          <a class="button button--ghost button--small" href="https://github.com/leandronoijo/r3nd">GitHub</a>
-        </nav>
+  <template id="tpl-hero-workflow-node">
+    <div class="flex items-center gap-4">
+      <div class="w-10 h-10 rounded-lg flex items-center justify-center border transition-colors" data-slot="icon-wrap">
+        <span class="material-symbols-outlined" data-slot="icon">description</span>
       </div>
-    </header>
-
-    <main>
-      <section class="hero section section--full" id="hero">
-        <div class="hero__halo hero__halo--cyan"></div>
-        <div class="hero__halo hero__halo--violet"></div>
-        <div class="site-shell hero__layout">
-          <div class="hero__copy reveal">
-            <p class="eyebrow">Spec-driven SDLC framework</p>
-            <h1>Ship with AI, keep control.</h1>
-            <p class="hero__lede">
-              The operating model stays in the repo. Execution can run through
-              Codex CLI, Claude Code, Gemini CLI, GitHub CLI, VS Code/Copilot,
-              Cursor, or generated prompts.
-            </p>
-
-            <div class="hero__actions">
-              <a class="button button--primary" href="./how-to-use.html#get-started">Get Started</a>
-              <a class="button button--ghost" href="#workflows">Workflows</a>
-            </div>
-
-            <ul class="signal-list">
-              <li>Human approval gates at every stage</li>
-              <li>Repo memory beats chat memory</li>
-              <li>Overlays adapt the framework to real stacks</li>
-            </ul>
-          </div>
-
-          <aside class="terminal-card workflow-demo reveal" aria-label="Example Claude-style workflow execution">
-            <div class="terminal-card__chrome">
-              <span></span>
-              <span></span>
-              <span></span>
-              <strong>claude-code / create-product-spec</strong>
-            </div>
-            <div class="workflow-demo__body">
-              <div class="demo-message demo-message--user">
-                <p class="demo-role">User</p>
-                <p>Create a product spec for team authentication with approval gates.</p>
-              </div>
-
-              <div class="demo-message demo-message--agent">
-                <p class="demo-role">Skill · create-product-spec</p>
-                <p>Drafting scope, goals, constraints, and expected outcomes from the request.</p>
-              </div>
-
-              <div class="artifact-stack">
-                <div class="artifact-pill">
-                  <span class="artifact-pill__icon">📝</span>
-                  <div>
-                    <strong>Artifact written</strong>
-                    <p><code>rnd/product_specs/auth.md</code></p>
-                  </div>
-                </div>
-                <div class="approval-pill">
-                  <span>👤</span>
-                  <p>Human approves the framing</p>
-                </div>
-              </div>
-
-              <div class="demo-message demo-message--agent">
-                <p class="demo-role">Skill · create-tech-spec</p>
-                <p>Turning the approved product spec into interfaces, boundaries, and implementation decisions.</p>
-              </div>
-
-              <div class="artifact-stack">
-                <div class="artifact-pill">
-                  <span class="artifact-pill__icon">🧩</span>
-                  <div>
-                    <strong>Artifact written</strong>
-                    <p><code>rnd/tech_specs/auth.md</code></p>
-                  </div>
-                </div>
-                <div class="approval-pill">
-                  <span>👤</span>
-                  <p>Human approves the architecture</p>
-                </div>
-              </div>
-
-              <div class="demo-message demo-message--agent">
-                <p class="demo-role">Skill · implement-feature</p>
-                <p>Running implementation, task QA gates, and final manual QA with real tools before handoff.</p>
-              </div>
-
-              <div class="artifact-row">
-                <span class="artifact-chip">rnd/build_plans/</span>
-                <span class="artifact-chip">rnd/test_cases/</span>
-                <span class="artifact-chip">rnd/e2e-results/</span>
-              </div>
-            </div>
-          </aside>
+      <div class="flex-1">
+        <div class="text-sm font-bold text-on-surface" data-slot="title"></div>
+        <div class="h-1.5 w-full bg-surface-container rounded-full mt-2 overflow-hidden" data-slot="progress-track">
+          <div class="h-full" data-slot="progress-fill"></div>
         </div>
-      </section>
+      </div>
+      <div data-slot="status"></div>
+    </div>
+  </template>
 
-      <section class="section" id="benefits">
-        <div class="site-shell">
-          <div class="section-heading reveal">
-            <p class="eyebrow">Benefits</p>
-            <h2>One model. Many tools.</h2>
-            <p>
-              r3nd turns AI execution into a system the whole team can inspect,
-              approve, and evolve.
-            </p>
+  <template id="tpl-workflow-mode-option">
+    <button class="flex flex-col items-start p-6 rounded-xl transition-all" type="button" data-slot="button">
+      <span class="material-symbols-outlined mb-4" data-slot="icon">rocket_launch</span>
+      <span class="text-lg font-headline font-bold" data-slot="title"></span>
+      <span class="text-xs text-on-surface-variant mt-2 text-left" data-slot="description"></span>
+    </button>
+  </template>
+
+  <template id="tpl-timeline-step">
+    <div class="flex flex-col items-center gap-2 w-[72px] shrink-0">
+      <div class="w-8 h-8 flex items-center justify-center" data-slot="badge"></div>
+      <div class="text-[9px] font-bold text-center uppercase tracking-tight leading-[1.05] whitespace-pre-line" data-slot="label"></div>
+    </div>
+  </template>
+
+  <template id="tpl-detail-card">
+    <div class="surface-container p-8 rounded-2xl ghost-border space-y-6">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center">
+          <span class="material-symbols-outlined" data-slot="icon">info</span>
+        </div>
+        <h4 class="text-xl font-headline font-bold text-on-surface" data-slot="title"></h4>
+      </div>
+      <div class="space-y-4" data-repeat="rows"></div>
+    </div>
+  </template>
+
+  <template id="tpl-detail-row">
+    <div class="flex justify-between border-b border-white/5 pb-3">
+      <span class="text-sm text-on-surface-variant" data-slot="label"></span>
+      <span class="text-sm font-bold text-on-surface" data-slot="value"></span>
+    </div>
+  </template>
+
+  <template id="tpl-metric-pill">
+    <div class="flex items-center gap-2 whitespace-nowrap">
+      <span class="text-[10px] text-on-surface-variant font-mono uppercase" data-slot="label"></span>
+      <span class="text-xs font-bold" data-slot="value"></span>
+    </div>
+  </template>
+
+  <template id="tpl-tool-badge">
+    <div class="flex items-center gap-3 px-6 py-3 bg-surface-container-highest rounded-lg border border-white/5">
+      <span class="material-symbols-outlined" data-slot="icon"></span>
+      <span class="font-headline font-bold text-sm tracking-tight uppercase" data-slot="label"></span>
+    </div>
+  </template>
+
+  <template id="tpl-secondary-support-card">
+    <div class="p-8 bg-surface-container-low rounded-xl ghost-border">
+      <div class="mb-6 flex items-center justify-between">
+        <span class="material-symbols-outlined text-3xl" data-slot="icon">hub</span>
+        <span class="text-[10px] font-bold tracking-[0.2em] text-slate-500 uppercase" data-slot="eyebrow"></span>
+      </div>
+      <h4 class="font-headline text-xl font-bold text-on-surface mb-3" data-slot="title"></h4>
+      <p class="text-on-surface-variant text-sm leading-relaxed" data-slot="description"></p>
+      <div data-slot="footer"></div>
+    </div>
+  </template>
+
+  <template id="tpl-dashboard-tab">
+    <button class="px-8 py-5 text-sm font-headline tracking-widest uppercase transition-colors whitespace-nowrap" type="button" data-slot="label"></button>
+  </template>
+
+  <template id="tpl-checkpoint-item">
+    <div class="flex items-center gap-3 p-3 bg-surface-container-high ghost-border rounded">
+      <span class="material-symbols-outlined text-lg" data-slot="icon">verified</span>
+      <span class="text-xs font-medium" data-slot="label"></span>
+    </div>
+  </template>
+
+  <template id="tpl-phase-card">
+    <div class="p-4 rounded" data-slot="card">
+      <span class="text-[9px] uppercase tracking-tighter font-bold mb-1 block" data-slot="eyebrow"></span>
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold tracking-tight" data-slot="title"></span>
+        <span class="material-symbols-outlined text-sm" data-slot="icon">smart_toy</span>
+      </div>
+      <p class="text-[10px] leading-tight mt-2 text-on-surface-variant phase-subtitle" data-slot="description"></p>
+    </div>
+  </template>
+
+  <template id="tpl-proof-card">
+    <div class="bg-surface-container p-8 rounded-xl ghost-border hover:bg-surface-container-high transition-all group">
+      <span class="material-symbols-outlined text-3xl mb-4 group-hover:scale-110 transition-transform" data-slot="icon"></span>
+      <h5 class="text-sm font-headline font-bold uppercase tracking-widest text-on-surface mb-2" data-slot="title"></h5>
+      <p class="text-xs text-on-surface-variant leading-relaxed" data-slot="description"></p>
+    </div>
+  </template>
+
+  <template id="tpl-command-snippet">
+    <div class="bg-surface-container-highest ghost-border rounded-lg p-4">
+      <div class="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold" data-slot="label"></div>
+      <pre class="mt-3 text-xs md:text-sm font-mono text-primary whitespace-pre-wrap break-all"><code data-slot="command"></code></pre>
+    </div>
+  </template>
+
+  <template id="tpl-behavior-item">
+    <li class="text-sm text-on-surface-variant leading-relaxed" data-slot="text"></li>
+  </template>
+
+  <template id="tpl-setup-path-card">
+    <article class="bg-surface-container-highest ghost-border rounded-xl p-6 h-full">
+      <h4 class="text-2xl font-headline font-bold text-on-surface tracking-tight" data-slot="name"></h4>
+      <p class="mt-3 text-sm text-on-surface-variant leading-relaxed" data-slot="summary"></p>
+      <p class="mt-5 text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold">Current behavior from the CLI implementation</p>
+      <ul class="mt-3 space-y-2 list-disc pl-5" data-repeat="behaviors"></ul>
+      <div class="mt-6 space-y-3" data-repeat="commands"></div>
+    </article>
+  </template>
+
+  <template id="tpl-footer-link">
+    <a class="text-slate-500 hover:text-white transition-colors focus:ring-1 focus:ring-cyan-500/50" href="#" data-slot="label"></a>
+  </template>
+
+  <!-- Composite Sections -->
+  <template id="tpl-top-nav">
+    <nav class="sticky top-0 w-full z-50 bg-[#070d1f]/80 backdrop-blur-md border-b border-white/10 shadow-[0_20px_40px_rgba(34,211,238,0.04)]">
+      <div class="flex justify-between items-center h-20 px-8 max-w-7xl mx-auto font-['Space_Grotesk'] tracking-tight">
+        <div class="text-2xl font-black tracking-tighter text-cyan-400" data-slot="brand">r3nd</div>
+        <div class="flex items-center gap-6" data-repeat="actions"></div>
+      </div>
+    </nav>
+  </template>
+
+  <template id="tpl-hero-section">
+    <section class="relative min-h-[921px] flex items-center pt-12 pb-24 overflow-hidden">
+      <div class="absolute top-0 right-0 -z-10 w-full h-full opacity-20">
+        <div class="absolute top-1/4 right-0 w-[600px] h-[600px] bg-primary rounded-full blur-[160px] opacity-20"></div>
+        <div class="absolute bottom-1/4 left-0 w-[400px] h-[400px] bg-secondary rounded-full blur-[140px] opacity-10"></div>
+      </div>
+      <div class="max-w-7xl mx-auto px-8 w-full grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+        <div class="flex flex-col space-y-8">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-[1px] bg-primary"></span>
+            <span class="font-headline text-xs tracking-[0.3em] uppercase text-primary font-bold" data-slot="eyebrow"></span>
           </div>
-
-          <div class="benefit-grid">
-            <article class="benefit-card reveal">
-              <span class="benefit-icon">↔</span>
-              <h3>One model, many backends</h3>
-              <p>Run the same operating model through Codex, Claude, Cursor, Copilot, Gemini, or generated prompts.</p>
-            </article>
-
-            <article class="benefit-card reveal">
-              <span class="benefit-icon">🧠</span>
-              <h3>Repo memory</h3>
-              <p>Specs, plans, QA artifacts, templates, and skills stay in the repository instead of vanishing in chat.</p>
-            </article>
-
-            <article class="benefit-card reveal">
-              <span class="benefit-icon">🛡</span>
-              <h3>Human approval gates</h3>
-              <p>Humans approve artifacts and direction changes while the agent executes the work.</p>
-            </article>
-
-            <article class="benefit-card reveal">
-              <span class="benefit-icon">🧩</span>
-              <h3>Stack overlays</h3>
-              <p>Ordered overlays inject skills, agents, instructions, templates, and build plans for real stacks.</p>
-            </article>
-
-            <article class="benefit-card reveal">
-              <span class="benefit-icon">🗺</span>
-              <h3>Scoped context</h3>
-              <p>Generate local context at repo, app, or module scope with <code>AGENTS.md</code> and <code>CLAUDE.md</code>.</p>
-            </article>
-
-            <article class="benefit-card reveal">
-              <span class="benefit-icon">🌿</span>
-              <h3>Safer parallel work</h3>
-              <p>Worktrees and config-driven open/copy behavior make multi-branch AI work easier to manage.</p>
-            </article>
+          <h1 class="font-headline text-5xl md:text-7xl font-extrabold tracking-tighter leading-[0.95] text-on-surface">
+            <span data-slot="title-prefix"></span>
+            <span class="gradient-text" data-slot="title-accent"></span>
+          </h1>
+          <p class="text-lg md:text-xl text-on-surface-variant max-w-lg leading-relaxed font-light" data-slot="description"></p>
+          <div class="flex flex-wrap gap-4 pt-4" data-repeat="actions"></div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-12 border-t border-white/5" data-repeat="features"></div>
+        </div>
+        <div class="relative group">
+          <div class="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
+          <div class="relative glass-panel rounded-2xl border border-white/5 p-8 shadow-2xl">
+            <div class="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
+              <div class="flex gap-2">
+                <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-500/50"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-500/50"></div>
+              </div>
+              <div class="text-[10px] uppercase tracking-widest text-on-surface-variant font-mono" data-slot="terminal-label"></div>
+            </div>
+            <div class="space-y-6" data-repeat="workflow-nodes"></div>
+            <div class="absolute -bottom-6 -right-6 px-6 py-4 glass-panel border border-primary/20 rounded-xl shadow-2xl animate-pulse">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-primary text-lg">face</span>
+                </div>
+                <div>
+                  <div class="text-[10px] uppercase font-bold text-primary" data-slot="gate-title"></div>
+                  <div class="text-xs text-on-surface" data-slot="gate-subtitle"></div>
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
+      </div>
+    </section>
+  </template>
 
-          <div class="sales-band reveal">
+  <template id="tpl-workflow-preview-section">
+    <section class="bg-surface-container-low py-32 border-t border-white/5 relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+      <div class="max-w-7xl mx-auto px-8">
+        <div class="max-w-3xl mb-24">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="w-8 h-[1px] bg-primary"></span>
+            <span class="font-headline text-xs tracking-[0.3em] uppercase text-primary font-bold" data-slot="eyebrow"></span>
+          </div>
+          <h2 class="text-5xl md:text-6xl font-headline font-bold tracking-tighter text-on-surface mb-6 leading-none">
+            <span data-slot="title-line-1"></span><br />
+            <span class="gradient-text" data-slot="title-line-2"></span>
+          </h2>
+          <p class="text-lg text-on-surface-variant leading-relaxed font-light" data-slot="description"></p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-16" data-repeat="modes"></div>
+
+        <div class="glass-panel rounded-2xl border border-white/10 p-10 mb-12 overflow-hidden relative">
+          <div class="flex items-center justify-between mb-12">
+            <h3 class="text-2xl font-headline font-bold text-primary" data-slot="sequence-title"></h3>
+            <div class="flex items-center gap-4 text-xs font-mono text-on-surface-variant">
+              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-primary"></span><span data-slot="legend-agent"></span></span>
+              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-secondary"></span><span data-slot="legend-gate"></span></span>
+            </div>
+          </div>
+          <div class="relative">
+            <div class="absolute top-5 left-0 w-full h-[1px] bg-white/5 -z-10 hidden md:block"></div>
+            <div class="flex items-start justify-between gap-1 md:gap-2" data-repeat="timeline"></div>
+            <div class="mt-8 flex justify-center">
+              <div class="px-4 py-1 bg-surface-container border border-white/5 rounded-full text-[10px] text-on-surface-variant uppercase tracking-[0.2em] whitespace-nowrap" data-slot="timeline-tail"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch" data-repeat="detail-cards"></div>
+      </div>
+    </section>
+  </template>
+
+  <template id="tpl-why-it-works-section">
+    <section class="relative py-32 px-8 max-w-7xl mx-auto border-t border-white/5">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-12 mb-24">
+        <div class="md:col-span-8">
+          <div class="flex items-center gap-3 mb-6">
+            <span class="w-8 h-[1px] bg-primary"></span>
+            <span class="font-headline text-xs tracking-[0.3em] uppercase text-primary font-bold" data-slot="eyebrow"></span>
+          </div>
+          <h2 class="font-headline text-5xl md:text-7xl font-bold tracking-tighter text-on-surface mb-8 leading-[0.95]">
+            <span data-slot="title-prefix"></span>
+            <span class="gradient-text" data-slot="title-accent"></span>
+          </h2>
+          <p class="text-on-surface-variant text-xl md:text-2xl max-w-2xl leading-relaxed font-light" data-slot="description"></p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-24">
+        <div class="md:col-span-7 group">
+          <div class="surface-container rounded-xl h-full flex flex-col justify-between hover:bg-surface-container-high transition-colors duration-500 ghost-border p-8">
+            <div class="mb-12">
+              <h3 class="font-headline text-3xl font-bold text-on-surface mb-4 tracking-tight" data-slot="durable-title"></h3>
+              <p class="text-on-surface-variant text-lg leading-relaxed max-w-md" data-slot="durable-description"></p>
+            </div>
+            <div class="bg-surface-container-lowest rounded-lg font-mono text-sm overflow-hidden border border-white/5 p-6">
+              <div class="flex gap-2 mb-6">
+                <div class="w-2.5 h-2.5 rounded-full bg-red-500/30"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-amber-500/30"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-emerald-500/30"></div>
+              </div>
+              <div class="space-y-2 text-slate-400">
+                <div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-base">folder_open</span> <span class="text-on-surface">rnd/</span></div>
+                <div class="flex items-center gap-2 pl-6"><span class="material-symbols-outlined text-secondary text-base">folder</span> product_specs/</div>
+                <div class="flex items-center gap-2 pl-12 border-l border-white/5 ml-3 py-0.5"><span class="material-symbols-outlined text-on-surface-variant text-base">description</span> <span class="text-primary">auth.md</span></div>
+                <div class="flex items-center gap-2 pl-6"><span class="material-symbols-outlined text-secondary text-base">folder</span> tech_specs/</div>
+                <div class="flex items-center gap-2 pl-12 border-l border-white/5 ml-3 py-0.5"><span class="material-symbols-outlined text-on-surface-variant text-base">description</span> <span class="text-primary">auth.md</span></div>
+                <div class="flex items-center gap-2 pl-6"><span class="material-symbols-outlined text-secondary text-base">folder</span> evidence/</div>
+                <div class="flex items-center gap-2 pl-12 border-l border-white/5 ml-3 py-0.5"><span class="material-symbols-outlined text-on-surface-variant text-base">task</span> <span class="text-slate-500">qa_run_01.json</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="md:col-span-5 group">
+          <div class="surface-container rounded-xl h-full flex flex-col justify-between hover:bg-surface-container-high transition-colors duration-500 ghost-border relative overflow-hidden p-8">
+            <div class="relative z-10">
+              <h3 class="font-headline text-3xl font-bold text-on-surface mb-4 tracking-tight" data-slot="execution-title"></h3>
+              <p class="text-on-surface-variant text-lg leading-relaxed" data-slot="execution-description"></p>
+            </div>
+            <div class="relative py-12 flex flex-col items-center gap-8">
+              <div class="w-full flex items-center justify-between gap-2">
+                <div class="px-3 py-1.5 bg-surface-container-highest rounded border border-primary/20 text-[10px] font-mono text-primary">ARTIFACT</div>
+                <div class="flex-1 h-[1px] bg-gradient-to-r from-primary/20 via-white/10 to-secondary/20"></div>
+                <div class="px-4 py-2 bg-secondary text-on-secondary rounded-full text-[10px] font-bold flex items-center gap-2 shadow-[0_0_20px_rgba(172,138,255,0.3)]">
+                  <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+                  APPROVAL
+                </div>
+                <div class="flex-1 h-[1px] bg-gradient-to-r from-secondary/20 via-white/10 to-primary/20"></div>
+                <div class="px-3 py-1.5 bg-surface-container-highest rounded border border-primary/20 text-[10px] font-mono text-primary">NEXT STAGE</div>
+              </div>
+              <div class="text-center">
+                <span class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold font-label">Human-in-the-loop Gate</span>
+              </div>
+            </div>
+            <div class="absolute -bottom-12 -right-12 w-48 h-48 bg-primary/10 blur-[60px] rounded-full"></div>
+          </div>
+        </div>
+
+        <div class="md:col-span-12 group">
+          <div class="surface-container rounded-xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-12 hover:bg-surface-container-high transition-colors duration-500 ghost-border">
+            <div class="flex-1">
+              <h3 class="font-headline text-3xl font-bold text-on-surface mb-4 tracking-tight" data-slot="tool-title"></h3>
+              <p class="text-on-surface-variant text-lg leading-relaxed max-w-xl" data-slot="tool-description"></p>
+            </div>
+            <div class="flex-1 w-full flex items-center justify-center gap-6 flex-wrap grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" data-repeat="tool-badges"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8" data-repeat="support-cards"></div>
+    </section>
+  </template>
+
+  <template id="tpl-autonomous-dashboard-section">
+    <section class="relative py-32 px-8 max-w-7xl mx-auto border-t border-white/5 bg-surface-container-low/20">
+      <div class="mb-16 max-w-3xl">
+        <span class="text-primary font-headline font-bold uppercase tracking-[0.3em] text-xs mb-4 block" data-slot="eyebrow"></span>
+        <h2 class="text-5xl md:text-6xl font-headline font-bold tracking-tighter text-on-surface mb-6 leading-none">
+          <span data-slot="title-line-1"></span><br /><span class="gradient-text" data-slot="title-line-2"></span>
+        </h2>
+        <p class="text-on-surface-variant text-lg md:text-xl leading-relaxed mb-4 font-light" data-slot="description"></p>
+        <p class="text-secondary font-label text-sm font-medium tracking-wide italic" data-slot="note"></p>
+      </div>
+
+      <div class="glass-panel border border-white/10 rounded-2xl overflow-hidden kinetic-glow mb-16 shadow-2xl">
+        <div class="flex border-b border-white/10 overflow-x-auto" data-repeat="tabs"></div>
+        <div class="flex flex-col lg:flex-row min-h-[640px]">
+          <div class="lg:w-[32%] border-r border-white/10 p-8 flex flex-col gap-8 bg-surface-container-low/40">
             <div>
-              <p class="eyebrow">In practice</p>
-              <h3>Less prompt babysitting. More artifact review.</h3>
+              <h4 class="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold mb-2">Summary</h4>
+              <p class="text-on-surface text-sm leading-relaxed" data-slot="summary"></p>
             </div>
-            <div class="sales-band__points">
-              <p>Templates and skills shape the output before the model ever starts typing.</p>
-              <p>Humans review artifacts instead of reconstructing intent from chat history.</p>
-              <p>The same repo can support monorepos, multiple spec directories, and multiple AI tools.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section section--tall" id="workflows">
-        <div class="site-shell">
-          <div class="section-heading reveal">
-            <p class="eyebrow">Workflows</p>
-            <h2>Four delivery paths.</h2>
-            <p>Pick the amount of structure you need without changing the operating model.</p>
-          </div>
-
-          <div class="workflow-grid">
-            <article class="workflow-card reveal">
-              <p class="workflow-card__label">01 · Full control</p>
-              <h3>High rigor</h3>
-              <ul class="plain-list actor-lines">
-                <li><strong>🤖 LLM</strong>: product spec, tech spec, build plan, implementation, test cases, E2E, manual QA, retro.</li>
-                <li><strong>👤 Human</strong>: reviews every artifact and decides when the next stage starts.</li>
-                <li><strong>Best for</strong>: important, ambiguous, or architectural work.</li>
-              </ul>
-            </article>
-
-            <article class="workflow-card reveal">
-              <p class="workflow-card__label">02 · Semi-control</p>
-              <h3>Faster feature work</h3>
-              <ul class="plain-list actor-lines">
-                <li><strong>🤖 LLM</strong>: <code>create-tech-spec</code>, then <code>implement-feature</code> with task plans and QA gates.</li>
-                <li><strong>👤 Human</strong>: approves the direction and reviews the final QA evidence.</li>
-                <li><strong>Best for</strong>: clear feature work that still needs discipline.</li>
-              </ul>
-            </article>
-
-            <article class="workflow-card reveal">
-              <p class="workflow-card__label">03 · Quick feature</p>
-              <h3>Tiny scoped change</h3>
-              <ul class="plain-list actor-lines">
-                <li><strong>🤖 LLM</strong>: investigates, gates the scope, writes one plan, implements, and verifies.</li>
-                <li><strong>👤 Human</strong>: approves the single plan before coding starts.</li>
-                <li><strong>Best for</strong>: local work that should stay small.</li>
-              </ul>
-            </article>
-
-            <article class="workflow-card reveal">
-              <p class="workflow-card__label">04 · Bugfix</p>
-              <h3>Focused fix path</h3>
-              <ul class="plain-list actor-lines">
-                <li><strong>🤖 LLM</strong>: turns the issue into a focused fix plan, implements, and verifies.</li>
-                <li><strong>👤 Human</strong>: approves the plan and reviews the evidence.</li>
-                <li><strong>Best for</strong>: defects that need a disciplined repair path.</li>
-              </ul>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="examples">
-        <div class="site-shell">
-          <div class="section-heading reveal">
-            <p class="eyebrow">Examples</p>
-            <h2>Real repo flows.</h2>
-            <p>Short examples tied directly to the current README and repository shape.</p>
-          </div>
-
-          <div class="snippet-layout">
-            <div class="snippet-selector reveal" role="tablist" aria-label="Usage example selector">
-              <button type="button" class="is-active" data-snippet-target="get-started" role="tab" aria-selected="true">
-                Get Started
-              </button>
-              <button type="button" data-snippet-target="backends" role="tab" aria-selected="false">
-                Backends
-              </button>
-              <button type="button" data-snippet-target="scopes" role="tab" aria-selected="false">
-                Scopes
-              </button>
-              <button type="button" data-snippet-target="config" role="tab" aria-selected="false">
-                Config
-              </button>
-            </div>
-
-            <div class="snippet-stack reveal">
-              <article class="snippet-card is-active" data-snippet-panel="get-started" role="tabpanel">
-                <div class="snippet-card__label">Install and scaffold</div>
-                <pre><code>sudo npm install -g git+https://github.com/leandronoijo/r3nd.git#0.3
-
-git clone https://github.com/leandronoijo/r3nd.git
-
-r3nd init
-
-# Overlay options:
-# angular, fast-api, nestjs, ruby-on-rails, vue
-r3nd scaffold</code></pre>
-                <p>The seed is meant to be forked and adapted. The markdown and overlays are the real product surface.</p>
-              </article>
-
-              <article class="snippet-card" data-snippet-panel="backends" role="tabpanel" hidden>
-                <div class="snippet-card__label">Tool-agnostic execution</div>
-                <pre><code>Codex CLI
-Claude Code
-Gemini CLI
-GitHub CLI
-VS Code / Copilot
-Cursor
-Generated prompts
-
-# The workflow stays the same.
-# The backend can change.</code></pre>
-                <p>r3nd keeps the operating model in the repo so tool churn does not rewrite how the team works.</p>
-              </article>
-
-              <article class="snippet-card" data-snippet-panel="scopes" role="tabpanel" hidden>
-                <div class="snippet-card__label">Scopes and multi-spec repos</div>
-                <pre><code># Context analysis
-analyze-repo-context    # input: .
-analyze-app-context     # input: apps/backend
-analyze-module-context  # input: apps/backend/src/modules/auth
-
-# Multi-spec-directory support
-r3nd agents create-tech-spec \
-  --file apps/backend/rnd/product_specs/auth.md \
-  --spec-dir apps/backend/rnd \
-  --agent codex</code></pre>
-                <p>Repo, app, and module context generation works alongside multi-directory spec layouts for monorepos.</p>
-              </article>
-
-              <article class="snippet-card" data-snippet-panel="config" role="tabpanel" hidden>
-                <div class="snippet-card__label">Config and worktrees</div>
-                <pre><code># r3nd.yaml controls:
-seed-repo: leandronoijo/r3nd@develop
-overlays: []
-
-worktree-copy-files:
-  - "*.env"
-  - "**/*.env"
-
-worktree-open-command:
-  - code
-  - "{worktreeDir}"</code></pre>
-                <p><code>r3nd.yaml</code> config covers overlays, seed repo choice, and worktree copy/open behavior.</p>
-              </article>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section section--full" id="model">
-        <div class="site-shell">
-          <div class="section-heading reveal">
-            <p class="eyebrow">Model</p>
-            <h2>Repo memory, overlays, and durable artifacts.</h2>
-            <p>The repo is the source of truth. Skills, templates, scoped context, and config keep the framework stable while tools stay replaceable.</p>
-          </div>
-
-          <div class="architecture-grid">
-            <article class="architecture-card reveal">
-              <p class="architecture-card__eyebrow">Skills</p>
-              <h3>Workflow logic</h3>
-              <p>Skills define phases, inputs, outputs, approval gates, and durable file paths.</p>
-            </article>
-
-            <article class="architecture-card reveal">
-              <p class="architecture-card__eyebrow">Templates</p>
-              <h3>Artifact shape</h3>
-              <p>Templates make specs, plans, and reports predictable enough for both humans and downstream agents.</p>
-            </article>
-
-            <article class="architecture-card reveal">
-              <p class="architecture-card__eyebrow">Overlays</p>
-              <h3>Stack adaptation</h3>
-              <p>Ordered overlays inject instructions, skills, agents, templates, and build plans for real stacks.</p>
-            </article>
-
-            <article class="architecture-card reveal">
-              <p class="architecture-card__eyebrow">Context</p>
-              <h3>Local guidance</h3>
-              <p><code>AGENTS.md</code> and <code>CLAUDE.md</code> can be generated at repo, app, or module scope.</p>
-            </article>
-          </div>
-
-          <div class="pipeline-panel reveal">
-            <div class="pipeline-panel__header">
-              <p class="eyebrow">Repo memory</p>
-              <h3>Durable team assets</h3>
-            </div>
-            <div class="memory-grid" aria-label="Repository memory items">
-              <span class="memory-item"><code>rnd/product_specs</code></span>
-              <span class="memory-item"><code>rnd/tech_specs</code></span>
-              <span class="memory-item"><code>rnd/build_plans</code></span>
-              <span class="memory-item"><code>rnd/test_cases</code></span>
-              <span class="memory-item"><code>rnd/e2e-results</code></span>
-              <span class="memory-item"><code>rnd/templates</code></span>
-              <span class="memory-item"><code>rnd/skills</code></span>
-              <span class="memory-item"><code>AGENTS.md</code></span>
-              <span class="memory-item"><code>CLAUDE.md</code></span>
-            </div>
-            <div class="pipeline-notes">
-              <p>Knowledge lives in the repo. Overlays add stack-specific behavior. <code>r3nd.yaml</code> controls overlays, seed repo selection, and worktree behavior.</p>
-              <p>The result is a framework that survives IDE changes, backend changes, and parallel delivery work.</p>
-            </div>
-          </div>
-
-          <div class="cta-panel reveal">
             <div>
-              <p class="eyebrow">Next step</p>
-              <h3>Open the guide.</h3>
-              <p>Install, scaffold, generate local context, configure worktrees, and pick the workflow that matches the change.</p>
+              <h4 class="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold mb-4">Input</h4>
+              <div class="bg-surface-container-highest p-4 ghost-border text-xs font-mono text-on-surface-variant rounded">
+                <span class="text-primary font-bold">PROMPT:</span>
+                <span data-slot="prompt"></span>
+              </div>
             </div>
-            <a class="button button--primary" href="./how-to-use.html#get-started">Guide</a>
+            <div>
+              <h4 class="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold mb-4">Human Checkpoints</h4>
+              <div class="space-y-3" data-repeat="checkpoints"></div>
+            </div>
+            <div class="mt-auto pt-8 border-t border-white/5">
+              <h4 class="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold mb-2">Outcome</h4>
+              <div class="flex items-center gap-2 text-primary">
+                <span class="material-symbols-outlined text-sm">task_alt</span>
+                <span class="text-xs font-bold uppercase tracking-widest" data-slot="outcome"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:w-[68%] p-10 relative overflow-hidden bg-surface-container/20">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-y-12 gap-x-6 relative z-10" data-repeat="phases"></div>
+            <div class="absolute inset-0 z-0 opacity-5 pointer-events-none" style="background-image: linear-gradient(#3adffa 1px, transparent 1px), linear-gradient(90deg, #3adffa 1px, transparent 1px); background-size: 40px 40px;"></div>
           </div>
         </div>
-      </section>
-    </main>
+      </div>
 
-    <footer class="site-footer">
-      <div class="site-shell site-footer__layout">
-        <div>
-          <a class="brand brand--footer" href="./index.html">r3nd</a>
-          <p>AI execution. Human approval. Repo memory.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-repeat="proof-cards"></div>
+    </section>
+  </template>
+
+  <template id="tpl-get-started-section">
+    <section class="relative py-32 px-8 max-w-7xl mx-auto border-t border-white/5">
+      <div class="max-w-3xl mb-16">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="w-8 h-[1px] bg-primary"></span>
+          <span class="font-headline text-xs tracking-[0.3em] uppercase text-primary font-bold" data-slot="eyebrow"></span>
         </div>
-        <div class="site-footer__links">
-          <a href="./how-to-use.html">Guide</a>
-          <a href="https://github.com/leandronoijo/r3nd">GitHub</a>
-          <a href="https://github.com/leandronoijo/r3nd/blob/main/README.md">README</a>
+        <h2 class="text-5xl md:text-6xl font-headline font-bold tracking-tighter text-on-surface mb-6 leading-none">
+          <span data-slot="title-line-1"></span><br />
+          <span class="gradient-text" data-slot="title-line-2"></span>
+        </h2>
+        <p class="text-lg text-on-surface-variant leading-relaxed font-light" data-slot="description"></p>
+        <a class="mt-6 inline-flex items-center gap-2 ghost-border text-on-surface font-bold px-5 py-2 rounded-lg hover:bg-surface-variant transition-colors" data-slot="full-guide-link" href="#">
+          <span data-slot="full-guide-label">Full getting started guide</span>
+          <span class="material-symbols-outlined text-base">open_in_new</span>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 gap-8">
+        <article class="surface-container rounded-2xl ghost-border p-8 md:p-10">
+          <h3 class="font-headline text-3xl font-bold text-on-surface tracking-tight" data-slot="install-title"></h3>
+          <p class="mt-3 text-on-surface-variant text-sm md:text-base leading-relaxed" data-slot="install-description"></p>
+          <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4" data-repeat="install-commands"></div>
+        </article>
+
+        <article class="surface-container rounded-2xl ghost-border p-8 md:p-10">
+          <h3 class="font-headline text-3xl font-bold text-on-surface tracking-tight" data-slot="setup-title"></h3>
+          <p class="mt-3 text-on-surface-variant text-sm md:text-base leading-relaxed" data-slot="setup-description"></p>
+          <div class="mt-6 grid grid-cols-1 xl:grid-cols-2 gap-6" data-repeat="setup-paths"></div>
+        </article>
+      </div>
+    </section>
+  </template>
+
+  <template id="tpl-closing-statement-section">
+    <section class="max-w-7xl mx-auto px-8">
+      <div class="mt-40 text-center max-w-4xl mx-auto py-24 relative rounded-3xl overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-secondary/5 blur-[80px] pointer-events-none"></div>
+        <div class="relative z-10 px-8">
+          <h2 class="font-headline text-4xl md:text-6xl font-bold tracking-tighter text-on-surface mb-6">
+            <span data-slot="title-line-1"></span><br /><span data-slot="title-line-2"></span>
+          </h2>
+          <p class="text-on-surface-variant text-xl md:text-2xl font-light mb-12" data-slot="description"></p>
+          <div class="flex flex-col md:flex-row items-center justify-center gap-4" data-repeat="actions"></div>
         </div>
-        <p class="site-footer__meta">Static site prepared for GitHub Pages. <span data-current-year></span></p>
+      </div>
+    </section>
+  </template>
+
+  <template id="tpl-final-cta-section">
+    <section class="py-24 relative overflow-hidden bg-surface">
+      <div class="max-w-4xl mx-auto px-8 text-center relative z-10">
+        <h3 class="font-headline text-4xl md:text-5xl font-bold mb-8" data-slot="title"></h3>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center" data-repeat="actions"></div>
+      </div>
+      <div class="absolute -bottom-24 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/10 blur-[120px] rounded-full"></div>
+    </section>
+  </template>
+
+  <template id="tpl-footer">
+    <footer class="bg-[#070d1f] w-full py-12 border-t border-white/5">
+      <div class="flex flex-col md:flex-row justify-between items-center px-8 max-w-7xl mx-auto font-['Space_Grotesk'] text-sm">
+        <div class="flex flex-col items-center md:items-start gap-4 mb-8 md:mb-0">
+          <div class="text-lg font-bold text-cyan-400" data-slot="brand">r3nd</div>
+          <p class="text-slate-500 max-w-xs text-center md:text-left" data-slot="copyright"></p>
+        </div>
+        <div class="flex flex-wrap justify-center gap-8" data-repeat="links"></div>
       </div>
     </footer>
+  </template>
 
-    <script src="./script.js"></script>
-  </body>
+  <script src="./page-data.js"></script>
+  <script src="./index.js"></script>
+</body>
 </html>
