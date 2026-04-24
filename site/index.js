@@ -677,11 +677,13 @@
       if (action.variant === "primary") {
         return renderComponent("PrimaryButton", {
           label: action.label,
+          href: action.href,
           className: "bg-primary text-on-primary font-bold px-10 py-4 rounded-lg shadow-[0_0_40px_rgba(58,223,250,0.2)]"
         });
       }
       return renderComponent("SecondaryButton", {
         label: action.label,
+        href: action.href,
         className: "ghost-border text-on-surface font-bold px-10 py-4 rounded-lg hover:bg-surface-variant transition-colors"
       });
     }));

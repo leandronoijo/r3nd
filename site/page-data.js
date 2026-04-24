@@ -465,8 +465,8 @@ window.PAGE_MODEL = {
   finalCta: {
     title: "Ready to evolve your delivery pipeline?",
     actions: [
-      { label: "Get Started Now", variant: "primary" },
-      { label: "Book a Demo", variant: "secondary" }
+      { label: "Get Started Now", variant: "primary", href: "https://github.com/leandronoijo/r3nd" },
+      { label: "Book a Demo", variant: "secondary", href: "https://github.com/leandronoijo/r3nd" }
     ]
   },
 
