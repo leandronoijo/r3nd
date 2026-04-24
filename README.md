@@ -29,6 +29,18 @@ The result is a framework for moving from request to implementation in a way tha
 
 ---
 
+## 📚 Docs
+
+Start with:
+
+- [Getting Started](docs/getting-started.md)
+- [Concepts](docs/concepts.md)
+- [Workflows](docs/workflows.md)
+
+These pages cover onboarding, the repo-native model behind r3nd, and the workflow options in more detail than this landing page.
+
+---
+
 ## 🚦 Core Workflows
 
 r3nd supports four practical ways of working.
@@ -216,7 +228,7 @@ The framework is **agnostic**. You can run the same operating model on:
 
 This is **one of the core ideas** behind r3nd.
 
-By default, the durable SDLC knowledge lives under `rnd/`:
+By default, the durable SDLC knowledge lives under `r3nd/`:
 
 - `product_specs/`
 - `tech_specs/`
@@ -288,11 +300,13 @@ r3nd scaffold
 
 Update the parts that define how your team **actually works**:
 
-- `rnd/templates/*`
-- `rnd/skills/*`
-- `rnd/agents/*`
+- `r3nd/templates/*`
+- `r3nd/skills/*`
+- `r3nd/agents/*`
 - `overlays/*`
 - `AGENTS.md` / `CLAUDE.md`
+
+In this seed repository, the source content still lives under `rnd/`. The CLI maps that seed content into your configured spec directory, which is canonically `r3nd/` for generated projects.
 
 ### 5. Generate local context
 
@@ -457,11 +471,13 @@ This repository is meant to be **forked and adapted**.
 
 You should treat the markdown files as the **real product surface**:
 
-- `rnd/templates/*`
-- `rnd/skills/*`
-- `rnd/agents/*`
+- `r3nd/templates/*`
+- `r3nd/skills/*`
+- `r3nd/agents/*`
 - `overlays/*`
 - `AGENTS.md` / `CLAUDE.md`
+
+In this seed repository itself, those source files are stored under `rnd/`, but generated projects should treat `r3nd/` as the canonical spec directory unless configured otherwise.
 
 The normal adoption path is:
 
@@ -534,7 +550,7 @@ It helps with:
 
 ### Additional Canonical Workflows
 
-These are part of the shipped framework and live in `rnd/skills/`, even when you are using them through generated vendor outputs rather than the `r3nd agents` command surface.
+These are part of the shipped framework. In generated projects they live in `r3nd/skills/`, while this seed repository stores the source content under `rnd/skills/`.
 
 | Workflow | Purpose |
 |----------|---------|
@@ -557,10 +573,10 @@ r3nd analyse
 r3nd agents create-product-spec --input "User authentication system" --agent github
 
 # Create a tech spec
-r3nd agents create-tech-spec --file rnd/product_specs/auth.md --agent codex
+r3nd agents create-tech-spec --file r3nd/product_specs/auth.md --agent codex
 
 # Implement a feature from a tech spec
-r3nd agents implement-feature --file rnd/tech_specs/auth.md --agent codex
+r3nd agents implement-feature --file r3nd/tech_specs/auth.md --agent codex
 ```
 
 ---
@@ -579,7 +595,7 @@ r3nd agents implement-feature --file rnd/tech_specs/auth.md --agent codex
 
 cli/                         # Operator tooling around the framework
 
-rnd/
+rnd/                        # Seed-repo source content; copied into your configured spec dir
   agents/                    # Shared agent briefs
   templates/                 # Canonical artifact templates
   skills/                    # Canonical task skills
@@ -589,6 +605,8 @@ rnd/
   test_cases/
   retros/
   agent_summaries/
+
+r3nd/                       # Canonical generated spec directory in consumer projects
 
 overlays/                    # Stack- or domain-specific additions, including instructions
 
