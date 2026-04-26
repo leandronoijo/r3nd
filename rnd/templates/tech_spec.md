@@ -97,7 +97,7 @@ interface ExampleEntity {
 
 #### 3.3.2 State Management
 
-Describe store changes or new stores (follow `rnd/instructions/frontend.instructions.md`).
+Describe store changes or new stores (follow the frontend guidance in the applicable `AGENTS.md` / `CLAUDE.md`).
 
 - **Store:** `use<Feature>Store` (file path: `src/frontend/stores/use<Feature>Store`)
   - State: `items`, `loading`, `error`

@@ -14,8 +14,8 @@ Generate, execute, diagnose, and report end-to-end tests derived from `rnd/test_
 
 - `rnd/test_cases/<feature-id>-test-cases.md` (required)
 - `rnd/build_plans/<feature-id>-build-plan.md` (required for selectors, contracts, and acceptance criteria)
-- `rnd/instructions/e2e-testing.instructions.md`
-- `rnd/instructions/testing.instructions.md`
+- the E2E testing guidance in the applicable `AGENTS.md` / `CLAUDE.md`
+- the testing guidance in the applicable `AGENTS.md` / `CLAUDE.md`
 - Implemented code in the current codebase
 
 ## Outputs
@@ -44,7 +44,7 @@ Generate, execute, diagnose, and report end-to-end tests derived from `rnd/test_
 ### Phase 3: Test Generation
 
 1. Map each test case to one executable test file, unless related cases can share fixtures safely.
-2. Use the framework and patterns specified in `rnd/instructions/e2e-testing.instructions.md`.
+2. Use the framework and patterns specified in the E2E testing guidance in the applicable `AGENTS.md` / `CLAUDE.md`.
 3. Prefer `data-test-id` selectors, explicit waits, and AAA structure.
 4. Keep tests independent and stable.
 
@@ -68,7 +68,7 @@ Generate, execute, diagnose, and report end-to-end tests derived from `rnd/test_
 
 ## Hard Rules
 
-- Use only the framework and patterns from `rnd/instructions/e2e-testing.instructions.md`.
+- Use only the framework and patterns from the E2E testing guidance in the applicable `AGENTS.md` / `CLAUDE.md`.
 - Use only `data-test-id` selectors.
 - Run tests sequentially.
 - Keep the startup timeout to 10 minutes.
@@ -84,7 +84,7 @@ Generate, execute, diagnose, and report end-to-end tests derived from `rnd/test_
 
 ## File I/O and Scope
 
-- Read: `rnd/test_cases/`, `rnd/build_plans/`, the current codebase, `rnd/instructions/e2e-testing.instructions.md`, and `rnd/instructions/testing.instructions.md`
+- Read: `rnd/test_cases/`, `rnd/build_plans/`, the current codebase, the E2E testing guidance in the applicable `AGENTS.md` / `CLAUDE.md`, and the testing guidance in the applicable `AGENTS.md` / `CLAUDE.md`
 - Write: E2E test files, fixtures, result reports, and failure artifacts in the current codebase or `rnd/e2e-results/`
 - Do not start services manually when a compose-based workflow is available
 
