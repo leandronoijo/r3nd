@@ -404,7 +404,7 @@ Test artifacts (failed tests only):
 
 ### E. Artifact Retention Policy
 
-Per `rnd/instructions/e2e-testing.instructions.md`:
+Per the E2E testing guidance in the applicable `AGENTS.md` / `CLAUDE.md`:
 - **Screenshots:** Saved only for failed tests
 - **Videos:** Saved only for failed tests (retain-on-failure)
 - **Traces:** Saved only on first retry

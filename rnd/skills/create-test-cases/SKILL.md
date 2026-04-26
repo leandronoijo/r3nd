@@ -15,7 +15,7 @@ Produce clear, actionable end-to-end sanity test cases for a feature and write t
 - `rnd/product_specs/<feature-id>-product-spec.md` (required)
 - `rnd/tech_specs/<feature-id>-tech-spec.md` (required if present)
 - `rnd/build_plans/<feature-id>-build-plan.md` (recommended)
-- Repository sources for touched modules, guided by `rnd/instructions/`
+- Repository sources for touched modules, guided by repo/app/module-scoped `AGENTS.md` / `CLAUDE.md` files
 
 ## Outputs
 
@@ -48,7 +48,7 @@ Produce clear, actionable end-to-end sanity test cases for a feature and write t
 
 ## File I/O and Scope
 
-- Read: `rnd/product_specs/`, `rnd/tech_specs/`, `rnd/build_plans/`, the current codebase, and `rnd/instructions/`
+- Read: `rnd/product_specs/`, `rnd/tech_specs/`, `rnd/build_plans/`, the current codebase, and repo/app/module-scoped `AGENTS.md` / `CLAUDE.md` files
 - Write: `rnd/test_cases/<feature-id>-test-cases.md` only
 - If the product spec is missing or ambiguous, stop and ask for clarification rather than guessing the feature id
 

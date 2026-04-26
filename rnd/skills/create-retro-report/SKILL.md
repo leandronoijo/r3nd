@@ -22,7 +22,7 @@ Review PR discussion and identify concrete improvements to this repo's agents, t
 | PR files | PR file list | Map feedback to directories and process assets |
 | Agent profiles | `rnd/agents/*.md` | Update guidance for agents |
 | Templates | `rnd/templates/*.md` | Update guidance for templates |
-| Instructions | `rnd/instructions/*.instructions.md` | Update execution rules |
+| Instructions | applicable `AGENTS.md` / `CLAUDE.md` files | Update execution rules |
 
 ## Outputs
 
@@ -44,13 +44,13 @@ Use the file path referenced in a comment to determine which process artifact to
 | `rnd/tech_specs/` | `architect` agent + `rnd/templates/tech_spec.md` |
 | `rnd/build_plans/` | `team-lead` agent + `rnd/templates/build_plan.md` |
 | `rnd/test_cases/` | `qa-team-lead` agent + `rnd/templates/test_cases.md` |
-| E2E artifacts in the current codebase or `rnd/e2e-results/` | `e2e-engineer` agent + `rnd/instructions/e2e-testing.instructions.md` + `rnd/templates/e2e-result.md` |
-| Backend application code paths in the current codebase | `developer` agent + `rnd/instructions/backend.instructions.md` |
-| Frontend application code paths in the current codebase | `developer` agent + `rnd/instructions/frontend.instructions.md` |
-| Automated test paths in the current codebase | `developer` agent + `rnd/instructions/testing.instructions.md` |
+| E2E artifacts in the current codebase or `rnd/e2e-results/` | `e2e-engineer` agent + the E2E testing guidance in the applicable `AGENTS.md` / `CLAUDE.md` + `rnd/templates/e2e-result.md` |
+| Backend application code paths in the current codebase | `developer` agent + the backend guidance in the applicable `AGENTS.md` / `CLAUDE.md` |
+| Frontend application code paths in the current codebase | `developer` agent + the frontend guidance in the applicable `AGENTS.md` / `CLAUDE.md` |
+| Automated test paths in the current codebase | `developer` agent + the testing guidance in the applicable `AGENTS.md` / `CLAUDE.md` |
 | `rnd/agents/` | The referenced agent profile |
 | `rnd/templates/` | The referenced template |
-| `rnd/instructions/` | The referenced instruction file |
+| repo/app/module-scoped `AGENTS.md` / `CLAUDE.md` files | The referenced instruction file or scoped rule |
 
 If a comment does not reference a file path, use the PR scope and discussion context to choose the most relevant artifact and state the assumption in the retro.
 

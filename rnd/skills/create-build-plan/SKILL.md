@@ -24,7 +24,7 @@ Turn a technical spec or concrete problem statement into a concrete implementati
 | Technical Spec | `rnd/tech_specs/<feature-id>-tech-spec.md` | Source of truth for the work and task breakdown |
 | Existing Code | Current codebase | Integration points and golden references |
 | Existing Tests | Current codebase test locations | Test structure and coverage patterns |
-| Stack Rules | `rnd/instructions/` | Relevant conventions for the affected areas |
+| Stack Rules | repo/app/module-scoped `AGENTS.md` / `CLAUDE.md` files | Relevant conventions for the affected areas |
 | Architecture Docs | Current codebase documentation | System context and constraints |
 
 ## Outputs
@@ -56,7 +56,7 @@ Use `rnd/templates/build_plan.md` exactly and fill in the task-specific placehol
 
 - Verify dependencies from previous tasks are complete.
 - Identify integration points in the technical spec.
-- Read matching instruction files in `rnd/instructions/`.
+- Read the repo/app/module-scoped `AGENTS.md` / `CLAUDE.md` files that match the affected areas.
 - Identify golden reference modules to follow.
 - Confirm no new dependencies are needed unless justified.
 - Review interfaces this task exposes or consumes.
@@ -139,7 +139,7 @@ Use `rnd/templates/build_plan.md` exactly and fill in the task-specific placehol
 
 ## File I/O and Scope
 
-- Read `rnd/tech_specs/`, the current codebase, and `rnd/instructions/`.
+- Read `rnd/tech_specs/`, the current codebase, and repo/app/module-scoped `AGENTS.md` / `CLAUDE.md` files.
 - Write `rnd/build_plans/` only.
 
 ## Communication Style

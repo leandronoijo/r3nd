@@ -29,7 +29,7 @@ The skill supports two input modes. Use exactly one per invocation.
 ### Both Modes Also Use
 
 - Repository sources across the current codebase for context.
-- `rnd/instructions/` for stack and tooling guidance.
+- repo/app/module-scoped `AGENTS.md` / `CLAUDE.md` files for stack and tooling guidance.
 - `rnd/templates/tech_spec.md` as the canonical template.
 
 ## Outputs
@@ -74,7 +74,7 @@ The final spec must include:
 ## Behavior & Rules
 
 - Always read `rnd/templates/tech_spec.md` and use it as the canonical starting point.
-- Always follow repository-level instructions and any path-specific `rnd/instructions/*.instructions.md`.
+- Always follow repository-level instructions and any applicable path-specific `AGENTS.md` / `CLAUDE.md` files.
 - Ground the design in the current repo layout and cite real files or modules that exist.
 - Verify referenced repository files exist before naming them in the spec.
 - Do not modify `rnd/templates/tech_spec.md`.
@@ -102,9 +102,9 @@ Use concise, delta-oriented writing.
 
 Before drafting any technical specification, perform these checks.
 
-### Step 1: List Available Instruction Files
+### Step 1: Find Available Instruction Files
 
-- List all files in `rnd/instructions/` before designing the spec.
+- Find repo/app/module-scoped `AGENTS.md` / `CLAUDE.md` files before designing the spec.
 
 ### Step 2: Identify Target Directories
 
@@ -117,11 +117,11 @@ Before drafting any technical specification, perform these checks.
 
 ### Step 3: Check for Matching Instructions
 
-- For each target directory, check whether a matching instruction file exists.
+- For each target directory, check whether a matching scoped instruction file exists.
 - Examples:
-  - `backend` directory -> `backend.instructions.md`
-  - `frontend` directory -> `frontend.instructions.md`
-  - custom directories -> `<directory-name>.instructions.md`
+  - backend changes -> nearest backend app/module `AGENTS.md` / `CLAUDE.md`
+  - frontend changes -> nearest frontend app/module `AGENTS.md` / `CLAUDE.md`
+  - cross-cutting changes -> repository-level `AGENTS.md` / `CLAUDE.md`
 
 ### Step 4: Warn and Prompt User
 

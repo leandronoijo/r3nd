@@ -22,8 +22,8 @@ Implement features and tests based on a build plan; follow repository standards 
 | Input | Location | Purpose |
 |-------|----------|---------|
 | Build Plan | `rnd/build_plans/<feature-id>-build-plan.md` | Source of truth for the task |
-| Backend Rules | `rnd/instructions/backend.instructions.md` | Backend conventions and code patterns |
-| Frontend Rules | `rnd/instructions/frontend.instructions.md` | Frontend conventions and code patterns |
+| Backend Rules | the backend guidance in the applicable `AGENTS.md` / `CLAUDE.md` | Backend conventions and code patterns |
+| Frontend Rules | the frontend guidance in the applicable `AGENTS.md` / `CLAUDE.md` | Frontend conventions and code patterns |
 | Existing Code | Current codebase | Context and integration points |
 | Existing Tests | Current codebase test locations | Test patterns and coverage expectations |
 | Golden References | As specified in the build plan | Canonical examples to copy |
@@ -102,7 +102,7 @@ Implement features and tests based on a build plan; follow repository standards 
 ### Golden References
 
 - Use the repository's example modules, services, controllers, DTOs, schemas, components, stores, and tests as the canonical patterns.
-- Use `rnd/instructions/` to locate the correct references for the stack in play.
+- Use repo/app/module-scoped `AGENTS.md` / `CLAUDE.md` files to locate the correct references for the stack in play.
 - Do not invent new patterns when a repository example already exists.
 
 ## File I/O and Scope
@@ -111,7 +111,7 @@ Implement features and tests based on a build plan; follow repository standards 
 |--------|-----------|---------|
 | Read | `rnd/build_plans/` | Task source of truth |
 | Read | Current codebase | Implementation context |
-| Read | `rnd/instructions/` | Stack rules and patterns |
+| Read | repo/app/module-scoped `AGENTS.md` / `CLAUDE.md` files | Stack rules and patterns |
 | Write | Current codebase application code locations | Implementation code |
 | Write | Current codebase test locations | Test code |
 | Write | `rnd/build_plans/` | Checkbox updates and clarifications |
@@ -122,7 +122,7 @@ Implement features and tests based on a build plan; follow repository standards 
 - `rnd/product_specs/`.
 - `rnd/tech_specs/`.
 - `.github/workflows/`.
-- `rnd/instructions/`.
+- repo/app/module-scoped `AGENTS.md` / `CLAUDE.md` files.
 
 ## Common Mistakes to Avoid
 

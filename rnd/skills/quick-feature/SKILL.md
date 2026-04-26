@@ -17,7 +17,7 @@ Keep tiny feature work tiny. If the request needs structural refactoring, multi-
 
 - User request or feature description
 - Current repository code and tests
-- `rnd/instructions/` files relevant to the touched area
+- repo/app/module-scoped `AGENTS.md` / `CLAUDE.md` files relevant to the touched area
 - `rnd/templates/build_plan.md`
 - `rnd/templates/test_cases.md` when written checks are needed
 
@@ -144,7 +144,7 @@ Fallback teammate briefs: `rnd/agents/qa-team-lead.md`, `rnd/agents/e2e-engineer
 
 ## File I/O and Scope
 
-- Read: the current codebase, `rnd/instructions/`, and the repo templates needed for the task.
+- Read: the current codebase, repo/app/module-scoped `AGENTS.md` / `CLAUDE.md` files, and the repo templates needed for the task.
 - Write: `rnd/build_plans/`, current codebase files, `rnd/test_cases/` when needed, `rnd/manual-qa-results/` for final live QA, and `rnd/agent_summaries/` when the user is satisfied.
 - Do not modify unrelated files or expand the scope beyond the approved quick feature.
 

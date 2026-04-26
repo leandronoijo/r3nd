@@ -25,7 +25,7 @@ This workflow is for regressions, not redesigns. The job is to understand why th
 4. **Minimal fix wins** - Prefer the smallest change that restores correctness without redesigning the feature.
 5. **Plan before implementation** - Show the diagnosis and proposed fix to the user before coding.
 6. **Verify after implementation** - Re-run the same repro path and targeted checks after the fix lands.
-7. **Developer standards still apply** - Once implementation starts, follow `rnd/agents/developer.md` and the relevant `rnd/instructions/*.instructions.md` files.
+7. **Developer standards still apply** - Once implementation starts, follow `rnd/agents/developer.md` and the applicable `AGENTS.md` / `CLAUDE.md` files.
 
 Ask yourself before changing code: *Do I understand the failure, the original intent, and the narrowest safe fix?*
 
@@ -83,7 +83,7 @@ Separate context required.
 No phase-specific skill exists.
 Use agent brief: `rnd/agents/developer.md`
 
-6. Inspect the failing path, nearby tests, and any matching `rnd/instructions/*.instructions.md` files before editing.
+6. Inspect the failing path, nearby tests, and any matching `AGENTS.md` / `CLAUDE.md` files before editing.
 7. Use commit history to identify the likely change that introduced the regression and the intent behind it.
 8. If `rnd/tech_specs/` or `rnd/build_plans/` contain relevant context, read the matching files and separate intended behavior from accidental behavior.
 9. Keep the investigation narrow: focus on the smallest set of files that plausibly owns the bug.
@@ -140,7 +140,7 @@ Use agent brief: `rnd/agents/developer.md`
 | Bug report | User prompt, issue link, stack trace, or observed failure | Starting point for reproduction |
 | Codebase | Current repository | Failure path and integration points |
 | Git history | Current repository history | Intent behind the regression |
-| Repo instructions | `rnd/instructions/*.instructions.md` | Stack-specific conventions and test rules |
+| Repo instructions | applicable `AGENTS.md` / `CLAUDE.md` files | Stack-specific conventions and test rules |
 | Specs and plans | `rnd/tech_specs/` and `rnd/build_plans/` when present | Intended behavior and scope boundaries |
 
 ## Outputs

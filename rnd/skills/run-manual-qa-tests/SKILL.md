@@ -22,7 +22,7 @@ This skill is the final evidence gate for live verification. Unit tests, integra
 - Inline custom repro case from a parent skill when no saved test-case file exists
 - Relevant build plans under `rnd/build_plans/`
 - Optional product spec and tech spec under `rnd/product_specs/` and `rnd/tech_specs/`
-- Relevant `rnd/instructions/*.instructions.md` files
+- Relevant `AGENTS.md` / `CLAUDE.md` files
 - `rnd/templates/manual-qa-result.md`
 - Current codebase, runtime scripts, test accounts, and observable side-effect tooling
 
@@ -44,7 +44,7 @@ This skill is the final evidence gate for live verification. Unit tests, integra
 ### 1. Context and Scope
 
 1. Read the written test cases or the inline repro case.
-2. Read the relevant build plans, specs, and `rnd/instructions/` files.
+2. Read the relevant build plans, specs, and repo/app/module-scoped `AGENTS.md` / `CLAUDE.md` files.
 3. Open `rnd/templates/manual-qa-result.md` and use it as the report structure.
 4. Identify the observable artifacts needed for each case.
 
@@ -86,7 +86,7 @@ When a parent skill sends a single inline reproduction case:
 
 ## File I/O and Scope
 
-- Read: `rnd/test_cases/`, `rnd/build_plans/`, `rnd/product_specs/`, `rnd/tech_specs/`, `rnd/instructions/`, `rnd/templates/manual-qa-result.md`, and the current codebase
+- Read: `rnd/test_cases/`, `rnd/build_plans/`, `rnd/product_specs/`, `rnd/tech_specs/`, repo/app/module-scoped `AGENTS.md` / `CLAUDE.md` files, `rnd/templates/manual-qa-result.md`, and the current codebase
 - Write: `rnd/manual-qa-results/` only
 - Do not approve behavior without fresh artifacts from the current run
 

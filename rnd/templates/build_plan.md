@@ -29,11 +29,11 @@ Complete these items **before** starting any implementation tasks.
 
 - [ ] **Verify previous task dependencies are complete** (if T>1)
 - [ ] Identify integration points in Section 1
-- [ ] Read instruction files in `rnd/instructions/` that match those integration points
-  - Example: backend changes → `backend.instructions.md` (if present)
-  - Example: frontend changes → `frontend.instructions.md` (if present)
-  - Example: testing changes → `testing.instructions.md`
-  - Example: e2e changes → `e2e-testing.instructions.md`
+- [ ] Read repo/app/module-scoped `AGENTS.md` / `CLAUDE.md` files that match those integration points
+  - Example: backend changes -> nearest backend app/module instruction file
+  - Example: frontend changes -> nearest frontend app/module instruction file
+  - Example: testing changes -> testing guidance in the applicable scoped instruction file
+  - Example: e2e changes -> E2E guidance in the applicable scoped instruction file
 - [ ] Identify golden reference modules:
   - Backend: `src/backend/modules/example/`
   - Frontend: `src/frontend/components/example/`, `src/frontend/stores/exampleStore.ts`
@@ -91,7 +91,7 @@ Complete these items **before** starting any implementation tasks.
 - **Dependencies:** None
 - **Golden Reference:** `src/backend/modules/example/schemas/example.schema.ts`
 - **Details:**
-  - Define schema/model using the backend data modeling approach specified in `rnd/instructions/backend.instructions.md`.
+  - Define schema/model using the backend data modeling approach specified in the backend guidance in the applicable `AGENTS.md` / `CLAUDE.md`.
   - Fields (example):
     - `fieldName: string` — required
     - `optionalField?: string` — optional
@@ -114,7 +114,7 @@ Complete these items **before** starting any implementation tasks.
 - **Dependencies:** Step 1
 - **Golden Reference:** `src/backend/modules/example/dto/create-example.dto.ts`
 - **Details:**
-  - Class with validation decorators/annotations (follow `rnd/instructions/backend.instructions.md` for examples)
+  - Class with validation decorators/annotations (follow the backend guidance in the applicable `AGENTS.md` / `CLAUDE.md` for examples)
   - Field names must match schema exactly
 - **Acceptance Criteria:**
   - All fields have appropriate validation decorators/annotations as defined in backend instructions
@@ -145,7 +145,7 @@ Complete these items **before** starting any implementation tasks.
 - **Dependencies:** Step 1, Step 2
 - **Golden Reference:** `src/backend/modules/example/example.service.ts`
 - **Details:**
-  - Class registered as a service per backend DI conventions (see `rnd/instructions/backend.instructions.md`)
+  - Class registered as a service per backend DI conventions (see the backend guidance in the applicable `AGENTS.md` / `CLAUDE.md`)
   - Inject repository/model via repository DI provider pattern per backend instructions
   - Methods:
     - `async create(dto: CreateEntityDto): Promise<Entity>`
@@ -198,7 +198,7 @@ Complete these items **before** starting any implementation tasks.
 - **Dependencies:** Step 1, Step 3, Step 4
 - **Golden Reference:** `src/backend/modules/example/example.module.ts`
 - **Details:**
-  - Register the model/provider according to backend module conventions (see `rnd/instructions/backend.instructions.md`)
+  - Register the model/provider according to backend module conventions (see the backend guidance in the applicable `AGENTS.md` / `CLAUDE.md`)
   - Declare controller in `controllers`
   - Declare service in `providers`
   - Export service if other modules need it
@@ -231,7 +231,7 @@ Complete these items **before** starting any implementation tasks.
 - **Dependencies:** Step 3
 - **Golden Reference:** `src/backend/modules/example/example.service.spec.ts`
 - **Details:**
-  - Use the repository's backend testing harness and patterns (see `rnd/instructions/testing.instructions.md`)
+  - Use the repository's backend testing harness and patterns (see the testing guidance in the applicable `AGENTS.md` / `CLAUDE.md`)
   - Mock `Model<Entity>` for all methods
   - Test cases:
     - `create()` — returns saved entity
@@ -303,17 +303,17 @@ Complete these items **before** starting any implementation tasks.
 - **Dependencies:** Step 7
 -- **Golden Reference:** `src/frontend/components/example/ExampleList` (component file)
 - **Details:**
-  - Use the frontend component pattern/syntax as defined in `rnd/instructions/frontend.instructions.md`
-  - Import and use the repository's store pattern per `rnd/instructions/frontend.instructions.md`
-  - UI components: use repository's selected UI library components (see `rnd/instructions/frontend.instructions.md`)
+  - Use the frontend component pattern/syntax as defined in the frontend guidance in the applicable `AGENTS.md` / `CLAUDE.md`
+  - Import and use the repository's store pattern per the frontend guidance in the applicable `AGENTS.md` / `CLAUDE.md`
+  - UI components: use repository's selected UI library components (see the frontend guidance in the applicable `AGENTS.md` / `CLAUDE.md`)
   - Required `data-test-id` attributes:
     - `entity-list-container`
     - `entity-list-item-{id}`
     - `entity-list-loading`
     - `entity-list-empty`
 - **Acceptance Criteria:**
-  - Frontend component pattern: use composition-style components as defined in `rnd/instructions/frontend.instructions.md`
-  - Use the repository's designated UI library and follow its component patterns (see `rnd/instructions/frontend.instructions.md`)
+  - Frontend component pattern: use composition-style components as defined in the frontend guidance in the applicable `AGENTS.md` / `CLAUDE.md`
+  - Use the repository's designated UI library and follow its component patterns (see the frontend guidance in the applicable `AGENTS.md` / `CLAUDE.md`)
   - All interactive elements have `data-test-id`
   - Fetches data via store on mount
 - **Effort:** medium
@@ -325,10 +325,10 @@ Complete these items **before** starting any implementation tasks.
 - **Action:** create
 - **Dependencies:** Step 7
 - **Details:**
-  - Use the frontend component pattern/syntax as defined in `rnd/instructions/frontend.instructions.md`
+  - Use the frontend component pattern/syntax as defined in the frontend guidance in the applicable `AGENTS.md` / `CLAUDE.md`
   - Props: `entity?: Entity` (for edit mode), `mode: 'create' | 'edit'`
   - Emits: `submit`, `cancel`
-  - UI form components per `rnd/instructions/frontend.instructions.md` (use the repo's designated UI library)
+  - UI form components per the frontend guidance in the applicable `AGENTS.md` / `CLAUDE.md` (use the repo's designated UI library)
   - Client-side validation matching backend DTOs
   - Required `data-test-id` attributes:
     - `entity-form`
@@ -405,7 +405,7 @@ Complete these items **before** starting any implementation tasks.
 - **Action:** create
 - **Dependencies:** Step 7
 - **Details:**
-  - Use the repository's frontend store test harness (see `rnd/instructions/testing.instructions.md`)
+  - Use the repository's frontend store test harness (see the testing guidance in the applicable `AGENTS.md` / `CLAUDE.md`)
   - Mock API calls
   - Test all actions and state mutations
 - **Acceptance Criteria:**
@@ -420,8 +420,8 @@ Complete these items **before** starting any implementation tasks.
 - **Action:** create
 - **Dependencies:** Step 8
 - **Details:**
-  - Use the repository's frontend testing utilities and patterns (see `rnd/instructions/testing.instructions.md`)
-  - Mock store using the repository's frontend testing harness (see `rnd/instructions/testing.instructions.md`)
+  - Use the repository's frontend testing utilities and patterns (see the testing guidance in the applicable `AGENTS.md` / `CLAUDE.md`)
+  - Mock store using the repository's frontend testing harness (see the testing guidance in the applicable `AGENTS.md` / `CLAUDE.md`)
   - Test rendering, interactions
 - **Acceptance Criteria:**
   - Components render correctly
@@ -544,10 +544,10 @@ Complete these items **before** starting any implementation tasks.
 
 | Area | Warning | Correct Pattern |
 |------|---------|-----------------|
-| **Frontend** | Follow `rnd/instructions/frontend.instructions.md` for frontend patterns and allowed libraries. | See frontend instructions |
-| **Backend** | Follow `rnd/instructions/backend.instructions.md` for backend patterns and allowed libraries. | See backend instructions |
+| **Frontend** | Follow the frontend guidance in the applicable `AGENTS.md` / `CLAUDE.md` for frontend patterns and allowed libraries. | See frontend instructions |
+| **Backend** | Follow the backend guidance in the applicable `AGENTS.md` / `CLAUDE.md` for backend patterns and allowed libraries. | See backend instructions |
 | **DTOs** | Follow backend instructions for DTOs, validation, and schema sync. | See backend instructions |
-| **Tests** | Follow `rnd/instructions/testing.instructions.md` for test requirements, selectors/doc conventions, and quality gates. | See testing instructions |
+| **Tests** | Follow the testing guidance in the applicable `AGENTS.md` / `CLAUDE.md` for test requirements, selectors/doc conventions, and quality gates. | See testing instructions |
 | **Imports** | Check `package.json` and instruction files for allowed packages. | Verify before adding dependencies |
 | **State** | Follow frontend instructions for state management patterns and store usage. | See frontend instructions |
 | **Queries** | Follow backend instructions for data access patterns and repository/ORM usage. | See backend instructions |

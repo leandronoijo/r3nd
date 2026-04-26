@@ -20,7 +20,7 @@ Drive a feature from tech spec to verified implementation by coordinating build-
 - Feature directory with the matching spec artifacts
 - Build plans: one `-T<n>-build-plan.md` file per task
 - Optional test cases: `rnd/test_cases/...`
-- Current codebase, tests, and relevant `rnd/instructions/` files
+- Current codebase, tests, and relevant repo/app/module-scoped `AGENTS.md` / `CLAUDE.md` files
 
 ## Outputs
 
@@ -97,7 +97,7 @@ No distinct agent brief exists.
 
 1. Resolve the feature id and locate the tech spec.
 2. Locate the feature build plans and any existing test-case files.
-3. Read the current codebase and relevant `rnd/instructions/` files before scheduling work.
+3. Read the current codebase and relevant repo/app/module-scoped `AGENTS.md` / `CLAUDE.md` files before scheduling work.
 
 ### 2. Build-Plan Assurance
 
@@ -191,7 +191,7 @@ On task-gate or final live-QA failure:
 
 ## File I/O and Scope
 
-- Read `rnd/tech_specs/`, `rnd/build_plans/`, `rnd/test_cases/`, the current codebase, and `rnd/instructions/`.
+- Read `rnd/tech_specs/`, `rnd/build_plans/`, `rnd/test_cases/`, the current codebase, and repo/app/module-scoped `AGENTS.md` / `CLAUDE.md` files.
 - Write implementation artifacts only under `rnd/agent_runs/<feature-id>/implement-feature-<timestamp>/`.
 - Use `rnd/manual-qa-results/` for the final live-QA report and artifacts.
 - Do not skip build-plan generation, task QA, or final live QA.
