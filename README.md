@@ -547,6 +547,7 @@ It helps with:
 | `implement-feature` | Coordinate feature delivery across build plans and QA gates |
 | `create-test-cases` | Generate E2E or QA test cases from a build plan |
 | `run-e2e-tests` | Execute E2E tests and produce result artifacts |
+| `manual-qa-report-to-html` | Convert a manual QA markdown result into an HTML evidence report |
 | `create-retro-report` | Produce a retro from the delivery flow |
 | `analyze-repo-context` | Generate repo-level context files |
 | `analyze-app-context` | Generate app-level context files |
