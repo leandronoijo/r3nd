@@ -1,20 +1,33 @@
-const { runWorktree, runWorktreeCreate, runWorktreeClean } = require('../lib/worktreeService');
+const { runWorktree, runWorktreeCreate, runWorktreeList, runWorktreeClean } = require('../lib/worktreeService');
 
 function register(program) {
   const worktree = program
-    .command('worktree')
+    .command('worktree [branch]')
     .description('Create and clean repo-scoped git worktrees under ~/.r3nd/worktrees');
 
   worktree
+    .option('-l, --list', 'List all worktrees for the current repository')
+    .option('-nc, --no-command', 'Return the worktree directory and skip the open command')
     .option('-br, --branch <name>', 'Branch name for the new worktree')
-    .action(async (options) => {
+    .action(async (branchArg, options) => {
       try {
-        if (options.branch) {
-          await runWorktreeCreate({ branch: options.branch });
+        if (options.list) {
+          const output = await runWorktreeList();
+          if (output) {
+            console.log(output);
+          }
           return;
         }
 
-        await runWorktree();
+        const branch = options.branch || branchArg;
+        const result = branch
+          ? await runWorktreeCreate({ branch, noCommand: options.noCommand })
+          : await runWorktree({ noCommand: options.noCommand });
+
+        if (options.noCommand && result && result.path) {
+          console.log(result.path);
+          return;
+        }
       } catch (err) {
         console.error('Worktree command failed:', err && err.message ? err.message : err);
         process.exit(1);
