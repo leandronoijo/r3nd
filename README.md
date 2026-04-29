@@ -362,7 +362,10 @@ Examples:
 
 ```bash
 r3nd worktree
+r3nd worktree --list
+r3nd worktree auth-investigation
 r3nd worktree --branch auth-investigation
+r3nd worktree auth-investigation --no-command
 r3nd worktree clean
 ```
 
@@ -371,7 +374,10 @@ The worktree flow can:
 - create repo-scoped git worktrees
 - open an existing worktree
 - clean up r3nd-managed clean worktrees
+- list all worktrees in `git worktree list` format
 - copy vendor directories like `.claude`, `.codex`, `.github`, and `.cursor` into the new worktree when present
+- accept branch names via `r3nd worktree [branch]` or `--branch`
+- skip the open command with `--no-command` and print the created/selected worktree path instead
 
 What gets copied into a new worktree and what command gets run afterward are both configurable in `r3nd.yaml`.
 

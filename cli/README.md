@@ -127,9 +127,12 @@ Commands:
 
 - `worktree`: Open an existing repo worktree or create a new repo-scoped git worktree under `~/.r3nd/worktrees/`.
   - Options:
+    - `[branch]`: Positional branch name for the new worktree.
     - `-br, --branch <name>`: Use a specific branch name instead of generating one automatically.
+    - `-l, --list`: Print all worktrees for the current repository (same format as `git worktree list`).
+    - `-nc, --no-command`: Skip running `worktree-open-command` and print the worktree directory path.
   - Behavior:
-    - Without `--branch`, shows all git worktrees for the current repository and lets you choose one to open with the configured `worktree-open-command`.
+    - Without a branch argument, shows all git worktrees for the current repository and lets you choose one to open with the configured `worktree-open-command`.
     - Appends a `New worktree` option to that list.
     - Choosing `New worktree` prompts for a branch name; leaving it empty uses an automatic faker-based branch name.
     - Copies every directory named as your configured `spec-dir-name`.
@@ -140,7 +143,10 @@ Commands:
 
     ```bash
     r3nd worktree
+    r3nd worktree --list
+    r3nd worktree auth-investigation
     r3nd worktree --branch auth-investigation
+    r3nd worktree auth-investigation --no-command
     ```
 
 - `worktree clean`: Delete clean r3nd-managed worktrees for the current repository.

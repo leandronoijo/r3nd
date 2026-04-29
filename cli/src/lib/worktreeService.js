@@ -379,6 +379,7 @@ async function getRepoContext(cwd, deps = {}) {
 async function runWorktreeCreate(opts = {}, deps = {}) {
   const cwd = opts.cwd || process.cwd();
   const nonInteractive = !!opts.nonInteractive;
+  const noCommand = !!opts.noCommand;
   const configManager = deps.configManager || new ConfigManager(cwd);
   const configured = await ensureWorktreeConfig(configManager, deps, { nonInteractive });
   const copyPatterns = await configManager.getWorktreeCopyFiles();
@@ -405,10 +406,12 @@ async function runWorktreeCreate(opts = {}, deps = {}) {
   const specDirName = await configManager.getSpecDirName();
   const copied = await copyManagedFiles(repoRoot, branchPlan.targetPath, specDirName, copyPatterns);
 
-  try {
-    await openWorktree(branchPlan.targetPath, openCommand, deps);
-  } catch (err) {
-    logger.warn(`Worktree created at ${branchPlan.targetPath}, but failed to launch the open command: ${err.message}`);
+  if (!noCommand) {
+    try {
+      await openWorktree(branchPlan.targetPath, openCommand, deps);
+    } catch (err) {
+      logger.warn(`Worktree created at ${branchPlan.targetPath}, but failed to launch the open command: ${err.message}`);
+    }
   }
 
   logger.info(`✓ Created worktree ${branchPlan.branchName} at ${branchPlan.targetPath}`);
@@ -426,6 +429,7 @@ async function runWorktreeCreate(opts = {}, deps = {}) {
 async function runWorktree(opts = {}, deps = {}) {
   const cwd = opts.cwd || process.cwd();
   const nonInteractive = !!opts.nonInteractive;
+  const noCommand = !!opts.noCommand;
 
   if (opts.branch || nonInteractive) {
     return runWorktreeCreate(opts, deps);
@@ -450,12 +454,21 @@ async function runWorktree(opts = {}, deps = {}) {
     }, deps);
   }
 
-  await openWorktree(selectedPath, openCommand, deps);
-  logger.info(`✓ Opened worktree ${selectedPath}`);
+  if (!noCommand) {
+    await openWorktree(selectedPath, openCommand, deps);
+    logger.info(`✓ Opened worktree ${selectedPath}`);
+  }
 
   return {
     path: selectedPath
   };
+}
+
+async function runWorktreeList(opts = {}, deps = {}) {
+  const cwd = opts.cwd || process.cwd();
+  const { repoRoot } = await getRepoContext(cwd, deps);
+  const listResult = await runGit(repoRoot, ['worktree', 'list'], deps);
+  return listResult.stdout.trimEnd();
 }
 
 async function runWorktreeClean(opts = {}, deps = {}) {
@@ -511,6 +524,7 @@ module.exports = {
   getRepoScopeName,
   WORKTREE_VENDOR_DIRS,
   runWorktree,
+  runWorktreeList,
   runWorktreeCreate,
   runWorktreeClean
 };

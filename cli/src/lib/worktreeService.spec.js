@@ -15,6 +15,7 @@ jest.mock('./ui/prompts', () => ({
 const { ConfigManager } = require('./config/configManager');
 const {
   runWorktree,
+  runWorktreeList,
   runWorktreeCreate,
   runWorktreeClean,
   getRepoScopeName,
@@ -120,6 +121,14 @@ describe('worktreeService', () => {
     expect(deps.spawnRunner).toHaveBeenCalled();
   });
 
+  it('creates a worktree without launching the open command when noCommand is true', async () => {
+    const result = await runWorktreeCreate({ cwd: repoDir, branch: 'no-open-branch', noCommand: true }, deps);
+
+    expect(result.path).toBe(path.join(worktreeScopeRoot, 'no-open-branch'));
+    await expect(fs.access(result.path)).resolves.toBeUndefined();
+    expect(deps.spawnRunner).not.toHaveBeenCalled();
+  });
+
   it('rejects creating a second worktree for a branch already checked out elsewhere', async () => {
     await runWorktreeCreate({ cwd: repoDir, branch: 'dupe-branch' }, deps);
 
@@ -162,6 +171,18 @@ describe('worktreeService', () => {
       cwd: existingWorktree.path,
       stdio: 'inherit'
     }));
+  });
+
+  it('returns selected existing worktree path without opening when noCommand is true', async () => {
+    const existingWorktree = await runWorktreeCreate({ cwd: repoDir, branch: 'existing-branch-no-open' }, deps);
+
+    deps.spawnRunner.mockClear();
+    deps.askWorktreeSelection.mockResolvedValueOnce(existingWorktree.path);
+
+    const result = await runWorktree({ cwd: repoDir, noCommand: true }, deps);
+
+    expect(result).toEqual({ path: existingWorktree.path });
+    expect(deps.spawnRunner).not.toHaveBeenCalled();
   });
 
   it('creates a new worktree from the chooser and auto-generates the branch name when left blank', async () => {
@@ -215,6 +236,16 @@ describe('worktreeService', () => {
       '{worktreeDir}',
       '--reuse-window'
     ]);
+  });
+
+  it('returns all worktrees in git worktree list format', async () => {
+    const linkedWorktree = await runWorktreeCreate({ cwd: repoDir, branch: 'list-branch', noCommand: true }, deps);
+    const output = await runWorktreeList({ cwd: repoDir }, deps);
+
+    expect(output).toContain(repoDir);
+    expect(output).toContain(linkedWorktree.path);
+    expect(output).toContain('[develop]');
+    expect(output).toContain('[list-branch]');
   });
 
   it('creates a new worktree under the correct scope when called from inside a linked worktree', async () => {
