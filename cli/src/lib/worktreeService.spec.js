@@ -216,4 +216,28 @@ describe('worktreeService', () => {
       '--reuse-window'
     ]);
   });
+
+  it('creates a new worktree under the correct scope when called from inside a linked worktree', async () => {
+    const firstWorktree = await runWorktreeCreate({ cwd: repoDir, branch: 'first-linked-branch' }, deps);
+    const firstWorktreeDir = firstWorktree.path;
+
+    deps.spawnRunner.mockClear();
+    const secondWorktree = await runWorktreeCreate({ cwd: firstWorktreeDir, branch: 'second-linked-branch' }, deps);
+
+    expect(secondWorktree.path).toBe(path.join(worktreeScopeRoot, 'second-linked-branch'));
+    await expect(fs.access(secondWorktree.path)).resolves.toBeUndefined();
+  });
+
+  it('lists the current linked worktree as current when run from inside it', async () => {
+    const linkedWorktree = await runWorktreeCreate({ cwd: repoDir, branch: 'nav-branch' }, deps);
+    const linkedWorktreeDir = linkedWorktree.path;
+
+    deps.askWorktreeSelection.mockResolvedValueOnce(linkedWorktreeDir);
+    await runWorktree({ cwd: linkedWorktreeDir }, deps);
+
+    const selectionCall = deps.askWorktreeSelection.mock.calls[0][0];
+    const currentEntry = selectionCall.find(w => w.current);
+    expect(currentEntry).toBeDefined();
+    expect(currentEntry.path).toBe(linkedWorktreeDir);
+  });
 });

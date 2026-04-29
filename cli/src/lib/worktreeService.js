@@ -357,16 +357,22 @@ async function getRepoContext(cwd, deps = {}) {
   const commonDirResult = await runGit(cwd, ['rev-parse', '--git-common-dir'], deps);
   const repoRoot = topLevel.stdout.trim();
   const gitCommonDir = path.resolve(repoRoot, commonDirResult.stdout.trim());
-  const scopeName = getRepoScopeName(repoRoot, gitCommonDir);
-  const worktreeScopeRoot = path.join(os.homedir(), '.r3nd', 'worktrees', scopeName);
   const worktreeList = await runGit(repoRoot, ['worktree', 'list', '--porcelain'], deps);
+  const worktrees = parseGitWorktreeList(worktreeList.stdout);
+
+  // The first entry in the porcelain output is always the main worktree.
+  // Using its path for the scope name keeps it stable whether r3nd is run
+  // from the main worktree or from any linked worktree.
+  const mainWorktreePath = worktrees.length > 0 ? worktrees[0].path : repoRoot;
+  const scopeName = getRepoScopeName(mainWorktreePath, gitCommonDir);
+  const worktreeScopeRoot = path.join(os.homedir(), '.r3nd', 'worktrees', scopeName);
 
   return {
     repoRoot,
     gitCommonDir,
     scopeName,
     worktreeScopeRoot,
-    worktrees: parseGitWorktreeList(worktreeList.stdout)
+    worktrees
   };
 }
 
