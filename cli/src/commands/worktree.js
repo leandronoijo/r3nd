@@ -20,11 +20,13 @@ function register(program) {
         }
 
         const branch = options.branch || branchArg;
+        // Commander sets options.command=false for --no-command (negation flag), not options.noCommand
+        const noCommand = !options.command;
         const result = branch
-          ? await runWorktreeCreate({ branch, noCommand: options.noCommand })
-          : await runWorktree({ noCommand: options.noCommand });
+          ? await runWorktreeCreate({ branch, noCommand })
+          : await runWorktree({ noCommand });
 
-        if (options.noCommand && result && result.path) {
+        if (noCommand && result && result.path) {
           console.log(result.path);
           return;
         }
