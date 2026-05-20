@@ -651,11 +651,15 @@
       if (action.variant === "primaryLarge") {
         return renderComponent("PrimaryButton", {
           label: action.label,
+          href: action.href,
+          target: action.target,
           className: "w-full md:w-auto px-10 py-4 bg-primary text-on-primary font-headline font-bold text-lg uppercase tracking-tight rounded-lg hover:scale-105 transition-transform shadow-[0_0_30px_rgba(58,223,250,0.2)]"
         });
       }
       return renderComponent("SecondaryButton", {
         label: action.label,
+        href: action.href,
+        target: action.target,
         className: "w-full md:w-auto px-10 py-4 ghost-border text-on-surface font-headline font-bold text-lg uppercase tracking-tight rounded-lg hover:bg-surface-variant transition-colors"
       });
     }));
@@ -671,11 +675,15 @@
       if (action.variant === "primary") {
         return renderComponent("PrimaryButton", {
           label: action.label,
+          href: action.href,
+          target: action.target,
           className: "bg-primary text-on-primary font-bold px-10 py-4 rounded-lg shadow-[0_0_40px_rgba(58,223,250,0.2)]"
         });
       }
       return renderComponent("SecondaryButton", {
         label: action.label,
+        href: action.href,
+        target: action.target,
         className: "ghost-border text-on-surface font-bold px-10 py-4 rounded-lg hover:bg-surface-variant transition-colors"
       });
     }));

@@ -13,8 +13,8 @@ window.PAGE_MODEL = {
     titleAccent: "with AI agents",
     description: "Turn product requests into specs, plans, code, tests, and retros with a repo-native workflow that works across Codex, Gemini, Copilot, Cursor, or prompts - while humans stay in control.",
     actions: [
-      { variant: "primary", label: "See workflows", icon: "arrow_forward" },
-      { variant: "secondary", label: "Get started" }
+      { variant: "primary", label: "See workflows", icon: "arrow_forward", href: "#workflow-modes" },
+      { variant: "secondary", label: "Get started", href: "#get-started" }
     ],
     features: [
       { icon: "terminal", label: "Tool-agnostic execution" },
@@ -309,7 +309,7 @@ window.PAGE_MODEL = {
       commands: [
         {
           label: "Global install from GitHub",
-          command: "sudo npm install -g git+https://github.com/leandronoijo/r3nd.git#0.3"
+          command: "npm install -g git+https://github.com/leandronoijo/r3nd.git#0.3"
         },
         {
           label: "Local development install",
@@ -463,8 +463,8 @@ window.PAGE_MODEL = {
   finalCta: {
     title: "Ready to evolve your delivery pipeline?",
     actions: [
-      { label: "Get Started Now", variant: "primary" },
-      { label: "Book a Demo", variant: "secondary" }
+      { label: "Get Started Now", variant: "primary", href: "https://github.com/leandronoijo/r3nd/blob/develop/docs/getting-started.md" },
+      { label: "Book a Demo", variant: "secondary", href: "https://github.com/leandronoijo/r3nd/issues/new" }
     ]
   },
 
