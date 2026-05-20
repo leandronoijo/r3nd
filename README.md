@@ -279,7 +279,7 @@ This lets each part of a codebase carry its own **local operating context** inst
 
 ```bash
 # Install globally from GitHub
-sudo npm install -g git+https://github.com/leandronoijo/r3nd.git#0.3
+npm install -g git+https://github.com/leandronoijo/r3nd.git#0.3
 ```
 
 ### 2. Fork the seed

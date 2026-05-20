@@ -48,7 +48,7 @@ If you do not want the CLI to run agents directly, no agent backend is required.
 Global install from GitHub:
 
 ```bash
-sudo npm install -g git+https://github.com/leandronoijo/r3nd.git#0.3
+npm install -g git+https://github.com/leandronoijo/r3nd.git#0.3
 ```
 
 Local development install:
