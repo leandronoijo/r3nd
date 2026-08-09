@@ -27,6 +27,7 @@ jest.mock('./fs/seedCopier', () => ({
 jest.mock('./overlays/overlaySeedService', () => ({
   fetchSeedSpecDirName: jest.fn().mockResolvedValue('rnd'),
   discoverAvailableOverlays: jest.fn().mockReturnValue(['api', 'vue']),
+  createEffectiveSeedView: jest.fn((tree, githubClient) => ({ tree, githubClient })),
   applySelectedOverlays: jest.fn().mockResolvedValue(undefined)
 }));
 
@@ -67,7 +68,11 @@ describe('initService', () => {
         'r3nd',
         'rnd',
         ['api', 'vue'],
-        { nonInteractive: false, overwriteExisting: true }
+        {
+          nonInteractive: false,
+          overwriteExisting: true,
+          skipSpecSubdirs: ['agents', 'skills', 'templates', 'build_plans']
+        }
       );
     });
   });

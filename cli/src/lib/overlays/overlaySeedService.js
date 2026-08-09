@@ -80,6 +80,66 @@ function createOverlayAliases(remotePath, overlayName, specDirName) {
   return Array.from(aliases);
 }
 
+function getOverlaySpecSourcePath(remotePath, overlayName, seedSpecDirName) {
+  const overlayRoot = `overlays/${overlayName}/`;
+  if (!remotePath.startsWith(overlayRoot)) {
+    return null;
+  }
+
+  const relativePath = remotePath.slice(overlayRoot.length);
+  const segments = relativePath.split('/');
+  const topLevelDir = segments[0];
+  const nestedPath = segments.slice(1).join('/');
+
+  if (!nestedPath || !OVERLAY_SPEC_SUBDIR_DESTINATIONS[topLevelDir]) {
+    return null;
+  }
+
+  return `${seedSpecDirName}/${OVERLAY_SPEC_SUBDIR_DESTINATIONS[topLevelDir]}/${nestedPath}`;
+}
+
+/**
+ * Build a seed view where selected overlay files replace their canonical seed
+ * paths before anything is copied or generated. Later overlays have precedence.
+ */
+function createEffectiveSeedView(tree, githubClient, seedSpecDirName, overlays) {
+  const selectedOverlays = Array.isArray(overlays) ? overlays.filter(Boolean) : [];
+  const effectiveTree = Array.isArray(tree) ? [...tree] : [];
+  const knownPaths = new Set(effectiveTree.map(item => item.path));
+  const sourceOverrides = new Map();
+
+  for (const overlayName of selectedOverlays) {
+    for (const item of listRemoteFiles(effectiveTree, `overlays/${overlayName}/`)) {
+      const canonicalPath = getOverlaySpecSourcePath(item.path, overlayName, seedSpecDirName);
+      if (!canonicalPath) {
+        continue;
+      }
+
+      sourceOverrides.set(canonicalPath, item.path);
+      if (!knownPaths.has(canonicalPath)) {
+        effectiveTree.push({ type: 'blob', path: canonicalPath });
+        knownPaths.add(canonicalPath);
+      }
+    }
+  }
+
+  const rawFileCache = new Map();
+  const effectiveGithubClient = {
+    async fetchRaw(remotePath) {
+      const sourcePath = sourceOverrides.get(remotePath) || remotePath;
+      if (!rawFileCache.has(sourcePath)) {
+        rawFileCache.set(sourcePath, Promise.resolve().then(() => githubClient.fetchRaw(sourcePath)));
+      }
+      return rawFileCache.get(sourcePath);
+    }
+  };
+
+  return {
+    tree: effectiveTree,
+    githubClient: effectiveGithubClient
+  };
+}
+
 async function fetchSeedSpecDirName(githubClient) {
   try {
     const configBuffer = await githubClient.fetchRaw('r3nd.yaml');
@@ -127,8 +187,18 @@ async function buildBaseTemplateCache(tree, githubClient, specDirName, seedSpecD
   return fileCache;
 }
 
-async function buildOverlayBuffers(tree, githubClient, overlayName) {
-  const overlayFiles = listRemoteFiles(tree, `overlays/${overlayName}/`);
+async function buildOverlayBuffers(tree, githubClient, overlayName, skipSpecSubdirs = []) {
+  const skipped = new Set(skipSpecSubdirs);
+  const availableOverlayFiles = listRemoteFiles(tree, `overlays/${overlayName}/`);
+  if (availableOverlayFiles.length === 0) {
+    logger.warn(`  No files found for overlay "${overlayName}".`);
+  }
+
+  const overlayFiles = availableOverlayFiles.filter(file => {
+    const relativePath = file.path.slice(`overlays/${overlayName}/`.length);
+    const topLevelDir = relativePath.split('/')[0];
+    return !skipped.has(topLevelDir);
+  });
   const buffers = new Map();
 
   for (const file of overlayFiles) {
@@ -142,12 +212,11 @@ async function buildOverlayBuffers(tree, githubClient, overlayName) {
   return { overlayFiles, buffers };
 }
 
-async function applyOverlay(cwd, tree, githubClient, specDirName, seedSpecDirName, overlayName, baseTemplateCache, { nonInteractive = false, overwriteExisting = true } = {}) {
+async function applyOverlay(cwd, tree, githubClient, specDirName, seedSpecDirName, overlayName, baseTemplateCache, { nonInteractive = false, overwriteExisting = true, skipSpecSubdirs = [] } = {}) {
   logger.info(`\n📦 Applying overlay: ${overlayName}`);
 
-  const { overlayFiles, buffers } = await buildOverlayBuffers(tree, githubClient, overlayName);
+  const { overlayFiles, buffers } = await buildOverlayBuffers(tree, githubClient, overlayName, skipSpecSubdirs);
   if (overlayFiles.length === 0) {
-    logger.warn(`  No files found for overlay "${overlayName}".`);
     return;
   }
 
@@ -201,6 +270,17 @@ async function applySelectedOverlays(cwd, tree, githubClient, specDirName, seedS
   const selectedOverlays = Array.isArray(overlays) ? overlays.filter(Boolean) : [];
   if (selectedOverlays.length === 0) {
     logger.info('\n📦 No overlays selected.');
+    return;
+  }
+
+  const skipped = new Set(options.skipSpecSubdirs || []);
+  const hasFilesToApply = selectedOverlays.some(overlayName =>
+    listRemoteFiles(tree, `overlays/${overlayName}/`).some(file => {
+      const relativePath = file.path.slice(`overlays/${overlayName}/`.length);
+      return !skipped.has(relativePath.split('/')[0]);
+    })
+  );
+  if (!hasFilesToApply) {
     return;
   }
 
@@ -268,6 +348,7 @@ async function ensureSpecDirectories(cwd, specDirName, { createRndInstructions =
 module.exports = {
   fetchSeedSpecDirName,
   discoverAvailableOverlays,
+  createEffectiveSeedView,
   applySelectedOverlays,
   ensureMandatorySeedFiles,
   ensureSpecDirectories,

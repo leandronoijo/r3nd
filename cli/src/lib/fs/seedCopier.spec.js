@@ -7,6 +7,7 @@ jest.mock('../ui/prompts', () => ({
 }));
 
 const { copyTaskSkills, syncPlatformAsset } = require('./seedCopier');
+const { createEffectiveSeedView } = require('../overlays/overlaySeedService');
 
 describe('seedCopier', () => {
   let tempDir;
@@ -198,5 +199,88 @@ description: Analyze repository context
     expect(generated).toContain('# analyze-repo-context');
     expect(generated).toContain('# Architect Agent');
     expect(generated).toContain('## Codex-Specific Instructions');
+  });
+
+  it('materializes overlaid canonical and vendor skills without fetching the shadowed original', async () => {
+    const tree = [
+      { type: 'blob', path: 'rnd/skills/create-tech-spec/SKILL.md' },
+      { type: 'blob', path: 'rnd/agents/shared/command-hygiene.md' },
+      { type: 'blob', path: 'rnd/vendor/skills/codex.md' },
+      { type: 'blob', path: 'rnd/vendor/skills/claude.md' },
+      { type: 'blob', path: 'overlays/prototyping/skills/create-tech-spec/SKILL.md' },
+      { type: 'blob', path: 'overlays/prototyping/agents/shared/prototyping.md' }
+    ];
+    const fileMap = new Map([
+      ['rnd/skills/create-tech-spec/SKILL.md', Buffer.from('# Original Skill')],
+      ['rnd/agents/shared/command-hygiene.md', Buffer.from('Keep commands focused.')],
+      ['rnd/vendor/skills/codex.md', Buffer.from('## Codex Instructions')],
+      ['rnd/vendor/skills/claude.md', Buffer.from('## Claude Instructions')],
+      ['overlays/prototyping/skills/create-tech-spec/SKILL.md', Buffer.from(`# Prototype Skill
+
+{{rnd/agents/shared/prototyping.md}}
+{{rnd/agents/shared/command-hygiene.md}}
+`)],
+      ['overlays/prototyping/agents/shared/prototyping.md', Buffer.from('Prototype policy.')]
+    ]);
+    const githubClient = {
+      fetchRaw: jest.fn(async remotePath => {
+        if (!fileMap.has(remotePath)) {
+          throw new Error(`Unexpected fetch: ${remotePath}`);
+        }
+        return fileMap.get(remotePath);
+      })
+    };
+    const effectiveSeed = createEffectiveSeedView(tree, githubClient, 'rnd', ['prototyping']);
+
+    await copyTaskSkills(
+      tempDir,
+      effectiveSeed.tree,
+      effectiveSeed.githubClient,
+      'r3nd',
+      'rnd',
+      { nonInteractive: true, overwriteExisting: true }
+    );
+
+    for (const vendor of ['codex', 'claude']) {
+      await syncPlatformAsset(
+        tempDir,
+        effectiveSeed.tree,
+        effectiveSeed.githubClient,
+        {
+          key: vendor,
+          label: `${vendor} skills`,
+          assetType: 'generated-skill',
+          vendor,
+          outputPath: `.${vendor}/skills`
+        },
+        'r3nd',
+        'rnd',
+        { nonInteractive: true, overwriteExisting: true }
+      );
+    }
+
+    const canonical = await fs.readFile(
+      path.join(tempDir, 'r3nd', 'skills', 'create-tech-spec', 'SKILL.md'),
+      'utf-8'
+    );
+    const codex = await fs.readFile(
+      path.join(tempDir, '.codex', 'skills', 'create-tech-spec', 'SKILL.md'),
+      'utf-8'
+    );
+    const claude = await fs.readFile(
+      path.join(tempDir, '.claude', 'skills', 'create-tech-spec', 'SKILL.md'),
+      'utf-8'
+    );
+
+    expect(canonical).toContain('# Prototype Skill');
+    expect(canonical).toContain('Prototype policy.');
+    expect(codex).toContain('# Prototype Skill');
+    expect(codex).toContain('## Codex Instructions');
+    expect(claude).toContain('# Prototype Skill');
+    expect(claude).toContain('## Claude Instructions');
+    expect(canonical).not.toContain('# Original Skill');
+    expect(codex).not.toContain('# Original Skill');
+    expect(claude).not.toContain('# Original Skill');
+    expect(githubClient.fetchRaw).not.toHaveBeenCalledWith('rnd/skills/create-tech-spec/SKILL.md');
   });
 });

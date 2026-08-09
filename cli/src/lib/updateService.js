@@ -13,6 +13,7 @@ const {
 } = require('./fs/seedCopier');
 const {
   fetchSeedSpecDirName,
+  createEffectiveSeedView,
   applySelectedOverlays
 } = require('./overlays/overlaySeedService');
 const {
@@ -58,16 +59,20 @@ async function runUpdate(opts = {}, deps = {}) {
   const seedSpecDirName = await fetchSeedSpecDirName(githubClient);
   const selectedPlatformAssets = normalizePlatformAssetSelection(selectedOptions);
   const selectedOverlays = await configManager.getOverlays();
+  const effectiveSeed = createEffectiveSeedView(tree, githubClient, seedSpecDirName, selectedOverlays);
+  const materializedOverlaySubdirs = ['agents', 'build_plans'];
 
-  await copyAgentPersonas(cwd, tree, githubClient, specDirName, seedSpecDirName, { overwriteExisting: true });
-  await copyBuildPlans(cwd, tree, githubClient, specDirName, seedSpecDirName, { overwriteExisting: true });
+  await copyAgentPersonas(cwd, effectiveSeed.tree, effectiveSeed.githubClient, specDirName, seedSpecDirName, { overwriteExisting: true });
+  await copyBuildPlans(cwd, effectiveSeed.tree, effectiveSeed.githubClient, specDirName, seedSpecDirName, { overwriteExisting: true });
 
   if (selectedOptions.includes('templates')) {
-    await copyTemplates(cwd, tree, githubClient, specDirName, seedSpecDirName, { overwriteExisting: true });
+    await copyTemplates(cwd, effectiveSeed.tree, effectiveSeed.githubClient, specDirName, seedSpecDirName, { overwriteExisting: true });
+    materializedOverlaySubdirs.push('templates');
   }
 
   if (selectedOptions.includes('skills')) {
-    await copyTaskSkills(cwd, tree, githubClient, specDirName, seedSpecDirName, { overwriteExisting: true });
+    await copyTaskSkills(cwd, effectiveSeed.tree, effectiveSeed.githubClient, specDirName, seedSpecDirName, { overwriteExisting: true });
+    materializedOverlaySubdirs.push('skills');
   }
 
   for (const assetKey of selectedPlatformAssets) {
@@ -75,11 +80,12 @@ async function runUpdate(opts = {}, deps = {}) {
     if (!asset) {
       continue;
     }
-    await syncPlatformAsset(cwd, tree, githubClient, asset, specDirName, seedSpecDirName, { overwriteExisting: true });
+    await syncPlatformAsset(cwd, effectiveSeed.tree, effectiveSeed.githubClient, asset, specDirName, seedSpecDirName, { overwriteExisting: true });
   }
 
-  await applySelectedOverlays(cwd, tree, githubClient, specDirName, seedSpecDirName, selectedOverlays, {
-    overwriteExisting: true
+  await applySelectedOverlays(cwd, effectiveSeed.tree, effectiveSeed.githubClient, specDirName, seedSpecDirName, selectedOverlays, {
+    overwriteExisting: true,
+    skipSpecSubdirs: materializedOverlaySubdirs
   });
 
   logger.info('\nUpdate complete.');

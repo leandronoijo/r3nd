@@ -58,7 +58,7 @@ Commands:
   - From the project root: `node src/index.js init`
   - If installed globally: `r3nd init` (see installation section)
 
-- `scaffold`: Full project scaffolding — prompts for ordered overlays discovered from the seed repo, copies base seed content plus selected overlay files, and keeps the existing scaffold build plan filenames for LLM execution.
+- `scaffold`: Full project scaffolding — prompts for ordered overlays discovered from the seed repo, resolves them into one effective seed, materializes canonical and vendor files once, and keeps the existing scaffold build plan filenames for LLM execution.
 
 - `analyse`: Analyze repository and app scopes and generate `AGENTS.md` / `CLAUDE.md` files using an LLM agent.
   - Options:
