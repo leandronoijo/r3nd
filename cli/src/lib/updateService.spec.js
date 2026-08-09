@@ -26,6 +26,7 @@ jest.mock('./fs/seedCopier', () => ({
 
 jest.mock('./overlays/overlaySeedService', () => ({
   fetchSeedSpecDirName: jest.fn().mockResolvedValue('rnd'),
+  createEffectiveSeedView: jest.fn((tree, githubClient) => ({ tree, githubClient })),
   applySelectedOverlays: jest.fn().mockResolvedValue(undefined)
 }));
 
@@ -88,7 +89,10 @@ describe('updateService', () => {
         'r3nd',
         'rnd',
         ['api', 'vue'],
-        { overwriteExisting: true }
+        {
+          overwriteExisting: true,
+          skipSpecSubdirs: ['agents', 'build_plans', 'templates', 'skills']
+        }
       );
     });
 

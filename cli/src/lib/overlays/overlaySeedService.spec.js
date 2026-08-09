@@ -37,6 +37,7 @@ jest.mock('../fs/seedCopier', () => {
 
 const {
   discoverAvailableOverlays,
+  createEffectiveSeedView,
   applySelectedOverlays,
   getOverlayDestinationForPath
 } = require('./overlaySeedService');
@@ -66,6 +67,30 @@ describe('overlaySeedService', () => {
       expect(
         getOverlayDestinationForPath('overlays/api/templates/feature.md', 'api', 'r3nd')
       ).toBe(path.join('r3nd', 'templates', 'feature.md'));
+    });
+  });
+
+  describe('createEffectiveSeedView', () => {
+    it('replaces canonical paths in memory with later overlay sources', async () => {
+      const tree = [
+        { type: 'blob', path: 'rnd/skills/example/SKILL.md' },
+        { type: 'blob', path: 'overlays/one/skills/example/SKILL.md' },
+        { type: 'blob', path: 'overlays/two/skills/example/SKILL.md' },
+        { type: 'blob', path: 'overlays/two/skills/new-task/SKILL.md' }
+      ];
+      const githubClient = {
+        fetchRaw: jest.fn(async remotePath => Buffer.from(remotePath))
+      };
+
+      const effectiveSeed = createEffectiveSeedView(tree, githubClient, 'rnd', ['one', 'two']);
+
+      await expect(effectiveSeed.githubClient.fetchRaw('rnd/skills/example/SKILL.md'))
+        .resolves.toEqual(Buffer.from('overlays/two/skills/example/SKILL.md'));
+      expect(effectiveSeed.tree).toContainEqual({
+        type: 'blob',
+        path: 'rnd/skills/new-task/SKILL.md'
+      });
+      expect(githubClient.fetchRaw).not.toHaveBeenCalledWith('rnd/skills/example/SKILL.md');
     });
   });
 
@@ -106,6 +131,28 @@ describe('overlaySeedService', () => {
         .resolves.toBe('overlay two\n');
       await expect(fs.readFile(path.join(tempDir, 'docs', 'guide.md'), 'utf-8'))
         .resolves.toBe('# Guide\n');
+    });
+
+    it('can skip spec files already materialized from the effective seed', async () => {
+      const files = new Map([
+        ['rnd/templates/base.md', Buffer.from('base template\n')],
+        ['overlays/one/templates/shared.md', Buffer.from('overlay template\n')],
+        ['overlays/one/instructions/docs/guide.md', Buffer.from('# Guide\n')]
+      ]);
+      const tree = Array.from(files.keys()).map(filePath => ({ type: 'blob', path: filePath }));
+      const githubClient = {
+        fetchRaw: jest.fn(async remotePath => files.get(remotePath))
+      };
+
+      await applySelectedOverlays(tempDir, tree, githubClient, 'r3nd', 'rnd', ['one'], {
+        overwriteExisting: true,
+        skipSpecSubdirs: ['templates']
+      });
+
+      await expect(fs.access(path.join(tempDir, 'r3nd', 'templates', 'shared.md'))).rejects.toThrow();
+      await expect(fs.readFile(path.join(tempDir, 'docs', 'guide.md'), 'utf-8'))
+        .resolves.toBe('# Guide\n');
+      expect(githubClient.fetchRaw).not.toHaveBeenCalledWith('overlays/one/templates/shared.md');
     });
   });
 });

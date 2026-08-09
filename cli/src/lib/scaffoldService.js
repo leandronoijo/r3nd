@@ -14,6 +14,7 @@ const {
 const { 
   fetchSeedSpecDirName, 
   discoverAvailableOverlays,
+  createEffectiveSeedView,
   applySelectedOverlays,
   ensureMandatorySeedFiles, 
   ensureSpecDirectories 
@@ -80,36 +81,38 @@ async function runScaffold(opts = {}, deps = {}) {
   const currentOverlays = await configManager.getOverlays();
   const selectedOverlays = await askOverlays(currentOverlays, availableOverlays, nonInteractive);
   await configManager.set('overlays', selectedOverlays);
+  const effectiveSeed = createEffectiveSeedView(tree, githubClient, seedSpecDirName, selectedOverlays);
 
   // Copy common files (gitignore)
   await copyCommonFiles(cwd, tree, githubClient, specDirName, { nonInteractive });
 
-  // Copy shared agents
-  await copyAgentPersonas(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
+  // Materialize effective shared agents after overlay precedence is resolved
+  await copyAgentPersonas(cwd, effectiveSeed.tree, effectiveSeed.githubClient, specDirName, seedSpecDirName, { nonInteractive });
 
   // Copy testing instructions to spec-dir/instructions
   await copyTestingInstructions(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
 
-  // Copy canonical task skills from seed repo as fully composed local files
-  await copyTaskSkills(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
+  // Materialize effective canonical task skills as fully composed local files
+  await copyTaskSkills(cwd, effectiveSeed.tree, effectiveSeed.githubClient, specDirName, seedSpecDirName, { nonInteractive });
 
-  // Copy base build plans from seed repo
-  await copyBuildPlans(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
+  // Materialize effective build plans
+  await copyBuildPlans(cwd, effectiveSeed.tree, effectiveSeed.githubClient, specDirName, seedSpecDirName, { nonInteractive });
 
   for (const assetKey of selectedOptions) {
     const asset = getPlatformAsset(assetKey);
     if (!asset) {
       continue;
     }
-    await syncPlatformAsset(cwd, tree, githubClient, asset, specDirName, seedSpecDirName, { nonInteractive });
+    await syncPlatformAsset(cwd, effectiveSeed.tree, effectiveSeed.githubClient, asset, specDirName, seedSpecDirName, { nonInteractive });
   }
 
   // Copy templates
-  await copyTemplates(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
+  await copyTemplates(cwd, effectiveSeed.tree, effectiveSeed.githubClient, specDirName, seedSpecDirName, { nonInteractive });
 
-  await applySelectedOverlays(cwd, tree, githubClient, specDirName, seedSpecDirName, selectedOverlays, {
+  await applySelectedOverlays(cwd, effectiveSeed.tree, effectiveSeed.githubClient, specDirName, seedSpecDirName, selectedOverlays, {
     nonInteractive,
-    overwriteExisting: true
+    overwriteExisting: true,
+    skipSpecSubdirs: ['agents', 'skills', 'templates', 'build_plans']
   });
 
   // Ensure spec directories exist (conditionally create rnd/instructions)

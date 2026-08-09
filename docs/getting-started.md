@@ -75,8 +75,8 @@ Current behavior from the CLI implementation:
 - prompts for `spec-dir-name`
 - lets you choose platform asset families
 - fetches the seed tree from GitHub
-- copies common files, task skills, agent personas, templates, and base build plans
-- applies selected overlays
+- resolves selected overlays over the base seed in precedence order
+- materializes common files, effective task skills, agent personas, templates, build plans, and selected vendor assets
 - writes configuration to `r3nd.yaml`
 
 Command:
@@ -99,10 +99,10 @@ Current behavior from the CLI implementation:
 
 - initializes Git if needed
 - can add `origin` during setup
-- copies the same core seed content as `init`
+- materializes the same effective seed content as `init`
 - also copies testing instructions
 - ensures spec directories exist
-- applies selected overlays
+- materializes root-scoped overlay instructions
 - can optionally run scaffold build plans through a supported agent backend
 
 Command:

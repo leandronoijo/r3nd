@@ -30,6 +30,7 @@ jest.mock('./fs/seedCopier', () => ({
 jest.mock('./overlays/overlaySeedService', () => ({
   fetchSeedSpecDirName: jest.fn().mockResolvedValue('rnd'),
   discoverAvailableOverlays: jest.fn().mockReturnValue(['api', 'vue']),
+  createEffectiveSeedView: jest.fn((tree, githubClient) => ({ tree, githubClient })),
   applySelectedOverlays: jest.fn().mockResolvedValue(undefined),
   ensureMandatorySeedFiles: jest.fn().mockResolvedValue(undefined),
   ensureSpecDirectories: jest.fn().mockResolvedValue(undefined)
