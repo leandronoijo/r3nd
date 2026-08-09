@@ -15,6 +15,16 @@ Use the workflow that matches the size and uncertainty of the work:
 
 The important distinction is not speed. It is how much artifact structure and how many approval gates the change needs.
 
+### Prototyping Overlay
+
+When `prototyping` is selected after the stack overlays, full control starts with a brief tech spec rather than a product spec, semi-control uses the streamlined `implement-feature` override, and bugfix uses the same minimal-fix policy. Full control remains a user-driven sequence rather than gaining a coordinator skill. After full-control or semi-control implementation, the workflow asks whether to run AI manual QA, write reusable E2E test code, do both, or do neither; test-case artifacts are created only for reusable E2E. Prototyping omits integration tests, prefers minimal containerized infrastructure, and stops after two unsuccessful attempts at the same loop to ask the user for help.
+
+### MVP Overlay
+
+Select `mvp` after the stack overlays when the first release must stay prototype-fast but run as a real production system. It uses the same brief tech-spec, compact-plan, and user-selected QA shape as `prototyping`, but raises the completion bar to the smallest applicable production baseline: deterministic CI, a production Docker/runtime path, explicit configuration and secret handling, security and identity/tenant decisions, compatibility and migration safety, health signals, useful structured logs, and only metrics tied to a concrete operational question.
+
+The MVP overlay does not require every concern to create code. Specs and plans mark a concern `Not applicable` with a reason when it is irrelevant, reuse existing boilerplate before adding anything, and add focused boundary/contract coverage only for risks that unit tests cannot credibly prove. Treat `mvp` and `prototyping` as alternative mindset overlays; if both are selected, the later overlay takes precedence.
+
 ## 1. Full Control Workflow
 
 Use this when the change needs explicit handoffs and human review between stages.
