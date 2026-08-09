@@ -98,9 +98,9 @@ const AGENT_REGISTRY = [
     filesDir: (specDirPath) => `${specDirPath}/tech_specs`,
     agentFile: (specDirPath) => `${specDirPath}/skills/implement-feature/SKILL.md`,
     promptTemplate: (agentFile, targetFile, specDirPath) =>
-      `Using the task skill at ${agentFile} as instructions, please run coordinated feature implementation for the following input path:\n\n${targetFile}\n\nTreat this input as either:\n- a tech-spec file path, or\n- a feature directory path.\n\nIMPORTANT: Execute the strict workflow in the task skill, including build-plan assurance, per-task QA gates, and mandatory final E2E QA. Write required run artifacts under ${specDirPath}/agent_runs/.`,
+      `Using the task skill at ${agentFile} as instructions, please run coordinated feature implementation for the following input path:\n\n${targetFile}\n\nTreat this input as either:\n- a tech-spec file path, or\n- a feature directory path.\n\nIMPORTANT: Execute the strict workflow in the task skill, including build-plan assurance and its QA-selection and gate rules. Write any run artifacts required by that skill under ${specDirPath}/agent_runs/.`,
     interactiveSuffix: (doneFile, specDirPath) =>
-      `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After each major implementation checkpoint, provide a summary of task progress, task-gate status, and blockers.\n2. Ask if there are any concerns about the coordination flow, task QA gates, or final E2E outcomes.\n3. Do NOT start any server or docker foreground processes that require manual termination. Always run services in detached/background mode.\n4. Then follow the shared summary workflow below.${getSharedSummaryWorkflow(doneFile)}`
+      `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After each major implementation checkpoint, provide a summary of task progress, task-gate status, and blockers.\n2. Ask if there are any concerns about the coordination flow, task QA gates, or selected QA outcomes.\n3. Do NOT start any server or docker foreground processes that require manual termination. Always run services in detached/background mode.\n4. Then follow the shared summary workflow below.${getSharedSummaryWorkflow(doneFile)}`
   },
   {
     name: 'create-test-cases',
@@ -118,7 +118,7 @@ const AGENT_REGISTRY = [
     filesDir: (specDirPath) => `${specDirPath}/test_cases`,
     agentFile: (specDirPath) => `${specDirPath}/skills/run-e2e-tests/SKILL.md`,
     promptTemplate: (agentFile, targetFile, specDirPath) =>
-      `Using the task skill at ${agentFile} as instructions, please implement and execute E2E tests for the following test cases:\n\n${targetFile}\n\nIMPORTANT: Follow all rules in the task skill. Read ${specDirPath}/instructions/e2e-testing.instructions.md before starting. Start required services, run tests sequentially, diagnose failures, and generate a comprehensive result report.\n\nTest results should be saved to: ${specDirPath}/e2e-results/`,
+      `Using the task skill at ${agentFile} as instructions, please implement and execute E2E tests for the following test cases:\n\n${targetFile}\n\nIMPORTANT: Follow all rules in the task skill. Start required services, run tests, diagnose failures, and generate the result report required by the task skill.\n\nTest results should be saved to: ${specDirPath}/e2e-results/`,
     interactiveSuffix: (doneFile, specDirPath) =>
       `\n\nIMPORTANT INSTRUCTIONS FOR INTERACTIVE MODE:\n1. After executing tests and generating the result report, provide a summary of test outcomes and failure categories.\n2. Ask if any failures need deeper investigation or if test methodology needs adjustment.\n3. Do NOT start any server or docker foreground processes that require manual termination. Always run services in detached/background mode.\n4. Then follow the shared summary workflow below.${getSharedSummaryWorkflow(doneFile)}`
   },

@@ -122,8 +122,11 @@ Current overlay examples referenced by the docs and CLI flow:
 - `angular`
 - `fast-api`
 - `nestjs`
+- `prototyping`
 - `ruby-on-rails`
 - `vue`
+
+Select `prototyping` after any stack overlays so its workflow, template, and testing overrides take precedence. It starts feature work with a short tech spec, uses compact build plans, requires focused unit tests, excludes integration tests, and asks whether post-implementation QA should be AI-run manual QA, reusable E2E test code, both, or neither. Repeated fix attempts stop after two cycles to ask for help.
 
 ## Configure The Repository
 

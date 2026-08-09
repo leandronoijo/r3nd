@@ -296,7 +296,7 @@ r3nd init
 
 # Full setup for new projects
 # Current overlay options include:
-# angular, fast-api, nestjs, ruby-on-rails, vue
+# angular, fast-api, nestjs, prototyping, ruby-on-rails, vue
 r3nd scaffold
 ```
 

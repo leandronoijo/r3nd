@@ -155,6 +155,7 @@ describe('agentRegistry', () => {
       expect(prompt).toContain('specs/skills/implement-feature/SKILL.md');
       expect(prompt).toContain('specs/tech_specs/feature.md');
       expect(prompt).toContain('strict workflow');
+      expect(prompt).toContain('QA-selection');
       expect(prompt).toContain('specs/agent_runs/');
     });
 
