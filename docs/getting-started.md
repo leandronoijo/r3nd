@@ -121,12 +121,18 @@ Current overlay examples referenced by the docs and CLI flow:
 
 - `angular`
 - `fast-api`
+- `mvp`
 - `nestjs`
 - `prototyping`
 - `ruby-on-rails`
 - `vue`
 
-Select `prototyping` after any stack overlays so its workflow, template, and testing overrides take precedence. It starts feature work with a short tech spec, uses compact build plans, requires focused unit tests, excludes integration tests, and asks whether post-implementation QA should be AI-run manual QA, reusable E2E test code, both, or neither. Repeated fix attempts stop after two cycles to ask for help.
+Select a mindset overlay after any stack overlays so its workflow, template, and testing overrides take precedence:
+
+- `prototyping` starts with a short tech spec, uses compact build plans, requires focused unit tests, excludes integration tests, and prefers the smallest demonstrable runtime.
+- `mvp` keeps that focused workflow while requiring the applicable minimum production baseline: deterministic CI, a production container/runtime, explicit security and identity/tenant decisions, compatibility and migration handling, and just-enough logs, health signals, and metrics.
+
+Treat `prototyping` and `mvp` as alternatives. If both are configured, the one selected later wins because overlays are applied in order. Both ask whether post-implementation QA should be AI-run manual QA, reusable E2E test code, both, or neither, and both stop after two unsuccessful attempts at the same loop to ask for help.
 
 ## Configure The Repository
 
