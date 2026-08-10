@@ -27,6 +27,8 @@ The tech spec is the first durable document in this workflow. Do not create or r
 
 - Brief functional requirements, essential constraints, out-of-scope items, and assumptions
 - A short list of relevant existing files or modules
+- Explicit reuse and dependency decisions for substantial commodity capabilities, naming the existing, framework-native, or mature open-source package selected
+- For relational persistence, the ORM and its supported migration tool; any focused raw SQL must be an explained exception rather than the default data-access strategy
 - One general component diagram
 - Real component boundaries and contracts
 - Non-obvious algorithm, state, data, failure, or runtime details
@@ -37,12 +39,15 @@ The tech spec is the first durable document in this workflow. Do not create or r
 ## Workflow
 
 1. Read the request and `rnd/templates/tech_spec.md`.
-2. Inspect only the repository areas needed to ground the design and find an existing pattern to reuse.
-3. Use obvious reversible defaults and record them as assumptions.
-4. Ask a focused question immediately if behavior, data ownership, a public contract, or a technology choice cannot be decided safely.
-5. Choose the simplest design that produces a runnable vertical slice and leaves clear boundaries for later production work.
-6. Create tasks only when separate sequencing, ownership, or contracts are useful. Do not target an arbitrary task count.
-7. Validate that task contracts fit together, then write the file.
+2. Inspect only the repository areas needed to ground the design. Read the relevant manifests and lockfiles and find an existing pattern to reuse.
+3. For every substantial commodity capability, prefer the repository's established package, then a framework-maintained option, then a mature ecosystem-standard package. Check that the selection supports the current runtime and requirement and does not duplicate an equivalent dependency.
+4. Do not choose custom infrastructure merely to avoid adding a dependency. If no suitable package exists, document the concrete constraint, the options ruled out, and the narrow custom-code boundary.
+5. For new relational persistence, select a stack-appropriate ORM and its supported migrations. Do not design a custom migration mechanism or a raw-query data layer; allow focused raw SQL only for a documented ORM limitation.
+6. Treat a focused, reversible package addition as a normal design decision. Ask only when behavior, data ownership, a public contract, or a material technology tradeoff cannot be decided safely.
+7. Use obvious reversible defaults and record them as assumptions.
+8. Choose the simplest design that produces a runnable vertical slice and leaves clear boundaries for later production work.
+9. Create tasks only when separate sequencing, ownership, or contracts are useful. Do not target an arbitrary task count.
+10. Validate that task contracts and dependency choices fit together, then write the file.
 
 ## Exclusions
 

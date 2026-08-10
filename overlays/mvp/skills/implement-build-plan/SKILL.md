@@ -28,14 +28,18 @@ Deliver the plan quickly while preserving the minimum production baseline select
 1. Read the plan and inspect the affected code plus the referenced production patterns.
 2. Confirm predecessor contracts and required configuration exist. Ask immediately if a missing contract, security/tenant decision, or migration choice blocks safe work.
 3. Implement the smallest vertical slice that satisfies the plan. Avoid speculative abstraction and infrastructure.
-4. Preserve existing public behavior and stored data. Use additive changes or the plan's migration/compatibility path.
-5. Validate inputs and authorization at real boundaries, enforce tenant ownership where applicable, and keep secrets and sensitive values out of source, images, errors, and logs.
-6. Add only useful structured lifecycle/failure logs, health/readiness behavior, correlation, and metrics named by the plan.
-7. Reuse or add the minimal production Dockerfile/configuration and CI checks assigned to the task.
-8. Add focused unit tests and the planned boundary/contract test when applicable.
-9. Run the smallest relevant checks, then the CI-equivalent lint/type/test/build/image commands.
-10. Build and start the production runtime in detached mode when applicable, verify health/readiness, and stop only services started by this workflow.
-11. Mark completed plan items and report exact commands and results.
+4. Use the plan's selected packages and framework features for commodity capabilities. Do not replace them with hand-built equivalents to avoid dependency installation or configuration.
+5. If the plan omitted a commodity capability, inspect manifests and lockfiles and use an existing or mature ecosystem-standard package. Add a focused, reversible dependency directly; ask only when every suitable choice has material operational, licensing, security, or lock-in consequences.
+6. Use the selected ORM and migration tooling for relational persistence. Do not add a custom migration runner or default to raw queries; keep any raw SQL to a documented and tested ORM limitation.
+7. Keep custom code to product behavior and thin integration glue unless the plan explicitly justifies an exception.
+8. Preserve existing public behavior and stored data. Use additive changes or the plan's migration/compatibility path.
+9. Validate inputs and authorization at real boundaries, enforce tenant ownership where applicable, and keep secrets and sensitive values out of source, images, errors, and logs.
+10. Add only useful structured lifecycle/failure logs, health/readiness behavior, correlation, and metrics named by the plan.
+11. Reuse or add the minimal production Dockerfile/configuration and CI checks assigned to the task.
+12. Add focused unit tests and the planned boundary/contract test when applicable.
+13. Run the smallest relevant checks, then the CI-equivalent lint/type/test/build/image commands.
+14. Build and start the production runtime in detached mode when applicable, verify health/readiness, and stop only services started by this workflow.
+15. Mark completed plan items and report exact commands and results.
 
 ## Full-Control QA Handoff
 

@@ -13,6 +13,10 @@ Use this policy for every workflow in this overlay. Its goal is a correct, demon
 
 - Prefer the existing stack, its standard tooling, and its simplest established patterns.
 - Prefer one service, one datastore, synchronous calls, and framework-native features when they are enough.
+- For commodity capabilities such as persistence, schema migrations, validation, authentication, serialization, HTTP clients, logging, retries, scheduling, cryptography, and date/time handling, use the repository's established package or a mature ecosystem-standard package instead of building a custom mechanism. Adding one focused dependency is usually simpler than owning a bespoke subsystem.
+- If the repository has no established choice, inspect its manifests and lockfiles, then select the smallest well-maintained package that fits the current stack and requirement. Prefer framework-maintained or widely adopted open-source options with clear documentation and an active maintenance history.
+- Write custom code for product-specific behavior and thin integration glue. Build a commodity mechanism only when a concrete constraint rules out suitable packages; record the constraint, the options considered, and the maintenance/testing burden accepted.
+- For new relational persistence, use a stack-appropriate ORM and its supported migration tooling. Do not create a migration runner or make raw-query persistence the default. Use focused raw SQL only when the ORM cannot express a required query adequately, and document and test that exception.
 - Do not introduce Bun, Nx, Kubernetes, Argo, Kafka, or similar platform machinery unless the user requests it or the requirement cannot reasonably be met without it.
 - Keep modules small and responsibilities obvious. Define contracts at real boundaries such as HTTP, persistence, queues, files, or external APIs; do not add abstraction layers for hypothetical reuse.
 - Use the simplest containerized runtime that works. Usually this means a small Dockerfile and one Docker Compose file containing only the app and required dependencies.

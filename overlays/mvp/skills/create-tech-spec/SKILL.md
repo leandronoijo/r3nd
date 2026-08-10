@@ -28,6 +28,8 @@ The tech spec is the first required artifact. Do not create or require a product
 
 - Brief functional requirements, constraints, out-of-scope items, and reversible assumptions
 - Relevant existing application and production-baseline patterns
+- Explicit reuse and dependency decisions for substantial commodity capabilities, naming the existing, framework-native, or mature open-source package selected
+- For relational persistence, the ORM and its supported migration tool; any focused raw SQL must be an explained exception rather than the default data-access strategy
 - One component diagram and explicit contracts at real boundaries
 - The minimum CI, production runtime/configuration, security, identity/tenancy, compatibility/data, and operability decisions
 - Non-obvious state, migration, failure, release, or rollback behavior
@@ -38,13 +40,16 @@ The tech spec is the first required artifact. Do not create or require a product
 ## Workflow
 
 1. Read the request and compact tech-spec template.
-2. Inspect the affected code and one useful existing pattern for each applicable concern. Do not survey the whole platform.
+2. Inspect the affected code, relevant manifests and lockfiles, and one useful existing pattern for each applicable concern. Do not survey the whole platform.
 3. Identify deployed consumers, stored data, trust boundaries, and whether the slice is public, authenticated, or tenant-scoped.
-4. Reuse the repository's CI, Docker, configuration, security, migration, logging, and telemetry conventions. Add a missing baseline only when this slice needs it to operate safely.
-5. Choose the simplest deployable design and record `Not applicable — <reason>` for irrelevant baseline concerns.
-6. Prefer additive contracts and migrations. Ask before an avoidable breaking change, unclear data ownership, security decision, tenancy model, or material technology addition.
-7. Create tasks only where sequencing, ownership, or contracts benefit from separation.
-8. Validate that the tasks collectively deliver the behavior and production baseline, then write the file.
+4. For every substantial commodity capability, prefer the repository's established package, then a framework-maintained option, then a mature ecosystem-standard package. Check runtime/database compatibility, maintenance history, licensing constraints, and whether an equivalent dependency already exists.
+5. Do not choose custom infrastructure merely to avoid adding a dependency. If no suitable package exists, document the concrete production constraint, the options ruled out, and the narrow custom-code boundary plus its operational and testing burden.
+6. For new relational persistence, select a stack-appropriate ORM and its supported migrations. Do not design a custom migration mechanism or a raw-query data layer; allow focused raw SQL only for a documented ORM limitation.
+7. Reuse the repository's CI, Docker, configuration, security, logging, and telemetry conventions. Add a missing baseline only when this slice needs it to operate safely.
+8. Choose the simplest deployable design and record `Not applicable — <reason>` for irrelevant baseline concerns.
+9. Prefer additive contracts and migrations. Treat a focused, reversible package addition as a normal design decision; ask before an avoidable breaking change, unclear data ownership, security decision, tenancy model, or a technology choice with material operational, licensing, or lock-in consequences.
+10. Create tasks only where sequencing, ownership, or contracts benefit from separation.
+11. Validate that the tasks, dependency choices, and production baseline fit together, then write the file.
 
 ## Exclusions
 

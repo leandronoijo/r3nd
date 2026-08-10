@@ -30,7 +30,16 @@
 - `<path>` — <what is reused or changed>
 - `<path>` — <relevant existing delivery, runtime, or security pattern>
 
-## 3. Components And Contracts
+## 3. Reuse And Dependency Decisions
+
+List each substantial commodity capability the slice needs. Prefer an existing or mature package over a custom mechanism. If custom infrastructure is unavoidable, name the packages considered and the concrete production constraint that ruled them out.
+
+| Concern | Existing Capability Inspected | Selected Package Or Tool | Custom Code Boundary And Rationale |
+|---------|-------------------------------|--------------------------|------------------------------------|
+| `<persistence, validation, auth, HTTP, logging, etc.>` | `<manifest, lockfile, framework feature, or existing module>` | `<existing or mature package; version/constraint when relevant>` | `<product-specific glue only, or justified exception>` |
+| Relational data and migrations | `<existing data-access pattern or None>` | `<ORM and its supported migration tool, or Not applicable>` | `<focused raw SQL exception and reason, or None>` |
+
+## 4. Components And Contracts
 
 ```mermaid
 flowchart LR
@@ -42,7 +51,7 @@ flowchart LR
 |----------|----------|-------|
 | `<caller -> callee>` | `<request/input -> response/output>` | `<component>` |
 
-## 4. Minimum Production Baseline
+## 5. Minimum Production Baseline
 
 Use `Not applicable — <reason>` when a concern does not apply. Do not invent a subsystem merely to fill the table.
 
@@ -55,14 +64,14 @@ Use `Not applicable — <reason>` when a concern does not apply. Do not invent a
 | Compatibility and data | <affected consumers/data, additive or breaking change, migration and rollback> |
 | Operability | <structured logs, correlation, health signals, and only actionable metrics> |
 
-## 5. Non-Obvious Implementation Details
+## 6. Non-Obvious Implementation Details
 
 - **Algorithm or state transition:** <only what implementers must agree on>
 - **Data shape and lifecycle:** <essential fields, ownership, retention, or migration>
 - **Failure behavior:** <safe observable response and operational signal>
 - **Deployment or rollback:** <smallest useful release/backout detail>
 
-## 6. Verification
+## 7. Verification
 
 - **Unit:** <new behavior and important failure/authorization case>
 - **Boundary/contract:** <one production-risk boundary to test, or Not applicable with reason>
@@ -71,7 +80,7 @@ Use `Not applicable — <reason>` when a concern does not apply. Do not invent a
 - **Optional QA candidates:** <primary flow and any critical security/tenant/compatibility edge>
 - **QA choice:** Ask after implementation; do not decide in the spec.
 
-## 7. Tasks
+## 8. Tasks
 
 ### T1 — <vertical slice or bounded deliverable>
 
@@ -84,6 +93,6 @@ Use `Not applicable — <reason>` when a concern does not apply. Do not invent a
 
 <!-- Add another task only when separate ownership or dependency ordering is useful. -->
 
-## 8. Blocking Questions
+## 9. Blocking Questions
 
 - None | <question whose answer can change behavior, data, a public contract, security, tenancy, or technology>
