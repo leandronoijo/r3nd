@@ -60,6 +60,40 @@ describe.each([
       }
     }
   });
+
+  it('prefers established packages over custom commodity infrastructure', () => {
+    const policy = fs.readFileSync(
+      path.join(overlayRoot, `agents/shared/${sharedPolicyName}.md`),
+      'utf-8'
+    );
+    const techSpecSkill = fs.readFileSync(
+      path.join(overlayRoot, 'skills/create-tech-spec/SKILL.md'),
+      'utf-8'
+    );
+    const techSpecTemplate = fs.readFileSync(
+      path.join(overlayRoot, 'templates/tech_spec.md'),
+      'utf-8'
+    );
+    const buildPlanSkill = fs.readFileSync(
+      path.join(overlayRoot, 'skills/create-build-plan/SKILL.md'),
+      'utf-8'
+    );
+    const implementationSkill = fs.readFileSync(
+      path.join(overlayRoot, 'skills/implement-build-plan/SKILL.md'),
+      'utf-8'
+    );
+
+    expect(policy).toContain('commodity capabilities');
+    expect(policy).toContain('mature ecosystem-standard package');
+    expect(policy).toContain('stack-appropriate ORM');
+    expect(policy).toContain('Do not create a migration runner');
+    expect(techSpecSkill).toContain('manifests and lockfiles');
+    expect(techSpecSkill).toContain('Do not choose custom infrastructure merely to avoid adding a dependency');
+    expect(techSpecTemplate).toContain('## 3. Reuse And Dependency Decisions');
+    expect(techSpecTemplate).toContain('| Relational data and migrations |');
+    expect(buildPlanSkill).toContain("Carry the tech spec's package/tool choices into the plan");
+    expect(implementationSkill).toContain('Do not replace them with hand-built equivalents');
+  });
 });
 
 describe('mvp production baseline', () => {

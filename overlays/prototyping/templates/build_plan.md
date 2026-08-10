@@ -15,6 +15,8 @@
 
 - **Consumes:** <input/API/type/state, or None>
 - **Exposes:** <output/API/type/state, or None>
+- **Packages/tooling:** <established packages and framework features selected by the tech spec; include the ORM and migration tool when applicable>
+- **Custom code boundary:** <product-specific behavior and thin glue; justified commodity-code exception, or None>
 - **Algorithm/state rule:** <only details needed to avoid incompatible implementations>
 - **Runtime/config:** <only required container, service, variable, or migration details>
 

@@ -28,11 +28,14 @@ Deliver the build-plan outcome quickly, correctly, and with enough encapsulation
 1. Read the plan and inspect the affected code plus one established pattern.
 2. Confirm required predecessor contracts exist. Ask immediately if a missing contract blocks correct work.
 3. Implement the smallest vertical slice that satisfies the plan; keep real boundaries explicit and avoid speculative abstraction.
-4. Use existing dependencies and tooling. Ask before adding a material dependency or any non-trivial platform component.
-5. Add unit tests for the happy path and the most obvious relevant edge case.
-6. Do not add integration tests.
-7. Run the smallest relevant unit target, then relevant lint/type/build checks already present.
-8. Mark completed plan items and report exact commands and results.
+4. Use the plan's selected packages and framework features for commodity capabilities. Do not replace them with hand-built equivalents to avoid dependency installation or configuration.
+5. If the plan omitted a commodity capability, inspect manifests and lockfiles and use an existing or mature ecosystem-standard package. Add a focused, reversible dependency directly; ask only when every suitable choice has a material tradeoff or a non-trivial platform component is required.
+6. Use the selected ORM and migration tooling for relational persistence. Do not add a custom migration runner or default to raw queries; keep any raw SQL to a documented and tested ORM limitation.
+7. Keep custom code to product behavior and thin integration glue unless the plan explicitly justifies an exception.
+8. Add unit tests for the happy path and the most obvious relevant edge case.
+9. Do not add integration tests.
+10. Run the smallest relevant unit target, then relevant lint/type/build checks already present.
+11. Mark completed plan items and report exact commands and results.
 
 ## Full-Control QA Handoff
 
