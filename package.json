@@ -8,8 +8,8 @@
   "author": "leandronoijo",
   "license": "MIT",
   "dependencies": {
-    "@faker-js/faker": "^10.4.0",
-    "axios": "^1.16.0",
+    "@faker-js/faker": "^10.6.0",
+    "axios": "^1.20.0",
     "commander": "^11.0.0",
     "fast-glob": "^3.3.3",
     "inquirer": "^9.0.0",
