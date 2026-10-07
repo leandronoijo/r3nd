@@ -7,11 +7,6 @@ const { rewriteSpecDirBuffer, rewriteSpecDirContent } = require('../utils/specDi
 const { askOverwriteFile } = require('../ui/prompts');
 const logger = require('../utils/logger');
 
-function matchesPlatformFile(item, sourcePath, extension) {
-  const normalizedPrefix = sourcePath.endsWith('/') ? sourcePath : `${sourcePath}/`;
-  return item.type === 'blob' && item.path.startsWith(normalizedPrefix) && item.path.endsWith(extension);
-}
-
 function listRemoteFiles(tree, prefix, predicate = null) {
   const normalizedPrefix = prefix.endsWith('/') ? prefix : `${prefix}/`;
   return tree.filter(item =>
@@ -187,32 +182,6 @@ async function copyVendorSkillAddons(cwd, tree, githubClient, specDirName, seedS
   );
 }
 
-async function copyGitHubWorkflows(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive = false, overwriteExisting = false } = {}) {
-  logger.info('\n📦 Copying GitHub workflows...');
-
-  const workflowFiles = tree.filter(item =>
-    item.type === 'blob' && item.path.startsWith('.github/workflows/')
-  );
-
-  if (workflowFiles.length === 0) {
-    logger.warn('No workflow files found in seed repo.');
-    return;
-  }
-
-  for (const file of workflowFiles) {
-    try {
-      const buffer = await githubClient.fetchRaw(file.path);
-      const rewritten = rewriteSpecDirBuffer(buffer, file.path, ['rnd', 'r3nd', seedSpecDirName], specDirName);
-      const written = await writeWithOverwritePrompt(cwd, file.path, rewritten.buffer, { nonInteractive, overwriteExisting });
-      if (written) {
-        logger.info(`  Copied: ${file.path}`);
-      }
-    } catch (err) {
-      logger.error(`  Failed to copy ${file.path}:`, err && err.message ? err.message : err);
-    }
-  }
-}
-
 function listCanonicalSkillFiles(tree, seedSpecDirName) {
   return listRemoteFiles(
     tree,
@@ -288,30 +257,6 @@ async function generatePlatformSkillFiles(cwd, tree, githubClient, asset, specDi
 
 async function syncPlatformAsset(cwd, tree, githubClient, asset, specDirName, seedSpecDirName, options = {}) {
   if (!asset) {
-    return;
-  }
-
-  if (asset.assetType === 'workflow') {
-    const platformFiles = tree.filter(item => matchesPlatformFile(item, asset.sourcePath, asset.fileExtension));
-    if (platformFiles.length === 0) {
-      logger.warn(`  No files found in ${asset.sourcePath}`);
-      return;
-    }
-
-    await ensureDir(path.join(cwd, asset.sourcePath));
-
-    for (const file of platformFiles) {
-      try {
-        const buffer = await githubClient.fetchRaw(file.path);
-        const rewritten = rewriteSpecDirBuffer(buffer, file.path, ['rnd', 'r3nd', seedSpecDirName], specDirName);
-        const written = await writeWithOverwritePrompt(cwd, file.path, rewritten.buffer, options);
-        if (written) {
-          logger.info(`  ${options.overwriteExisting ? 'Updated' : 'Copied'}: ${file.path}`);
-        }
-      } catch (err) {
-        logger.error(`  Failed to sync ${file.path}:`, err && err.message ? err.message : err);
-      }
-    }
     return;
   }
 
@@ -444,7 +389,6 @@ module.exports = {
   copyBuildPlans,
   copyTaskSkills,
   copyVendorSkillAddons,
-  copyGitHubWorkflows,
   syncPlatformAsset,
   copyTemplates,
   copyCommonFiles,

@@ -30,8 +30,8 @@ async function runGenerateSeed(opts = {}) {
   // Discover the spec dir name used by the source seed (e.g. 'r3nd')
   const seedSpecDirName = await fetchSeedSpecDirName(githubClient);
 
-  // Copy overlays, the full spec dir, github workflows, and root files
-  const seedPrefixes = ['overlays/', `${seedSpecDirName}/`, '.github/workflows/'];
+  // Copy overlays, the full spec dir, and root files
+  const seedPrefixes = ['overlays/', `${seedSpecDirName}/`];
   const filesToCopy = tree.filter(item => {
     if (item.type !== 'blob') return false;
     return seedPrefixes.some(p => item.path.startsWith(p)) || SEED_ROOT_FILES.includes(item.path);

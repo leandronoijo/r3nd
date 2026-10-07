@@ -42,7 +42,6 @@ If you haven't installed any of the CLI tools yet, you can still use r3nd! Selec
 Commands:
 
 - `init`: Initialize the current directory as a git repository (runs `git init` if `.git` is missing) and copy a minimal set of seed files from the r3nd seed repository. Files copied include:
-  - `.github/workflows/**`
   - `.github/skills/**`
   - `.cursor/skills/**`
   - `.claude/skills/**`
@@ -51,7 +50,8 @@ Commands:
   - `rnd/templates/**`
   - `rnd/instructions/e2e-testing.instructions.md`
   - `.gitignore`
-  - (GitHub workflows and GitHub skills are managed as separate generated asset families)
+
+  `init`, `update`, `scaffold`, and `generate-seed` do not install or update GitHub Actions workflows. Existing project workflows are preserved. GitHub skills remain available.
 
   Example:
 

@@ -603,7 +603,6 @@ r3nd agents implement-feature --file r3nd/tech_specs/auth.md --agent codex
 ```text
 .github/
   chatmodes/                 # VS Code / Copilot chat modes
-  workflows/                 # Optional GitHub workflow automation
   copilot-instructions.md    # Copilot-specific global instructions
 
 .cursor/
