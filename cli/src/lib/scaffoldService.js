@@ -16,7 +16,6 @@ const {
   discoverAvailableOverlays,
   createEffectiveSeedView,
   applySelectedOverlays,
-  ensureMandatorySeedFiles, 
   ensureSpecDirectories 
 } = require('./overlays/overlaySeedService');
 const { askLLMChoice, askOverlays, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askSeedRepo, askInitOptions } = require('./ui/prompts');
@@ -118,13 +117,6 @@ async function runScaffold(opts = {}, deps = {}) {
   // Ensure spec directories exist (conditionally create rnd/instructions)
   const createRndInstructions = shouldMirrorInstructionsToRnd(selectedOptions);
   await ensureSpecDirectories(cwd, specDirName, { createRndInstructions });
-
-  // Ensure mandatory seed files exist
-  const mandatorySeedFiles = [];
-  if (selectedOptions.includes('github-workflows')) {
-    mandatorySeedFiles.push(`${seedSpecDirName}/templates/retro.md`, '.github/workflows/06-retro-ready.yml');
-  }
-  await ensureMandatorySeedFiles(cwd, githubClient, specDirName, seedSpecDirName, mandatorySeedFiles, { nonInteractive });
 
   logger.info('Scaffolding complete.');
 

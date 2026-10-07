@@ -10,17 +10,6 @@ const PLATFORM_ASSETS = [
     updateAction: 'Update .github/skills for each task'
   },
   {
-    key: 'github-workflows',
-    label: 'GitHub Workflows',
-    assetType: 'workflow',
-    sourcePath: '.github/workflows',
-    fileExtension: '.yml',
-    compose: false,
-    mirrorInstructionsToRnd: false,
-    initAction: 'Copy .github/workflows',
-    updateAction: 'Update .github/workflows'
-  },
-  {
     key: 'cursor',
     label: 'Cursor Skills',
     assetType: 'generated-skill',
@@ -75,7 +64,7 @@ const PLATFORM_ASSETS = [
 ];
 
 const LEGACY_PLATFORM_ASSET_ALIASES = {
-  github: ['github-skills', 'github-workflows']
+  github: ['github-skills']
 };
 
 function getPlatformAssets() {

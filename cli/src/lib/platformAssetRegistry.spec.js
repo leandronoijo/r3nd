@@ -13,7 +13,6 @@ describe('platformAssetRegistry', () => {
     expect(Array.isArray(assets)).toBe(true);
     expect(assets.map(asset => asset.key)).toEqual([
       'github-skills',
-      'github-workflows',
       'cursor',
       'codex',
       'claude',
@@ -33,7 +32,6 @@ describe('platformAssetRegistry', () => {
   it('returns default platform asset keys in registry order', () => {
     expect(getDefaultPlatformAssetKeys()).toEqual([
       'github-skills',
-      'github-workflows',
       'cursor',
       'codex',
       'claude',
@@ -42,19 +40,23 @@ describe('platformAssetRegistry', () => {
     ]);
   });
 
-  it('normalizes legacy github selection into the split asset keys', () => {
+  it('normalizes legacy github selection to GitHub skills', () => {
     expect(normalizePlatformAssetSelection(['github'])).toEqual([
-      'github-skills',
-      'github-workflows'
+      'github-skills'
     ]);
   });
 
-  it('preserves explicit split selections without duplication', () => {
+  it('preserves explicit skill selections without duplication', () => {
     expect(normalizePlatformAssetSelection(['github', 'github-skills', 'cursor'])).toEqual([
       'github-skills',
-      'github-workflows',
       'cursor'
     ]);
+  });
+
+  it('ignores retired workflow selections, including alongside the legacy GitHub alias', () => {
+    expect(getPlatformAsset('github-workflows')).toBeUndefined();
+    expect(normalizePlatformAssetSelection(['github-workflows'])).toEqual([]);
+    expect(normalizePlatformAssetSelection(['github', 'github-workflows'])).toEqual(['github-skills']);
   });
 
   it('reports whether any selected assets require rnd instruction mirroring', () => {
