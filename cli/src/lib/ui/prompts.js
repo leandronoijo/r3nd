@@ -303,7 +303,10 @@ async function askInitOptions(nonInteractive = false) {
   const defaultOptions = getDefaultPlatformAssetKeys();
   if (nonInteractive) return defaultOptions;
 
-  const choices = getPlatformAssetPromptChoices('init');
+  const choices = [
+    { name: 'Bootstrap repo using r3start', value: 'r3start', checked: false },
+    ...getPlatformAssetPromptChoices('init')
+  ];
   
   const res = await prompt([{
     type: 'checkbox',

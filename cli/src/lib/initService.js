@@ -25,6 +25,7 @@ const {
   normalizePlatformAssetSelection
 } = require('./platformAssetRegistry');
 const logger = require('./utils/logger');
+const { bootstrapR3start } = require('./r3startBootstrap');
 
 /**
  * Legacy function for backwards compatibility - migrate old agent files
@@ -85,6 +86,13 @@ function migrateLegacyAgent(content) {
 async function runInit(opts = {}, deps = {}) {
   const cwd = opts.cwd || process.cwd();
   const nonInteractive = !!opts.nonInteractive;
+
+  logger.info('r3nd — repository initializer\n');
+  const initOptions = await askInitOptions(nonInteractive);
+  const selectedOptions = normalizePlatformAssetSelection(initOptions);
+  if (opts.r3start || initOptions.includes('r3start')) {
+    await bootstrapR3start(cwd, { nonInteractive });
+  }
   
   // Initialize config manager
   const configManager = new ConfigManager(cwd);
@@ -125,10 +133,6 @@ async function runInit(opts = {}, deps = {}) {
   } else {
     logger.info('Git repository already initialized.');
   }
-
-  // Ask user which components to initialize
-  logger.info('r3nd — repository initializer\n');
-  const selectedOptions = normalizePlatformAssetSelection(await askInitOptions(nonInteractive));
 
   logger.info(`\nSelected: ${selectedOptions.join(', ') || 'None'}\n`);
 

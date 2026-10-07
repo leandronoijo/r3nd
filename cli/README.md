@@ -58,6 +58,13 @@ Commands:
   - From the project root: `node src/index.js init`
   - If installed globally: `r3nd init` (see installation section)
 
+  Select **Bootstrap repo using r3start** in the interactive options, or run
+  `r3nd init --r3start` to copy the initial code from
+  [r3start](https://github.com/leandronoijo/r3start) before applying the r3nd seed files.
+  Git history and remotes are not copied. Existing files require overwrite confirmation;
+  non-interactive mode keeps them. Use `r3nd init --r3start --yes` to bootstrap without
+  prompts. `--yes` alone keeps the normal seed-only initialization.
+
 - `scaffold`: Full project scaffolding — prompts for ordered overlays discovered from the seed repo, resolves them into one effective seed, materializes canonical and vendor files once, and keeps the existing scaffold build plan filenames for LLM execution.
 
 - `analyse`: Analyze repository and app scopes and generate `AGENTS.md` / `CLAUDE.md` files using an LLM agent.

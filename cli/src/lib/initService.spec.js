@@ -31,8 +31,13 @@ jest.mock('./overlays/overlaySeedService', () => ({
   applySelectedOverlays: jest.fn().mockResolvedValue(undefined)
 }));
 
+jest.mock('./r3startBootstrap', () => ({
+  bootstrapR3start: jest.fn().mockResolvedValue(undefined)
+}));
+
 const { parseAgentFile, migrateLegacyAgent, runInit } = require('./initService');
-const { askOverlays } = require('./ui/prompts');
+const { askOverlays, askInitOptions } = require('./ui/prompts');
+const { bootstrapR3start } = require('./r3startBootstrap');
 const { applySelectedOverlays } = require('./overlays/overlaySeedService');
 
 describe('initService', () => {
@@ -40,12 +45,33 @@ describe('initService', () => {
     let originalAccess;
 
     beforeEach(() => {
+      jest.clearAllMocks();
       const fs = require('fs').promises;
       originalAccess = fs.access;
       fs.access = jest.fn((targetPath) => {
         if (String(targetPath).includes('.git')) return Promise.resolve();
         return Promise.reject(Object.assign(new Error('missing'), { code: 'ENOENT' }));
       });
+    });
+
+    it.each([
+      [true, ['codex']],
+      [false, ['r3start', 'codex']]
+    ])('bootstraps before fetching seed files (flag: %s)', async (r3start, selection) => {
+      askInitOptions.mockResolvedValueOnce(selection);
+      const mockGithubClient = { getTree: jest.fn().mockResolvedValue([]) };
+
+      await runInit({ cwd: '/test/repo', nonInteractive: true, r3start }, { githubClient: mockGithubClient });
+
+      expect(bootstrapR3start).toHaveBeenCalledWith('/test/repo', { nonInteractive: true });
+      expect(bootstrapR3start.mock.invocationCallOrder[0]).toBeLessThan(mockGithubClient.getTree.mock.invocationCallOrder[0]);
+    });
+
+    it('keeps normal non-interactive initialization seed-only', async () => {
+      await runInit({ cwd: '/test/repo', nonInteractive: true }, {
+        githubClient: { getTree: jest.fn().mockResolvedValue([]) }
+      });
+      expect(bootstrapR3start).not.toHaveBeenCalled();
     });
 
     afterEach(() => {
