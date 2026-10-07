@@ -9,6 +9,7 @@ Coordinate an approved tech spec through planning, implementation, and user-sele
 
 {{rnd/agents/shared/prototyping.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## Input
 

@@ -9,6 +9,7 @@ Use AI-driven interaction with the running system to check that the requested re
 
 {{rnd/agents/shared/prototyping.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## When To Run
 

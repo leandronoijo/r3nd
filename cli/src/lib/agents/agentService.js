@@ -80,7 +80,7 @@ async function buildInteractivePrompt(agent, targetFile, doneFileName, cwd) {
   
   if (typeof agent.interactiveSuffix !== 'function') {
     // Fallback: if no interactive suffix defined, use base prompt with generic instructions
-    return `${basePrompt}\n\nIMPORTANT: When you have completely finished and the user is satisfied, create a file named "${doneFileName}" in the current directory to signal completion.`;
+    return `${basePrompt}\n\nIMPORTANT: When the requested work and required verification are complete, follow the task skill's checkpoint/outcome instructions and create a file named "${doneFileName}" in the current directory to signal completion.`;
   }
   
   // Use fullSpecDir if available, otherwise fall back to specDirName

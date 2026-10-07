@@ -40,6 +40,7 @@ Start with:
 - [Getting Started](docs/getting-started.md)
 - [Concepts](docs/concepts.md)
 - [Workflows](docs/workflows.md)
+- [Continuous Learning](docs/continuous-learning.md)
 
 These pages cover onboarding, the repo-native model behind r3nd, and the workflow options in more detail than this landing page.
 
@@ -89,9 +90,9 @@ The main skills are:
 5. **Test cases and QA** via `create-test-cases`, `run-e2e-tests`, and `run-manual-qa-tests`
    - **🤖 LLM**: verifies the behavior, runs checks, and performs the final QA itself, including **manual QA with real tools**.
    - **👤 Human**: reviews the evidence rather than executing the QA personally.
-6. **Retro** via `create-retro-report`
-   - **🤖 LLM**: captures what worked, what failed, and what should be improved in the system itself.
-   - **👤 Human**: uses that feedback to refine the workflow.
+6. **Period retro** via `create-retro-report`
+   - **🤖 LLM**: reviews a time window across tasks and sessions, using evidence saved during work to propose specific process edits.
+   - **👤 Human**: reviews proposals and decides which improvements to apply.
 
 This is the **highest-control mode**. It is the best fit when you want explicit handoffs, explicit review points, and maximum traceability.
 
@@ -228,6 +229,10 @@ The framework is **agnostic**. You can run the same operating model on:
 
 ---
 
+## Continuous Learning
+
+Existing r3nd skills record meaningful corrections, failures, decisions, and recovery with the coding agent's normal file tools. Invoke `create-retro-report` for “today”, “last week”, or “since the last retro” to find patterns across tasks and sessions and propose exact improvements to skills, agents, templates, and instructions. No separate logging command is required, and evidence is retained across retros. See [Continuous Learning](docs/continuous-learning.md) for scope, timing, and capture limits.
+
 ## 🧠 Knowledge Lives In The Repo
 
 This is **one of the core ideas** behind r3nd.
@@ -240,7 +245,8 @@ By default, the durable SDLC knowledge lives under `r3nd/`:
 - `test_cases/`
 - `e2e-results/`
 - `retros/`
-- `agent_summaries/`
+- `learning/runs/` for evidence captured during skill use
+- `agent_summaries/` for retained legacy evidence
 - `templates/`
 - `skills/`
 
@@ -554,7 +560,7 @@ It helps with:
 | `create-test-cases` | Generate E2E or QA test cases from a build plan |
 | `run-e2e-tests` | Execute E2E tests and produce result artifacts |
 | `manual-qa-report-to-html` | Convert a manual QA markdown result into an HTML evidence report |
-| `create-retro-report` | Produce a retro from the delivery flow |
+| `create-retro-report` | Review a time period across work and propose evidence-backed process edits |
 | `analyze-repo-context` | Generate repo-level context files |
 | `analyze-app-context` | Generate app-level context files |
 | `analyze-module-context` | Generate module-level context files |
@@ -614,8 +620,9 @@ rnd/                        # Seed-repo source content; copied into your configu
   tech_specs/
   build_plans/
   test_cases/
-  retros/
-  agent_summaries/
+  retros/                    # Period reports with evidence and coverage
+  learning/runs/             # Interaction evidence captured directly by skills
+  agent_summaries/            # Retained legacy evidence
 
 r3nd/                       # Canonical generated spec directory in consumer projects
 

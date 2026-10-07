@@ -9,6 +9,7 @@ Create clear, concise product specifications from short feature descriptions or 
 
 {{rnd/agents/product-manager.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## Purpose
 

@@ -9,6 +9,7 @@ Execute live manual QA from written cases or an inline repro case, capture verif
 
 {{rnd/agents/manual-qa-tester.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## Cost Profile
 

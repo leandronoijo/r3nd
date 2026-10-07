@@ -81,7 +81,7 @@ Commands:
     - `implement-feature`: Run coordinated feature implementation with teammate agents
     - `create-test-cases`: Generate E2E test cases from a build plan
     - `run-e2e-tests`: Generate, run, and diagnose E2E tests from test cases
-    - `create-retro-report`: Review PR discussions and create a retro report
+    - `create-retro-report`: Review a time period across tasks/sessions and propose evidence-backed process edits
     - `analyze-repo-context`: Analyze repo root and generate repo-level `AGENTS.md` / `CLAUDE.md`
     - `analyze-app-context`: Analyze app path and generate app-level `AGENTS.md` / `CLAUDE.md`
     - `analyze-module-context`: Analyze module path and generate module-level `AGENTS.md` / `CLAUDE.md`
@@ -217,3 +217,9 @@ The r3nd CLI will automatically detect available tools and adjust its options ac
 ---
 
 This CLI is intended to be used as a scaffolder and helper for generating project overlays and instructions using ordered overlay packs from the seed repo and optional LLM-driven plans.
+
+## Continuous Learning Through Skills
+
+Generated coding-agent skills capture significant corrections, failures, decisions, and recovery directly using their file tools. Capture and period retros work without an installed r3nd CLI; the CLI distributes assets and its existing launcher passes through period input. There is no journal command.
+
+Use `create-retro-report` in your coding agent with “last week” or “since the last retro”; the existing launcher also accepts `r3nd agents create-retro-report --input "last week in Asia/Jerusalem" --agent codex`. Evidence under the selected spec root's `learning/runs/` is retained, and reports describe their exact time window and coverage. See [Continuous Learning](../docs/continuous-learning.md).

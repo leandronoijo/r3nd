@@ -1,35 +1,11 @@
-# Summary Workflow
+# Completion Summary
 
-Apply this workflow after you have delivered the requested artifact or reached a meaningful checkpoint.
+After delivering an artifact or reaching a meaningful checkpoint:
 
-1. Provide a concise summary of the current result, including major decisions, blockers, and any assumptions that affect next steps.
-2. Ask the user the exact question: **"Are you satisfied with the current result? (yes/no)"**
-3. If the user is not satisfied or requests changes, address the feedback and repeat step 2.
-4. If the user confirms satisfaction:
-   - If the current task is producing a retro report in `rnd/retros/`, do not create an agent summary log.
-   - Otherwise create a summary log in `rnd/agent_summaries/<agent-id>-<timestamp>.md`.
-   - Use the current command or agent name as `<agent-id>`. If that is unavailable, use the active agent persona filename without the `.md` suffix.
-   - Use a timestamp in `YYYY-MM-DD-HH-MM-SS` format.
-5. Write the summary log in markdown with this structure:
+1. Summarize the result, important decisions, verification, blockers, and assumptions affecting next steps.
+2. Follow the task skill's Learning Journal instructions during work, not only at completion. Before handoff or a completion signal, save the observed checkpoint/outcome and include the run path when useful. If capture was skipped or unavailable, say so briefly rather than creating a fictitious log.
+3. Address user feedback under the existing task scope. Do not add a satisfaction question as a prerequisite to saving evidence or signaling completed work; preserve any approval/QA choices explicitly required by the task skill.
+4. Do not create new legacy `rnd/agent_summaries/` files. Existing summaries remain readable evidence and must not be deleted.
+5. When producing a retro, summarize its period, coverage, evidence gaps, and proposed edits. Do not journal the retro's own generation or create a completion record that would recursively feed the next retro.
 
-```markdown
-# <agent-id> - Interaction Summary
-**Date:** [current date]
-**Task:** [brief description]
-
-## Summary
-[What was accomplished]
-
-## Key Points
-- [Important decision or change 1]
-- [Important decision or change 2]
-
-## User Interactions
-- [Summary of user feedback and requested changes]
-
-## Notes
-[Any additional context for future reference]
-```
-
-6. If your execution environment uses a completion or done file, create the summary log before that completion file.
-7. These summary logs are inputs for the retro workflow, so keep them factual and high-signal.
+If the environment uses a done file, create it only after the requested work and required verification are complete, and after any applicable outcome/checkpoint record is saved. A partial retro must remain marked partial in its report; a done file does not make its coverage complete.

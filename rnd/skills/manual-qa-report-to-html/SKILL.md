@@ -9,6 +9,7 @@ Convert a manual QA Markdown result into a standalone HTML evidence report with 
 
 {{rnd/agents/manual-qa-tester.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## Purpose
 

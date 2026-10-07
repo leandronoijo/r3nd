@@ -9,6 +9,7 @@ Convert product specs into a repo-grounded technical specification / high-level 
 
 {{rnd/agents/architect.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## Purpose
 

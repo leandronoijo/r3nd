@@ -6,7 +6,8 @@ jest.mock('../ui/prompts', () => ({
   askOverwriteFile: jest.fn().mockResolvedValue(true)
 }));
 
-const { copyTaskSkills, syncPlatformAsset } = require('./seedCopier');
+const { copyTaskSkills, copyTemplates, copyAgentPersonas, syncPlatformAsset } = require('./seedCopier');
+const { getPlatformAssets } = require('../platformAssetRegistry');
 const { createEffectiveSeedView } = require('../overlays/overlaySeedService');
 
 describe('seedCopier', () => {
@@ -283,4 +284,83 @@ description: Analyze repository context
     expect(claude).not.toContain('# Original Skill');
     expect(githubClient.fetchRaw).not.toHaveBeenCalledWith('rnd/skills/create-tech-spec/SKILL.md');
   });
+  describe('learning assets from the actual seed', () => {
+    const repoRoot = path.resolve(__dirname, '../../../..');
+    let tree, fileMap, githubClient;
+
+    beforeEach(async () => {
+      fileMap = new Map();
+      async function collect(relativeDir) {
+        for (const entry of await fs.readdir(path.join(repoRoot, relativeDir), { withFileTypes: true })) {
+          const relativePath = `${relativeDir}/${entry.name}`;
+          if (entry.isDirectory()) await collect(relativePath);
+          else if (entry.isFile()) fileMap.set(relativePath, await fs.readFile(path.join(repoRoot, relativePath)));
+        }
+      }
+      for (const dir of ['rnd/agents', 'rnd/skills', 'rnd/templates', 'rnd/vendor', 'overlays/mvp/agents', 'overlays/mvp/skills', 'overlays/prototyping/agents', 'overlays/prototyping/skills']) await collect(dir);
+      // Runtime records are not distributable assets, even if committed in a seed.
+      fileMap.set('rnd/learning/runs/seed/events/private.json', Buffer.from('{"private":"seed evidence"}'));
+      tree = [...fileMap.keys()].map(p => ({ type: 'blob', path: p }));
+      githubClient = { fetchRaw: jest.fn(async p => {
+        if (!fileMap.has(p)) throw new Error(`Unexpected fetch: ${p}`);
+        return fileMap.get(p);
+      }) };
+    });
+
+    it.each([[[]], [['prototyping']], [['mvp']]])('ships capture and period retros across all vendor targets with overlays %j', async overlays => {
+      const effective = createEffectiveSeedView(tree, githubClient, 'rnd', overlays);
+      const specRoot = 'apps/api/specs';
+      await copyAgentPersonas(tempDir, effective.tree, effective.githubClient, specRoot, 'rnd', { overwriteExisting: true });
+      await copyTaskSkills(tempDir, effective.tree, effective.githubClient, specRoot, 'rnd', { overwriteExisting: true });
+      await copyTemplates(tempDir, effective.tree, effective.githubClient, specRoot, 'rnd', { overwriteExisting: true });
+      const assets = getPlatformAssets().filter(asset => asset.assetType === 'generated-skill');
+      for (const asset of assets) await syncPlatformAsset(tempDir, effective.tree, effective.githubClient, asset, specRoot, 'rnd', { overwriteExisting: true });
+      const skillNames = await fs.readdir(path.join(repoRoot, 'rnd/skills'));
+      for (const outputRoot of [specRoot, ...assets.map(asset => asset.outputPath.replace(/\/skills$/, ''))]) {
+        for (const skillName of skillNames) {
+          const output = path.join(tempDir, outputRoot, 'skills', skillName, 'SKILL.md');
+          const content = await fs.readFile(output, 'utf8');
+          expect(content).not.toContain('{{');
+          expect(content).not.toContain('Are you satisfied with the current result?');
+          if (skillName === 'create-retro-report') {
+            expect(content).not.toContain('## Learning Journal');
+            expect(content).toContain('captured_at');
+            expect(content).toContain('coverage: complete');
+            expect(content).toContain(`${specRoot}/templates/retro.md`);
+          } else {
+            expect(content.match(/^## Learning Journal$/gm)).toHaveLength(1);
+            expect(content).toContain(`${specRoot}/templates/learning-event.json`);
+            expect(content).toContain('Before acting on the correction');
+          }
+        }
+      }
+      const run = JSON.parse(await fs.readFile(path.join(tempDir, specRoot, 'templates/learning-run.json'), 'utf8'));
+      const event = JSON.parse(await fs.readFile(path.join(tempDir, specRoot, 'templates/learning-event.json'), 'utf8'));
+      expect(run).toEqual(expect.objectContaining({ schema_version: 1, capture_mode: 'agent_reported', skill_path: expect.any(String), run_id: event.run_id, task_id: event.task_id }));
+      expect(event).toEqual(expect.objectContaining({ schema_version: 1, kind: 'user_correction', evidence: expect.any(Array), captured_at: expect.any(String) }));
+      expect(Number.isFinite(Date.parse(event.captured_at))).toBe(true);
+      await expect(fs.access(path.join(tempDir, specRoot, 'learning'))).rejects.toThrow();
+      expect(githubClient.fetchRaw).not.toHaveBeenCalledWith('rnd/learning/runs/seed/events/private.json');
+    });
+
+    it('keeps consumer evidence and customized skills through asset updates', async () => {
+      const root = 'specs';
+      const recordPath = path.join(tempDir, root, 'learning/runs/local/events/event.json');
+      await fs.mkdir(path.dirname(recordPath), { recursive: true });
+      await fs.writeFile(recordPath, '{"local":"retained"}');
+      const skillPath = path.join(tempDir, root, 'skills/create-build-plan/SKILL.md');
+      await fs.mkdir(path.dirname(skillPath), { recursive: true });
+      await fs.writeFile(skillPath, 'Customized plan skill');
+      const { askOverwriteFile } = require('../ui/prompts');
+      askOverwriteFile.mockResolvedValueOnce(false);
+      const selectedTree = tree.filter(item => !item.path.startsWith('rnd/skills/') || item.path === 'rnd/skills/create-build-plan/SKILL.md');
+      await copyTaskSkills(tempDir, selectedTree, githubClient, root, 'rnd');
+      expect(await fs.readFile(skillPath, 'utf8')).toBe('Customized plan skill');
+      await copyTaskSkills(tempDir, selectedTree, githubClient, root, 'rnd', { overwriteExisting: true });
+      await copyTemplates(tempDir, selectedTree, githubClient, root, 'rnd', { overwriteExisting: true });
+      expect(await fs.readFile(recordPath, 'utf8')).toBe('{"local":"retained"}');
+      expect(await fs.readFile(skillPath, 'utf8')).toContain('## Learning Journal');
+    });
+  });
+
 });

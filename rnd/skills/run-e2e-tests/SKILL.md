@@ -9,6 +9,7 @@ Generate, execute, diagnose, and report end-to-end tests derived from `rnd/test_
 
 {{rnd/agents/e2e-engineer.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## Inputs
 

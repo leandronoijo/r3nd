@@ -9,6 +9,7 @@ Describe only the end-to-end behavior needed to prove the MVP's value and its di
 
 {{rnd/agents/shared/mvp.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 Run this skill only when the user selects **reusable E2E test code** or invokes it directly. AI-run manual QA alone does not require a test-case document.
 

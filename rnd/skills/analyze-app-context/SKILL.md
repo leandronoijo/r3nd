@@ -55,3 +55,4 @@ Generate app-level context files for AI agents.
   - security constraints
 
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}

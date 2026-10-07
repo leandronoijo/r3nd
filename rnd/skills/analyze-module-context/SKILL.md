@@ -44,4 +44,5 @@ Generate module-level context files for AI agents.
 - If both files are required, keep content semantically equivalent across both files.
 - If no module directories can be confidently identified, refuse and explain what structure is missing or ambiguous.
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 {{rnd/agents/summary.md}}

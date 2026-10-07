@@ -9,6 +9,7 @@ Deliver the plan quickly while preserving the minimum production baseline select
 
 {{rnd/agents/shared/mvp.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## Inputs
 
