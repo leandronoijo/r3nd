@@ -9,6 +9,7 @@ Write durable tests that protect the selected MVP flows and can be rerun by deve
 
 {{rnd/agents/shared/mvp.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 Run this skill only when the user selects **reusable E2E test code** or invokes it directly. Do not use it for the manual-QA-only path.
 

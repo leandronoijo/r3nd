@@ -38,7 +38,7 @@ jest.mock('./overlays/overlaySeedService', () => ({
 
 const { runScaffold } = require('./scaffoldService');
 const { askInitOptions, askOverlays } = require('./ui/prompts');
-const { copyTaskSkills, syncPlatformAsset } = require('./fs/seedCopier');
+const { copyAgentPersonas, copyTaskSkills, copyTemplates, syncPlatformAsset } = require('./fs/seedCopier');
 
 describe('scaffoldService', () => {
   let mockGithubClient;
@@ -69,6 +69,8 @@ describe('scaffoldService', () => {
     expect(askInitOptions).toHaveBeenCalledWith(false);
     expect(askOverlays).toHaveBeenCalledWith([], ['api', 'vue'], false);
     expect(copyTaskSkills).toHaveBeenCalled();
+    expect(copyAgentPersonas).toHaveBeenCalledWith('/test/repo', expect.any(Array), mockGithubClient, 'r3nd', 'rnd', { nonInteractive: false });
+    expect(copyTemplates).toHaveBeenCalledWith('/test/repo', expect.any(Array), mockGithubClient, 'r3nd', 'rnd', { nonInteractive: false });
     expect(syncPlatformAsset).toHaveBeenCalledTimes(2);
   });
 });

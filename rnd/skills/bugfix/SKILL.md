@@ -10,6 +10,7 @@ Reproduce the bug first, inspect the code's intent and history, propose the smal
 {{rnd/agents/developer.md}}
 {{rnd/agents/e2e-engineer.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## Purpose
 
@@ -52,7 +53,7 @@ Before starting any work, create a persistent phase checklist using the environm
 - [ ] Phase 4: Implementation (required skill: `implement-build-plan` when a relevant plan exists; otherwise no phase skill exists, use `rnd/agents/developer.md`)
 - [ ] Phase 5: Verification (required skill: `run-manual-qa-tests`; fallback: `rnd/agents/manual-qa-tester.md`)
 - [ ] Phase 6: Documentation follow-up (separate context required; no phase skill exists; use `rnd/agents/developer.md`)
-- [ ] Wrap-up: Interaction log written
+- [ ] Wrap-up: Learning checkpoint/outcome saved (or capture gap/skip reported)
 ```
 
 **Rules:**

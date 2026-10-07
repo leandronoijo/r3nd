@@ -9,6 +9,7 @@ Create a short technical specification that contains enough requirements and des
 
 {{rnd/agents/shared/prototyping.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## Inputs
 

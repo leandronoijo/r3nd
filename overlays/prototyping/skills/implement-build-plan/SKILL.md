@@ -9,6 +9,7 @@ Deliver the build-plan outcome quickly, correctly, and with enough encapsulation
 
 {{rnd/agents/shared/prototyping.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## Inputs
 

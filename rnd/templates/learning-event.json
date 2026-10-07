@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "event_id": "example-event-replace-with-unique-id",
+  "run_id": "example-run-replace-with-unique-id",
+  "task_id": "example-task",
+  "kind": "user_correction",
+  "captured_at": "2026-10-04T09:05:00Z",
+  "occurred_at": null,
+  "phase": "planning",
+  "observation": "Replace with the observed correction and the approach it corrected",
+  "evidence": [
+    {
+      "source_type": "user_message",
+      "reference": null,
+      "excerpt": "Replace with the relevant original request",
+      "fidelity": "verbatim"
+    },
+    {
+      "source_type": "agent_action",
+      "reference": null,
+      "excerpt": "Replace with the attempted action or proposal",
+      "fidelity": "paraphrase"
+    },
+    {
+      "source_type": "user_message",
+      "reference": null,
+      "excerpt": "Replace with the actual correction",
+      "fidelity": "verbatim"
+    }
+  ],
+  "expected": "Replace with the user's intended behavior",
+  "actual": "Replace with what was attempted",
+  "action_taken": "Correction recorded; adjustment not yet verified",
+  "related_event_ids": [],
+  "artifacts": [],
+  "process_assets": [],
+  "outcome": "unresolved",
+  "category": "scope",
+  "hypothesis": null
+}

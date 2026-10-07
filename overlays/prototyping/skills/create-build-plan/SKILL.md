@@ -9,6 +9,7 @@ Create a compact build plan containing only the details needed for implementatio
 
 {{rnd/agents/shared/prototyping.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## Inputs
 

@@ -172,7 +172,8 @@ The CLI resolves task instructions from your configured spec directory:
 - `r3nd/test_cases/`
 - `r3nd/e2e-results/`
 - `r3nd/retros/`
-- `r3nd/agent_summaries/`
+- `r3nd/learning/runs/` (created lazily by skills)
+- `r3nd/agent_summaries/` (legacy evidence, retained)
 - `r3nd/agent_runs/`
 - `r3nd/instructions/`
 
@@ -361,3 +362,7 @@ For a new repo:
 3. Review the generated build plans
 4. Optionally let the CLI run scaffold implementation through an agent backend
 5. Generate context files after the repo shape is stable
+
+## Learning From Everyday Skill Use
+
+Use installed r3nd skills normally in your coding agent. They save compact evidence when you correct an approach, encounter a meaningful failure, make a material decision, or verify recovery; no separate logging command is needed. Invoke `create-retro-report` with “today”, “last week”, or “since the last retro” to review patterns across work. Install/update the skills and templates together, preserving your customizations. See [Continuous Learning](continuous-learning.md) for examples, retained history, and capture limits.

@@ -9,6 +9,7 @@ Use AI-driven interaction with the production-like system to verify selected acc
 
 {{rnd/agents/shared/mvp.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## When To Run
 

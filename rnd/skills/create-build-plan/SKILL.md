@@ -9,6 +9,7 @@ Turn a technical spec or concrete problem statement into a concrete implementati
 
 {{rnd/agents/team-lead.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## Task-Specific Instructions
 

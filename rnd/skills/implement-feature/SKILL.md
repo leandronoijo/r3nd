@@ -9,6 +9,7 @@ Coordinate feature delivery with dependency-aware implementation, task-level QA,
 
 {{rnd/agents/implement-feature.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## Purpose
 
@@ -76,7 +77,7 @@ Before starting any work, create a persistent phase checklist using the environm
 - [ ] Phase 5: Test cases (required skill: `create-test-cases`; fallback: `rnd/agents/qa-team-lead.md`)
 - [ ] Phase 6: Final live QA (required skill: `run-manual-qa-tests`; fallback: `rnd/agents/manual-qa-tester.md`)
 - [ ] Phase 7: Fix loop (required skills: `implement-build-plan` + `run-e2e-tests` + `run-manual-qa-tests`; fallbacks: `rnd/agents/developer.md` + `rnd/agents/e2e-engineer.md` + `rnd/agents/manual-qa-tester.md`)
-- [ ] Wrap-up: Interaction log written
+- [ ] Wrap-up: Learning checkpoint/outcome saved (or capture gap/skip reported)
 ```
 
 **Rules:**

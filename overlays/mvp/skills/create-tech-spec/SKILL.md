@@ -9,6 +9,7 @@ Create a concise technical specification that is simple enough to execute quickl
 
 {{rnd/agents/shared/mvp.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## Inputs
 

@@ -9,6 +9,7 @@ Describe only the E2E behavior needed to show the result works and catch the mos
 
 {{rnd/agents/shared/prototyping.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 Run this skill only when the user selected **reusable E2E test code** or invoked this skill directly. AI-run manual QA alone does not need a test-case document.
 

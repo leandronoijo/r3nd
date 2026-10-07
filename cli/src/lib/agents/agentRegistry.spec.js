@@ -115,6 +115,24 @@ describe('agentRegistry', () => {
   });
 
   describe('promptTemplate functions', () => {
+    it('uses period input and the nested spec root without deleting evidence or gating capture', () => {
+      const retro = resolveAgentConfig(getAgent('create-retro-report'), 'specs', 'apps/api');
+      const prompt = retro.promptTemplate(retro.agentFile, 'last week in Asia/Jerusalem', retro.fullSpecDir);
+      const completion = retro.interactiveSuffix('retro.done', retro.fullSpecDir);
+      expect(prompt).toContain('last week in Asia/Jerusalem');
+      expect(prompt).toContain('apps/api/specs/templates/retro.md');
+      expect(prompt).toContain('period-named report');
+      expect(prompt).toContain('Preserve all source evidence');
+      expect(completion).toContain('Do not journal');
+      expect(completion).toContain('retro.done');
+      for (const agent of getAgents()) {
+        const suffix = agent.interactiveSuffix('task.done', 'apps/api/specs');
+        expect(suffix).not.toContain('Are you satisfied');
+        expect(suffix).not.toContain('delete all files');
+        expect(suffix).not.toContain('agent_summaries/');
+      }
+    });
+
     it('should generate correct prompt for create-tech-spec agent', () => {
       const agent = getAgent('create-tech-spec');
       const resolved = resolveAgentConfig(agent, 'specs');

@@ -9,6 +9,7 @@ Restore the requested behavior with the smallest correct change and minimal cere
 
 {{rnd/agents/shared/prototyping.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## Workflow
 

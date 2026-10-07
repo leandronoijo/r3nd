@@ -9,6 +9,7 @@ Create a compact plan that delivers one compatible, deployable slice without tur
 
 {{rnd/agents/shared/mvp.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## Inputs
 

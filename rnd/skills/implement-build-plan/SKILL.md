@@ -9,6 +9,7 @@ Implement features and tests based on a build plan; follow repository standards 
 
 {{rnd/agents/developer.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## Task-Specific Instructions
 

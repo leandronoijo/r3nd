@@ -8,6 +8,7 @@ description: Investigate, gate, plan, implement, and QA a very small feature wit
 Deliver a very small feature safely by investigating first, enforcing a hard eligibility gate, writing exactly one build plan, waiting for explicit approval, then implementing and verifying with automated checks plus live QA.
 
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## Purpose
 
@@ -27,7 +28,7 @@ Keep tiny feature work tiny. If the request needs structural refactoring, multi-
 - Exactly one build plan at `rnd/build_plans/<feature-id>-T1-build-plan.md`
 - Implemented code and tests in the current codebase
 - Automated check results and live QA evidence in the session
-- Optional interaction summary in `rnd/agent_summaries/<agent-id>-<timestamp>.md` when the user is satisfied
+- Learning events/checkpoint under `rnd/learning/runs/<run-id>/` during work, unless capture is skipped
 
 ## Hard Eligibility Limits
 
@@ -63,7 +64,7 @@ Before starting any work, create a persistent phase checklist using the environm
 - [ ] Phase 3: Build plan (required skill: `create-build-plan`; fallback: `rnd/agents/team-lead.md`)
 - [ ] Phase 4: Implementation (required skill: `implement-build-plan`; fallback: `rnd/agents/developer.md`)
 - [ ] Phase 5: QA (required skills: `create-test-cases` when needed, `run-e2e-tests` when needed, `run-manual-qa-tests` as final gate; fallbacks: `rnd/agents/qa-team-lead.md`, `rnd/agents/e2e-engineer.md`, `rnd/agents/manual-qa-tester.md`)
-- [ ] Wrap-up: Interaction log written
+- [ ] Wrap-up: Learning checkpoint/outcome saved (or capture gap/skip reported)
 ```
 
 **Rules:**
@@ -145,7 +146,7 @@ Fallback teammate briefs: `rnd/agents/qa-team-lead.md`, `rnd/agents/e2e-engineer
 ## File I/O and Scope
 
 - Read: the current codebase, repo/app/module-scoped `AGENTS.md` / `CLAUDE.md` files, and the repo templates needed for the task.
-- Write: `rnd/build_plans/`, current codebase files, `rnd/test_cases/` when needed, `rnd/manual-qa-results/` for final live QA, and `rnd/agent_summaries/` when the user is satisfied.
+- Write: `rnd/build_plans/`, current codebase files, `rnd/test_cases/` when needed, `rnd/manual-qa-results/` for final live QA, and compact learning records under `rnd/learning/runs/` during work unless capture is skipped.
 - Do not modify unrelated files or expand the scope beyond the approved quick feature.
 
 ## Communication Style

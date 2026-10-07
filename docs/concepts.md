@@ -29,7 +29,8 @@ That durable context lives in repo artifacts such as:
 - E2E results
 - manual QA results
 - retros
-- agent summaries
+- interaction evidence captured during work
+- retained legacy agent summaries
 - task skills
 - templates
 - stack instructions
@@ -37,6 +38,10 @@ That durable context lives in repo artifacts such as:
 In generated projects, those usually live under `r3nd/`.
 
 In this seed repository, the canonical source content is stored under `rnd/`, then copied or composed into the configured spec directory by the CLI.
+
+## Continuous Learning
+
+Skills preserve significant interaction evidence with the active coding agent's file tools, before corrections and failures disappear into summaries. Retros belong to time windows, with tasks/runs/PRs supplying provenance. Period coverage and source links make recommendations reviewable, and evidence remains available for later reviews. Capture is agent-reported rather than guaranteed complete. See [Continuous Learning](continuous-learning.md).
 
 ## Skills
 
@@ -123,7 +128,7 @@ The normal delivery path is an artifact chain:
 3. Tech spec becomes one or more build plans
 4. Build plans drive implementation
 5. Implementation drives test cases and QA evidence
-6. Delivery produces a retro
+6. Evidence accumulates during delivery; a period retro reviews patterns across tasks and sessions
 
 The chain exists so implementation is grounded in approved documents instead of whatever the current chat window happens to contain.
 

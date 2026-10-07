@@ -55,7 +55,7 @@ Use this when the change needs explicit handoffs and human review between stages
 5. `test_cases/`
 6. `e2e-results/`
 7. `manual-qa-results/`
-8. `retros/`
+8. Evidence accumulates in `learning/runs/`; `retros/` reviews a period across delivery efforts
 
 ### Approval Boundaries
 
@@ -74,7 +74,7 @@ r3nd agents create-build-plan --file r3nd/tech_specs/<feature>.md --agent codex
 r3nd agents implement-build-plan --file r3nd/build_plans/<feature>-T1-build-plan.md --agent codex
 r3nd agents create-test-cases --file r3nd/build_plans/<feature>-T1-build-plan.md --agent codex
 r3nd agents run-e2e-tests --file r3nd/test_cases/<feature>.md --agent codex
-r3nd agents create-retro-report --input "<pr-url-or-number>" --agent github
+r3nd agents create-retro-report --input "last week in Asia/Jerusalem" --agent codex
 ```
 
 ### Notes From The Current Skills
@@ -217,6 +217,12 @@ Use this workflow when the core question is:
 
 Do not use it for redesigns disguised as bug reports.
 
+## Period Retros
+
+Every delivery/analysis skill includes compact evidence capture using normal coding-agent file tools, including MVP/prototyping replacements. Invoke `create-retro-report` for a time window such as “today”, “last week”, or “since the last retro”. It compares incidents across tasks, sessions, and skills, including unfinished work, and proposes exact supported edits without applying them. No journal command or r3nd executable is required.
+
+Records are retained, and the report states UTC boundaries, display timezone, reviewed evidence, and complete/partial coverage. Tasks and PRs are context or optional filters rather than owners of the retro. See [Continuous Learning](continuous-learning.md) for period defaults, late-arriving evidence, and a worked example.
+
 ## Analysis Workflow
 
 There is also a context-generation workflow that supports the other delivery paths.
@@ -273,7 +279,8 @@ Common directories used by the current workflows:
 - `e2e-results/`
 - `manual-qa-results/`
 - `retros/`
-- `agent_summaries/`
+- `learning/runs/`
+- `agent_summaries/` (retained legacy evidence)
 - `agent_runs/`
 
 Not every workflow uses every directory:

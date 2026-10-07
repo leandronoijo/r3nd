@@ -9,6 +9,7 @@ Write durable test code that proves the primary flow through the real applicatio
 
 {{rnd/agents/shared/prototyping.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 Run this skill only when the user selected **reusable E2E test code** or invoked this skill directly. Do not use it for the manual-QA-only path.
 

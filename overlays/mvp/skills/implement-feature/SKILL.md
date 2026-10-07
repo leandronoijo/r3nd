@@ -9,6 +9,7 @@ Coordinate an approved tech spec into the smallest safely deployable feature wit
 
 {{rnd/agents/shared/mvp.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## Input
 

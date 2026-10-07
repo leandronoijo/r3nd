@@ -45,3 +45,4 @@ Generate repository-wide context files for AI agents.
 - Keep the metadata block concise and valid so it can be parsed programmatically.
 
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}

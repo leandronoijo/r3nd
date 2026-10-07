@@ -9,6 +9,7 @@ Produce clear, actionable end-to-end sanity test cases for a feature and write t
 
 {{rnd/agents/qa-team-lead.md}}
 {{rnd/agents/shared/command-hygiene.md}}
+{{rnd/agents/shared/learning-journal.md}}
 
 ## Inputs
 

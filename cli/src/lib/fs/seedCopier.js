@@ -39,7 +39,9 @@ function createSpecDirAliases(remotePath, seedSpecDirName, specDirName) {
 
 async function buildSkillFileCache(tree, githubClient, specDirName, seedSpecDirName) {
   const fileCache = new Map();
-  const seedFiles = listRemoteFiles(tree, `${seedSpecDirName}/`);
+  // Runtime evidence is owned by the seed's users, not a composable asset.
+  const seedFiles = listRemoteFiles(tree, `${seedSpecDirName}/`,
+    filePath => !filePath.startsWith(`${seedSpecDirName}/learning/`));
 
   for (const file of seedFiles) {
     try {
