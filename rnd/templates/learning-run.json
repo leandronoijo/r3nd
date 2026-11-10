@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "run_id": "example-run-replace-with-unique-id",
+  "task_id": "example-task",
+  "task_description": "Replace with the actual task and relevant user intent",
+  "spec_root": "<spec-root>",
+  "skill_path": "<spec-root>/skills/<active-skill>/SKILL.md",
+  "started_at": "2026-10-04T09:00:00Z",
+  "capture_mode": "agent_reported",
+  "primary_artifact": null,
+  "parent_run_id": null,
+  "resumes_run_id": null
+}

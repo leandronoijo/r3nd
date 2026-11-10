@@ -1,0 +1,84 @@
+# r3nd Configuration File
+#
+# This file contains configuration values for the r3nd CLI tool.
+# It should be placed at the root of your repository.
+#
+# Configuration values can be managed using the r3nd config command:
+#   r3nd config list              - List all configuration values
+#   r3nd config get <key>         - Get a specific configuration value
+#   r3nd config set <key> <value> - Set a configuration value
+#   r3nd config overlays          - Interactively choose overlays from the seed repo
+# Example array input:
+#   r3nd config set worktree-copy-files '["*.env", "**/*.env", "**/*.local"]'
+
+# Seed Repository
+# The GitHub repository from which r3nd fetches seed files, overlays,
+# agents, workflows, and templates.
+#
+# Format: owner/repo[@branch]
+# Default: leandronoijo/r3nd@develop
+#
+# Examples:
+#   seed-repo: leandronoijo/r3nd@develop       # Use the develop branch
+#   seed-repo: leandronoijo/r3nd@main          # Use the main branch
+#   seed-repo: myorganization/custom-r3nd      # Use a custom fork (uses default branch: develop)
+seed-repo: leandronoijo/r3nd@develop
+
+# Specification Directory Name
+# The name of directories containing r3nd specifications.
+# The CLI will search the entire repository tree for directories with this name.
+# Default: r3nd
+#
+# Examples:
+#   spec-dir-name: r3nd        # Search for all 'r3nd' directories
+#   spec-dir-name: specs       # Search for all 'specs' directories
+#   spec-dir-name: rnd         # Use legacy 'rnd' directory name
+#
+# Note: The CLI supports multiple spec directories at different levels:
+#   project/
+#   ├── r3nd/                    # Root-level specs (shared)
+#   ├── apps/backend/r3nd/       # Backend-specific specs
+#   └── services/auth/r3nd/      # Service-specific specs
+spec-dir-name: r3nd
+
+# Overlays
+# Ordered list of overlays to apply from the seed repo.
+# Later overlays override earlier overlays when they write the same file.
+# Use `r3nd config overlays` to pick and reorder them interactively.
+#
+# Examples:
+# overlays:
+#   - api
+#   - vue
+overlays: []
+
+# Worktree Copy Patterns
+# Additional files to copy into every new r3nd worktree.
+# These patterns use glob semantics similar to VSCode search.
+# Default: copies root and nested .env files.
+#
+# Warning: matched files can include secrets and other local-only files.
+worktree-copy-files:
+  - '*.env'
+  - '**/*.env'
+
+# Worktree Open Command
+# Command run after a new worktree is created and files are copied.
+# Use {worktreeDir} as the placeholder for the created worktree path.
+# Store this as an argv-style array for cross-platform behavior.
+#
+# Examples:
+# worktree-open-command:
+#   - code
+#   - '{worktreeDir}'
+#
+# worktree-open-command:
+#   - cursor
+#   - '{worktreeDir}'
+#
+# worktree-open-command:
+#   - nvim
+#   - '{worktreeDir}'
+worktree-open-command:
+  - code
+  - '{worktreeDir}'

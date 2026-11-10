@@ -5,6 +5,8 @@ const { spawn } = require('child_process');
 const { askBugDescription, askBugfixLLMChoice, confirmBuildPlan } = require('./ui/prompts');
 const { ensureDir } = require('./fs/fileWriter');
 const { runGitHubAgent } = require('./llm/agentRunner');
+const { ConfigManager } = require('./config/configManager');
+const { findFirstSpecDirectory } = require('./fs/treeSearch');
 const logger = require('./utils/logger');
 
 async function runBugfix(opts = {}) {
@@ -13,13 +15,22 @@ async function runBugfix(opts = {}) {
 
   logger.info('r3nd — bugfix workflow');
 
-  // Check if we're in a project root directory
-  const githubDirExists = await fs.access(path.join(cwd, '.github')).then(() => true).catch(() => false);
-  const rndDirExists = await fs.access(path.join(cwd, 'rnd')).then(() => true).catch(() => false);
-  const srcDirExists = await fs.access(path.join(cwd, 'src')).then(() => true).catch(() => false);
+  // Get configured spec directory name
+  const configManager = new ConfigManager(cwd);
+  const specDirName = await configManager.getSpecDirName();
 
-  if (!githubDirExists || !rndDirExists || !srcDirExists) {
-    logger.error('Error: Not in a project root directory. Required directories (.github/, rnd/, src/) not found.');
+  // Check if we're in a project root directory
+  const srcDirExists = await fs.access(path.join(cwd, 'src')).then(() => true).catch(() => false);
+  
+  // Find spec directory (backward compatible - supports both rnd and r3nd)
+  const specDir = await findFirstSpecDirectory(cwd, specDirName);
+  const specDirExists = specDir !== null;
+  const skillsDirExists = specDir
+    ? await fs.access(path.join(cwd, specDir, 'skills')).then(() => true).catch(() => false)
+    : false;
+
+  if (!specDirExists || !srcDirExists || !skillsDirExists) {
+    logger.error(`Error: Not in a project root directory. Required directories (${specDirName}/skills, ${specDirName}/, src/) not found.`);
     logger.error('Please run this command from the root of your r3nd project.');
     process.exit(1);
   }
@@ -39,15 +50,17 @@ async function runBugfix(opts = {}) {
   const now = new Date();
   const timestamp = now.toISOString().replace(/[:.]/g, '-').replace('T', '-').substring(0, 19);
   const planName = `bugfix-${timestamp}`;
-  const planPath = `rnd/build_plans/${planName}.md`;
+  const planPath = path.join(specDir, 'build_plans', `${planName}.md`);
   const fullPlanPath = path.join(cwd, planPath);
 
   // Ensure the build_plans directory exists
   await ensureDir(path.dirname(fullPlanPath));
 
   // Step 3: Create prompts based on LLM choice
-  const planPrompt = `using the instructions in .github/agents/team-lead.agent.md please create a build plan to fix the following problem: ${problemDescription}`;
-  const implementPrompt = `using the instructions in .github/agents/developer.agent.md implement the following plan to completion: ${planPath}`;
+  const buildPlanSkillPath = path.join(specDir, 'skills', 'create-build-plan', 'SKILL.md');
+  const implementPlanSkillPath = path.join(specDir, 'skills', 'implement-build-plan', 'SKILL.md');
+  const planPrompt = `Using the task skill at ${buildPlanSkillPath} as instructions, please create a build plan to fix the following problem:\n\n${problemDescription}`;
+  const implementPrompt = `Using the task skill at ${implementPlanSkillPath} as instructions, please implement the following plan to completion:\n\n${planPath}`;
 
   if (llmChoice === 'codex') {
     // Run codex for build plan creation
@@ -145,6 +158,91 @@ async function runBugfix(opts = {}) {
       logger.error('Failed to implement build plan:', err && err.message ? err.message : err);
     }
 
+  } else if (llmChoice === 'claude') {
+    logger.info('\n=== STEP 1: Creating Build Plan ===');
+    logger.info('Running Claude to create build plan...\n');
+
+    const planDoneFile = `${planName}-plan.done`;
+    const planPromptWithDone = `${planPrompt}\n\nIMPORTANT: Save the build plan to ${planPath}. When you have completely finished creating this build plan, create a file named ${planDoneFile} in the current directory to signal completion.`;
+
+    const claudePlanCommand = ['claude', '--dangerously-skip-permissions', planPromptWithDone];
+
+    try {
+      const childProcess = spawn(claudePlanCommand[0], claudePlanCommand.slice(1), { cwd, stdio: 'inherit' });
+
+      logger.info(`\nWaiting for build plan creation to complete (looking for ${planDoneFile})...`);
+      const maxWait = opts.agentTimeout || 3600000;
+      const startTime = Date.now();
+      let found = false;
+
+      while (Date.now() - startTime < maxWait) {
+        const exists = await fs.access(path.join(cwd, planDoneFile)).then(() => true).catch(() => false);
+        if (exists) {
+          found = true;
+          logger.info('✓ Build plan creation completed');
+          childProcess.kill('SIGTERM');
+          await fs.unlink(path.join(cwd, planDoneFile)).catch(() => {});
+          break;
+        }
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+
+      if (!found) {
+        childProcess.kill('SIGTERM');
+        throw new Error('Timeout waiting for build plan creation to complete');
+      }
+    } catch (err) {
+      logger.error('Failed to create build plan:', err && err.message ? err.message : err);
+      return;
+    }
+
+    process.stdout.write('\x1Bc');
+
+    logger.info(`\nPlease review the build plan at: ${planPath}`);
+    const approved = await confirmBuildPlan(nonInteractive);
+
+    if (!approved) {
+      logger.info('Build plan not approved. Bugfix workflow cancelled.');
+      return;
+    }
+
+    logger.info('\n=== STEP 2: Implementing Build Plan ===');
+    logger.info('Running Claude to implement the build plan...\n');
+
+    const implDoneFile = `${planName}-impl.done`;
+    const implPromptWithDone = `${implementPrompt}\n\nIMPORTANT: When you have completely finished implementing this build plan, create a file named ${implDoneFile} in the current directory to signal completion.`;
+
+    const claudeImplCommand = ['claude', '--dangerously-skip-permissions', implPromptWithDone];
+
+    try {
+      const childProcess = spawn(claudeImplCommand[0], claudeImplCommand.slice(1), { cwd, stdio: 'inherit' });
+
+      logger.info(`\nWaiting for implementation to complete (looking for ${implDoneFile})...`);
+      const maxWait = opts.agentTimeout || 3600000;
+      const startTime = Date.now();
+      let found = false;
+
+      while (Date.now() - startTime < maxWait) {
+        const exists = await fs.access(path.join(cwd, implDoneFile)).then(() => true).catch(() => false);
+        if (exists) {
+          found = true;
+          logger.info('✓ Implementation completed');
+          childProcess.kill('SIGTERM');
+          await fs.unlink(path.join(cwd, implDoneFile)).catch(() => {});
+          break;
+        }
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+
+      if (!found) {
+        childProcess.kill('SIGTERM');
+        throw new Error('Timeout waiting for implementation to complete');
+      }
+
+      logger.info('\n✓ Bugfix workflow completed successfully!');
+    } catch (err) {
+      logger.error('Failed to implement build plan:', err && err.message ? err.message : err);
+    }
   } else if (llmChoice === 'gemini') {
     // Run gemini for build plan creation
     logger.info('\n=== STEP 1: Creating Build Plan ===');
@@ -249,13 +347,18 @@ async function runBugfix(opts = {}) {
     const fullPrompt = `${planPrompt}\n\nIMPORTANT: Save the build plan to ${planPath}.\n\nAfter creating the build plan, wait for user approval. Once approved, ${implementPrompt}`;
     
     try {
-      const url = await runGitHubAgent(fullPrompt, cwd, 'Bugfix task');
+      const url = await runGitHubAgent(fullPrompt, cwd, 'Bugfix task', { featureLabel: problemDescription });
       logger.info('\n📋 Next steps:');
       logger.info('  1. Review the agent\'s progress at the link above');
       logger.info('  2. The agent will create the build plan and wait for your approval');
       logger.info('  3. Once approved, the agent will implement the fix');
       logger.info('  4. Monitor the agent session on GitHub for completion\n');
     } catch (err) {
+      if (err && err.code === 'GITHUB_BRANCH_PUSH_FAILED') {
+        logger.error('GitHub agent run will not work: snapshot branch could not be pushed to origin.');
+        logger.info('Use a local CLI tool, or fix your git remote/auth and rerun the command.');
+        return;
+      }
       logger.error('Failed to create GitHub agent task.');
       return;
     }
@@ -279,7 +382,7 @@ async function runBugfix(opts = {}) {
     const saveContent = `=== BUGFIX WORKFLOW PROMPTS ===\n\nProblem Description:\n${problemDescription}\n\n--- STEP 1: Create Build Plan ---\n${planPrompt}\n\n(Save the resulting build plan to: ${planPath})\n\n--- STEP 2: Implement Build Plan ---\n(After reviewing and approving the build plan from Step 1)\n${implementPrompt}\n`;
     
     try {
-      const savePath = path.join(cwd, 'rnd', 'bugfix_prompts.txt');
+      const savePath = path.join(cwd, specDir, 'bugfix_prompts.txt');
       await ensureDir(path.dirname(savePath));
       await fs.writeFile(savePath, saveContent, 'utf8');
       logger.info(`Prompts saved to: ${savePath}`);

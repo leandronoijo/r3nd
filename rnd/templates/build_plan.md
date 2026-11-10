@@ -1,0 +1,646 @@
+# Build Plan: `<feature-id>-T<n>`
+
+> **Source:** `rnd/tech_specs/<feature-id>-tech-spec.md`  
+> **Task:** T<n> — [Task Title from Tech Spec]  
+> **Created:** YYYY-MM-DD  
+> **Status:** Draft | In Progress | Complete
+
+---
+
+## Task Reference (from Tech Spec)
+
+Copy the task definition from the tech spec's Task Breakdown section:
+
+- **Task ID**: T<n>
+- **Title**: [Copy from tech spec]
+- **Description**: [Copy from tech spec]
+- **Scope**: [Copy from tech spec]
+- **Dependencies**: [Copy from tech spec — e.g., "T1, T2" or "None"]
+- **Interfaces**:
+  - Exposes: [What this task provides to future tasks]
+  - Consumes: [What this task expects from dependencies]
+- **Acceptance Criteria**: [Copy from tech spec]
+
+---
+
+## 0. Pre-Implementation Checklist
+
+Complete these items **before** starting any implementation tasks.
+
+- [ ] **Verify previous task dependencies are complete** (if T>1)
+- [ ] Identify integration points in Section 1
+- [ ] Read repo/app/module-scoped `AGENTS.md` / `CLAUDE.md` files that match those integration points
+  - Example: backend changes -> nearest backend app/module instruction file
+  - Example: frontend changes -> nearest frontend app/module instruction file
+  - Example: testing changes -> testing guidance in the applicable scoped instruction file
+  - Example: e2e changes -> E2E guidance in the applicable scoped instruction file
+- [ ] Identify golden reference modules:
+  - Backend: `src/backend/modules/example/`
+  - Frontend: `src/frontend/components/example/`, `src/frontend/stores/exampleStore.ts`
+- [ ] Confirm no new dependencies needed (or justify additions below)
+- [ ] Review interfaces this task must expose (from tech spec)
+- [ ] Review interfaces this task consumes from previous tasks
+
+### New Dependencies (if any)
+
+| Package | Purpose | Justification |
+|---------|---------|---------------|
+| _None_ | — | — |
+
+---
+
+## 1. Implementation Overview
+
+<!-- 2-3 sentences summarizing the approach and key decisions for THIS TASK ONLY -->
+
+**Approach:** _Brief description of the architectural approach chosen for this task._
+
+**Key Decisions:**
+- _Decision 1 and why_
+- _Decision 2 and why_
+
+**Dependencies on Previous Tasks:**
+| Task | What This Task Uses From It |
+|------|----------------------------|
+| T<n-1> | [Describe interface/output consumed] |
+
+**Interfaces This Task Exposes:**
+| Interface | Consumer Tasks | Description |
+|-----------|----------------|-------------|
+| [API/Contract/Event] | T<n+1>, T<n+2> | [What future tasks will use] |
+
+**Integration Points:**
+| Existing Module | Integration Type | Notes |
+|-----------------|------------------|-------|
+| `src/backend/modules/xxx/` | Extends / Imports / Calls | _How this task integrates_ |
+| `src/frontend/stores/xxxStore.ts` | Uses | _How this task integrates_ |
+
+---
+
+## 2. Implementation Steps
+
+> **Note:** These are the implementation steps for tech spec task T<n> only. Each step is an atomic unit of work.
+
+### Phase 1: [Phase Name — e.g., Backend Foundation]
+
+#### Step 1: Create Entity Schema
+
+- [ ] **Create data model/schema (per backend instructions)**
+- **File(s):** `src/backend/modules/<module-name>/schemas/<entity>.schema.ts`
+- **Action:** create
+- **Dependencies:** None
+- **Golden Reference:** `src/backend/modules/example/schemas/example.schema.ts`
+- **Details:**
+  - Define schema/model using the backend data modeling approach specified in the backend guidance in the applicable `AGENTS.md` / `CLAUDE.md`.
+  - Fields (example):
+    - `fieldName: string` — required
+    - `optionalField?: string` — optional
+    - `createdAt: Date` — default to creation timestamp
+  - Export and register model/provider according to backend instructions
+  - Add indexes for frequently queried fields
+- **Acceptance Criteria:**
+  - Schema compiles without errors
+  - All fields have explicit types (no `any` or `Mixed`)
+  - Required fields marked with `required: true`
+- **Effort:** small
+
+---
+
+#### Step 2: Create DTOs
+
+- [ ] **Create CreateEntityDto**
+- **File(s):** `src/backend/modules/<module-name>/dto/create-<entity>.dto.ts`
+- **Action:** create
+- **Dependencies:** Step 1
+- **Golden Reference:** `src/backend/modules/example/dto/create-example.dto.ts`
+- **Details:**
+  - Class with validation decorators/annotations (follow the backend guidance in the applicable `AGENTS.md` / `CLAUDE.md` for examples)
+  - Field names must match schema exactly
+- **Acceptance Criteria:**
+  - All fields have appropriate validation decorators/annotations as defined in backend instructions
+  - Field names match schema 1:1
+  - Explicit types (follow repository language/type system and backend instructions)
+- **Effort:** small
+
+---
+
+- [ ] **Create UpdateEntityDto**
+- **File(s):** `src/backend/modules/<module-name>/dto/update-<entity>.dto.ts`
+- **Action:** create
+- **Dependencies:** Step 2 (CreateEntityDto)
+- **Details:**
+  - Extend the Create DTO with a language-appropriate partial/patch DTO pattern per backend instructions
+  - Add any update-specific fields
+- **Acceptance Criteria:**
+  - Properly extends CreateEntityDto using the repository’s partial/update DTO pattern as described in backend instructions
+- **Effort:** small
+
+---
+
+#### Step 3: Create Service
+
+- [ ] **Create EntityService**
+- **File(s):** `src/backend/modules/<module-name>/<module-name>.service.ts`
+- **Action:** create
+- **Dependencies:** Step 1, Step 2
+- **Golden Reference:** `src/backend/modules/example/example.service.ts`
+- **Details:**
+  - Class registered as a service per backend DI conventions (see the backend guidance in the applicable `AGENTS.md` / `CLAUDE.md`)
+  - Inject repository/model via repository DI provider pattern per backend instructions
+  - Methods:
+    - `async create(dto: CreateEntityDto): Promise<Entity>`
+    - `async findAll(): Promise<Entity[]>`
+    - `async findById(id: string): Promise<Entity>`
+    - `async update(id: string, dto: UpdateEntityDto): Promise<Entity>`
+    - `async delete(id: string): Promise<void>`
+  - Throw `NotFoundException` when entity not found
+  - Log significant operations
+- **Acceptance Criteria:**
+  - `@Injectable()` decorator present
+  - All methods return typed data models per backend conventions
+  - `NotFoundException` thrown with descriptive message
+  - No business logic validation (DTOs handle input validation)
+- **Effort:** medium
+- ⚠️ **Warning:** Keep business logic in service, not controller. Use DTOs for input validation only.
+
+---
+
+#### Step 4: Create Controller
+
+- [ ] **Create EntityController**
+- **File(s):** `src/backend/modules/<module-name>/<module-name>.controller.ts`
+- **Action:** create
+- **Dependencies:** Step 3
+- **Golden Reference:** `src/backend/modules/example/example.controller.ts`
+- **Details:**
+  - Class decorated with `@Controller('<route-prefix>')`
+  - Inject service via constructor
+  - Endpoints:
+    - `@Post()` → `create(@Body() dto: CreateEntityDto)`
+    - `@Get()` → `findAll()`
+    - `@Get(':id')` → `findById(@Param('id') id: string)`
+    - `@Patch(':id')` → `update(@Param('id') id: string, @Body() dto: UpdateEntityDto)`
+    - `@Delete(':id')` → `delete(@Param('id') id: string)`
+  - Use `@UseGuards()` for protected routes
+- **Acceptance Criteria:**
+  - Controller is thin — only HTTP handling, delegates to service
+  - All DTOs used for request bodies
+  - Appropriate HTTP status codes returned
+- **Effort:** small
+
+---
+
+#### Step 5: Create Module
+
+- [ ] **Create EntityModule**
+- **File(s):** `src/backend/modules/<module-name>/<module-name>.module.ts`
+- **Action:** create
+- **Dependencies:** Step 1, Step 3, Step 4
+- **Golden Reference:** `src/backend/modules/example/example.module.ts`
+- **Details:**
+  - Register the model/provider according to backend module conventions (see the backend guidance in the applicable `AGENTS.md` / `CLAUDE.md`)
+  - Declare controller in `controllers`
+  - Declare service in `providers`
+  - Export service if other modules need it
+- **Acceptance Criteria:**
+  - Module registers schema correctly
+  - Controller and service properly declared
+- **Effort:** small
+
+---
+
+- [ ] **Register module in AppModule**
+- **File(s):** `src/backend/app.module.ts`
+- **Action:** modify
+- **Dependencies:** Step 5
+- **Details:**
+  - Add `EntityModule` to imports array
+- **Acceptance Criteria:**
+  - Module imported and app starts without errors
+- **Effort:** small
+
+---
+
+### Phase 2: Backend Tests
+
+#### Step 6: Unit Tests
+
+- [ ] **Create service unit tests**
+- **File(s):** `src/backend/modules/<module-name>/<module-name>.service.spec.ts`
+- **Action:** create
+- **Dependencies:** Step 3
+- **Golden Reference:** `src/backend/modules/example/example.service.spec.ts`
+- **Details:**
+  - Use the repository's backend testing harness and patterns (see the testing guidance in the applicable `AGENTS.md` / `CLAUDE.md`)
+  - Mock `Model<Entity>` for all methods
+  - Test cases:
+    - `create()` — returns saved entity
+    - `findAll()` — returns array
+    - `findById()` — returns entity when found
+    - `findById()` — throws NotFoundException when not found
+    - `update()` — returns updated entity
+    - `delete()` — completes without error
+- **Acceptance Criteria:**
+  - All service methods tested for success path
+  - Error paths tested (NotFoundException)
+  - Mocks properly configured
+- **Effort:** medium
+
+---
+
+- [ ] **Create controller unit tests**
+- **File(s):** `src/backend/modules/<module-name>/<module-name>.controller.spec.ts`
+- **Action:** create
+- **Dependencies:** Step 4, Step 6
+- **Details:**
+  - Mock service
+  - Verify controller methods call correct service methods
+  - Test request validation
+- **Acceptance Criteria:**
+  - All endpoints tested
+  - Service mocked correctly
+- **Effort:** small
+
+---
+
+### Phase 3: Frontend Implementation
+
+#### Step 7: Create store
+
+- [ ] **Create useEntityStore**
+- **File(s):** `src/frontend/stores/useEntityStore.ts`
+- **Action:** create
+- **Dependencies:** Backend API complete (Step 4)
+- **Golden Reference:** `src/frontend/stores/exampleStore.ts`
+- **Details:**
+  - Use `defineStore` with setup syntax (Composition API)
+  - State:
+    - `entities: ref<Entity[]>([])`
+    - `currentEntity: ref<Entity | null>(null)`
+    - `loading: ref<boolean>(false)`
+    - `error: ref<string | null>(null)`
+  - Actions:
+    - `async fetchAll(): Promise<void>`
+    - `async fetchById(id: string): Promise<void>`
+    - `async create(dto: CreateEntityDto): Promise<Entity>`
+    - `async update(id: string, dto: UpdateEntityDto): Promise<Entity>`
+    - `async delete(id: string): Promise<void>`
+  - Handle loading states and errors in each action
+- **Acceptance Criteria:**
+  - Store uses setup syntax (not options)
+  - All API calls in actions, not components
+  - Loading and error states managed
+  - Typed interfaces for Entity
+- **Effort:** medium
+
+---
+
+#### Step 8: Create Components
+
+- [ ] **Create EntityList component**
+-- **File(s):** `src/frontend/components/<feature>/EntityList` (component file)
+- **Action:** create
+- **Dependencies:** Step 7
+-- **Golden Reference:** `src/frontend/components/example/ExampleList` (component file)
+- **Details:**
+  - Use the frontend component pattern/syntax as defined in the frontend guidance in the applicable `AGENTS.md` / `CLAUDE.md`
+  - Import and use the repository's store pattern per the frontend guidance in the applicable `AGENTS.md` / `CLAUDE.md`
+  - UI components: use repository's selected UI library components (see the frontend guidance in the applicable `AGENTS.md` / `CLAUDE.md`)
+  - Required `data-test-id` attributes:
+    - `entity-list-container`
+    - `entity-list-item-{id}`
+    - `entity-list-loading`
+    - `entity-list-empty`
+- **Acceptance Criteria:**
+  - Frontend component pattern: use composition-style components as defined in the frontend guidance in the applicable `AGENTS.md` / `CLAUDE.md`
+  - Use the repository's designated UI library and follow its component patterns (see the frontend guidance in the applicable `AGENTS.md` / `CLAUDE.md`)
+  - All interactive elements have `data-test-id`
+  - Fetches data via store on mount
+- **Effort:** medium
+
+---
+
+- [ ] **Create EntityForm component**
+-- **File(s):** `src/frontend/components/<feature>/EntityForm` (component file)
+- **Action:** create
+- **Dependencies:** Step 7
+- **Details:**
+  - Use the frontend component pattern/syntax as defined in the frontend guidance in the applicable `AGENTS.md` / `CLAUDE.md`
+  - Props: `entity?: Entity` (for edit mode), `mode: 'create' | 'edit'`
+  - Emits: `submit`, `cancel`
+  - UI form components per the frontend guidance in the applicable `AGENTS.md` / `CLAUDE.md` (use the repo's designated UI library)
+  - Client-side validation matching backend DTOs
+  - Required `data-test-id` attributes:
+    - `entity-form`
+    - `entity-form-field-name` (for each field)
+    - `entity-form-submit-btn`
+    - `entity-form-cancel-btn`
+- **Acceptance Criteria:**
+  - Form validation present
+  - Proper v-model bindings
+  - Submit calls store action
+  - All form elements have `data-test-id`
+- **Effort:** medium
+
+---
+
+- [ ] **Create EntityDetail component**
+-- **File(s):** `src/frontend/components/<feature>/EntityDetail` (component file)
+- **Action:** create
+- **Dependencies:** Step 7
+- **Details:**
+  - Display entity details
+  - Actions: Edit, Delete buttons
+  - Required `data-test-id` attributes:
+    - `entity-detail-container`
+    - `entity-detail-edit-btn`
+    - `entity-detail-delete-btn`
+- **Acceptance Criteria:**
+  - Data fetched via store
+  - Delete has confirmation dialog
+  - All buttons have `data-test-id`
+- **Effort:** small
+
+---
+
+#### Step 9: Create View and Route
+
+- [ ] **Create EntityView**
+-- **File(s):** `src/frontend/views/<Feature>View` (view component/file)
+- **Action:** create
+- **Dependencies:** Step 8
+- **Details:**
+  - Compose EntityList, EntityForm, EntityDetail
+  - Handle routing for create/edit/view modes
+- **Acceptance Criteria:**
+  - View properly composes components
+  - Handles all CRUD flows
+- **Effort:** small
+
+---
+
+- [ ] **Add route**
+- **File(s):** `src/frontend/router/index.ts`
+- **Action:** modify
+- **Dependencies:** Step 9
+- **Details:**
+  - Add routes:
+    - `/entities` → EntityView (list mode)
+    - `/entities/new` → EntityView (create mode)
+    - `/entities/:id` → EntityView (detail mode)
+    - `/entities/:id/edit` → EntityView (edit mode)
+- **Acceptance Criteria:**
+  - Routes registered and navigable
+  - Lazy loading if appropriate
+- **Effort:** small
+
+---
+
+### Phase 4: Frontend Tests
+
+#### Step 10: Frontend Unit Tests
+
+- [ ] **Create store tests**
+- **File(s):** `tests/frontend/stores/useEntityStore.spec.ts`
+- **Action:** create
+- **Dependencies:** Step 7
+- **Details:**
+  - Use the repository's frontend store test harness (see the testing guidance in the applicable `AGENTS.md` / `CLAUDE.md`)
+  - Mock API calls
+  - Test all actions and state mutations
+- **Acceptance Criteria:**
+  - All actions tested
+  - Loading/error states verified
+- **Effort:** medium
+
+---
+
+- [ ] **Create component tests**
+- **File(s):** `tests/frontend/components/EntityList.spec.ts`, `tests/frontend/components/EntityForm.spec.ts`
+- **Action:** create
+- **Dependencies:** Step 8
+- **Details:**
+  - Use the repository's frontend testing utilities and patterns (see the testing guidance in the applicable `AGENTS.md` / `CLAUDE.md`)
+  - Mock store using the repository's frontend testing harness (see the testing guidance in the applicable `AGENTS.md` / `CLAUDE.md`)
+  - Test rendering, interactions
+- **Acceptance Criteria:**
+  - Components render correctly
+  - User interactions trigger expected behavior
+- **Effort:** medium
+
+---
+
+## 3. File/Module-level Changes
+
+| File Path | Action | Rationale | Golden Reference |
+|-----------|--------|-----------|------------------|
+| `src/backend/modules/<module>/schemas/<entity>.schema.ts` | create | Entity persistence | `modules/example/schemas/example.schema.ts` |
+| `src/backend/modules/<module>/dto/create-<entity>.dto.ts` | create | Input validation | `modules/example/dto/create-example.dto.ts` |
+| `src/backend/modules/<module>/dto/update-<entity>.dto.ts` | create | Update validation | — |
+| `src/backend/modules/<module>/<module>.service.ts` | create | Business logic | `modules/example/example.service.ts` |
+| `src/backend/modules/<module>/<module>.controller.ts` | create | HTTP layer | `modules/example/example.controller.ts` |
+| `src/backend/modules/<module>/<module>.module.ts` | create | Module wiring | `modules/example/example.module.ts` |
+| `src/backend/app.module.ts` | modify | Register module | — |
+| `src/frontend/stores/useEntityStore.ts` | create | State management | `stores/exampleStore.ts` |
+| `src/frontend/components/<feature>/EntityList` (component) | create | List UI | `components/example/ExampleList` (component) |
+| `src/frontend/components/<feature>/EntityForm` (component) | create | Form UI | — |
+| `src/frontend/components/<feature>/EntityDetail` (component) | create | Detail UI | — |
+| `src/frontend/views/<Feature>View` (view) | create | Page view | — |
+| `src/frontend/router/index.ts` | modify | Add routes | — |
+
+---
+
+## 4. Schema & DTO Changes
+
+### Database Schema Changes
+
+| Field | Type | Required | Indexed | Notes |
+|-------|------|----------|---------|-------|
+| `fieldName` | `string` | Yes | No | _Description_ |
+| `optionalField` | `string` | No | No | _Description_ |
+| `createdAt` | `Date` | Yes (default) | Yes | Auto-set on creation |
+| `updatedAt` | `Date` | No | No | Auto-set on update |
+
+### DTO Decorators
+
+| Field | CreateDto Decorators | UpdateDto | Notes |
+|-------|---------------------|-----------|-------|
+| `fieldName` | Validation decorators/annotations as defined in backend instructions | Optional via update DTO pattern | — |
+| `optionalField` | Validation annotations as defined in backend instructions | Optional | — |
+
+### Migration Plan
+
+- [ ] No existing data — no migration needed
+- [ ] _OR_ Migration script: `scripts/migrations/<date>-add-<entity>.ts`
+- [ ] Backfill strategy: _describe_
+
+---
+
+## 5. Test Strategy
+
+### Unit Tests
+
+| Test File | What to Test | Mocks Needed | Coverage Target |
+|-----------|--------------|--------------|-----------------|
+| `<module>.service.spec.ts` | `create()` returns saved entity | `Model.create` | Success path |
+| `<module>.service.spec.ts` | `findById()` returns entity | `Model.findById` | Success path |
+| `<module>.service.spec.ts` | `findById()` throws NotFoundException | `Model.findById` returns null | Error path |
+| `<module>.service.spec.ts` | `update()` returns updated entity | `Model.findByIdAndUpdate` | Success path |
+| `<module>.service.spec.ts` | `delete()` removes entity | `Model.findByIdAndDelete` | Success path |
+| `<module>.controller.spec.ts` | POST calls service.create | `Service` | Delegation |
+| `<module>.controller.spec.ts` | GET calls service.findAll | `Service` | Delegation |
+| `useEntityStore.spec.ts` | `fetchAll()` populates state | API client | State mutation |
+| `useEntityStore.spec.ts` | `create()` adds to state | API client | State mutation |
+| `EntityList.spec.ts` | Renders list of entities | Store | Rendering |
+| `EntityForm.spec.ts` | Submits form data | Store | User interaction |
+
+### Integration Tests
+
+| Endpoint | Test Case | Expected Result |
+|----------|-----------|-----------------|
+| `POST /entities` | Valid DTO | 201 + entity object |
+| `POST /entities` | Missing required field | 400 + validation error |
+| `GET /entities/:id` | Valid ID | 200 + entity object |
+| `GET /entities/:id` | Invalid ID | 404 + NotFoundException |
+| `PATCH /entities/:id` | Partial update | 200 + updated entity |
+| `DELETE /entities/:id` | Valid ID | 204 No Content |
+
+## 6. Deployment & Rollout
+
+### Feature Flags
+
+| Flag Name | Default | Purpose |
+|-----------|---------|---------|
+| _None_ | — | — |
+
+### Environment Variables
+
+| Variable | Required | Default | Purpose |
+|----------|----------|---------|---------|
+| _None_ | — | — | — |
+
+### Migration Steps
+
+1. _No migrations required for this feature_
+2. _OR: Run migration script before deployment_
+
+### Rollback Plan
+
+1. Revert deployment to previous version
+2. _If migration was run:_ Run rollback migration
+3. Verify system health
+
+### Monitoring & Logging
+
+- [ ] Add structured logging for key operations
+- [ ] Error tracking for new endpoints
+- [ ] _Metrics to add (if any)_
+
+---
+
+## 7. AI-Agent Guardrails
+
+⚠️ **Developer agents must read this section before implementing any task.**
+
+| Area | Warning | Correct Pattern |
+|------|---------|-----------------|
+| **Frontend** | Follow the frontend guidance in the applicable `AGENTS.md` / `CLAUDE.md` for frontend patterns and allowed libraries. | See frontend instructions |
+| **Backend** | Follow the backend guidance in the applicable `AGENTS.md` / `CLAUDE.md` for backend patterns and allowed libraries. | See backend instructions |
+| **DTOs** | Follow backend instructions for DTOs, validation, and schema sync. | See backend instructions |
+| **Tests** | Follow the testing guidance in the applicable `AGENTS.md` / `CLAUDE.md` for test requirements, selectors/doc conventions, and quality gates. | See testing instructions |
+| **Imports** | Check `package.json` and instruction files for allowed packages. | Verify before adding dependencies |
+| **State** | Follow frontend instructions for state management patterns and store usage. | See frontend instructions |
+| **Queries** | Follow backend instructions for data access patterns and repository/ORM usage. | See backend instructions |
+| **Errors** | Follow backend instructions for error handling and exception patterns. | See backend instructions |
+| **Types** | No `any` types. Explicit interfaces required. | Define interfaces/types |
+| **Files** | Max 300-400 lines per file. Split if larger. | Single responsibility |
+| **Schema ↔ DTO** | Follow backend instructions to ensure schema and DTO field parity and migration plans. | See backend instructions |
+| **Validation** | Follow backend instructions for input validation patterns and decorators. | See backend instructions |
+
+### Common Mistakes to Avoid
+
+| Anti-Pattern | Correct Approach |
+|--------------|------------------|
+| Logic in controllers | Move to service — follow backend instructions |
+| `any` types | Define explicit interfaces — follow instruction file's type-checker rules |
+| Missing stable selectors | Use `data-test-id` or equivalent as per testing instructions |
+| Raw fetch in components | Use store/composable patterns for data fetching per frontend instructions |
+| Non-recommended component APIs | Follow frontend instructions for component patterns (composition/props/emits) |
+| Missing tests | Create test files and update build plan's test sections as required |
+| Hardcoded values | Use configuration service and environment variables (see backend instructions) |
+| Large files (>300 LOC) | Split into smaller modules — single responsibility patterns apply |
+
+---
+
+## 8. Definition of Done
+
+### Implementation Complete (for this task T<n>)
+
+- [ ] All steps in Section 2 marked complete
+- [ ] No `TODO` or `FIXME` comments left unresolved
+- [ ] Code follows golden reference patterns
+- [ ] Interfaces documented in tech spec are properly exposed
+
+### Quality Gates
+
+- [ ] All unit tests passing
+- [ ] All integration tests passing
+- [ ] Lint passing (`npm run lint`)
+- [ ] Type-check passing (`npm run type-check`)
+- [ ] No new warnings introduced
+
+### Independence Verification
+
+- [ ] This task works independently (can be tested in isolation)
+- [ ] Does not require modification to previous tasks (T1, T2, etc.)
+- [ ] Interfaces match what was specified in tech spec
+
+### Documentation
+
+- [ ] README updated (if new module)
+- [ ] API documentation updated (if new endpoints)
+- [ ] Inline comments for complex logic
+
+### Review Ready
+
+- [ ] Self-review completed
+- [ ] Golden reference patterns verified
+- [ ] Schema ↔ DTO sync verified
+- [ ] All `data-test-id` values added
+- [ ] Task tested manually in development
+
+---
+
+## Appendix: Step Dependency Graph
+
+```
+Step 1 (Schema)
+    ↓
+Step 2 (DTOs)
+    ↓
+Step 3 (Service) ──→ Step 6 (Service Tests)
+    ↓
+Step 4 (Controller) ──→ Step 6 (Controller Tests)
+    ↓
+Step 5 (Module)
+    ↓
+[Backend Complete]
+    ↓
+Step 7 (Store) ──→ Step 10 (Store Tests)
+    ↓
+Step 8 (Components) ──→ Step 10 (Component Tests)
+    ↓
+Step 9 (View + Route)
+    ↓
+[Task T<n> Complete]
+```
+
+> **Note:** This is an example dependency graph for the implementation steps within this task. Adjust based on what this specific tech spec task requires — not all tasks will have all phases.
+
+---
+
+## Notes
+
+<!-- Add any clarifications, decisions, or context for implementers -->
+
+_Add notes here during implementation._

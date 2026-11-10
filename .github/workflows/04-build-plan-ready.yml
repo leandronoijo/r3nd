@@ -1,8 +1,8 @@
 # Development Workflow
 #
 # Triggered when a PR is merged to develop with changes to build plans.
-# Creates a GitHub issue and assigns it to Copilot with the Developer agent
-# to implement the build plan.
+# Creates GitHub issues and assigns them to Copilot with task skills
+# to implement the build plan and generate test cases.
 #
 # Required Secrets:
 #   COPILOT_PAT - Personal Access Token with the following permissions:
@@ -19,6 +19,9 @@ on:
       - develop
     paths:
       - 'rnd/build_plans/**'
+      - 'r3nd/build_plans/**'
+      - '**/rnd/build_plans/**'
+      - '**/r3nd/build_plans/**'
   workflow_dispatch:
     inputs:
       branch:
@@ -56,6 +59,9 @@ jobs:
           filters: |
             build_plans:
               - added: 'rnd/build_plans/**'
+              - added: 'r3nd/build_plans/**'
+              - added: '**/rnd/build_plans/**'
+              - added: '**/r3nd/build_plans/**'
       - name: Select changed files
         id: select
         run: |
@@ -116,6 +122,8 @@ jobs:
             const fileList = changedFiles.map(file => '- `' + file + '`').join('\n');
             const firstFile = changedFiles[0] || 'rnd/build_plans/';
             const planName = firstFile.split('/').pop().replace('.md', '');
+            const specDirMatch = firstFile.match(/(?:^|\/)(rnd|r3nd)\//);
+            const specDir = specDirMatch ? specDirMatch[1] : 'r3nd';
             
             const issueTitle = 'Development: ' + planName;
             const issueBody = [
@@ -126,9 +134,9 @@ jobs:
               '### Changed file(s)',
               fileList,
               '',
-              '> **Agent profile:** `.github/agents/developer.agent.md`',
+              '> **Task skill:** `.github/skills/implement-build-plan/SKILL.md`',
               '',
-              '_No additional instructions are included here; follow the referenced agent profile._'
+              '_No additional instructions are included here; follow the referenced task skill._'
             ].join('\n');
 
             const issue = await github.rest.issues.create({
@@ -185,6 +193,8 @@ jobs:
             const fileList = changedFiles.map(file => '- `' + file + '`').join('\n');
             const firstFile = changedFiles[0] || 'rnd/build_plans/';
             const planName = firstFile.split('/').pop().replace('.md', '');
+            const specDirMatch = firstFile.match(/(?:^|\/)(rnd|r3nd)\//);
+            const specDir = specDirMatch ? specDirMatch[1] : 'r3nd';
 
             const issueTitle = 'Generate Test Cases: ' + planName;
             const issueBody = [
@@ -195,10 +205,10 @@ jobs:
               '### Changed file(s)',
               fileList,
               '',
-              '> **Agent profile:** `.github/agents/qa-team-lead.agent.md`',
-              '> **Canonical template:** `.github/templates/test_cases.md`',
+              '> **Task skill:** `.github/skills/create-test-cases/SKILL.md`',
+              '> **Canonical template:** `' + specDir + '/templates/test_cases.md`',
               '',
-              '_No additional instructions are included here; follow the referenced agent profile and template._'
+              '_No additional instructions are included here; follow the referenced task skill and template._'
             ].join('\n');
 
             const issue = await github.rest.issues.create({
@@ -218,11 +228,8 @@ jobs:
     needs: create-development-task
     runs-on: ubuntu-latest
     steps:
-      # Note: Currently, the GitHub API does not support assigning a specific
-      # custom agent (like 'developer') programmatically. The issue is assigned
-      # to the default Copilot agent, but includes explicit instructions to
-      # follow the developer agent profile. When GitHub adds API support for
-      # custom agent assignment, this step should be updated.
+      # The issue is assigned to Copilot and steered by the task skill
+      # referenced in the issue body.
       - name: Assign issue to Copilot
         uses: otto-de/assign_issue_toCopilot_action@v1.0.1
         with:

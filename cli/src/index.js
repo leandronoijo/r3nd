@@ -24,6 +24,18 @@ process.stdout && process.stdout.on && process.stdout.on('error', (err) => {
   console.error('stdout error:', err && err.message ? err.message : err);
 });
 
+function isCommandModuleEntry(entry) {
+  if (entry.isDirectory()) {
+    return true;
+  }
+
+  if (!entry.isFile() || !entry.name.endsWith('.js')) {
+    return false;
+  }
+
+  return !entry.name.endsWith('.spec.js') && !entry.name.endsWith('.test.js');
+}
+
 async function main(argv = process.argv) {
   // Pre-detect tools once at startup (caches results for later use)
   detectAvailableTools();
@@ -34,9 +46,11 @@ async function main(argv = process.argv) {
   // Auto-register command modules from src/commands
   const commandsDir = path.join(__dirname, 'commands');
   if (fs.existsSync(commandsDir)) {
-    const files = fs.readdirSync(commandsDir).filter(f => f.endsWith('.js') || fs.statSync(path.join(commandsDir, f)).isDirectory());
-    for (const file of files) {
-      const modPath = path.join(commandsDir, file);
+    const entries = fs.readdirSync(commandsDir, { withFileTypes: true });
+    const commandEntries = entries.filter(isCommandModuleEntry);
+
+    for (const entry of commandEntries) {
+      const modPath = path.join(commandsDir, entry.name);
       try {
         const mod = require(modPath);
         if (typeof mod.register === 'function') {
@@ -44,7 +58,7 @@ async function main(argv = process.argv) {
         }
       } catch (err) {
         // don't crash on a bad command file - log and continue
-        console.error(`Failed to load command ${file}:`, err && err.message ? err.message : err);
+        console.error(`Failed to load command ${entry.name}:`, err && err.message ? err.message : err);
       }
     }
   }
@@ -59,4 +73,4 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { main };
+module.exports = { main, isCommandModuleEntry };

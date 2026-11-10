@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs').promises;
 const logger = require('../utils/logger');
+const { resolveTemplate, createLocalFileReader } = require('../templateResolver');
 
 /**
  * List all markdown files in a directory, sorted by creation time (newest first)
@@ -48,7 +49,7 @@ async function listMarkdownFiles(cwd, dir) {
 
 /**
  * Build the prompt text for an agent
- * @param {Object} agent - Agent configuration from registry
+ * @param {Object} agent - Agent configuration from registry (resolved)
  * @param {string} targetFile - The selected file to process
  * @returns {string} Formatted prompt text
  */
@@ -57,30 +58,45 @@ function buildPrompt(agent, targetFile) {
     throw new Error('Agent promptTemplate must be a function');
   }
   
+  // Pass fullSpecDir as third parameter (fallback to specDirName for backward compatibility)
+  const specDirPath = agent.fullSpecDir || agent.specDirName;
+  if (specDirPath) {
+    return agent.promptTemplate(agent.agentFile, targetFile, specDirPath);
+  }
+  
   return agent.promptTemplate(agent.agentFile, targetFile);
 }
 
 /**
  * Build an interactive prompt with completion instructions
- * @param {Object} agent - Agent configuration from registry
+ * @param {Object} agent - Agent configuration from registry (resolved)
  * @param {string} targetFile - The selected file to process or user input
  * @param {string} doneFileName - Name of the done file to create when complete
- * @returns {string} Formatted prompt text with interactive suffix
+ * @param {string} cwd - Current working directory for resolving {{...}} references
+ * @returns {Promise<string>} Formatted prompt text with interactive suffix
  */
-function buildInteractivePrompt(agent, targetFile, doneFileName) {
+async function buildInteractivePrompt(agent, targetFile, doneFileName, cwd) {
   const basePrompt = buildPrompt(agent, targetFile);
   
   if (typeof agent.interactiveSuffix !== 'function') {
     // Fallback: if no interactive suffix defined, use base prompt with generic instructions
-    return `${basePrompt}\n\nIMPORTANT: When you have completely finished and the user is satisfied, create a file named "${doneFileName}" in the current directory to signal completion.`;
+    return `${basePrompt}\n\nIMPORTANT: When the requested work and required verification are complete, follow the task skill's checkpoint/outcome instructions and create a file named "${doneFileName}" in the current directory to signal completion.`;
   }
   
-  const suffix = agent.interactiveSuffix(doneFileName);
-  return `${basePrompt}${suffix}`;
+  // Use fullSpecDir if available, otherwise fall back to specDirName
+  const specDirPath = agent.fullSpecDir || agent.specDirName;
+  const suffix = agent.interactiveSuffix(doneFileName, specDirPath);
+  const unresolvedPrompt = `${basePrompt}${suffix}`;
+
+  if (!cwd) {
+    return unresolvedPrompt;
+  }
+
+  return resolveTemplate(unresolvedPrompt, createLocalFileReader(cwd));
 }
 
 /**
- * Verify that required agent files exist
+ * Verify that required task skill files exist
  * @param {string} cwd - Current working directory
  * @param {Object} agent - Agent configuration
  * @returns {Promise<{agentExists: boolean, targetDir: string}>}

@@ -1,6 +1,11 @@
 const inquirer = require('inquirer');
 const { detectAvailableTools } = require('../utils/toolDetector');
+const {
+  getDefaultPlatformAssetKeys,
+  getPlatformAssetPromptChoices
+} = require('../platformAssetRegistry');
 const prompt = inquirer.createPromptModule();
+const NEW_WORKTREE_OPTION_VALUE = '__new_worktree__';
 
 /**
  * Build agent choices based on available tools
@@ -15,8 +20,9 @@ function buildAgentChoices({ labels = {}, extraChoices = [] } = {}) {
   
   const defaultLabels = {
     codex: 'Use local codex CLI (run now)',
+    claude: 'Use Claude Code CLI (run now)',
     gemini: 'Use Gemini CLI (run now)',
-    github: 'Use GitHub coding agent',
+    github: 'Use GitHub agent via gh CLI',
   };
   
   const finalLabels = { ...defaultLabels, ...labels };
@@ -24,6 +30,9 @@ function buildAgentChoices({ labels = {}, extraChoices = [] } = {}) {
   // Add available agent options
   if (availableTools.codex) {
     choices.push({ name: finalLabels.codex, value: 'codex' });
+  }
+  if (availableTools.claude) {
+    choices.push({ name: finalLabels.claude, value: 'claude' });
   }
   if (availableTools.gemini) {
     choices.push({ name: finalLabels.gemini, value: 'gemini' });
@@ -37,7 +46,7 @@ function buildAgentChoices({ labels = {}, extraChoices = [] } = {}) {
   
   // Show helpful message if no agents available
   if (!availableTools.hasAnyAgent) {
-    console.log('\nℹ️  No LLM agents detected. Install codex, gemini, or gh CLI to use agents.');
+    console.log('\nℹ️  No LLM agents detected. Install codex, claude, gemini, or gh CLI to use agents.');
   }
   
   return choices;
@@ -53,6 +62,76 @@ async function chooseFrontend(nonInteractive = false) {
   if (nonInteractive) return 'vue';
   const res = await prompt([{ type: 'list', name: 'frontend', message: 'Choose a frontend', choices: [ { name: 'Vue', value: 'vue' }, { name: 'Angular', value: 'angular' } ] }]);
   return res.frontend;
+}
+
+function normalizeOverlayChoices(currentOverlays, availableOverlays) {
+  const available = Array.from(new Set((availableOverlays || []).filter(Boolean)));
+  const current = Array.from(new Set((currentOverlays || []).filter(overlay => available.includes(overlay))));
+  return { available, current };
+}
+
+async function askOverlaySelection(currentOverlays = [], availableOverlays = [], nonInteractive = false) {
+  const { available, current } = normalizeOverlayChoices(currentOverlays, availableOverlays);
+
+  if (nonInteractive) {
+    return current;
+  }
+
+  if (available.length === 0) {
+    return [];
+  }
+
+  const choices = available.map(overlay => ({
+    name: overlay,
+    value: overlay,
+    checked: current.includes(overlay)
+  }));
+
+  const res = await prompt([{
+    type: 'checkbox',
+    name: 'selectedOverlays',
+    message: 'Select overlays to apply:',
+    choices,
+    pageSize: 15
+  }]);
+
+  return res.selectedOverlays;
+}
+
+async function askOverlayOrder(selectedOverlays = [], currentOverlays = [], nonInteractive = false) {
+  const selected = Array.from(new Set(selectedOverlays.filter(Boolean)));
+  if (nonInteractive || selected.length <= 1) {
+    return selected;
+  }
+
+  const current = Array.from(new Set((currentOverlays || []).filter(overlay => selected.includes(overlay))));
+  const ordered = [];
+  const remaining = [...selected];
+
+  while (remaining.length > 0) {
+    const defaultValue = current.find(overlay => remaining.includes(overlay)) || remaining[0];
+    const res = await prompt([{
+      type: 'list',
+      name: 'overlay',
+      message: `Choose overlay precedence ${ordered.length + 1}/${selected.length} (lower precedence first):`,
+      choices: remaining.map(overlay => ({ name: overlay, value: overlay })),
+      default: defaultValue,
+      pageSize: 15
+    }]);
+
+    ordered.push(res.overlay);
+    const index = remaining.indexOf(res.overlay);
+    if (index >= 0) {
+      remaining.splice(index, 1);
+    }
+  }
+
+  return ordered;
+}
+
+async function askOverlays(currentOverlays = [], availableOverlays = [], nonInteractive = false) {
+  const selected = await askOverlaySelection(currentOverlays, availableOverlays, nonInteractive);
+  return askOverlayOrder(selected, currentOverlays, nonInteractive);
 }
 
 async function askLLMChoice(nonInteractive = false) {
@@ -120,8 +199,9 @@ async function askBugfixLLMChoice(nonInteractive = false) {
   const choices = buildAgentChoices({
     labels: {
       codex: 'Use local codex CLI',
+      claude: 'Use Claude Code CLI',
       gemini: 'Use Gemini CLI',
-      github: 'Use GitHub coding agent',
+      github: 'Use GitHub agent via gh CLI',
     },
     extraChoices: [
       { name: 'Generate prompts to copy & paste', value: 'generate' },
@@ -151,18 +231,25 @@ async function askAnalyseAgent(defaultAgent = 'codex', nonInteractive = false) {
   const choices = buildAgentChoices({
     labels: {
       codex: 'Local codex CLI',
+      claude: 'Claude Code CLI',
       gemini: 'Gemini CLI',
-      github: 'GitHub coding agent',
+      github: 'GitHub agent via gh CLI',
     },
-    extraChoices: [
-      { name: 'Generate prompts only (no agent)', value: 'generate' },
-    ],
+    extraChoices: [],
   });
   
-  // If the default agent is not available, use the first available or 'generate'
+  // If the default agent is not available, use the first available installed agent.
   let effectiveDefault = defaultAgent;
-  if (defaultAgent !== 'generate' && !availableTools[defaultAgent]) {
-    effectiveDefault = availableTools.codex ? 'codex' : availableTools.gemini ? 'gemini' : availableTools.github ? 'github' : 'generate';
+  if (!availableTools[defaultAgent]) {
+    effectiveDefault = availableTools.codex
+      ? 'codex'
+      : availableTools.claude
+        ? 'claude'
+        : availableTools.gemini
+          ? 'gemini'
+          : availableTools.github
+            ? 'github'
+            : defaultAgent;
   }
   
   const res = await prompt([{ 
@@ -207,4 +294,296 @@ async function chooseFile(files, message = 'Select a file:', nonInteractive = fa
   return res.selectedFile;
 }
 
-module.exports = { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askBugDescription, askFeatureDescription, askBugfixLLMChoice, confirmBuildPlan, askAnalyseAgent, buildAgentChoices, chooseFile };
+/**
+ * Prompt user to select which components to initialize
+ * @param {boolean} nonInteractive - If true, returns default selections
+ * @returns {Promise<string[]>} Array of selected option values
+ */
+async function askInitOptions(nonInteractive = false) {
+  const defaultOptions = getDefaultPlatformAssetKeys();
+  if (nonInteractive) return defaultOptions;
+
+  const choices = [
+    { name: 'Bootstrap repo using r3start', value: 'r3start', checked: false },
+    ...getPlatformAssetPromptChoices('init')
+  ];
+  
+  const res = await prompt([{
+    type: 'checkbox',
+    name: 'initOptions',
+    message: 'Select which components to initialize:',
+    choices,
+  }]);
+  
+  return res.initOptions;
+}
+
+/**
+ * Prompt user to select which components to update
+ * @param {boolean} nonInteractive - If true, returns default selections
+ * @returns {Promise<string[]>} Array of selected option values
+ */
+async function askUpdateOptions(nonInteractive = false) {
+  const defaultOptions = ['templates', 'skills', ...getDefaultPlatformAssetKeys()];
+  if (nonInteractive) return defaultOptions;
+
+  const choices = [
+    { name: 'Templates → Update spec-dir-name/templates/', value: 'templates', checked: true },
+    { name: 'Skills → Update spec-dir-name/skills/ (fully composed task skills)', value: 'skills', checked: true },
+    ...getPlatformAssetPromptChoices('update'),
+  ];
+  
+  const res = await prompt([{
+    type: 'checkbox',
+    name: 'updateOptions',
+    message: 'Select which components to update:',
+    choices,
+  }]);
+  
+  return res.updateOptions;
+}
+
+/**
+ * Prompt user for seed repository configuration
+ * @param {string} currentValue - Current seed-repo value if any
+ * @param {boolean} nonInteractive - If true, returns default value
+ * @returns {Promise<string>} Seed repository in format owner/repo[@branch]
+ */
+async function askSeedRepo(currentValue = null, nonInteractive = false) {
+  const defaultValue = currentValue || 'leandronoijo/r3nd@develop';
+  
+  if (nonInteractive) return defaultValue;
+  
+  const res = await prompt([{
+    type: 'input',
+    name: 'seedRepo',
+    message: 'Enter seed repository (format: owner/repo[@branch]):',
+    default: defaultValue,
+    validate: (input) => {
+      const trimmed = input.trim();
+      if (!trimmed) return 'Seed repository is required';
+      
+      // Basic validation - will be validated more thoroughly by ConfigManager
+      const hasSlash = trimmed.includes('/');
+      if (!hasSlash) return 'Invalid format. Expected: owner/repo[@branch]';
+      
+      return true;
+    }
+  }]);
+  
+  return res.seedRepo.trim();
+}
+
+/**
+ * Prompt user for spec directory name configuration
+ * @param {string} currentValue - Current spec-dir-name value if any
+ * @param {boolean} nonInteractive - If true, returns default value
+ * @returns {Promise<string>} Spec directory name (e.g., 'r3nd', 'rnd', 'specs')
+ */
+async function askSpecDirName(currentValue = null, nonInteractive = false) {
+  const defaultValue = currentValue || 'r3nd';
+  
+  if (nonInteractive) return defaultValue;
+  
+  const res = await prompt([{
+    type: 'input',
+    name: 'specDirName',
+    message: 'Enter spec directory name (where skills and specs will be stored):',
+    default: defaultValue,
+    validate: (input) => {
+      const trimmed = input.trim();
+      if (!trimmed) return 'Spec directory name is required';
+      
+      // Validate it's a valid directory name (no slashes, no special chars that break paths)
+      if (trimmed.includes('/') || trimmed.includes('\\')) {
+        return 'Directory name cannot contain slashes';
+      }
+      
+      if (!/^[a-zA-Z0-9_.-]+$/.test(trimmed)) {
+        return 'Directory name can only contain letters, numbers, dots, dashes, and underscores';
+      }
+      
+      return true;
+    }
+  }]);
+  
+  return res.specDirName.trim();
+}
+
+/**
+ * Prompt user to select which apps to analyze
+ * @param {Array} apps - Array of app objects with name, path, purpose, stack
+ * @param {boolean} nonInteractive - If true, returns all apps
+ * @returns {Promise<Array>} Array of selected apps
+ */
+async function askSelectApps(apps, nonInteractive = false) {
+  if (nonInteractive || !apps || apps.length === 0) {
+    return apps;
+  }
+  
+  const choices = apps.map(app => ({
+    name: `${app.name} (${app.path}) - ${app.purpose || 'No description'}`,
+    value: app,
+    checked: true, // All checked by default
+  }));
+  
+  const res = await prompt([{
+    type: 'checkbox',
+    name: 'selectedApps',
+    message: 'Select which apps/libs to analyze:',
+    choices,
+    validate: (answer) => {
+      if (answer.length === 0) {
+        return 'You must choose at least one app to analyze.';
+      }
+      return true;
+    },
+  }]);
+  
+  return res.selectedApps;
+}
+
+/**
+ * Prompt user whether to overwrite an existing file
+ * @param {string} filePath - Path of the file that would be overwritten
+ * @param {boolean} nonInteractive - If true, returns false (don't overwrite)
+ * @returns {Promise<boolean>} True if user wants to overwrite, false otherwise
+ */
+async function askOverwriteFile(filePath, nonInteractive = false) {
+  if (nonInteractive) return false;
+  
+  const res = await prompt([{
+    type: 'confirm',
+    name: 'overwrite',
+    message: `File "${filePath}" already exists. Overwrite?`,
+    default: false
+  }]);
+  
+  return res.overwrite;
+}
+
+async function askWorktreeIDE(nonInteractive = false) {
+  if (nonInteractive) return 'vscode';
+
+  const res = await prompt([{
+    type: 'list',
+    name: 'ide',
+    message: 'Choose the default editor to open new worktrees:',
+    choices: [
+      { name: 'VSCode', value: 'vscode' },
+      { name: 'Cursor', value: 'cursor' },
+      { name: 'Neovim', value: 'neovim' }
+    ],
+    default: 'vscode'
+  }]);
+
+  return res.ide;
+}
+
+async function confirmWorktreeCopyWarning(patterns, nonInteractive = false) {
+  if (nonInteractive) return true;
+
+  const formattedPatterns = patterns.map(pattern => `  - ${pattern}`).join('\n');
+  const res = await prompt([{
+    type: 'confirm',
+    name: 'confirmed',
+    message: `New worktrees will also copy files matched by these patterns:\n${formattedPatterns}\n\nThese files can include secrets such as .env files. Continue?`,
+    default: true
+  }]);
+
+  return res.confirmed;
+}
+
+async function askWorktreeCleanSelection(worktrees, nonInteractive = false) {
+  if (!worktrees || worktrees.length === 0) {
+    return [];
+  }
+
+  if (nonInteractive) {
+    return worktrees.map(worktree => worktree.path);
+  }
+
+  const choices = worktrees.map(worktree => ({
+    name: `${worktree.branch} — ${worktree.path}`,
+    value: worktree.path
+  }));
+
+  const res = await prompt([{
+    type: 'checkbox',
+    name: 'selectedWorktrees',
+    message: 'Select clean worktrees to delete:',
+    choices,
+    pageSize: 15
+  }]);
+
+  return res.selectedWorktrees;
+}
+
+async function askWorktreeSelection(worktrees, nonInteractive = false) {
+  if (nonInteractive) {
+    return NEW_WORKTREE_OPTION_VALUE;
+  }
+
+  const choices = (worktrees || []).map(worktree => ({
+    name: `${worktree.branch} — ${worktree.path}${worktree.current ? ' (current)' : ''}`,
+    value: worktree.path
+  }));
+
+  choices.push({ name: 'New worktree', value: NEW_WORKTREE_OPTION_VALUE });
+
+  const res = await prompt([{
+    type: 'list',
+    name: 'selectedWorktree',
+    message: 'Select a worktree to open:',
+    choices,
+    pageSize: 15
+  }]);
+
+  return res.selectedWorktree;
+}
+
+async function askWorktreeBranchName(nonInteractive = false) {
+  if (nonInteractive) {
+    return '';
+  }
+
+  const res = await prompt([{
+    type: 'input',
+    name: 'branchName',
+    message: 'Enter a branch name for the new worktree (leave empty for an automatic name):',
+    default: ''
+  }]);
+
+  return res.branchName.trim();
+}
+
+module.exports = {
+  chooseBackend,
+  chooseFrontend,
+  askOverlays,
+  askOverlaySelection,
+  askOverlayOrder,
+  askLLMChoice,
+  confirmRunNow,
+  confirmSavePrompts,
+  askRemoteOrigin,
+  askBugDescription,
+  askFeatureDescription,
+  askBugfixLLMChoice,
+  confirmBuildPlan,
+  askAnalyseAgent,
+  buildAgentChoices,
+  chooseFile,
+  askInitOptions,
+  askUpdateOptions,
+  askSeedRepo,
+  askSpecDirName,
+  askOverwriteFile,
+  askSelectApps,
+  askWorktreeIDE,
+  confirmWorktreeCopyWarning,
+  askWorktreeCleanSelection,
+  askWorktreeSelection,
+  askWorktreeBranchName,
+  NEW_WORKTREE_OPTION_VALUE
+};

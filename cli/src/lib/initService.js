@@ -1,14 +1,129 @@
 const path = require('path');
 const fs = require('fs').promises;
 const { execSync } = require('child_process');
+const YAML = require('yaml');
 
 const { GitHubClient } = require('./github/githubClient');
-const { writeBuffer } = require('./fs/fileWriter');
+const { 
+  copyAgentPersonas,
+  copyBuildPlans,
+  copyTaskSkills,
+  syncPlatformAsset,
+  copyTemplates, 
+  copyCommonFiles
+} = require('./fs/seedCopier');
+const {
+  fetchSeedSpecDirName,
+  discoverAvailableOverlays,
+  createEffectiveSeedView,
+  applySelectedOverlays
+} = require('./overlays/overlaySeedService');
+const { askInitOptions, askOverlays, askSeedRepo, askSpecDirName } = require('./ui/prompts');
+const { ConfigManager } = require('./config/configManager');
+const {
+  getPlatformAsset,
+  normalizePlatformAssetSelection
+} = require('./platformAssetRegistry');
 const logger = require('./utils/logger');
+const { bootstrapR3start } = require('./r3startBootstrap');
+
+/**
+ * Legacy function for backwards compatibility - migrate old agent files
+ * @param {string} content - Raw markdown content of agent file
+ * @returns {Object} Parsed agent with name, description, tools, and content
+ */
+function parseAgentFile(content) {
+  const lines = content.split('\n');
+  let frontmatterStart = -1;
+  let frontmatterEnd = -1;
+  
+  // Find frontmatter boundaries
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].trim() === '---') {
+      if (frontmatterStart === -1) {
+        frontmatterStart = i;
+      } else {
+        frontmatterEnd = i;
+        break;
+      }
+    }
+  }
+  
+  let metadata = {};
+  
+  // Parse YAML frontmatter if found
+  if (frontmatterStart !== -1 && frontmatterEnd !== -1) {
+    const frontmatterContent = lines.slice(frontmatterStart + 1, frontmatterEnd).join('\n');
+    try {
+      metadata = YAML.parse(frontmatterContent) || {};
+    } catch (err) {
+      // Fallback to defaults if YAML parsing fails
+      metadata = {};
+    }
+  }
+  
+  const bodyStartLine = frontmatterEnd !== -1 ? frontmatterEnd + 1 : 0;
+  const bodyContent = lines.slice(bodyStartLine).join('\n').trim();
+  
+  return {
+    name: metadata.name || 'unknown',
+    description: metadata.description || '',
+    tools: metadata.tools || ['*'],
+    content: bodyContent
+  };
+}
+
+/**
+ * Migrate legacy agent file to new rnd/agents structure
+ * @param {string} content - Legacy agent file content with frontmatter
+ * @returns {string} Platform-agnostic agent persona content (without frontmatter)
+ */
+function migrateLegacyAgent(content) {
+  const parsed = parseAgentFile(content);
+  return parsed.content;
+}
 
 async function runInit(opts = {}, deps = {}) {
   const cwd = opts.cwd || process.cwd();
-  const githubClient = deps.githubClient || new GitHubClient({});
+  const nonInteractive = !!opts.nonInteractive;
+
+  logger.info('r3nd — repository initializer\n');
+  const initOptions = await askInitOptions(nonInteractive);
+  const selectedOptions = normalizePlatformAssetSelection(initOptions);
+  if (opts.r3start || initOptions.includes('r3start')) {
+    await bootstrapR3start(cwd, { nonInteractive });
+  }
+  
+  // Initialize config manager
+  const configManager = new ConfigManager(cwd);
+  
+  // Check if seed-repo is configured, prompt if not
+  let seedRepo = await configManager.get('seed-repo');
+  if (!seedRepo) {
+    logger.info('No seed repository configured.');
+    seedRepo = await askSeedRepo(null, nonInteractive);
+    await configManager.set('seed-repo', seedRepo);
+    logger.info(`✓ Configured seed-repo: ${seedRepo}\n`);
+  }
+
+  // Check if spec-dir-name is configured, prompt if not
+  let specDirName = await configManager.get('spec-dir-name');
+  if (!specDirName) {
+    logger.info('No spec directory name configured.');
+    specDirName = await askSpecDirName(null, nonInteractive);
+    await configManager.set('spec-dir-name', specDirName);
+    logger.info(`✓ Configured spec-dir-name: ${specDirName}\n`);
+  } else {
+    // Even if configured, ask the user to confirm or change it during init
+    const confirmedSpecDirName = await askSpecDirName(specDirName, nonInteractive);
+    if (confirmedSpecDirName !== specDirName) {
+      await configManager.set('spec-dir-name', confirmedSpecDirName);
+      specDirName = confirmedSpecDirName;
+      logger.info(`✓ Updated spec-dir-name: ${specDirName}\n`);
+    }
+  }
+
+  const githubClient = deps.githubClient || new GitHubClient({ cwd });
 
   // Ensure git repo
   const isGitRepo = await fs.access(path.join(cwd, '.git')).then(() => true).catch(() => false);
@@ -19,43 +134,50 @@ async function runInit(opts = {}, deps = {}) {
     logger.info('Git repository already initialized.');
   }
 
-  // Determine which files to copy from seed (only these prefixes)
-  const prefixes = ['.github/agents/', '.github/templates/', '.github/workflows/'];
-  const singleFiles = [
-    '.gitignore',
-    '.github/instructions/e2e-testing.instructions.md',
-    '.github/agents/retro.agent.md',
-    '.github/templates/retro.md',
-    '.github/workflows/06-retro-ready.yml'
-  ];
+  logger.info(`\nSelected: ${selectedOptions.join(', ') || 'None'}\n`);
 
+  // Fetch file tree from GitHub
   logger.info('Fetching file list from GitHub (seed repo)...');
   const tree = await githubClient.getTree();
+  
+  // Fetch seed repo's spec-dir-name configuration
+  const seedSpecDirName = await fetchSeedSpecDirName(githubClient);
+  const availableOverlays = discoverAvailableOverlays(tree);
+  const currentOverlays = await configManager.getOverlays();
+  const selectedOverlays = await askOverlays(currentOverlays, availableOverlays, nonInteractive);
+  await configManager.set('overlays', selectedOverlays);
+  const effectiveSeed = createEffectiveSeedView(tree, githubClient, seedSpecDirName, selectedOverlays);
 
-  const toCopy = tree.filter(item => {
-    if (item.type !== 'blob') return false;
-    const p = item.path;
-    if (singleFiles.includes(p)) return true;
-    return prefixes.some(pref => p.startsWith(pref));
-  }).map(i => i.path);
+  // Copy common files (gitignore)
+  await copyCommonFiles(cwd, tree, githubClient, specDirName, { nonInteractive });
 
-  if (toCopy.length === 0) {
-    logger.warn('No matching seed files found to copy.');
-    return;
-  }
+  // Materialize effective shared agents after overlay precedence is resolved
+  await copyAgentPersonas(cwd, effectiveSeed.tree, effectiveSeed.githubClient, specDirName, seedSpecDirName, { nonInteractive });
 
-  logger.info(`Found ${toCopy.length} files to copy. Downloading...`);
-  for (const remotePath of toCopy) {
-    try {
-      const buffer = await githubClient.fetchRaw(remotePath);
-      await writeBuffer(cwd, remotePath, buffer, { overwrite: true });
-      logger.info(`Copied: ${remotePath}`);
-    } catch (err) {
-      logger.error(`Failed to copy ${remotePath}:`, err && err.message ? err.message : err);
+  // Materialize effective canonical task skills as fully composed local files
+  await copyTaskSkills(cwd, effectiveSeed.tree, effectiveSeed.githubClient, specDirName, seedSpecDirName, { nonInteractive });
+
+  // Materialize effective build plans
+  await copyBuildPlans(cwd, effectiveSeed.tree, effectiveSeed.githubClient, specDirName, seedSpecDirName, { nonInteractive });
+
+  for (const assetKey of selectedOptions) {
+    const asset = getPlatformAsset(assetKey);
+    if (!asset) {
+      continue;
     }
+    await syncPlatformAsset(cwd, effectiveSeed.tree, effectiveSeed.githubClient, asset, specDirName, seedSpecDirName, { nonInteractive });
   }
 
-  logger.info('Init complete.');
+  // Also copy templates if any option was selected
+  await copyTemplates(cwd, effectiveSeed.tree, effectiveSeed.githubClient, specDirName, seedSpecDirName, { nonInteractive });
+
+  await applySelectedOverlays(cwd, effectiveSeed.tree, effectiveSeed.githubClient, specDirName, seedSpecDirName, selectedOverlays, {
+    nonInteractive,
+    overwriteExisting: true,
+    skipSpecSubdirs: ['agents', 'skills', 'templates', 'build_plans']
+  });
+
+  logger.info('\nInit complete.');
 }
 
-module.exports = { runInit };
+module.exports = { runInit, parseAgentFile, migrateLegacyAgent };

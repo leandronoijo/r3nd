@@ -1,4 +1,4 @@
-const { getAgents, getAgent, registerAgent } = require('./agentRegistry');
+const { getAgents, getAgent, registerAgent, resolveAgentConfig } = require('./agentRegistry');
 
 describe('agentRegistry', () => {
   describe('getAgents', () => {
@@ -20,21 +20,25 @@ describe('agentRegistry', () => {
       });
     });
 
-    it('should include tech-spec, build-plan, and develop agents', () => {
+    it('should include core planning/implementation and analysis agents', () => {
       const agents = getAgents();
       const names = agents.map(a => a.name);
-      expect(names).toContain('tech-spec');
-      expect(names).toContain('build-plan');
-      expect(names).toContain('develop');
+      expect(names).toContain('create-tech-spec');
+      expect(names).toContain('create-build-plan');
+      expect(names).toContain('implement-build-plan');
+      expect(names).toContain('implement-feature');
+      expect(names).toContain('analyze-repo-context');
+      expect(names).toContain('analyze-app-context');
+      expect(names).toContain('analyze-module-context');
     });
   });
 
   describe('getAgent', () => {
     it('should return agent config by name', () => {
-      const agent = getAgent('tech-spec');
+      const agent = getAgent('create-tech-spec');
       expect(agent).toBeDefined();
-      expect(agent.name).toBe('tech-spec');
-      expect(agent.filesDir).toBe('rnd/product_specs');
+      expect(agent.name).toBe('create-tech-spec');
+      expect(typeof agent.filesDir).toBe('function');
     });
 
     it('should return undefined for non-existent agent', () => {
@@ -64,7 +68,7 @@ describe('agentRegistry', () => {
         name: 'test-agent',
         description: 'Test agent',
         filesDir: 'test/dir',
-        agentFile: '.github/agents/test.agent.md',
+        agentFile: 'specs/skills/test-agent/SKILL.md',
         promptTemplate: (agentFile, targetFile) => `Test prompt for ${targetFile}`
       };
 
@@ -87,7 +91,7 @@ describe('agentRegistry', () => {
 
     it('should throw error if agent name already exists', () => {
       const duplicateAgent = {
-        name: 'tech-spec', // Already exists
+        name: 'create-tech-spec', // Already exists
         description: 'Duplicate',
         filesDir: 'test',
         agentFile: 'test',
@@ -111,31 +115,114 @@ describe('agentRegistry', () => {
   });
 
   describe('promptTemplate functions', () => {
-    it('should generate correct prompt for tech-spec agent', () => {
-      const agent = getAgent('tech-spec');
-      const prompt = agent.promptTemplate(agent.agentFile, 'rnd/product_specs/feature.md');
+    it('uses period input and the nested spec root without deleting evidence or gating capture', () => {
+      const retro = resolveAgentConfig(getAgent('create-retro-report'), 'specs', 'apps/api');
+      const prompt = retro.promptTemplate(retro.agentFile, 'last week in Asia/Jerusalem', retro.fullSpecDir);
+      const completion = retro.interactiveSuffix('retro.done', retro.fullSpecDir);
+      expect(prompt).toContain('last week in Asia/Jerusalem');
+      expect(prompt).toContain('apps/api/specs/templates/retro.md');
+      expect(prompt).toContain('period-named report');
+      expect(prompt).toContain('Preserve all source evidence');
+      expect(completion).toContain('Do not journal');
+      expect(completion).toContain('retro.done');
+      for (const agent of getAgents()) {
+        const suffix = agent.interactiveSuffix('task.done', 'apps/api/specs');
+        expect(suffix).not.toContain('Are you satisfied');
+        expect(suffix).not.toContain('delete all files');
+        expect(suffix).not.toContain('agent_summaries/');
+      }
+    });
+
+    it('should generate correct prompt for create-tech-spec agent', () => {
+      const agent = getAgent('create-tech-spec');
+      const resolved = resolveAgentConfig(agent, 'specs');
+      const prompt = resolved.promptTemplate(resolved.agentFile, 'specs/product_specs/feature.md', resolved.fullSpecDir);
       
-      expect(prompt).toContain('.github/agents/architect.agent.md');
-      expect(prompt).toContain('rnd/product_specs/feature.md');
+      expect(prompt).toContain('specs/skills/create-tech-spec/SKILL.md');
+      expect(prompt).toContain('specs/product_specs/feature.md');
       expect(prompt).toContain('technical specification');
+      expect(prompt).toContain('specs/tech_specs/');
     });
 
-    it('should generate correct prompt for build-plan agent', () => {
-      const agent = getAgent('build-plan');
-      const prompt = agent.promptTemplate(agent.agentFile, 'rnd/tech_specs/feature.md');
+    it('should generate correct prompt for create-build-plan agent', () => {
+      const agent = getAgent('create-build-plan');
+      const resolved = resolveAgentConfig(agent, 'specs');
+      const prompt = resolved.promptTemplate(resolved.agentFile, 'specs/tech_specs/feature.md', resolved.fullSpecDir);
       
-      expect(prompt).toContain('.github/agents/team-lead.agent.md');
-      expect(prompt).toContain('rnd/tech_specs/feature.md');
+      expect(prompt).toContain('specs/skills/create-build-plan/SKILL.md');
+      expect(prompt).toContain('specs/tech_specs/feature.md');
       expect(prompt).toContain('build plan');
+      expect(prompt).toContain('specs/build_plans/');
     });
 
-    it('should generate correct prompt for develop agent', () => {
-      const agent = getAgent('develop');
-      const prompt = agent.promptTemplate(agent.agentFile, 'rnd/build_plans/feature.md');
+    it('should generate correct prompt for implement-build-plan agent', () => {
+      const agent = getAgent('implement-build-plan');
+      const resolved = resolveAgentConfig(agent, 'specs');
+      const prompt = resolved.promptTemplate(resolved.agentFile, 'specs/build_plans/feature.md', resolved.fullSpecDir);
       
-      expect(prompt).toContain('.github/agents/developer.agent.md');
-      expect(prompt).toContain('rnd/build_plans/feature.md');
+      expect(prompt).toContain('specs/skills/implement-build-plan/SKILL.md');
+      expect(prompt).toContain('specs/build_plans/feature.md');
       expect(prompt).toContain('implement');
+    });
+
+    it('should generate correct prompt for implement-feature agent', () => {
+      const agent = getAgent('implement-feature');
+      const resolved = resolveAgentConfig(agent, 'specs');
+      const prompt = resolved.promptTemplate(resolved.agentFile, 'specs/tech_specs/feature.md', resolved.fullSpecDir);
+      
+      expect(prompt).toContain('specs/skills/implement-feature/SKILL.md');
+      expect(prompt).toContain('specs/tech_specs/feature.md');
+      expect(prompt).toContain('strict workflow');
+      expect(prompt).toContain('QA-selection');
+      expect(prompt).toContain('specs/agent_runs/');
+    });
+
+    it('should use custom spec directory base', () => {
+      const agent = getAgent('create-product-spec');
+      const resolved = resolveAgentConfig(agent, 'r3nd', 'apps/my-app');
+      
+      expect(resolved.fullSpecDir).toBe('apps/my-app/r3nd');
+      expect(resolved.agentFile).toBe('apps/my-app/r3nd/skills/create-product-spec/SKILL.md');
+      
+      const prompt = resolved.promptTemplate(resolved.agentFile, 'test input', resolved.fullSpecDir);
+      expect(prompt).toContain('apps/my-app/r3nd/product_specs/');
+    });
+
+    it('should default to root spec directory when no base provided', () => {
+      const agent = getAgent('create-product-spec');
+      const resolved = resolveAgentConfig(agent, 'r3nd');
+      
+      expect(resolved.fullSpecDir).toBe('r3nd');
+      expect(resolved.agentFile).toBe('r3nd/skills/create-product-spec/SKILL.md');
+      
+      const prompt = resolved.promptTemplate(resolved.agentFile, 'test input', resolved.fullSpecDir);
+      expect(prompt).toContain('r3nd/product_specs/');
+    });
+
+    it('should generate path-validation prompt for analyze-repo-context agent', () => {
+      const agent = getAgent('analyze-repo-context');
+      const resolved = resolveAgentConfig(agent, 'specs');
+      const prompt = resolved.promptTemplate(resolved.agentFile, '.', resolved.fullSpecDir);
+
+      expect(prompt).toContain('specs/skills/analyze-repo-context/SKILL.md');
+      expect(prompt).toContain('repository-level scope path');
+      expect(prompt).toContain('If it is missing or invalid');
+    });
+
+    it('should resolve implement-feature paths with custom spec directory base', () => {
+      const agent = getAgent('implement-feature');
+      const resolved = resolveAgentConfig(agent, 'r3nd', 'apps/my-app');
+
+      expect(resolved.fullSpecDir).toBe('apps/my-app/r3nd');
+      expect(resolved.agentFile).toBe('apps/my-app/r3nd/skills/implement-feature/SKILL.md');
+      expect(resolved.filesDir).toBe('apps/my-app/r3nd/tech_specs');
+
+      const prompt = resolved.promptTemplate(
+        resolved.agentFile,
+        'apps/my-app/r3nd/tech_specs/feature.md',
+        resolved.fullSpecDir
+      );
+      expect(prompt).toContain('apps/my-app/r3nd/agent_runs/');
     });
   });
 });

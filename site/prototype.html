@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="./assets/r3nd-icon.png" rel="icon" type="image/png"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface": "#070d1f",
+                    "on-tertiary-fixed-variant": "#003874",
+                    "on-secondary": "#280067",
+                    "surface-variant": "#1c253e",
+                    "tertiary": "#7aacff",
+                    "on-error": "#490006",
+                    "primary-fixed": "#3adffa",
+                    "on-tertiary-container": "#001f46",
+                    "surface-bright": "#222b47",
+                    "error-dim": "#d7383b",
+                    "secondary-fixed-dim": "#ceb9ff",
+                    "surface-tint": "#3adffa",
+                    "primary": "#3adffa",
+                    "surface-container-highest": "#1c253e",
+                    "inverse-on-surface": "#4f5469",
+                    "outline-variant": "#41475b",
+                    "tertiary-fixed": "#84b1ff",
+                    "on-primary-fixed-variant": "#005561",
+                    "primary-dim": "#1ad0eb",
+                    "on-secondary-fixed": "#40009b",
+                    "tertiary-container": "#619efd",
+                    "surface-container": "#11192e",
+                    "inverse-surface": "#faf8ff",
+                    "primary-container": "#00cbe6",
+                    "surface-container-high": "#171f36",
+                    "on-surface-variant": "#a5aac2",
+                    "inverse-primary": "#006977",
+                    "secondary": "#ac8aff",
+                    "on-primary": "#004b56",
+                    "secondary-dim": "#8455ef",
+                    "on-tertiary": "#002b5c",
+                    "on-error-container": "#ffa8a3",
+                    "secondary-container": "#5516be",
+                    "on-tertiary-fixed": "#001737",
+                    "on-surface": "#dfe4fe",
+                    "on-secondary-fixed-variant": "#5f28c8",
+                    "on-primary-container": "#003d46",
+                    "error-container": "#9f0519",
+                    "tertiary-dim": "#619efd",
+                    "surface-container-lowest": "#000000",
+                    "background": "#070d1f",
+                    "secondary-fixed": "#dac9ff",
+                    "tertiary-fixed-dim": "#6aa3ff",
+                    "surface-dim": "#070d1f",
+                    "surface-container-low": "#0c1326",
+                    "primary-fixed-dim": "#1ad0eb",
+                    "on-primary-fixed": "#00363e",
+                    "outline": "#6f758b",
+                    "on-background": "#dfe4fe",
+                    "error": "#ff716c",
+                    "on-secondary-container": "#d9c8ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Space Grotesk"],
+                    "display": ["Space Grotesk"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { background-color: #070d1f; color: #dfe4fe; font-family: 'Inter', sans-serif; }
+        .font-headline { font-family: 'Space Grotesk', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel { background: rgba(28, 37, 62, 0.6); backdrop-filter: blur(24px); }
+        .ghost-border { outline: 1px solid rgba(111, 117, 139, 0.15); }
+        .neon-glow { text-shadow: 0 0 15px rgba(58, 223, 250, 0.4); }
+        .gradient-text { background: linear-gradient(135deg, #3adffa 0%, #ac8aff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .kinetic-glow { box-shadow: 0 0 40px -10px rgba(58, 223, 250, 0.15), 0 0 40px -10px rgba(172, 138, 255, 0.1); }
+    </style>
+</head>
+<body class="selection:bg-primary/30 selection:text-primary">
+<!-- Top Navigation Shell -->
+<nav class="sticky top-0 w-full z-50 bg-[#070d1f]/80 backdrop-blur-md border-b border-white/10 shadow-[0_20px_40px_rgba(34,211,238,0.04)]">
+<div class="flex justify-between items-center h-20 px-8 max-w-7xl mx-auto font-['Space_Grotesk'] tracking-tight">
+<div class="text-2xl font-black tracking-tighter text-cyan-400">r3nd</div>
+<div class="hidden md:flex gap-8">
+<a class="text-slate-400 hover:text-cyan-300 transition-colors duration-200" href="#">Framework</a>
+<a class="text-cyan-400 font-bold hover:text-cyan-300 transition-colors duration-200" href="#">Workflow</a>
+<a class="text-slate-400 hover:text-cyan-300 transition-colors duration-200" href="#">Pipeline</a>
+<a class="text-slate-400 hover:text-cyan-300 transition-colors duration-200" href="#">API</a>
+<a class="text-slate-400 hover:text-cyan-300 transition-colors duration-200" href="#">Pricing</a>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-slate-400 hover:text-white transition-colors">Sign In</button>
+<button class="bg-primary hover:bg-primary-container text-on-primary font-bold px-5 py-2 rounded-lg transition-transform active:scale-95">Get Started</button>
+</div>
+</div>
+</nav>
+<main class="overflow-x-hidden">
+<!-- SECTION 1: HERO -->
+<section class="relative min-h-[921px] flex items-center pt-12 pb-24 overflow-hidden">
+<!-- Background Aesthetic -->
+<div class="absolute top-0 right-0 -z-10 w-full h-full opacity-20">
+<div class="absolute top-1/4 right-0 w-[600px] h-[600px] bg-primary rounded-full blur-[160px] opacity-20"></div>
+<div class="absolute bottom-1/4 left-0 w-[400px] h-[400px] bg-secondary rounded-full blur-[140px] opacity-10"></div>
+</div>
+<div class="max-w-7xl mx-auto px-8 w-full grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+<!-- Left: Message -->
+<div class="flex flex-col space-y-8">
+<div class="flex items-center gap-3">
+<span class="w-8 h-[1px] bg-primary"></span>
+<span class="font-headline text-xs tracking-[0.3em] uppercase text-primary font-bold">SPEC-DRIVEN SDLC FRAMEWORK</span>
+</div>
+<h1 class="font-headline text-5xl md:text-7xl font-extrabold tracking-tighter leading-[0.95] text-on-surface">
+                        Spec-driven software delivery <span class="gradient-text">with AI agents</span>
+</h1>
+<p class="text-lg md:text-xl text-on-surface-variant max-w-lg leading-relaxed font-light">
+                        Turn product requests into specs, plans, code, tests, and retros with a repo-native workflow that works across Codex, Gemini, Copilot, Cursor, or prompts — while humans stay in control.
+                    </p>
+<div class="flex flex-wrap gap-4 pt-4">
+<button class="group relative px-8 py-4 bg-primary text-on-primary font-bold rounded-lg overflow-hidden transition-all hover:shadow-[0_0_30px_rgba(58,223,250,0.3)]">
+<span class="relative z-10 flex items-center gap-2">
+                                See workflows
+                                <span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</span>
+</button>
+<button class="px-8 py-4 ghost-border hover:bg-surface-variant transition-colors text-on-surface font-bold rounded-lg">
+                            Get started
+                        </button>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-12 border-t border-white/5">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">terminal</span>
+<span class="text-sm font-label tracking-tight text-on-surface-variant">Tool-agnostic execution</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">security</span>
+<span class="text-sm font-label tracking-tight text-on-surface-variant">Human approval gates</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">history_edu</span>
+<span class="text-sm font-label tracking-tight text-on-surface-variant">Repo-native artifacts</span>
+</div>
+</div>
+</div>
+<!-- Right: Visual -->
+<div class="relative group">
+<div class="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
+<div class="relative glass-panel rounded-2xl border border-white/5 p-8 shadow-2xl">
+<!-- Terminal Header -->
+<div class="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
+<div class="flex gap-2">
+<div class="w-3 h-3 rounded-full bg-red-500/50"></div>
+<div class="w-3 h-3 rounded-full bg-amber-500/50"></div>
+<div class="w-3 h-3 rounded-full bg-emerald-500/50"></div>
+</div>
+<div class="text-[10px] uppercase tracking-widest text-on-surface-variant font-mono">r3nd :: active_pipeline</div>
+</div>
+<!-- Workflow Visual Nodes -->
+<div class="space-y-6">
+<div class="flex items-center gap-4 group/node">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center border border-primary/20 group-hover/node:border-primary transition-colors">
+<span class="material-symbols-outlined text-primary">description</span>
+</div>
+<div class="flex-1">
+<div class="text-sm font-bold text-on-surface">Product Spec</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full mt-2 overflow-hidden">
+<div class="h-full bg-primary w-full shadow-[0_0_10px_#3adffa]"></div>
+</div>
+</div>
+<span class="material-symbols-outlined text-emerald-400">check_circle</span>
+</div>
+<div class="flex items-center gap-4 group/node">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center border border-white/10 group-hover/node:border-primary transition-colors">
+<span class="material-symbols-outlined text-secondary">architecture</span>
+</div>
+<div class="flex-1">
+<div class="text-sm font-bold text-on-surface">Technical Design</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full mt-2 overflow-hidden">
+<div class="h-full bg-secondary w-3/4"></div>
+</div>
+</div>
+<div class="px-2 py-1 bg-secondary/10 border border-secondary/20 text-[10px] text-secondary font-bold rounded uppercase">Pending</div>
+</div>
+<div class="flex items-center gap-4 opacity-40">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center border border-white/10">
+<span class="material-symbols-outlined text-on-surface-variant">code</span>
+</div>
+<div class="flex-1">
+<div class="text-sm font-bold text-on-surface-variant">Execution</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full mt-2"></div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">lock</span>
+</div>
+</div>
+<!-- Floating Gate -->
+<div class="absolute -bottom-6 -right-6 px-6 py-4 glass-panel border border-primary/20 rounded-xl shadow-2xl animate-pulse">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-lg">face</span>
+</div>
+<div>
+<div class="text-[10px] uppercase font-bold text-primary">Human Approval Gate</div>
+<div class="text-xs text-on-surface">Awaiting Lead Architect...</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 2: WORKFLOW PREVIEW -->
+<section class="bg-surface-container-low py-32 border-t border-white/5 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+<div class="max-w-7xl mx-auto px-8">
+<div class="max-w-3xl mb-24">
+<div class="flex items-center gap-3 mb-4">
+<span class="w-8 h-[1px] bg-secondary"></span>
+<span class="font-headline text-xs tracking-[0.3em] uppercase text-secondary font-bold">WORKFLOW MODES</span>
+</div>
+<h2 class="font-headline text-4xl md:text-5xl font-bold tracking-tight text-on-surface mb-6">Choose the control level for the work</h2>
+<p class="text-lg text-on-surface-variant leading-relaxed font-light">
+                        From architectural work to tiny fixes, r3nd gives teams different delivery paths with explicit approval points and durable repo artifacts.
+                    </p>
+</div>
+<!-- Interactive Selector Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-16">
+<button class="flex flex-col items-start p-6 rounded-xl bg-surface-variant border border-primary/30 shadow-[0_0_20px_rgba(58,223,250,0.1)] transition-all">
+<span class="material-symbols-outlined text-primary mb-4" style="font-variation-settings: 'FILL' 1;">rocket_launch</span>
+<span class="text-lg font-headline font-bold text-on-surface">Full Control</span>
+<span class="text-xs text-on-surface-variant mt-2 text-left">Large features requiring deep review cycles.</span>
+</button>
+<button class="flex flex-col items-start p-6 rounded-xl surface-container-high ghost-border hover:bg-surface-variant transition-all">
+<span class="material-symbols-outlined text-on-surface-variant mb-4">account_tree</span>
+<span class="text-lg font-headline font-bold text-on-surface-variant">Semi-Control</span>
+<span class="text-xs text-on-surface-variant mt-2 text-left">Iterative updates with key gate checks.</span>
+</button>
+<button class="flex flex-col items-start p-6 rounded-xl surface-container-high ghost-border hover:bg-surface-variant transition-all">
+<span class="material-symbols-outlined text-on-surface-variant mb-4">bolt</span>
+<span class="text-lg font-headline font-bold text-on-surface-variant">Small Feature</span>
+<span class="text-xs text-on-surface-variant mt-2 text-left">Quick additive tasks with validation.</span>
+</button>
+<button class="flex flex-col items-start p-6 rounded-xl surface-container-high ghost-border hover:bg-surface-variant transition-all">
+<span class="material-symbols-outlined text-on-surface-variant mb-4">bug_report</span>
+<span class="text-lg font-headline font-bold text-on-surface-variant">Bugfix</span>
+<span class="text-xs text-on-surface-variant mt-2 text-left">Swift resolution for reported issues.</span>
+</button>
+</div>
+<!-- Active Workflow Visualization (Full Control) -->
+<div class="glass-panel rounded-2xl border border-white/10 p-10 mb-12 overflow-hidden relative">
+<div class="flex items-center justify-between mb-12">
+<h3 class="text-2xl font-headline font-bold text-primary">Full Control Sequence</h3>
+<div class="flex items-center gap-4 text-xs font-mono text-on-surface-variant">
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-primary"></span> Agent</span>
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-secondary"></span> Human Gate</span>
+</div>
+</div>
+<!-- Sequence Line -->
+<div class="relative flex justify-between items-start gap-4 flex-wrap">
+<div class="absolute top-5 left-0 w-full h-[1px] bg-white/5 -z-10 hidden md:block"></div>
+<!-- Step 1 -->
+<div class="flex flex-col items-center gap-3 w-32">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest border border-white/10 flex items-center justify-center text-on-surface-variant">1</div>
+<div class="text-[10px] font-bold text-center uppercase tracking-tight">Request</div>
+</div>
+<div class="hidden md:block pt-5"><span class="material-symbols-outlined text-white/10 text-sm">chevron_right</span></div>
+<!-- Step 2 -->
+<div class="flex flex-col items-center gap-3 w-32">
+<div class="w-10 h-10 rounded-full bg-primary/20 border border-primary flex items-center justify-center text-primary shadow-[0_0_15px_#3adffa33]">
+<span class="material-symbols-outlined text-sm">auto_awesome</span>
+</div>
+<div class="text-[10px] font-bold text-center uppercase tracking-tight text-primary">Product Spec</div>
+</div>
+<div class="hidden md:block pt-5"><span class="material-symbols-outlined text-white/10 text-sm">chevron_right</span></div>
+<!-- Step 3: Gate -->
+<div class="flex flex-col items-center gap-3 w-32">
+<div class="w-10 h-10 rounded-lg bg-secondary/20 border border-secondary flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-sm">verified_user</span>
+</div>
+<div class="text-[10px] font-bold text-center uppercase tracking-tight text-secondary">Approval</div>
+</div>
+<div class="hidden md:block pt-5"><span class="material-symbols-outlined text-white/10 text-sm">chevron_right</span></div>
+<!-- Step 4 -->
+<div class="flex flex-col items-center gap-3 w-32">
+<div class="w-10 h-10 rounded-full bg-primary/20 border border-primary flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-sm">architecture</span>
+</div>
+<div class="text-[10px] font-bold text-center uppercase tracking-tight text-primary">Tech Spec</div>
+</div>
+<div class="hidden md:block pt-5"><span class="material-symbols-outlined text-white/10 text-sm">chevron_right</span></div>
+<!-- Step 5: Gate -->
+<div class="flex flex-col items-center gap-3 w-32">
+<div class="w-10 h-10 rounded-lg bg-secondary/20 border border-secondary flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-sm">verified_user</span>
+</div>
+<div class="text-[10px] font-bold text-center uppercase tracking-tight text-secondary">Approval</div>
+</div>
+<!-- More steps implied for space -->
+<div class="w-full mt-12 flex justify-center">
+<div class="px-4 py-1 bg-surface-container border border-white/5 rounded-full text-[10px] text-on-surface-variant uppercase tracking-[0.2em]">Sequence continues to Build Plan → QA → Retro</div>
+</div>
+</div>
+</div>
+<!-- Details Panel -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+<div class="surface-container p-8 rounded-2xl ghost-border space-y-6">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">info</span>
+</div>
+<h4 class="text-xl font-headline font-bold text-on-surface">Configuration Details</h4>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between border-b border-white/5 pb-3">
+<span class="text-sm text-on-surface-variant">Best for</span>
+<span class="text-sm font-bold text-on-surface">New feature architecture</span>
+</div>
+<div class="flex justify-between border-b border-white/5 pb-3">
+<span class="text-sm text-on-surface-variant">Human role</span>
+<span class="text-sm font-bold text-on-surface">Reviewer &amp; Strategist</span>
+</div>
+<div class="flex justify-between border-b border-white/5 pb-3">
+<span class="text-sm text-on-surface-variant">Agent role</span>
+<span class="text-sm font-bold text-on-surface">Spec Writer &amp; Implementer</span>
+</div>
+</div>
+</div>
+<div class="surface-container p-8 rounded-2xl ghost-border space-y-6">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">analytics</span>
+</div>
+<h4 class="text-xl font-headline font-bold text-on-surface">Artifacts &amp; Tradeoffs</h4>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between border-b border-white/5 pb-3">
+<span class="text-sm text-on-surface-variant">Main artifacts</span>
+<span class="text-sm font-bold text-on-surface">PR, Tech Spec, MD Files</span>
+</div>
+<div class="flex justify-between border-b border-white/5 pb-3">
+<span class="text-sm text-on-surface-variant">Tradeoff</span>
+<span class="text-sm font-bold text-on-surface">Slower but high-rigor</span>
+</div>
+<div class="flex justify-between border-b border-white/5 pb-3">
+<span class="text-sm text-on-surface-variant">Verification</span>
+<span class="text-sm font-bold text-on-surface">100% human-verified</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Comparison Strip -->
+<div class="mt-20 py-8 px-10 glass-panel rounded-full ghost-border flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="flex items-center gap-8 overflow-x-auto w-full md:w-auto">
+<div class="flex items-center gap-2 whitespace-nowrap">
+<span class="text-[10px] text-on-surface-variant font-mono uppercase">Avg Speed</span>
+<span class="text-xs font-bold text-on-surface">2.4h Cycle</span>
+</div>
+<div class="w-[1px] h-4 bg-white/10"></div>
+<div class="flex items-center gap-2 whitespace-nowrap">
+<span class="text-[10px] text-on-surface-variant font-mono uppercase">Reliability</span>
+<span class="text-xs font-bold text-emerald-400">99.2%</span>
+</div>
+<div class="w-[1px] h-4 bg-white/10"></div>
+<div class="flex items-center gap-2 whitespace-nowrap">
+<span class="text-[10px] text-on-surface-variant font-mono uppercase">Agent Load</span>
+<span class="text-xs font-bold text-on-surface">Heavy</span>
+</div>
+</div>
+<button class="w-full md:w-auto px-10 py-3 bg-secondary text-on-secondary font-bold rounded-full transition-transform active:scale-95">
+                        Explore all workflows
+                    </button>
+</div>
+</div>
+</section>
+<!-- SECTION 3: WHY IT WORKS -->
+<section class="relative py-32 px-8 max-w-7xl mx-auto border-t border-white/5">
+<!-- Section Intro -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-12 mb-24">
+<div class="md:col-span-8">
+<div class="flex items-center gap-3 mb-6">
+<span class="w-8 h-[1px] bg-primary"></span>
+<span class="font-headline text-xs tracking-[0.3em] uppercase text-primary font-bold">WHY IT WORKS</span>
+</div>
+<h2 class="font-headline text-5xl md:text-7xl font-bold tracking-tighter text-on-surface mb-8 leading-[0.95]">
+            From vibe-coding to <span class="gradient-text">controlled delivery</span></h2>
+<p class="text-on-surface-variant text-xl md:text-2xl max-w-2xl leading-relaxed font-light">
+            r3nd keeps skills, templates, artifacts, approvals, and stack rules in the repository so teams can move fast without becoming opaque.
+          </p>
+</div>
+</div>
+<!-- Primary Benefit Blocks -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-24">
+<!-- Block 1: Durable Knowledge -->
+<div class="md:col-span-7 group">
+<div class="surface-container rounded-xl h-full flex flex-col justify-between hover:bg-surface-container-high transition-colors duration-500 ghost-border p-8">
+<div class="mb-12">
+<h3 class="font-headline text-3xl font-bold text-on-surface mb-4 tracking-tight">Durable knowledge.</h3>
+<p class="text-on-surface-variant text-lg leading-relaxed max-w-md">
+                Specs, plans, QA evidence, context files, and retros stay in the repository instead of disappearing into assistant sessions.
+              </p>
+</div>
+<!-- File Tree Visual -->
+<div class="bg-surface-container-lowest rounded-lg font-mono text-sm overflow-hidden border border-white/5 p-6">
+<div class="flex gap-2 mb-6">
+<div class="w-2.5 h-2.5 rounded-full bg-red-500/30"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-amber-500/30"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-emerald-500/30"></div>
+</div>
+<div class="space-y-2 text-slate-400">
+<div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-base">folder_open</span> <span class="text-on-surface">rnd/</span></div>
+<div class="flex items-center gap-2 pl-6"><span class="material-symbols-outlined text-secondary text-base">folder</span> product_specs/</div>
+<div class="flex items-center gap-2 pl-12 border-l border-white/5 ml-3 py-0.5"><span class="material-symbols-outlined text-on-surface-variant text-base">description</span> <span class="text-primary">auth.md</span></div>
+<div class="flex items-center gap-2 pl-6"><span class="material-symbols-outlined text-secondary text-base">folder</span> tech_specs/</div>
+<div class="flex items-center gap-2 pl-12 border-l border-white/5 ml-3 py-0.5"><span class="material-symbols-outlined text-on-surface-variant text-base">description</span> <span class="text-primary">auth.md</span></div>
+<div class="flex items-center gap-2 pl-6"><span class="material-symbols-outlined text-secondary text-base">folder</span> evidence/</div>
+<div class="flex items-center gap-2 pl-12 border-l border-white/5 ml-3 py-0.5"><span class="material-symbols-outlined text-on-surface-variant text-base">task</span> <span class="text-slate-500">qa_run_01.json</span></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Block 2: Controlled Execution -->
+<div class="md:col-span-5 group">
+<div class="surface-container rounded-xl h-full flex flex-col justify-between hover:bg-surface-container-high transition-colors duration-500 ghost-border relative overflow-hidden p-8">
+<div class="relative z-10">
+<h3 class="font-headline text-3xl font-bold text-on-surface mb-4 tracking-tight">Controlled execution.</h3>
+<p class="text-on-surface-variant text-lg leading-relaxed">
+                Humans review the important decisions at approval gates while agents execute the work between them.
+              </p>
+</div>
+<!-- Mini Flow Visual -->
+<div class="relative py-12 flex flex-col items-center gap-8">
+<div class="w-full flex items-center justify-between gap-2">
+<div class="px-3 py-1.5 bg-surface-container-highest rounded border border-primary/20 text-[10px] font-mono text-primary">ARTIFACT</div>
+<div class="flex-1 h-[1px] bg-gradient-to-r from-primary/20 via-white/10 to-secondary/20"></div>
+<div class="px-4 py-2 bg-secondary text-on-secondary rounded-full text-[10px] font-bold flex items-center gap-2 shadow-[0_0_20px_rgba(172,138,255,0.3)]">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+                  APPROVAL
+                </div>
+<div class="flex-1 h-[1px] bg-gradient-to-r from-secondary/20 via-white/10 to-primary/20"></div>
+<div class="px-3 py-1.5 bg-surface-container-highest rounded border border-primary/20 text-[10px] font-mono text-primary">NEXT STAGE</div>
+</div>
+<div class="text-center">
+<span class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold font-label">Human-in-the-loop Gate</span>
+</div>
+</div>
+<!-- Abstract background glow -->
+<div class="absolute -bottom-12 -right-12 w-48 h-48 bg-primary/10 blur-[60px] rounded-full"></div>
+</div>
+</div>
+<!-- Block 3: Tool Independence -->
+<div class="md:col-span-12 group">
+<div class="surface-container rounded-xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-12 hover:bg-surface-container-high transition-colors duration-500 ghost-border">
+<div class="flex-1">
+<h3 class="font-headline text-3xl font-bold text-on-surface mb-4 tracking-tight">Tool independence.</h3>
+<p class="text-on-surface-variant text-lg leading-relaxed max-w-xl">
+                The same operating model works across Codex, Gemini, Copilot, Cursor, or prompts because the workflow lives in the repo, not in the vendor.
+              </p>
+</div>
+<!-- Tool logos visual -->
+<div class="flex-1 w-full flex items-center justify-center gap-6 flex-wrap grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700">
+<div class="flex items-center gap-3 px-6 py-3 bg-surface-container-highest rounded-lg border border-white/5">
+<span class="material-symbols-outlined text-primary">terminal</span>
+<span class="font-headline font-bold text-sm tracking-tight uppercase">CODEX</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 bg-surface-container-highest rounded-lg border border-white/5">
+<span class="material-symbols-outlined text-secondary">flare</span>
+<span class="font-headline font-bold text-sm tracking-tight uppercase">GEMINI</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 bg-surface-container-highest rounded-lg border border-white/5">
+<span class="material-symbols-outlined text-tertiary">potted_plant</span>
+<span class="font-headline font-bold text-sm tracking-tight uppercase">CLAUDE</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 bg-surface-container-highest rounded-lg border border-white/5">
+<span class="material-symbols-outlined text-on-surface">code</span>
+<span class="font-headline font-bold text-sm tracking-tight uppercase">CURSOR</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Secondary Supporting Blocks -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Secondary 1 -->
+<div class="p-8 bg-surface-container-low rounded-xl ghost-border">
+<div class="mb-6 flex items-center justify-between">
+<span class="material-symbols-outlined text-primary text-3xl">hub</span>
+<span class="text-[10px] font-bold tracking-[0.2em] text-slate-500 uppercase">Contextual</span>
+</div>
+<h4 class="font-headline text-xl font-bold text-on-surface mb-3">Scoped context.</h4>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-8">
+            Rules and guidance can exist at the repo, app, or module level so work stays aligned with the part of the system being changed.
+          </p>
+<div class="flex items-center gap-2 text-[10px] font-mono text-slate-500">
+<span>Repo</span>
+<span class="material-symbols-outlined text-[12px]">chevron_right</span>
+<span>App</span>
+<span class="material-symbols-outlined text-[12px]">chevron_right</span>
+<span class="text-primary font-bold">Module</span>
+</div>
+</div>
+<!-- Secondary 2 -->
+<div class="p-8 bg-surface-container-low rounded-xl ghost-border">
+<div class="mb-6 flex items-center justify-between">
+<span class="material-symbols-outlined text-secondary text-3xl">layers</span>
+<span class="text-[10px] font-bold tracking-[0.2em] text-slate-500 uppercase">Overlay</span>
+</div>
+<h4 class="font-headline text-xl font-bold text-on-surface mb-3">Stack overlays.</h4>
+<p class="text-on-surface-variant text-sm leading-relaxed">
+            Teams can inject stack-specific rules, artifact templates, skills, and workflows without changing the core operating model.
+          </p>
+</div>
+<!-- Secondary 3 -->
+<div class="p-8 bg-surface-container-low rounded-xl ghost-border">
+<div class="mb-6 flex items-center justify-between">
+<span class="material-symbols-outlined text-tertiary text-3xl">split_scene</span>
+<span class="text-[10px] font-bold tracking-[0.2em] text-slate-500 uppercase">Parallel</span>
+</div>
+<h4 class="font-headline text-xl font-bold text-on-surface mb-3">Parallel work.</h4>
+<p class="text-on-surface-variant text-sm leading-relaxed">
+            Because context is written down and worktrees keep efforts isolated, multiple streams of work can move in parallel without collision.
+          </p>
+</div>
+</div>
+</section>
+<!-- SECTION 4: AUTONOMOUS WORKFLOWS DASHBOARD (Unified from SCREEN_17) -->
+<section class="relative py-32 px-8 max-w-7xl mx-auto border-t border-white/5 bg-surface-container-low/20">
+<div class="mb-16 max-w-3xl">
+<span class="text-primary font-headline font-bold uppercase tracking-[0.3em] text-xs mb-4 block">Autonomous Workflows</span>
+<h2 class="text-5xl md:text-6xl font-headline font-bold tracking-tighter text-on-surface mb-6 leading-none">
+            Execution you can <br/><span class="gradient-text">actually inspect.</span>
+</h2>
+<p class="text-on-surface-variant text-lg md:text-xl leading-relaxed mb-4 font-light">
+            r3nd can run multi-phase delivery workflows end to end — with explicit phases, hard gates, durable artifacts, QA evidence, and human checkpoints where they actually matter.
+        </p>
+<p class="text-secondary font-label text-sm font-medium tracking-wide italic">
+            Agent-run does not mean black-box. Every run stays reviewable.
+        </p>
+</div>
+<!-- Main Panel Container -->
+<div class="glass-panel border border-white/10 rounded-2xl overflow-hidden kinetic-glow mb-16 shadow-2xl">
+<!-- Tabs -->
+<div class="flex border-b border-white/10 overflow-x-auto scrollbar-hide">
+<button class="px-8 py-5 text-sm font-headline tracking-widest uppercase text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap">
+                Quick Feature
+            </button>
+<button class="px-8 py-5 text-sm font-headline tracking-widest uppercase text-primary border-b-2 border-primary bg-primary/5 whitespace-nowrap">
+                Implement Feature
+            </button>
+<button class="px-8 py-5 text-sm font-headline tracking-widest uppercase text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap">
+                Bugfix
+            </button>
+</div>
+<!-- Panel Body -->
+<div class="flex flex-col lg:flex-row min-h-[640px]">
+<!-- Left Column: 32% -->
+<div class="lg:w-[32%] border-r border-white/10 p-8 flex flex-col gap-8 bg-surface-container-low/40">
+<div>
+<h4 class="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold mb-2">Summary</h4>
+<p class="text-on-surface text-sm leading-relaxed">
+                        Best for larger features with dependency ordering and QA gates. Handles complex multi-file architectural shifts with orchestrated verification steps.
+                    </p>
+</div>
+<div>
+<h4 class="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold mb-4">Input</h4>
+<div class="bg-surface-container-highest p-4 ghost-border text-xs font-mono text-on-surface-variant rounded">
+<span class="text-primary font-bold">PROMPT:</span> "Extend the billing service to support tiered consumption-based pricing with a 30-day grace period."
+                    </div>
+</div>
+<div>
+<h4 class="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold mb-4">Human Checkpoints</h4>
+<div class="space-y-3">
+<div class="flex items-center gap-3 p-3 bg-surface-container-high ghost-border rounded">
+<span class="material-symbols-outlined text-secondary text-lg" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="text-xs font-medium">Architectural Review</span>
+</div>
+<div class="flex items-center gap-3 p-3 bg-surface-container-high ghost-border rounded">
+<span class="material-symbols-outlined text-tertiary text-lg">fact_check</span>
+<span class="text-xs font-medium">Final Live QA Approval</span>
+</div>
+</div>
+</div>
+<div class="mt-auto pt-8 border-t border-white/5">
+<h4 class="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold mb-2">Outcome</h4>
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-sm">task_alt</span>
+<span class="text-xs font-bold uppercase tracking-widest">Success: Tiered_Billing_v1</span>
+</div>
+</div>
+</div>
+<!-- Right Column: 68% Visual Workflow -->
+<div class="lg:w-[68%] p-10 relative overflow-hidden bg-surface-container/20">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-y-12 gap-x-6 relative z-10">
+<!-- Row 1 -->
+<div class="flex flex-col gap-3">
+<div class="p-4 bg-surface-container-highest ghost-border border-l-2 border-primary rounded">
+<span class="text-[9px] uppercase tracking-tighter text-on-surface-variant font-bold mb-1 block">Phase 01</span>
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold tracking-tight">Resolve Context</span>
+<span class="material-symbols-outlined text-sm text-primary">smart_toy</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<div class="p-4 bg-surface-container-highest ghost-border border-l-2 border-primary rounded">
+<span class="text-[9px] uppercase tracking-tighter text-on-surface-variant font-bold mb-1 block">Phase 02</span>
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold tracking-tight">Build-plan Assurance</span>
+<span class="material-symbols-outlined text-sm text-primary">smart_toy</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<div class="p-4 bg-surface-container-highest ghost-border border-l-2 border-primary rounded">
+<span class="text-[9px] uppercase tracking-tighter text-on-surface-variant font-bold mb-1 block">Phase 03</span>
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold tracking-tight">Dependency Plan</span>
+<span class="material-symbols-outlined text-sm text-primary">smart_toy</span>
+</div>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="flex flex-col gap-3">
+<div class="p-4 bg-surface-container-highest ghost-border border-l-2 border-primary rounded">
+<span class="text-[9px] uppercase tracking-tighter text-on-surface-variant font-bold mb-1 block">Phase 04</span>
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold tracking-tight">Execution Plan/Todo</span>
+<span class="material-symbols-outlined text-sm text-primary">smart_toy</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<div class="p-4 bg-surface-container-highest ghost-border border-l-2 border-primary rounded">
+<span class="text-[9px] uppercase tracking-tighter text-on-surface-variant font-bold mb-1 block">Phase 05</span>
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold tracking-tight">Task Execution</span>
+<span class="material-symbols-outlined text-sm text-primary">smart_toy</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<div class="p-4 bg-surface-container shadow-[0_0_15px_rgba(172,138,255,0.15)] border border-secondary/30 rounded">
+<span class="text-[9px] uppercase tracking-tighter text-secondary font-bold mb-1 block">Gate 06</span>
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold tracking-tight">Task QA Gates</span>
+<span class="material-symbols-outlined text-sm text-secondary">security</span>
+</div>
+</div>
+</div>
+<!-- Row 3 -->
+<div class="flex flex-col gap-3">
+<div class="p-4 bg-surface-container-highest ghost-border border-l-2 border-primary rounded">
+<span class="text-[9px] uppercase tracking-tighter text-on-surface-variant font-bold mb-1 block">Phase 07</span>
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold tracking-tight">Test Cases</span>
+<span class="material-symbols-outlined text-sm text-primary">smart_toy</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<div class="p-4 bg-surface-container shadow-[0_0_15px_rgba(172,138,255,0.15)] border border-secondary/30 rounded">
+<span class="text-[9px] uppercase tracking-tighter text-secondary font-bold mb-1 block">Gate 08</span>
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold tracking-tight">Final Live QA</span>
+<span class="material-symbols-outlined text-sm text-secondary">security</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-3 relative">
+<div class="p-4 bg-surface-container-highest ghost-border border-l-2 border-error rounded">
+<span class="text-[9px] uppercase tracking-tighter text-error font-bold mb-1 block">Loop 09</span>
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold tracking-tight">Fix Loop</span>
+<span class="material-symbols-outlined text-sm text-error">sync</span>
+</div>
+</div>
+<!-- Loop Connector (Simplified SVG) -->
+<svg class="absolute -right-4 top-1/2 w-16 h-48 -translate-y-1/2 overflow-visible pointer-events-none opacity-20 hidden sm:block">
+<path d="M 0 0 C 40 0, 40 180, 0 180" fill="none" stroke="#ff716c" stroke-dasharray="4 2" stroke-width="1.5"></path>
+</svg>
+</div>
+</div>
+<!-- Decorative Grid Background -->
+<div class="absolute inset-0 z-0 opacity-5 pointer-events-none" style="background-image: linear-gradient(#3adffa 1px, transparent 1px), linear-gradient(90deg, #3adffa 1px, transparent 1px); background-size: 40px 40px;"></div>
+</div>
+</div>
+</div>
+<!-- Proof Strip -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="bg-surface-container p-8 rounded-xl ghost-border hover:bg-surface-container-high transition-all group">
+<span class="material-symbols-outlined text-secondary text-3xl mb-4 group-hover:scale-110 transition-transform">history_edu</span>
+<h5 class="text-sm font-headline font-bold uppercase tracking-widest text-on-surface mb-2">Durable artifacts</h5>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+                Full state snapshots at every stage. Audit-ready logs that never expire.
+            </p>
+</div>
+<div class="bg-surface-container p-8 rounded-xl ghost-border hover:bg-surface-container-high transition-all group">
+<span class="material-symbols-outlined text-primary text-3xl mb-4 group-hover:scale-110 transition-transform">door_front</span>
+<h5 class="text-sm font-headline font-bold uppercase tracking-widest text-on-surface mb-2">Hard gates</h5>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+                Automated blockers that prevent progress until specific quality metrics are hit.
+            </p>
+</div>
+<div class="bg-surface-container p-8 rounded-xl ghost-border hover:bg-surface-container-high transition-all group">
+<span class="material-symbols-outlined text-tertiary text-3xl mb-4 group-hover:scale-110 transition-transform">rocket_launch</span>
+<h5 class="text-sm font-headline font-bold uppercase tracking-widest text-on-surface mb-2">Agent-run live QA</h5>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+                Real-time dynamic testing by agents on ephemeral branch environments.
+            </p>
+</div>
+<div class="bg-surface-container p-8 rounded-xl ghost-border hover:bg-surface-container-high transition-all group">
+<span class="material-symbols-outlined text-on-primary-fixed text-3xl mb-4 group-hover:scale-110 transition-transform">person_search</span>
+<h5 class="text-sm font-headline font-bold uppercase tracking-widest text-on-surface mb-2">Human review</h5>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+                High-level oversight designed for critical decision points only.
+            </p>
+</div>
+</div>
+</section>
+<!-- Closing Statement -->
+<section class="max-w-7xl mx-auto px-8">
+<div class="mt-40 text-center max-w-4xl mx-auto py-24 relative rounded-3xl overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-secondary/5 blur-[80px] pointer-events-none"></div>
+<div class="relative z-10 px-8">
+<h2 class="font-headline text-4xl md:text-6xl font-bold tracking-tighter text-on-surface mb-6">
+                AI writes the artifact.<br/>Humans review the decision.
+            </h2>
+<p class="text-on-surface-variant text-xl md:text-2xl font-light mb-12">
+                The team reviews specs, plans, and evidence — not lost chat history.
+            </p>
+<div class="flex flex-col md:flex-row items-center justify-center gap-4">
+<button class="w-full md:w-auto px-10 py-4 bg-primary text-on-primary font-headline font-bold text-lg uppercase tracking-tight rounded-lg hover:scale-105 transition-transform shadow-[0_0_30px_rgba(58,223,250,0.2)]">
+                    Start Building with r3nd
+                </button>
+<button class="w-full md:w-auto px-10 py-4 ghost-border text-on-surface font-headline font-bold text-lg uppercase tracking-tight rounded-lg hover:bg-surface-variant transition-colors">
+                    View Framework Docs
+                </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Final CTA Section -->
+<section class="py-24 relative overflow-hidden bg-surface">
+<div class="max-w-4xl mx-auto px-8 text-center relative z-10">
+<h3 class="font-headline text-4xl md:text-5xl font-bold mb-8">Ready to evolve your delivery pipeline?</h3>
+<div class="flex flex-col sm:flex-row gap-4 justify-center">
+<button class="bg-primary text-on-primary font-bold px-10 py-4 rounded-lg shadow-[0_0_40px_rgba(58,223,250,0.2)]">Get Started Now</button>
+<button class="ghost-border text-on-surface font-bold px-10 py-4 rounded-lg hover:bg-surface-variant transition-colors">Book a Demo</button>
+</div>
+</div>
+<!-- Background elements -->
+<div class="absolute -bottom-24 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/10 blur-[120px] rounded-full"></div>
+</section>
+</main>
+<!-- Footer Shell -->
+<footer class="bg-[#070d1f] w-full py-12 border-t border-white/5">
+<div class="flex flex-col md:flex-row justify-between items-center px-8 max-w-7xl mx-auto font-['Space_Grotesk'] text-sm">
+<div class="flex flex-col items-center md:items-start gap-4 mb-8 md:mb-0">
+<div class="text-lg font-bold text-cyan-400">r3nd</div>
+<p class="text-slate-500 max-w-xs text-center md:text-left">© 2024 r3nd Framework. Engineered for the Kinetic Void.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-8">
+<a class="text-slate-500 hover:text-white transition-colors focus:ring-1 focus:ring-cyan-500/50" href="#">Documentation</a>
+<a class="text-slate-500 hover:text-white transition-colors focus:ring-1 focus:ring-cyan-500/50" href="#">Changelog</a>
+<a class="text-slate-500 hover:text-white transition-colors focus:ring-1 focus:ring-cyan-500/50" href="#">Security</a>
+<a class="text-slate-500 hover:text-white transition-colors focus:ring-1 focus:ring-cyan-500/50" href="#">Status</a>
+<a class="text-slate-500 hover:text-white transition-colors focus:ring-1 focus:ring-cyan-500/50" href="#">Twitter</a>
+<a class="text-slate-500 hover:text-white transition-colors focus:ring-1 focus:ring-cyan-500/50" href="#">GitHub</a>
+</div>
+</div>
+</footer>
+</body></html>

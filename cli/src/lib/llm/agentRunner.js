@@ -2,6 +2,7 @@ const child_process = require('child_process');
 const path = require('path');
 const fs = require('fs').promises;
 const { detectAvailableTools, getInstallInstructions } = require('../utils/toolDetector');
+const logger = require('../utils/logger');
 
 // Simple agent runner that supports the file-based completion signaling used
 // by the existing codex workflow. Agents should expose a `makeCommand(prompt)`
@@ -125,10 +126,90 @@ async function runCodexCommand(cmd, cwd) {
  * @param {string} promptText - The prompt to pass to the GitHub agent
  * @returns {string} The formatted GitHub CLI command
  */
-function makeGitHubCommand(promptText) {
+function escapeForDoubleQuotes(value) {
+  return value.replace(/"/g, '\\"');
+}
+
+function makeGitHubCommand(promptText, options = {}) {
   // Escape double quotes in the prompt text
-  const escapedPrompt = promptText.replace(/"/g, '\\"');
-  return `gh agent-task create "${escapedPrompt}"`;
+  const escapedPrompt = escapeForDoubleQuotes(promptText);
+  const baseBranch = options.baseBranch ? ` --base "${escapeForDoubleQuotes(options.baseBranch)}"` : '';
+  return `gh agent-task create "${escapedPrompt}"${baseBranch}`;
+}
+
+function slugifyFeature(input) {
+  const normalized = String(input || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return normalized || 'agent';
+}
+
+async function runGit(args, cwd) {
+  return new Promise((resolve, reject) => {
+    const child = child_process.spawn('git', args, { cwd, stdio: ['ignore', 'pipe', 'pipe'] });
+    let stdout = '';
+    let stderr = '';
+    child.stdout.on('data', data => { stdout += data.toString(); });
+    child.stderr.on('data', data => { stderr += data.toString(); });
+    child.on('error', err => reject(err));
+    child.on('exit', code => resolve({ code, stdout, stderr }));
+  });
+}
+
+async function ensureGitBaseBranch(cwd, featureLabel, taskName) {
+  const status = await runGit(['status', '--porcelain'], cwd);
+  if (status.code !== 0) {
+    throw new Error(status.stderr || 'Failed to read git status');
+  }
+
+  const currentBranchResult = await runGit(['rev-parse', '--abbrev-ref', 'HEAD'], cwd);
+  const currentBranch = currentBranchResult.stdout.trim();
+  if (currentBranchResult.code !== 0 || !currentBranch || currentBranch === 'HEAD') {
+    throw new Error('GitHub agent requires a checked-out branch (not detached HEAD).');
+  }
+
+  if (!status.stdout.trim()) {
+    return currentBranch;
+  }
+
+  const safeSlug = slugifyFeature(featureLabel || taskName);
+  let branchName = `st/${safeSlug}`;
+
+  const branchExists = await runGit(['show-ref', '--verify', '--quiet', `refs/heads/${branchName}`], cwd);
+  if (branchExists.code === 0) {
+    const suffix = Date.now().toString(36);
+    branchName = `st/${safeSlug}-${suffix}`;
+  }
+
+  logger.info(`\nLocal changes detected. Creating snapshot branch ${branchName}...`);
+
+  const checkout = await runGit(['checkout', '-b', branchName], cwd);
+  if (checkout.code !== 0) {
+    throw new Error(checkout.stderr || `Failed to create branch ${branchName}`);
+  }
+
+  const addAll = await runGit(['add', '-A'], cwd);
+  if (addAll.code !== 0) {
+    throw new Error(addAll.stderr || 'Failed to stage changes');
+  }
+
+  const commitMessage = `chore: agent snapshot (${safeSlug})`;
+  const commit = await runGit(['commit', '-m', commitMessage], cwd);
+  if (commit.code !== 0) {
+    throw new Error(commit.stderr || 'Failed to commit changes');
+  }
+
+  const push = await runGit(['push', '-u', 'origin', branchName], cwd);
+  if (push.code !== 0) {
+    const err = new Error(push.stderr || 'Failed to push snapshot branch to origin');
+    err.code = 'GITHUB_BRANCH_PUSH_FAILED';
+    err.branch = branchName;
+    throw err;
+  }
+
+  return branchName;
 }
 
 /**
@@ -136,11 +217,15 @@ function makeGitHubCommand(promptText) {
  * @param {string} promptText - The prompt to pass to the GitHub agent
  * @param {string} cwd - Working directory
  * @param {string} taskName - Optional name for logging (e.g., 'Build plan creation')
+ * @param {Object} options - Additional options
+ * @param {string} options.baseBranch - Explicit base branch
+ * @param {string} options.featureLabel - Feature label for snapshot branch slug
  * @returns {Promise<string>} The agent session URL
  * @throws {Error} If agent fails with exit code 1 (repo/permissions) or other errors
  */
-async function runGitHubAgent(promptText, cwd, taskName = 'Task') {
-  const cmd = makeGitHubCommand(promptText);
+async function runGitHubAgent(promptText, cwd, taskName = 'Task', options = {}) {
+  const resolvedBase = options.baseBranch || await ensureGitBaseBranch(cwd, options.featureLabel, taskName);
+  const cmd = makeGitHubCommand(promptText, { baseBranch: resolvedBase });
   
   const result = await new Promise((resolve, reject) => {
     let stdout = '';
@@ -183,7 +268,7 @@ async function runGitHubAgent(promptText, cwd, taskName = 'Task') {
 
 /**
  * Validate that the required agent tool is available before running
- * @param {string} agentType - The agent type (codex, gemini, github)
+ * @param {string} agentType - The agent type (codex, claude, gemini, github)
  * @throws {Error} If agent tool is not available
  */
 function validateAgentAvailability(agentType) {
@@ -191,6 +276,9 @@ function validateAgentAvailability(agentType) {
   
   if (agentType === 'codex' && !availableTools.codex) {
     throw new Error(`Codex CLI not found. ${getInstallInstructions('codex')}`);
+  }
+  if (agentType === 'claude' && !availableTools.claude) {
+    throw new Error(`Claude Code CLI not found. ${getInstallInstructions('claude')}`);
   }
   if (agentType === 'gemini' && !availableTools.gemini) {
     throw new Error(`Gemini CLI not found. ${getInstallInstructions('gemini')}`);
@@ -214,14 +302,14 @@ async function runPlansSequential(plans, { cwd = process.cwd(), makePrompt, make
     // GitHub agent doesn't need done file - it exits when complete
     if (agentType === 'github') {
       try {
-        const url = await runGitHubAgent(prompt, cwd, `Plan: ${planName}`);
+        const url = await runGitHubAgent(prompt, cwd, `Plan: ${planName}`, { featureLabel: planName });
       } catch (err) {
         throw err; // Stop on GitHub agent failure
       }
       continue;
     }
     
-    // For codex/gemini: wait for completion file
+    // For local interactive agents (codex/claude/gemini): wait for completion file
     const doneFile = path.join(cwd, `${planName}.done`);
     // Spawn the agent interactively.
     const child = child_process.spawn('sh', ['-lc', cmd], { stdio: 'inherit', cwd });
@@ -265,6 +353,10 @@ async function runPlansSequential(plans, { cwd = process.cwd(), makePrompt, make
       if (!childExited) {
         await childExitPromise;
       }
+      
+      // Clear terminal for next interaction
+      process.stdout.write('\x1Bc');
+      
       console.log(`✓ Plan completed: ${planName}`);
       continue; // proceed to next plan
     }

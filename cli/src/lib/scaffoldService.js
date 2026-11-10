@@ -1,10 +1,32 @@
 const path = require('path');
 
 const { GitHubClient } = require('./github/githubClient');
-const { mapDestination } = require('./overlays/overlayRegistry');
-const { writeBuffer, ensureDir } = require('./fs/fileWriter');
-const { chooseBackend, chooseFrontend, askLLMChoice, confirmRunNow, confirmSavePrompts, askRemoteOrigin } = require('./ui/prompts');
+const { ensureDir } = require('./fs/fileWriter');
+const { 
+  copyAgentPersonas,
+  copyBuildPlans,
+  copyTaskSkills,
+  syncPlatformAsset,
+  copyTemplates, 
+  copyCommonFiles,
+  copyTestingInstructions
+} = require('./fs/seedCopier');
+const { 
+  fetchSeedSpecDirName, 
+  discoverAvailableOverlays,
+  createEffectiveSeedView,
+  applySelectedOverlays,
+  ensureMandatorySeedFiles, 
+  ensureSpecDirectories 
+} = require('./overlays/overlaySeedService');
+const { askLLMChoice, askOverlays, confirmRunNow, confirmSavePrompts, askRemoteOrigin, askSeedRepo, askInitOptions } = require('./ui/prompts');
 const { runPlansSequential, waitForCompletionFile, runCodexCommand, makeGitHubCommand } = require('./llm/agentRunner');
+const { ConfigManager } = require('./config/configManager');
+const {
+  getPlatformAsset,
+  normalizePlatformAssetSelection,
+  shouldMirrorInstructionsToRnd
+} = require('./platformAssetRegistry');
 const logger = require('./utils/logger');
 const fs = require('fs').promises;
 const { execSync } = require('child_process');
@@ -12,7 +34,23 @@ const { execSync } = require('child_process');
 async function runScaffold(opts = {}, deps = {}) {
   const cwd = opts.cwd || process.cwd();
   const nonInteractive = !!opts.nonInteractive;
-  const githubClient = deps.githubClient || new GitHubClient({});
+  
+  // Initialize config manager
+  const configManager = new ConfigManager(cwd);
+  
+  // Get configured spec directory name
+  const specDirName = await configManager.getSpecDirName();
+  
+  // Check if seed-repo is configured, prompt if not
+  let seedRepo = await configManager.get('seed-repo');
+  if (!seedRepo) {
+    logger.info('No seed repository configured.');
+    seedRepo = await askSeedRepo(null, nonInteractive);
+    await configManager.set('seed-repo', seedRepo);
+    logger.info(`✓ Configured seed-repo: ${seedRepo}\n`);
+  }
+
+  const githubClient = deps.githubClient || new GitHubClient({ cwd });
 
   // Check if current directory is a git repository, if not, initialize it
   const isGitRepo = await fs.access(path.join(cwd, '.git')).then(() => true).catch(() => false);
@@ -29,110 +67,77 @@ async function runScaffold(opts = {}, deps = {}) {
 
   logger.info('r3nd — project scaffolder');
 
-  const backendInstructionsExist = await fs.access(path.join(cwd, '.github', 'instructions', 'backend.instructions.md')).then(() => true).catch(() => false);
-  const frontendInstructionsExist = await fs.access(path.join(cwd, '.github', 'instructions', 'frontend.instructions.md')).then(() => true).catch(() => false);
+  // Ask user which components to initialize (similar to init command)
+  logger.info('\nr3nd — component initializer\n');
+  const selectedOptions = normalizePlatformAssetSelection(await askInitOptions(nonInteractive));
+  logger.info(`\nSelected: ${selectedOptions.join(', ') || 'None'}\n`);
 
-  let backend = opts.backend;
-  let frontend = opts.frontend;
+  logger.info('Fetching file list from GitHub...');
+  const tree = await githubClient.getTree();
 
-  if (!backend) {
-    if (backendInstructionsExist) {
-      logger.info('✓ Backend instructions already exist, skipping backend selection');
-      backend = 'nestjs';
-    } else {
-      backend = await chooseBackend(nonInteractive);
+  // Fetch seed repo's spec-dir-name configuration
+  const seedSpecDirName = await fetchSeedSpecDirName(githubClient);
+  const availableOverlays = discoverAvailableOverlays(tree);
+  const currentOverlays = await configManager.getOverlays();
+  const selectedOverlays = await askOverlays(currentOverlays, availableOverlays, nonInteractive);
+  await configManager.set('overlays', selectedOverlays);
+  const effectiveSeed = createEffectiveSeedView(tree, githubClient, seedSpecDirName, selectedOverlays);
+
+  // Copy common files (gitignore)
+  await copyCommonFiles(cwd, tree, githubClient, specDirName, { nonInteractive });
+
+  // Materialize effective shared agents after overlay precedence is resolved
+  await copyAgentPersonas(cwd, effectiveSeed.tree, effectiveSeed.githubClient, specDirName, seedSpecDirName, { nonInteractive });
+
+  // Copy testing instructions to spec-dir/instructions
+  await copyTestingInstructions(cwd, tree, githubClient, specDirName, seedSpecDirName, { nonInteractive });
+
+  // Materialize effective canonical task skills as fully composed local files
+  await copyTaskSkills(cwd, effectiveSeed.tree, effectiveSeed.githubClient, specDirName, seedSpecDirName, { nonInteractive });
+
+  // Materialize effective build plans
+  await copyBuildPlans(cwd, effectiveSeed.tree, effectiveSeed.githubClient, specDirName, seedSpecDirName, { nonInteractive });
+
+  for (const assetKey of selectedOptions) {
+    const asset = getPlatformAsset(assetKey);
+    if (!asset) {
+      continue;
     }
+    await syncPlatformAsset(cwd, effectiveSeed.tree, effectiveSeed.githubClient, asset, specDirName, seedSpecDirName, { nonInteractive });
   }
 
-  if (!frontend) {
-    if (frontendInstructionsExist) {
-      logger.info('✓ Frontend instructions already exist, skipping frontend selection');
-      frontend = 'vue';
-    } else {
-      frontend = await chooseFrontend(nonInteractive);
-    }
+  // Copy templates
+  await copyTemplates(cwd, effectiveSeed.tree, effectiveSeed.githubClient, specDirName, seedSpecDirName, { nonInteractive });
+
+  await applySelectedOverlays(cwd, effectiveSeed.tree, effectiveSeed.githubClient, specDirName, seedSpecDirName, selectedOverlays, {
+    nonInteractive,
+    overwriteExisting: true,
+    skipSpecSubdirs: ['agents', 'skills', 'templates', 'build_plans']
+  });
+
+  // Ensure spec directories exist (conditionally create rnd/instructions)
+  const createRndInstructions = shouldMirrorInstructionsToRnd(selectedOptions);
+  await ensureSpecDirectories(cwd, specDirName, { createRndInstructions });
+
+  // Ensure mandatory seed files exist
+  const mandatorySeedFiles = [];
+  if (selectedOptions.includes('github-workflows')) {
+    mandatorySeedFiles.push(`${seedSpecDirName}/templates/retro.md`, '.github/workflows/06-retro-ready.yml');
   }
+  await ensureMandatorySeedFiles(cwd, githubClient, specDirName, seedSpecDirName, mandatorySeedFiles, { nonInteractive });
 
-  const prefixes = [];
-  const mandatorySeedFiles = [
-    '.github/agents/retro.agent.md',
-    '.github/templates/retro.md',
-    '.github/workflows/06-retro-ready.yml'
-  ];
-  if (!backendInstructionsExist && !frontendInstructionsExist) {
-    prefixes.push('.github/', 'rnd/', '.gitignore', 'README.md');
-  }
-  if (!backendInstructionsExist) prefixes.push(`overlays/backend/${backend}/`);
-  if (!frontendInstructionsExist) prefixes.push(`overlays/frontend/${frontend}/`);
-
-  if (backendInstructionsExist && frontendInstructionsExist) {
-    logger.info('✓ Resuming from existing setup, skipping file download');
-  } else {
-    logger.info('Fetching file list from GitHub...');
-    const tree = await githubClient.getTree();
-    const toCopy = tree.filter(item => {
-      if (item.type !== 'blob') return false;
-      return prefixes.some(p => (p.endsWith('/') ? item.path.startsWith(p) : item.path === p));
-    }).map(i => i.path);
-
-    if (toCopy.length === 0) {
-      logger.warn('No files matched the requested prefixes.');
-    } else {
-      logger.info(`Found ${toCopy.length} files to copy. Starting download...`);
-      for (const remotePath of toCopy) {
-        const mapped = mapDestination(remotePath, backend, frontend);
-        const buffer = await githubClient.fetchRaw(remotePath);
-        const rel = mapped || remotePath;
-        await writeBuffer(cwd, rel, buffer, { overwrite: true });
-        logger.info(`Copied: ${remotePath} -> ${rel}`);
-      }
-    }
-
-    const rndDirs = ['rnd/build_plans', 'rnd/product_specs', 'rnd/tech_specs'];
-    for (const r of rndDirs) {
-      await ensureDir(path.join(cwd, r));
-      logger.info(`Ensured directory: ${r}`);
-    }
-
-    await ensureDir(path.join(cwd, '.github', 'instructions'));
-    logger.info('Ensured directory: .github/instructions');
-    logger.info('Scaffolding complete.');
-  }
-
-  async function ensureSeedFiles(files) {
-    const missing = [];
-    for (const remotePath of files) {
-      const rel = mapDestination(remotePath, backend, frontend) || remotePath;
-      const exists = await fs.access(path.join(cwd, rel)).then(() => true).catch(() => false);
-      if (!exists) missing.push({ remotePath, rel });
-    }
-
-    if (missing.length === 0) return;
-
-    logger.info(`Fetching ${missing.length} mandatory file(s) from GitHub...`);
-    for (const item of missing) {
-      try {
-        const buffer = await githubClient.fetchRaw(item.remotePath);
-        await writeBuffer(cwd, item.rel, buffer, { overwrite: false });
-        logger.info(`Copied: ${item.remotePath} -> ${item.rel}`);
-      } catch (err) {
-        logger.error(`Failed to copy ${item.remotePath}:`, err && err.message ? err.message : err);
-      }
-    }
-  }
-
-  await ensureSeedFiles(mandatorySeedFiles);
+  logger.info('Scaffolding complete.');
 
   logger.info('Next steps: install dependencies and adapt overlays as needed.');
 
   const llmChoice = await askLLMChoice(nonInteractive);
   if (llmChoice === 'codex') {
     const allPlans = [
-      'rnd/build_plans/scaffold-backend-bootstrap-build-plan.md',
-      'rnd/build_plans/scaffold-frontend-bootstrap-build-plan.md',
-      'rnd/build_plans/scaffold-backend-complete-build-plan.md',
-      'rnd/build_plans/scaffold-frontend-complete-build-plan.md',
-      'rnd/build_plans/scaffold-infra-build-plan.md'
+      `${specDirName}/build_plans/scaffold-backend-bootstrap-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-frontend-bootstrap-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-backend-complete-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-frontend-complete-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-infra-build-plan.md`
     ];
 
     const backendDirExists = await fs.access(path.join(cwd, 'src', 'backend')).then(() => true).catch(() => false);
@@ -147,7 +152,7 @@ async function runScaffold(opts = {}, deps = {}) {
     if (plans.length === 0) { logger.info('\n✓ All scaffolding appears to be complete. Nothing to do!'); return; }
 
     function getPlanName(planPath) { return path.basename(planPath, '.md'); }
-    function makePrompt(planPath) { const planName = getPlanName(planPath); const doneFile = `${planName}.done`; return `using the .github/agents/developer.agent.md as instructions please implement the following building plan to its completion:\n\n1. ${planPath}\n\nIMPORTANT: When you have completely finished implementing this build plan, create a file named ${doneFile} in the current directory to signal completion.`; }
+    function makePrompt(planPath) { const planName = getPlanName(planPath); const doneFile = `${planName}.done`; return `Using the task skill at ${specDirName}/skills/implement-build-plan/SKILL.md as instructions, please implement the following build plan to completion:\n\n1. ${planPath}\n\nIMPORTANT: When you have completely finished implementing this build plan, create a file named ${doneFile} in the current directory to signal completion.`; }
     function makeCodexCommand(promptText) { return `codex --yolo '${promptText.replace(/"/g, '\"')}'`; }
 
     logger.info('\nLocal codex CLI commands (will be run sequentially):');
@@ -170,11 +175,11 @@ async function runScaffold(opts = {}, deps = {}) {
   } else if (llmChoice === 'gemini') {
     // Gemini: run `gemini --yolo "prompt"` sequentially and wait for process exit.
     const allPlansGem = [
-      'rnd/build_plans/scaffold-backend-bootstrap-build-plan.md',
-      'rnd/build_plans/scaffold-frontend-bootstrap-build-plan.md',
-      'rnd/build_plans/scaffold-backend-complete-build-plan.md',
-      'rnd/build_plans/scaffold-frontend-complete-build-plan.md',
-      'rnd/build_plans/scaffold-infra-build-plan.md'
+      `${specDirName}/build_plans/scaffold-backend-bootstrap-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-frontend-bootstrap-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-backend-complete-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-frontend-complete-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-infra-build-plan.md`
     ];
 
     const backendDirExistsGem = await fs.access(path.join(cwd, 'src', 'backend')).then(() => true).catch(() => false);
@@ -193,7 +198,7 @@ async function runScaffold(opts = {}, deps = {}) {
       // and require a .done file to signal completion (same automation hack as codex).
       const planName = path.basename(planPath, '.md');
       const doneFile = `${planName}.done`;
-    return `using the .github/agents/developer.agent.md as instructions please implement the following building plan to its completion:\n\n1. ${planPath}\n\nIMPORTANT: Do NOT start any server or docker foreground processes that require manual termination (like "npm run dev", "docker-compose up" without -d flag, "uvicorn" without --daemon, etc.). If you need to start servers or services, always run them in detached/background mode and output their logs. (e.g., "docker-compose up -d", "npm run dev &", or use process managers like PM2). Only start foreground processes if they naturally exit on their own. IF U START A SERVER FOREGROUND PROCESS THE UNIVERSE WILL END\n\nIMPORTANT: When you have completely finished implementing this build plan, create a file named ${doneFile} in the current directory to signal completion.`;
+    return `Using the task skill at ${specDirName}/skills/implement-build-plan/SKILL.md as instructions, please implement the following build plan to completion:\n\n1. ${planPath}\n\nIMPORTANT: Do NOT start any server or docker foreground processes that require manual termination (like "npm run dev", "docker-compose up" without -d flag, "uvicorn" without --daemon, etc.). If you need to start servers or services, always run them in detached/background mode and output their logs. (e.g., "docker-compose up -d", "npm run dev &", or use process managers like PM2). Only start foreground processes if they naturally exit on their own. IF U START A SERVER FOREGROUND PROCESS THE UNIVERSE WILL END\n\nIMPORTANT: When you have completely finished implementing this build plan, create a file named ${doneFile} in the current directory to signal completion.`;
     }
     function makeGeminiCommand(promptText) { return `gemini --yolo -i "${promptText.replace(/"/g, '\\"')}"`; }
 
@@ -204,14 +209,48 @@ async function runScaffold(opts = {}, deps = {}) {
     } catch (err) {
       logger.error('An error occurred while running Gemini plans:', err && err.message ? err.message : err);
     }
+  } else if (llmChoice === 'claude') {
+    const allPlansClaude = [
+      `${specDirName}/build_plans/scaffold-backend-bootstrap-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-frontend-bootstrap-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-backend-complete-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-frontend-complete-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-infra-build-plan.md`
+    ];
+
+    const backendDirExistsClaude = await fs.access(path.join(cwd, 'src', 'backend')).then(() => true).catch(() => false);
+    const frontendDirExistsClaude = await fs.access(path.join(cwd, 'src', 'frontend')).then(() => true).catch(() => false);
+    const dockerComposeExistsClaude = await fs.access(path.join(cwd, 'docker-compose.yml')).then(() => true).catch(() => false);
+
+    const plansClaude = [];
+    if (!backendDirExistsClaude) { plansClaude.push(allPlansClaude[0]); plansClaude.push(allPlansClaude[2]); }
+    if (!frontendDirExistsClaude) { plansClaude.push(allPlansClaude[1]); plansClaude.push(allPlansClaude[3]); }
+    if (!dockerComposeExistsClaude) { plansClaude.push(allPlansClaude[4]); }
+
+    if (plansClaude.length === 0) { logger.info('\n✓ All scaffolding appears to be complete. Nothing to do!'); return; }
+
+    function makeClaudePrompt(planPath) {
+      const planName = path.basename(planPath, '.md');
+      const doneFile = `${planName}.done`;
+      return `Using the task skill at ${specDirName}/skills/implement-build-plan/SKILL.md as instructions, please implement the following build plan to completion:\n\n1. ${planPath}\n\nIMPORTANT: When you have completely finished implementing this build plan, create a file named ${doneFile} in the current directory to signal completion.`;
+    }
+    function makeClaudeCommand(promptText) { return `claude --dangerously-skip-permissions "${promptText.replace(/"/g, '\\"')}"`; }
+
+    logger.info('\nRunning Claude Code CLI commands (interactive, sequentially):');
+    try {
+      await runPlansSequential(plansClaude, { cwd, makePrompt: async (p) => makeClaudePrompt(p), makeCommand: (prompt) => makeClaudeCommand(prompt), timeoutMs: opts.agentTimeout || 3600000, agentType: 'claude' });
+      logger.info('Claude plans completed.');
+    } catch (err) {
+      logger.error('An error occurred while running Claude plans:', err && err.message ? err.message : err);
+    }
   } else if (llmChoice === 'github') {
     // GitHub: send only first prompt, user continues on GitHub
     const allPlansGithub = [
-      'rnd/build_plans/scaffold-backend-bootstrap-build-plan.md',
-      'rnd/build_plans/scaffold-frontend-bootstrap-build-plan.md',
-      'rnd/build_plans/scaffold-backend-complete-build-plan.md',
-      'rnd/build_plans/scaffold-frontend-complete-build-plan.md',
-      'rnd/build_plans/scaffold-infra-build-plan.md'
+      `${specDirName}/build_plans/scaffold-backend-bootstrap-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-frontend-bootstrap-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-backend-complete-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-frontend-complete-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-infra-build-plan.md`
     ];
 
     const backendDirExistsGithub = await fs.access(path.join(cwd, 'src', 'backend')).then(() => true).catch(() => false);
@@ -227,19 +266,24 @@ async function runScaffold(opts = {}, deps = {}) {
 
     // Create a single comprehensive prompt with all plans
     const allPlansText = plansGithub.map((p, i) => `${i + 1}. ${p}`).join('\n');
-    const comprehensivePrompt = `using the .github/agents/developer.agent.md as instructions please implement the following building plans to completion (in order):\n\n${allPlansText}`;
+    const comprehensivePrompt = `Using the task skill at ${specDirName}/skills/implement-build-plan/SKILL.md as instructions, please implement the following build plans to completion (in order):\n\n${allPlansText}`;
 
     logger.info('\n=== Creating GitHub Agent Task ===');
     logger.info('Sending scaffold plans to GitHub agent...\n');
     
     try {
       const { runGitHubAgent } = require('./llm/agentRunner');
-      const url = await runGitHubAgent(comprehensivePrompt, cwd, 'Scaffold task');
+      const url = await runGitHubAgent(comprehensivePrompt, cwd, 'Scaffold task', { featureLabel: 'scaffold' });
       logger.info('\n📋 Next steps:');
       logger.info('  1. Monitor the agent\'s progress at the link above');
       logger.info('  2. The agent will implement all build plans sequentially');
       logger.info(`  3. Review the changes as they are made\n`);
     } catch (err) {
+      if (err && err.code === 'GITHUB_BRANCH_PUSH_FAILED') {
+        logger.error('GitHub agent run will not work: snapshot branch could not be pushed to origin.');
+        logger.info('Use a local CLI tool, or fix your git remote/auth and rerun the command.');
+        return;
+      }
       if (err.message && err.message.includes('GitHub agent requires repository')) {
         logger.error('GitHub agent failed: Requires a repository with proper permissions.');
       } else {
@@ -251,11 +295,11 @@ async function runScaffold(opts = {}, deps = {}) {
     // operator or external agent and should NOT include the automated .done file
     // completion hack used by the local `codex` flow.)
     const allPlans = [
-      'rnd/build_plans/scaffold-backend-bootstrap-build-plan.md',
-      'rnd/build_plans/scaffold-frontend-bootstrap-build-plan.md',
-      'rnd/build_plans/scaffold-backend-complete-build-plan.md',
-      'rnd/build_plans/scaffold-frontend-complete-build-plan.md',
-      'rnd/build_plans/scaffold-infra-build-plan.md'
+      `${specDirName}/build_plans/scaffold-backend-bootstrap-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-frontend-bootstrap-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-backend-complete-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-frontend-complete-build-plan.md`,
+      `${specDirName}/build_plans/scaffold-infra-build-plan.md`
     ];
 
     const backendDirExists = await fs.access(path.join(cwd, 'src', 'backend')).then(() => true).catch(() => false);
@@ -270,7 +314,7 @@ async function runScaffold(opts = {}, deps = {}) {
     function getPlanName(planPath) { return path.basename(planPath, '.md'); }
     // For user-facing prompts we omit the automated completion-file instruction.
     function makePrompt(planPath) {
-      return `using the .github/agents/developer.agent.md as instructions please implement the following building plan to its completion:\n\n1. ${planPath}`;
+      return `Using the task skill at ${specDirName}/skills/implement-build-plan/SKILL.md as instructions, please implement the following build plan to completion:\n\n1. ${planPath}`;
     }
 
     logger.info('\n--- COPY & PASTE PROMPTS (in order) ---\n');
@@ -281,7 +325,7 @@ async function runScaffold(opts = {}, deps = {}) {
     const saveToFile = await confirmSavePrompts(nonInteractive);
     if (saveToFile) {
       try {
-        const savePath = path.join(process.cwd(), 'rnd', 'llm_create_prompts.txt');
+        const savePath = path.join(process.cwd(), specDirName, 'llm_create_prompts.txt');
         await ensureDir(path.dirname(savePath));
         await fs.writeFile(savePath, allPrompts, 'utf8');
         logger.info(`Saved prompts to ${savePath}`);

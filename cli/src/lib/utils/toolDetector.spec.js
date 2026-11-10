@@ -21,11 +21,13 @@ describe('toolDetector', () => {
       const tools = detectAvailableTools();
       
       expect(tools).toHaveProperty('codex');
+      expect(tools).toHaveProperty('claude');
       expect(tools).toHaveProperty('gemini');
       expect(tools).toHaveProperty('github');
       expect(tools).toHaveProperty('hasAnyAgent');
       
       expect(typeof tools.codex).toBe('boolean');
+      expect(typeof tools.claude).toBe('boolean');
       expect(typeof tools.gemini).toBe('boolean');
       expect(typeof tools.github).toBe('boolean');
       expect(typeof tools.hasAnyAgent).toBe('boolean');
@@ -80,8 +82,8 @@ describe('toolDetector', () => {
       const available = getAvailableToolNames();
       const missing = getMissingToolNames();
       
-      // Total should be 3 (codex, gemini, gh)
-      expect(available.length + missing.length).toBe(3);
+      // Total should be 4 (codex, claude, gemini, gh)
+      expect(available.length + missing.length).toBe(4);
     });
   });
 
@@ -96,6 +98,12 @@ describe('toolDetector', () => {
       const instructions = getInstallInstructions('gemini');
       expect(typeof instructions).toBe('string');
       expect(instructions).toContain('gemini');
+    });
+
+    it('should return instructions for claude', () => {
+      const instructions = getInstallInstructions('claude');
+      expect(typeof instructions).toBe('string');
+      expect(instructions).toContain('Claude');
     });
 
     it('should return instructions for github', () => {

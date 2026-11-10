@@ -8,3 +8,6 @@ npm-debug.log*
 .angular/
 test-results/
 */**/e2e/reports/
+
+# r3nd configuration (user-specific, not committed)
+r3nd.yaml
